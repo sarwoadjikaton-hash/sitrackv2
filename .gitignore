@@ -1,0 +1,40 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Temporary
+tmp/
+temp/
+cache/
+
+# Upload runtime
+uploads/*
+!uploads/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+
+# Windows
+Thumbs.db
+
+# macOS
+.DS_Store
+
+# Backup dan archive
+*.bak
+*.backup
+*.zip
+
+# Composer
+/vendor/
+node_modules/
+
+public/storage
+
+public/uploads

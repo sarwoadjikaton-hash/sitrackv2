@@ -1,0 +1,655 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   SITRACK — DESIGN SYSTEM v4
+   Audited against actual usage across resources/js Pages, Layouts,
+   and Components.
+
+   NOTE on scope: .app-sidebar / .app-topbar / .brand-* / .nav-link-item /
+   .sidebar-* / .user-* / .btn-topbar* / .hamburger-btn are owned by
+   Layouts/AppLayout.vue's own <style scoped> block (higher specificity
+   wins there), same for .auth-* / .blob* / .field-* / .switch-* in
+   Pages/Auth/Login.vue and .nav-glass / .nav-pill-btn / .btn-login-epic
+   in Layouts/PublicLayout.vue. This file intentionally does not
+   re-declare those — it owns everything actually shared across pages:
+   cards, badges, buttons, forms, tables, the public hero/glass card,
+   print output, and page-level motion.
+   ========================================================================== */
+
+:root {
+  /* =========================================
+       SiTrack — Premium Dark Ocean + Ice + Orange
+       ========================================= */
+
+  /* Brand */
+  --st-primary: #002b4c;
+  --st-primary-rgb: 0, 43, 76;
+
+  --st-primary-hover: #003a63;
+  --st-primary-dark: #001a2e;
+  --st-primary-light: #5b96b8;
+  --st-primary-soft: #eaf8ff;
+
+  /* Accent */
+  --st-accent: #f59e71;
+  --st-accent-rgb: 245, 158, 113;
+
+  /* Navy / Slate */
+  --st-navy: #002b4c;
+  --st-navy-light: #0d3a5c;
+
+  --st-slate: #1e293b;
+  --st-slate-muted: #5b6b8c;
+
+  /* =========================================
+       Semantic Colors
+       ========================================= */
+
+  --st-success: #059669;
+  --st-warning: #b45309;
+  --st-danger: #dc2626;
+
+  /* Optional semantic blue */
+  --st-info: #0284c7;
+
+  /* =========================================
+       Surfaces
+       ========================================= */
+
+  --st-bg: #f5f9fc;
+  --st-surface: #ffffff;
+  --st-surface-sunken: #f4faff;
+
+  /* Glass */
+  --st-glass-bg: rgba(255, 255, 255, 0.72);
+  --st-glass-border: rgba(255, 255, 255, 0.5);
+
+  /* =========================================
+       Borders
+       ========================================= */
+
+  --st-border: #dce8ef;
+  --st-border-soft: #e8f0f5;
+
+  /* =========================================
+       Shadows
+       ========================================= */
+
+  --st-shadow-low: 0 2px 4px rgba(0, 43, 76, 0.03);
+
+  --st-shadow-med:
+    0 2px 4px rgba(0, 43, 76, 0.03), 0 12px 22px -8px rgba(0, 43, 76, 0.1);
+
+  --st-shadow-high:
+    0 4px 10px rgba(0, 43, 76, 0.04), 0 28px 46px -14px rgba(0, 43, 76, 0.16);
+
+  --st-shadow-primary: 0 10px 22px -6px rgba(var(--st-primary-rgb), 0.32);
+
+  /* =========================================
+       Radius
+       ========================================= */
+
+  --st-radius: 16px;
+  --st-radius-sm: 10px;
+  --st-radius-lg: 22px;
+
+  /* =========================================
+       Animation
+       ========================================= */
+
+  --st-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --st-ease-snap: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* =========================================
+       Bootstrap Integration
+       ========================================= */
+
+  --bs-primary: var(--st-primary);
+  --bs-primary-rgb: var(--st-primary-rgb);
+
+  --bs-primary-bg-subtle: #e3f6ff;
+  --bs-primary-border-subtle: #a8ddf5;
+  --bs-primary-text-emphasis: #003552;
+
+  --bs-link-color: var(--st-primary);
+  --bs-link-color-rgb: var(--st-primary-rgb);
+
+  --bs-link-hover-color: var(--st-primary-hover);
+  --bs-link-hover-color-rgb: 0, 58, 99;
+
+  --bs-focus-ring-color: rgba(var(--st-primary-rgb), 0.25);
+
+  --bs-border-radius: var(--st-radius-sm);
+  --bs-border-radius-sm: 8px;
+  --bs-border-radius-lg: var(--st-radius);
+  --bs-border-radius-xl: var(--st-radius-lg);
+
+  /* =========================================
+       Typography
+       ========================================= */
+
+  --bs-body-font-family:
+    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--st-bg);
+  background-image:
+    radial-gradient(
+      at 0% 0%,
+      rgba(var(--st-primary-rgb), 0.05) 0px,
+      transparent 50%
+    ),
+    radial-gradient(
+      at 100% 0%,
+      rgba(var(--st-accent-rgb), 0.03) 0px,
+      transparent 50%
+    ),
+    radial-gradient(
+      at 50% 100%,
+      rgba(var(--st-primary-rgb), 0.02) 0px,
+      transparent 50%
+    );
+  background-attachment: fixed;
+  color: var(--st-navy);
+  font-family: "Plus Jakarta Sans", sans-serif;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(var(--st-primary-rgb), 0.18);
+  color: #0b1735;
+}
+
+/* Custom scrollbar (page-level; sidebar has its own thin scrollbar in
+   AppLayout.vue) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ==========================================================================
+   CARDS — .st-card is the workhorse: appears on every page in many
+   modifier combinations (h-100, p-*, bg-*, shadow-*, border-0, text-center…)
+   ========================================================================== */
+
+.st-card {
+  background: var(--st-surface);
+  border: 1px solid rgba(11, 18, 32, 0.05);
+  border-radius: var(--st-radius);
+  padding: 1.5rem;
+  box-shadow: var(--st-shadow-med);
+  transition:
+    transform 0.3s var(--st-ease),
+    box-shadow 0.3s var(--st-ease),
+    border-color 0.3s var(--st-ease);
+  position: relative;
+  isolation: isolate;
+}
+
+/* Hairline top highlight for a touch of depth without a heavy border */
+.st-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  border-radius: var(--st-radius) var(--st-radius) 0 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.9),
+    transparent
+  );
+  pointer-events: none;
+}
+
+.st-card-interactive {
+  cursor: pointer;
+}
+
+.st-card-interactive:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--st-shadow-high);
+  border-color: rgba(var(--st-primary-rgb), 0.14);
+}
+
+.stat-card-blue {
+  background: linear-gradient(160deg, #ffffff 0%, #eef3ff 120%);
+  border-color: #dbe6ff;
+  overflow: hidden;
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--st-primary-soft);
+  color: var(--st-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  transition: all 0.3s var(--st-ease);
+}
+
+.st-card:hover .stat-icon {
+  background: var(--st-primary);
+  color: #fff;
+  transform: rotate(-8deg) scale(1.08);
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--st-navy);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  color: var(--st-slate-muted);
+}
+
+/* ==========================================================================
+   STAtus & LANE BADGES (Components/StatusBadge.vue, badge-lane-* on
+   AlurStatus / Disposisi / TindakLanjut pages)
+   ========================================================================== */
+
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+.badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: currentColor;
+  flex-shrink: 0;
+  /* Motion for this dot comes from animate.css (animate__pulse) applied
+     alongside this class in StatusBadge.vue — no animation declared here
+     to avoid stacking two pulse effects. */
+}
+
+.badge-status-processing {
+  background-color: #eef2ff;
+  color: var(--st-primary);
+  border: 1px solid #c7d5ff;
+}
+
+.badge-status-waiting {
+  background-color: #fffbeb;
+  color: var(--st-warning);
+  border: 1px solid #fde68a;
+}
+
+.badge-status-completed {
+  background-color: #ecfdf5;
+  color: var(--st-success);
+  border: 1px solid #a7f3d0;
+}
+
+.badge-status-cancelled {
+  background-color: #fef2f2;
+  color: var(--st-danger);
+  border: 1px solid #fecaca;
+}
+
+.badge-lane-signature {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.badge-lane-disposition {
+  background: #eef2ff;
+  color: #1e3a8a;
+  border: 1px solid #c7d5ff;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+
+.btn-primary-blue {
+  background: linear-gradient(
+    135deg,
+    var(--st-primary),
+    var(--st-primary-dark)
+  );
+  color: #fff;
+  border: none;
+  padding: 0.65rem 1.35rem;
+  border-radius: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: var(--st-shadow-primary);
+  transition:
+    transform 0.2s var(--st-ease),
+    box-shadow 0.2s var(--st-ease),
+    background 0.2s var(--st-ease);
+}
+
+.btn-primary-blue:hover {
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px -8px rgba(var(--st-primary-rgb), 0.4);
+}
+
+.btn-primary-blue:active {
+  transform: scale(0.97);
+}
+
+.btn-primary-blue:disabled,
+.btn-primary-blue.disabled {
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.btn-outline-blue {
+  background: transparent;
+  border: 1.5px solid var(--st-primary);
+  color: var(--st-primary);
+  font-weight: 700;
+  border-radius: 12px;
+  transition: all 0.2s var(--st-ease);
+}
+
+.btn-outline-blue:hover {
+  background: var(--st-primary-soft);
+  color: var(--st-primary-hover);
+  border-color: var(--st-primary-hover);
+}
+
+/* Retint plain-Bootstrap outline/alert components that hardcode Bootstrap
+   blue at the component-variable level (bg-primary-subtle/text-primary
+   already inherit the brand color for free via the --bs-primary-* root
+   override above; these two don't, so they get an explicit nudge). Used
+   on Master data pages (row edit buttons) and DataSurat. */
+.btn-outline-primary {
+  --bs-btn-color: var(--st-primary);
+  --bs-btn-border-color: var(--st-primary);
+  --bs-btn-hover-bg: var(--st-primary);
+  --bs-btn-hover-border-color: var(--st-primary);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: var(--st-primary-hover);
+  --bs-btn-active-border-color: var(--st-primary-hover);
+  --bs-btn-disabled-color: var(--st-primary);
+  --bs-btn-disabled-border-color: var(--st-primary);
+  --bs-btn-focus-shadow-rgb: var(--st-primary-rgb);
+}
+
+.alert-primary {
+  --bs-alert-color: #142f82;
+  --bs-alert-bg: #eef2ff;
+  --bs-alert-border-color: #c7d5ff;
+}
+
+/* ==========================================================================
+   FORMS
+   ========================================================================== */
+
+.form-control,
+.form-select {
+  border: 1.5px solid #e2e8f0;
+  background: var(--st-surface-sunken);
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  font-weight: 500;
+  color: var(--st-navy);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.form-control::placeholder {
+  color: #9aa7c2;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background: #fff;
+  border-color: var(--st-primary);
+  box-shadow: 0 0 0 4px rgba(var(--st-primary-rgb), 0.1);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
+.form-label {
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: var(--st-slate);
+}
+
+/* ==========================================================================
+   TABLES
+   ========================================================================== */
+
+.table-responsive {
+  border-radius: var(--st-radius);
+  border: 1px solid rgba(11, 18, 32, 0.06);
+}
+
+.table-modern {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-modern thead th {
+  background: var(--st-surface-sunken);
+  border-bottom: 1.5px solid #e2e8f0;
+  color: var(--st-slate-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  padding: 0.9rem 1.1rem;
+  white-space: nowrap;
+}
+
+.table-modern tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.table-modern tbody tr:hover {
+  background: rgba(var(--st-primary-rgb), 0.025);
+}
+
+.table-modern tbody td {
+  padding: 0.95rem 1.1rem;
+  border-bottom: 1px solid #eef1f6;
+  vertical-align: middle;
+}
+
+.table-modern tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ==========================================================================
+   PUBLIC TRACKING PORTAL — hero + glass search card
+   (Pages/Tracking/Index.vue; PublicLayout owns the navbar/footer)
+   ========================================================================== */
+
+.public-hero {
+  background: linear-gradient(
+    150deg,
+    var(--st-primary-dark) 0%,
+    var(--st-primary) 55%,
+    #3f79ff 100%
+  );
+  color: #fff;
+  position: relative;
+  padding: 3.5rem 0 5rem;
+  overflow: hidden;
+}
+
+.public-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(255, 255, 255, 0.14),
+      transparent 40%
+    ),
+    radial-gradient(circle at 85% 75%, rgba(56, 189, 248, 0.2), transparent 45%);
+  pointer-events: none;
+}
+
+.public-hero > * {
+  position: relative;
+}
+
+.glass-card {
+  background: var(--st-glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--st-glass-border);
+  border-radius: var(--st-radius-lg);
+}
+
+/* ==========================================================================
+   PRINT (Pages/Print/Disposisi.vue, Pages/Print/Pendamping.vue)
+   ========================================================================== */
+
+@media print {
+  .no-print,
+  .app-sidebar,
+  .app-topbar,
+  .btn,
+  .navbar {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .print-sheet {
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
+/* ==========================================================================
+   PAGE-LEVEL MOTION (used directly on <template>/<div> elements, not
+   inside any scoped block)
+   ========================================================================== */
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: slideInUp 0.45s var(--st-ease);
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInScale 0.35s ease-out forwards;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 575.98px) {
+  .st-card {
+    padding: 1.1rem;
+    border-radius: 14px;
+  }
+  .stat-number {
+    font-size: 1.6rem;
+  }
+  .public-hero {
+    padding: 2.75rem 0 3.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

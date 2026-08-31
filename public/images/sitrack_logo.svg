@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="240" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B1F3A"/>
+      <stop offset="1" stop-color="#0A3348"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="140" y1="140" x2="212" y2="212" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2DD4BF"/>
+      <stop offset="1" stop-color="#0D9488"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#02101F" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <rect width="240" height="240" rx="54" fill="url(#bg)"/>
+
+  <!-- diagonal teal accent sweep -->
+  <path d="M-20,178 C60,138 140,222 260,138 L260,260 L-20,260 Z" fill="#0D9488" opacity="0.16"/>
+
+  <!-- soft glow behind the status badge -->
+  <circle cx="178" cy="176" r="55" fill="#2DD4BF" opacity="0.35" filter="url(#glow)"/>
+
+  <!-- envelope, gently tilted, lifted with shadow -->
+  <g transform="rotate(-4 120 132)" filter="url(#shadow)">
+    <rect x="46" y="84" width="148" height="100" rx="14" fill="#FFFFFF"/>
+    <path d="M48,90 L120,148 L192,90"
+          fill="none" stroke="#0B1F3A" stroke-width="7"
+          stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  </g>
+
+  <!-- tracked / delivered badge -->
+  <circle cx="178" cy="176" r="36" fill="#0B1F3A"/>
+  <circle cx="178" cy="176" r="31" fill="url(#teal)"/>
+  <path d="M162,177 l11,11 l23,-25"
+        fill="none" stroke="#FFFFFF" stroke-width="7.5"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

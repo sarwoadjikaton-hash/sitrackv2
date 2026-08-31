@@ -1,0 +1,320 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Letter;
+use App\Models\LetterCategory;
+use App\Models\LetterStatusLog;
+use App\Models\Unit;
+use App\Services\LetterNumberService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class SignatureLetterController extends Controller
+{
+    /**
+     * Allowed statuses for signature lane
+     */
+    public static function allowedStatuses(): array
+    {
+        return [
+            'Dokumen Diterima dan Diinput',
+            'Diperiksa Arsiparis',
+            'Paraf Pengendalian Administrasi (KtusSAMSKM)',
+            'Proses Paraf/TTD Sekjen',
+            'Surat Selesai di Paraf/TTD dan bisa diambil',
+            'Dokumen Sudah diambil',
+            'Revisi',
+            'Ditolak',
+        ];
+    }
+
+    /**
+     * Display signature lane letters
+     */
+    public function index(Request $request): Response
+    {
+        $search = trim((string) $request->input('search', ''));
+        $status = trim((string) $request->input('status', ''));
+
+        $query = Letter::with(['category', 'recipientUnit'])
+            ->where('process_lane', 'signature');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('tracking_code', 'ILIKE', "%{$search}%")
+                  ->orWhere('agenda_number', 'ILIKE', "%{$search}%")
+                  ->orWhere('letter_number', 'ILIKE', "%{$search}%")
+                  ->orWhere('subject', 'ILIKE', "%{$search}%")
+                  ->orWhere('sender_name', 'ILIKE', "%{$search}%")
+                  ->orWhere('sender_unit', 'ILIKE', "%{$search}%");
+            });
+        }
+
+        if ($status !== '' && in_array($status, self::allowedStatuses(), true)) {
+            $query->where('status', $status);
+        }
+
+        $letters = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
+
+        return Inertia::render('TindakLanjut/Index', [
+            'letters' => $letters,
+            'filters' => [
+                'search' => $search,
+                'status' => $status,
+            ],
+            'allowedStatuses' => self::allowedStatuses(),
+        ]);
+    }
+
+    /**
+     * Show form to create new signature letter
+     */
+    public function create(): Response
+    {
+        $categories = LetterCategory::where('is_active', true)->orderBy('category_name')->get();
+        $units = Unit::where('is_active', true)->orderBy('unit_name')->get();
+
+        return Inertia::render('TindakLanjut/Form', [
+            'letter' => null,
+            'categories' => $categories,
+            'units' => $units,
+            'allowedStatuses' => self::allowedStatuses(),
+        ]);
+    }
+
+    /**
+     * Store new signature letter
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'letter_number' => ['nullable', 'string', 'max:150'],
+            'letter_type' => ['required', 'in:in,out'],
+            'sender_unit' => ['nullable', 'string', 'max:150'],
+            'category_id' => ['nullable', 'exists:letter_categories,id'],
+            'sender_name' => ['required', 'string', 'max:150'],
+            'sender_phone' => ['nullable', 'string', 'max:50'],
+            'recipient_unit_id' => ['nullable', 'exists:units,id'],
+            'subject' => ['required', 'string', 'max:500'],
+            'letter_date' => ['nullable', 'date'],
+            'received_date' => ['nullable', 'date'],
+            'priority' => ['required', 'in:urgent,high,normal,low'],
+            'security_level' => ['required', 'string', 'max:50'],
+            'status' => ['required', 'string'],
+            'current_position' => ['required', 'string', 'max:150'],
+            'requested_actions' => ['nullable', 'array'],
+            'notes' => ['nullable', 'string'],
+            'letter_source' => ['required', 'in:Manual,SRIKANDI'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
+        ]);
+
+        $trackingCode = LetterNumberService::generateTrackingCode();
+        $agendaNumber = LetterNumberService::nextAgendaNumber($validated['letter_type']);
+
+        $attachmentPath = null;
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $attachmentPath = $file->store('letters', 'public');
+        }
+
+        $actions = !empty($validated['requested_actions'])
+            ? implode(', ', $validated['requested_actions'])
+            : null;
+
+        DB::beginTransaction();
+        try {
+            $letter = Letter::create([
+                'tracking_code' => $trackingCode,
+                'agenda_number' => $agendaNumber,
+                'letter_number' => $validated['letter_number'] ?? null,
+                'letter_type' => $validated['letter_type'],
+                'process_lane' => 'signature',
+                'sender_unit' => $validated['sender_unit'] ?? null,
+                'category_id' => $validated['category_id'] ?: null,
+                'sender_name' => $validated['sender_name'],
+                'sender_phone' => $validated['sender_phone'] ?? null,
+                'recipient_unit_id' => $validated['recipient_unit_id'] ?: null,
+                'subject' => $validated['subject'],
+                'letter_date' => $validated['letter_date'] ?? null,
+                'received_date' => $validated['received_date'] ?? date('Y-m-d'),
+                'priority' => $validated['priority'],
+                'security_level' => $validated['security_level'],
+                'status' => $validated['status'],
+                'current_position' => $validated['current_position'],
+                'requested_actions' => $actions,
+                'notes' => $validated['notes'] ?? null,
+                'attachment_path' => $attachmentPath,
+                'letter_source' => $validated['letter_source'],
+                'created_by' => Auth::id(),
+            ]);
+
+            LetterStatusLog::create([
+                'letter_id' => $letter->id,
+                'status' => $letter->status,
+                'position' => $letter->current_position,
+                'note' => 'Dokumen baru dicatat ke sistem.',
+                'changed_by' => Auth::user()->name ?: Auth::user()->username,
+                'changed_at' => now(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('tindak-lanjut.index')
+                ->with('success', "Surat berhasil dicatat dengan nomor agenda: {$agendaNumber}");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Show form to edit signature letter
+     */
+    public function edit($id): Response
+    {
+        $letter = Letter::findOrFail($id);
+        $categories = LetterCategory::where('is_active', true)->orderBy('category_name')->get();
+        $units = Unit::where('is_active', true)->orderBy('unit_name')->get();
+
+        return Inertia::render('TindakLanjut/Form', [
+            'letter' => $letter,
+            'categories' => $categories,
+            'units' => $units,
+            'allowedStatuses' => self::allowedStatuses(),
+        ]);
+    }
+
+    /**
+     * Update signature letter
+     */
+    public function update(Request $request, $id)
+    {
+        $letter = Letter::findOrFail($id);
+
+        $validated = $request->validate([
+            'letter_number' => ['nullable', 'string', 'max:150'],
+            'sender_unit' => ['nullable', 'string', 'max:150'],
+            'category_id' => ['nullable', 'exists:letter_categories,id'],
+            'sender_name' => ['required', 'string', 'max:150'],
+            'sender_phone' => ['nullable', 'string', 'max:50'],
+            'recipient_unit_id' => ['nullable', 'exists:units,id'],
+            'subject' => ['required', 'string', 'max:500'],
+            'letter_date' => ['nullable', 'date'],
+            'received_date' => ['nullable', 'date'],
+            'priority' => ['required', 'in:urgent,high,normal,low'],
+            'security_level' => ['required', 'string', 'max:50'],
+            'status' => ['required', 'string'],
+            'current_position' => ['required', 'string', 'max:150'],
+            'requested_actions' => ['nullable', 'array'],
+            'notes' => ['nullable', 'string'],
+            'letter_source' => ['required', 'in:Manual,SRIKANDI'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
+        ]);
+
+        $attachmentPath = $letter->attachment_path;
+        if ($request->hasFile('attachment')) {
+            if ($attachmentPath) {
+                Storage::disk('public')->delete($attachmentPath);
+            }
+            $attachmentPath = $request->file('attachment')->store('letters', 'public');
+        }
+
+        $actions = !empty($validated['requested_actions'])
+            ? implode(', ', $validated['requested_actions'])
+            : null;
+
+        $statusChanged = ($letter->status !== $validated['status'] || $letter->current_position !== $validated['current_position']);
+
+        $letter->update([
+            'letter_number' => $validated['letter_number'] ?? null,
+            'sender_unit' => $validated['sender_unit'] ?? null,
+            'category_id' => $validated['category_id'] ?: null,
+            'sender_name' => $validated['sender_name'],
+            'sender_phone' => $validated['sender_phone'] ?? null,
+            'recipient_unit_id' => $validated['recipient_unit_id'] ?: null,
+            'subject' => $validated['subject'],
+            'letter_date' => $validated['letter_date'] ?? null,
+            'received_date' => $validated['received_date'] ?? null,
+            'priority' => $validated['priority'],
+            'security_level' => $validated['security_level'],
+            'status' => $validated['status'],
+            'current_position' => $validated['current_position'],
+            'requested_actions' => $actions,
+            'notes' => $validated['notes'] ?? null,
+            'attachment_path' => $attachmentPath,
+            'letter_source' => $validated['letter_source'],
+        ]);
+
+        if ($statusChanged) {
+            LetterStatusLog::create([
+                'letter_id' => $letter->id,
+                'status' => $letter->status,
+                'position' => $letter->current_position,
+                'note' => 'Pembaruan data surat dan status operasional.',
+                'changed_by' => Auth::user()->name ?: Auth::user()->username,
+                'changed_at' => now(),
+            ]);
+        }
+
+        return redirect()->route('tindak-lanjut.index')
+            ->with('success', 'Data surat berhasil diperbarui.');
+    }
+
+    /**
+     * Quick status update for signature letter
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string'],
+            'current_position' => ['required', 'string', 'max:150'],
+            'requested_actions' => ['nullable', 'array'],
+            'note' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $letter = Letter::findOrFail($id);
+
+        $actions = !empty($validated['requested_actions'])
+            ? implode(', ', $validated['requested_actions'])
+            : $letter->requested_actions;
+
+        $letter->update([
+            'status' => $validated['status'],
+            'current_position' => $validated['current_position'],
+            'requested_actions' => $actions,
+        ]);
+
+        LetterStatusLog::create([
+            'letter_id' => $letter->id,
+            'status' => $validated['status'],
+            'position' => $validated['current_position'],
+            'note' => $validated['note'] ?: 'Pembaruan status dokumen.',
+            'changed_by' => Auth::user()->name ?: Auth::user()->username,
+            'changed_at' => now(),
+        ]);
+
+        return back()->with('success', 'Status surat berhasil diperbarui.');
+    }
+
+    /**
+     * Delete a signature letter
+     */
+    public function destroy($id)
+    {
+        $letter = Letter::findOrFail($id);
+
+        if ($letter->attachment_path) {
+            Storage::disk('public')->delete($letter->attachment_path);
+        }
+
+        $letter->delete();
+
+        return redirect()->route('tindak-lanjut.index')
+            ->with('success', 'Surat berhasil dihapus.');
+    }
+}
