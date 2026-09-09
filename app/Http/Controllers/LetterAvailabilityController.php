@@ -268,6 +268,16 @@ class LetterAvailabilityController extends Controller
 
         DB::beginTransaction();
         try {
+            $usedCount = LetterNumber::where('type_id', $batch->type_id)
+                ->where('number_year', $batch->number_year)
+                ->whereBetween('sequence_number', [$batch->start_sequence, $batch->end_sequence])
+                ->where('status', 'used')
+                ->count();
+
+            if ($usedCount > 0) {
+                throw new RuntimeException('Tidak dapat dihapus karena ' . $usedCount . ' nomor sudah digunakan dalam Data Surat.');
+            }
+
             if ($batch->purpose === 'available') {
                 LetterNumber::where('type_id', $batch->type_id)
                     ->where('number_year', $batch->number_year)
@@ -296,7 +306,7 @@ class LetterAvailabilityController extends Controller
             DB::commit();
 
             return redirect()->route('ketersediaan-nomor.index', ['year' => $year, 'open_type' => $typeId])
-                ->with('success', 'Batch berhasil dihapus. Nomor yang sudah terpakai tetap dipertahankan.');
+                ->with('success', 'Data ketersediaan berhasil dihapus.');
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->with('error', $e->getMessage());
@@ -327,7 +337,41 @@ class LetterAvailabilityController extends Controller
         $number = LetterNumber::findOrFail($id);
 
         DB::transaction(function () use ($number, $validated) {
-            $this->applyStatusChange($number, $validated['status']);
+            $payload = [
+                'status' => $validated['status'],
+                'used_at' => $validated['status'] === 'used' ? ($number->used_at ?? now()) : null,
+                'reserved_at' => in_array($validated['status'], ['reserved', 'preorder'], true) ? ($number->reserved_at ?? now()) : null,
+            ];
+
+            if ($validated['status'] === 'available') {
+                if ($number->linked_letter_id) {
+                    Letter::find($number->linked_letter_id)?->delete();
+                }
+
+                $payload = array_merge($payload, [
+                    'security_access' => null,
+                    'classification_code' => null,
+                    'month_number' => null,
+                    'number_text' => null,
+                    'incoming_date' => null,
+                    'unit_id' => null,
+                    'processing_unit_text' => null,
+                    'signatory' => null,
+                    'request_type' => null,
+                    'destination' => null,
+                    'letter_date' => null,
+                    'subject' => null,
+                    'technical_officer' => null,
+                    'scan_result' => null,
+                    'nd_pengantar' => null,
+                    'linked_letter_id' => null,
+                    'reserved_for' => null,
+                    'attachment_path' => null,
+                    'pdf_content' => null,
+                ]);
+            }
+
+            $number->update($payload);
         });
 
         return back()->with('success', 'Status nomor berhasil diperbarui.');
