@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Link, usePage, router } from '@inertiajs/vue3';
+import { Link, usePage, router, useForm } from '@inertiajs/vue3';
+import Modal from '@/Components/Modal.vue';
 import { computed, ref } from 'vue';
 import ToastNotification from '@/Components/ToastNotification.vue';
 import type { PageProps } from '@/types';
@@ -29,6 +30,56 @@ const toggleSidebarCollapse = () => {
 
 const logout = () => router.post('/logout');
 
+// ===== Floating Tooltip (Teleport-based) =====
+const sidebarRef = ref<HTMLElement | null>(null);
+const tooltip = ref({ visible: false, text: '', top: 0, left: 0 });
+
+const showTooltip = (e: MouseEvent) => {
+    if (!isSidebarCollapsed.value || window.innerWidth < 992) return;
+    const target = (e.target as HTMLElement).closest('[data-tooltip]') as HTMLElement | null;
+    if (!target || !sidebarRef.value) return;
+
+    const itemRect = target.getBoundingClientRect();
+    const sidebarRect = sidebarRef.value.getBoundingClientRect();
+
+    tooltip.value = {
+        visible: true,
+        text: target.dataset.tooltip || '',
+        top: itemRect.top + itemRect.height / 2,
+        left: sidebarRect.right + 12,
+    };
+};
+
+const hideTooltip = (e: MouseEvent) => {
+    const target = (e.target as HTMLElement).closest('[data-tooltip]');
+    const related = e.relatedTarget as HTMLElement | null;
+    if (target && related && target.contains(related)) return;
+    tooltip.value.visible = false;
+};
+
+const showPasswordModal = ref(false);
+const passwordForm = useForm({
+    current_password: '',
+    password: '',
+    password_confirmation: '',
+});
+
+const openPasswordModal = () => {
+    passwordForm.reset();
+    passwordForm.clearErrors();
+    showPasswordModal.value = true;
+};
+
+const submitPasswordChange = () => {
+    passwordForm.put('/password', {
+        preserveScroll: true,
+        onSuccess: () => {
+            showPasswordModal.value = false;
+            passwordForm.reset();
+        },
+    });
+};
+
 const roleLabel = computed(() => {
     switch (role.value) {
         case 'super_admin': return 'Super Admin';
@@ -49,7 +100,8 @@ const isActive = (path: string, exact = false) =>
         <ToastNotification />
 
         <!-- Sidebar Navigation -->
-        <aside class="app-sidebar" :class="{ 'is-open': isMobileNavOpen, 'is-collapsed': isSidebarCollapsed }">
+        <aside class="app-sidebar" ref="sidebarRef"
+            :class="{ 'is-open': isMobileNavOpen, 'is-collapsed': isSidebarCollapsed }">
             <div class="sidebar-blob sidebar-blob-a"></div>
             <div class="sidebar-blob sidebar-blob-b"></div>
 
@@ -58,7 +110,7 @@ const isActive = (path: string, exact = false) =>
                 <i class="bi" :class="isSidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
             </button>
 
-            <div class="sidebar-inner">
+            <div class="sidebar-inner" @mouseover="showTooltip" @mouseout="hideTooltip">
                 <!-- Brand Header -->
                 <div class="sidebar-header">
                     <Link href="/dashboard" class="brand-wrapper" @click="closeMobileNav">
@@ -79,7 +131,7 @@ const isActive = (path: string, exact = false) =>
                     <div class="sidebar-caption">Menu Utama</div>
                     <nav class="sidebar-nav">
                         <Link href="/dashboard" class="nav-link-item" :class="{ active: isActive('/dashboard') }"
-                            @click="closeMobileNav">
+                            @click="closeMobileNav" data-tooltip="Dashboard">
                             <i class="bi bi-grid-1x2-fill"></i>
                             <span class="nav-label">Dashboard</span>
                         </Link>
@@ -89,7 +141,8 @@ const isActive = (path: string, exact = false) =>
                         <div class="sidebar-caption">Penomoran Surat</div>
                         <nav class="sidebar-nav">
                             <Link href="/ketersediaan-nomor" class="nav-link-item"
-                                :class="{ active: isActive('/ketersediaan-nomor') }" @click="closeMobileNav">
+                                :class="{ active: isActive('/ketersediaan-nomor') }" @click="closeMobileNav"
+                                data-tooltip="Ketersediaan Nomor">
                                 <i class="bi bi-123"></i>
                                 <span class="nav-label">Ketersediaan Nomor</span>
                             </Link>
@@ -100,17 +153,19 @@ const isActive = (path: string, exact = false) =>
                         <div class="sidebar-caption">Tindak Lanjut / TTD</div>
                         <nav class="sidebar-nav">
                             <Link href="/tindak-lanjut/create" class="nav-link-item"
-                                :class="{ active: isActive('/tindak-lanjut/create', true) }" @click="closeMobileNav">
+                                :class="{ active: isActive('/tindak-lanjut/create', true) }" @click="closeMobileNav"
+                                data-tooltip="Input TTD Baru">
                                 <i class="bi bi-file-earmark-check-fill"></i>
                                 <span class="nav-label">Input TTD Baru</span>
                             </Link>
                             <Link href="/tindak-lanjut" class="nav-link-item"
-                                :class="{ active: isActive('/tindak-lanjut', true) }" @click="closeMobileNav">
+                                :class="{ active: isActive('/tindak-lanjut', true) }" @click="closeMobileNav"
+                                data-tooltip="Data Tindak Lanjut">
                                 <i class="bi bi-pen-fill"></i>
                                 <span class="nav-label">Data Tindak Lanjut</span>
                             </Link>
                             <Link href="/data-surat" class="nav-link-item" :class="{ active: isActive('/data-surat') }"
-                                @click="closeMobileNav">
+                                @click="closeMobileNav" data-tooltip="Laporan Data Surat">
                                 <i class="bi bi-table"></i>
                                 <span class="nav-label">Laporan Data Surat</span>
                             </Link>
@@ -120,13 +175,14 @@ const isActive = (path: string, exact = false) =>
                     <div class="sidebar-caption">Lajur Disposisi</div>
                     <nav class="sidebar-nav">
                         <Link v-if="!isSekjen" href="/disposisi/create" class="nav-link-item"
-                            :class="{ active: isActive('/disposisi/create', true) }" @click="closeMobileNav">
+                            :class="{ active: isActive('/disposisi/create', true) }" @click="closeMobileNav"
+                            data-tooltip="Input Disposisi">
                             <i class="bi bi-file-earmark-arrow-down-fill"></i>
                             <span class="nav-label">Input Disposisi</span>
                         </Link>
                         <Link href="/disposisi" class="nav-link-item"
                             :class="{ active: isActive('/disposisi') && !isActive('/disposisi/create', true) }"
-                            @click="closeMobileNav">
+                            @click="closeMobileNav" data-tooltip="Lajur Disposisi">
                             <i class="bi bi-diagram-3-fill"></i>
                             <span class="nav-label">Lajur Disposisi</span>
                         </Link>
@@ -136,27 +192,33 @@ const isActive = (path: string, exact = false) =>
                         <div class="sidebar-caption">Master Data</div>
                         <nav class="sidebar-nav">
                             <Link href="/master/units" class="nav-link-item"
-                                :class="{ active: isActive('/master/units') }" @click="closeMobileNav">
+                                :class="{ active: isActive('/master/units') }" @click="closeMobileNav"
+                                data-tooltip="Unit Kerja">
                                 <i class="bi bi-building"></i> <span class="nav-label">Unit Kerja</span>
                             </Link>
                             <Link href="/master/number-types" class="nav-link-item"
-                                :class="{ active: isActive('/master/number-types') }" @click="closeMobileNav">
+                                :class="{ active: isActive('/master/number-types') }" @click="closeMobileNav"
+                                data-tooltip="Jenis Naskah">
                                 <i class="bi bi-file-code"></i> <span class="nav-label">Jenis Naskah</span>
                             </Link>
                             <Link href="/master/categories" class="nav-link-item"
-                                :class="{ active: isActive('/master/categories') }" @click="closeMobileNav">
+                                :class="{ active: isActive('/master/categories') }" @click="closeMobileNav"
+                                data-tooltip="Kategori Surat">
                                 <i class="bi bi-tags-fill"></i> <span class="nav-label">Kategori Surat</span>
                             </Link>
                             <Link href="/master/users" class="nav-link-item"
-                                :class="{ active: isActive('/master/users') }" @click="closeMobileNav">
+                                :class="{ active: isActive('/master/users') }" @click="closeMobileNav"
+                                data-tooltip="User & Akses">
                                 <i class="bi bi-person-gear"></i> <span class="nav-label">User &amp; Akses</span>
                             </Link>
                             <Link href="/alur-status" class="nav-link-item"
-                                :class="{ active: isActive('/alur-status', true) }" @click="closeMobileNav">
+                                :class="{ active: isActive('/alur-status', true) }" @click="closeMobileNav"
+                                data-tooltip="Alur Status">
                                 <i class="bi bi-bezier2"></i> <span class="nav-label">Alur Status</span>
                             </Link>
                             <Link href="/master/rekap" class="nav-link-item"
-                                :class="{ active: isActive('/master/rekap') }" @click="closeMobileNav">
+                                :class="{ active: isActive('/master/rekap') }" @click="closeMobileNav"
+                                data-tooltip="Rekap Master">
                                 <i class="bi bi-file-earmark-spreadsheet"></i> <span class="nav-label">Rekap
                                     Master</span>
                             </Link>
@@ -168,14 +230,15 @@ const isActive = (path: string, exact = false) =>
                 <div class="sidebar-footer-container">
                     <!-- Logout Button (Positioned above user on collapse via CSS) -->
                     <div class="logout-wrapper">
-                        <button type="button" class="logout-btn" @click="logout">
+                        <button type="button" class="logout-btn" @click="logout" data-tooltip="Keluar Sistem">
                             <i class="bi bi-box-arrow-right"></i>
                             <span class="nav-label">Keluar Sistem</span>
                         </button>
                     </div>
 
                     <!-- User Profile -->
-                    <div class="sidebar-user">
+                    <button type="button" class="sidebar-user border-0 w-100 text-start" data-tooltip="Ubah Password"
+                        @click="openPasswordModal">
                         <div class="user-avatar-circle">
                             {{ (user?.name || user?.username || 'A').substring(0, 1).toUpperCase() }}
                         </div>
@@ -183,13 +246,8 @@ const isActive = (path: string, exact = false) =>
                             <div class="user-name">{{ user?.name || user?.username }}</div>
                             <div class="user-role-badge">{{ roleLabel }}</div>
                         </div>
-                    </div>
-
-                    <!-- Sidebar Logo Footer -->
-                    <div class="sidebar-copyright">
-                        <img src="/images/sitrack_logo.svg" alt="SiTrack" width="20" height="22" />
-                        <span class="nav-label">SiTrack &copy; 2026</span>
-                    </div>
+                        <i class="bi bi-key-fill user-profile-hint"></i>
+                    </button>
                 </div>
             </div>
         </aside>
@@ -205,15 +263,18 @@ const isActive = (path: string, exact = false) =>
                     <button type="button" class="hamburger-btn d-lg-none" @click="toggleMobileNav">
                         <i class="bi bi-list"></i>
                     </button>
-                    <h2 class="topbar-title">{{ title || 'Sistem Tracking Persuratan' }}</h2>
+                    <div class="topbar-heading">
+                        <span class="topbar-heading-mark"></span>
+                        <h2 class="topbar-title">{{ title || 'Sistem Tracking Persuratan' }}</h2>
+                    </div>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <Link v-if="!isSekjen" href="/scan-status" class="btn-topbar btn-topbar-accent">
-                        <i class="bi bi-qr-code-scan"></i>
+                        <span class="btn-topbar-icon"><i class="bi bi-qr-code-scan"></i></span>
                         <span class="d-none d-sm-inline">Scan QR</span>
                     </Link>
                     <Link href="/tracking" class="btn-topbar" target="_blank">
-                        <i class="bi bi-box-arrow-up-right"></i>
+                        <span class="btn-topbar-icon"><i class="bi bi-box-arrow-up-right"></i></span>
                         <span class="d-none d-sm-inline">Portal Publik</span>
                     </Link>
                 </div>
@@ -222,7 +283,58 @@ const isActive = (path: string, exact = false) =>
             <main class="app-main-body">
                 <slot></slot>
             </main>
+
+            <footer class="app-page-footer no-print">
+                <img src="/images/sitrack_logo.svg" alt="SiTrack" width="18" height="20" />
+                <span>SiTrack &copy; 2026</span>
+            </footer>
         </div>
+
+        <!-- Floating Tooltip (Teleport, lepas dari overflow sidebar) -->
+        <Teleport to="body">
+            <Transition name="tooltip-fade">
+                <div v-if="tooltip.visible" class="sidebar-tooltip-floating"
+                    :style="{ top: tooltip.top + 'px', left: tooltip.left + 'px' }">
+                    {{ tooltip.text }}
+                </div>
+            </Transition>
+        </Teleport>
+
+        <!-- Modal Ubah Password -->
+        <Modal :show="showPasswordModal" @close="showPasswordModal = false">
+            <div class="p-4">
+                <h5 class="fw-bold mb-3">Ubah Password</h5>
+                <form @submit.prevent="submitPasswordChange">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Password Saat Ini</label>
+                        <input v-model="passwordForm.current_password" type="password" class="form-control" required
+                            autofocus />
+                        <div v-if="passwordForm.errors.current_password" class="text-danger small mt-1">{{
+                            passwordForm.errors.current_password }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Password Baru</label>
+                        <input v-model="passwordForm.password" type="password" class="form-control" required
+                            minlength="8" />
+                        <div v-if="passwordForm.errors.password" class="text-danger small mt-1">{{
+                            passwordForm.errors.password
+                            }}</div>
+                        <small class="text-muted">Minimal 8 karakter.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Konfirmasi Password Baru</label>
+                        <input v-model="passwordForm.password_confirmation" type="password" class="form-control"
+                            required minlength="8" />
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                        <button type="button" class="btn btn-secondary"
+                            @click="showPasswordModal = false">Batal</button>
+                        <button type="submit" class="btn btn-primary-blue" :disabled="passwordForm.processing">Simpan
+                            Password</button>
+                    </div>
+                </form>
+            </div>
+        </Modal>
     </div>
 </template>
 
@@ -468,6 +580,13 @@ const isActive = (path: string, exact = false) =>
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    cursor: pointer;
+    position: relative;
+    transition: 0.2s;
+}
+
+.sidebar-user:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .user-avatar-circle {
@@ -509,20 +628,58 @@ const isActive = (path: string, exact = false) =>
     font-size: 0.7rem;
 }
 
+.user-profile-hint {
+    font-size: 0.75rem;
+    opacity: 0.4;
+    flex: none;
+}
+
+.app-page-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1.5rem 0 1rem;
+    opacity: 0.5;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+/* ===== FLOATING TOOLTIP (Teleport ke body) ===== */
+.sidebar-tooltip-floating {
+    position: fixed;
+    transform: translateY(-50%);
+    background: #0f172a;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    z-index: 3000;
+}
+
+.tooltip-fade-enter-active,
+.tooltip-fade-leave-active {
+    transition: opacity 0.15s ease;
+}
+
+.tooltip-fade-enter-from,
+.tooltip-fade-leave-to {
+    opacity: 0;
+}
+
 /* COLLAPSED STATE ADJUSTMENTS */
 @media (min-width: 992px) {
 
     .app-sidebar.is-collapsed .brand-text,
     .app-sidebar.is-collapsed .sidebar-caption,
     .app-sidebar.is-collapsed .nav-label,
-    .app-sidebar.is-collapsed .user-info {
+    .app-sidebar.is-collapsed .user-info,
+    .app-sidebar.is-collapsed .user-profile-hint {
         display: none;
-    }
-
-    .app-sidebar.is-collapsed .nav-link-item {
-        justify-content: center;
-        padding-left: 0;
-        padding-right: 0;
     }
 
     /* Logout button above user on collapsed */
@@ -576,56 +733,132 @@ const isActive = (path: string, exact = false) =>
 }
 
 .app-topbar {
-    padding: 1rem 1.25rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #fff;
-    border-bottom: 1px solid #e2e8f0;
     position: sticky;
     top: 0;
     z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.1rem 1.5rem;
+    background: linear-gradient(180deg, #ffffff 0%, var(--st-surface-sunken) 100%);
+    border-bottom: 1px solid var(--st-border);
+    box-shadow: var(--st-shadow-low);
+}
+
+.app-topbar {
+    position: sticky;
+    top: 1rem;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 1.5rem 1.5rem;
+    padding: 1.1rem 1.5rem;
+    border-radius: var(--st-radius);
+    background: linear-gradient(180deg, #ffffff 0%, var(--st-surface-sunken) 100%);
+    border: 1px solid var(--st-border);
+    box-shadow: var(--st-shadow-med);
+}
+
+.topbar-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.topbar-heading-mark {
+    width: 4px;
+    height: 22px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, var(--st-primary) 0%, var(--st-accent) 100%);
 }
 
 .topbar-title {
-    font-weight: 800;
-    color: #1e293b;
-    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+    color: var(--st-primary);
 }
 
 .hamburger-btn {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     display: grid;
     place-items: center;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    color: #1e293b;
+    background: var(--st-surface);
+    border: 1px solid var(--st-border);
+    border-radius: var(--st-radius-sm);
+    color: var(--st-primary);
+    transition: background-color 0.2s var(--st-ease), border-color 0.2s var(--st-ease), transform 0.15s var(--st-ease);
+}
+
+.hamburger-btn:hover {
+    background: var(--st-primary-soft);
+    border-color: var(--st-primary-light);
+}
+
+.hamburger-btn:active {
+    transform: scale(0.94);
 }
 
 .btn-topbar {
-    padding: 0.5rem 1rem;
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    text-decoration: none;
-    color: #64748b;
-    font-size: 0.85rem;
-    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.55rem;
+    padding: 0.35rem 0.9rem 0.35rem 0.35rem;
+    background: var(--st-surface);
+    border: 1px solid var(--st-border);
+    border-radius: 999px;
+    text-decoration: none;
+    color: var(--st-slate-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: border-color 0.2s var(--st-ease), color 0.2s var(--st-ease),
+        transform 0.2s var(--st-ease), box-shadow 0.2s var(--st-ease);
+}
+
+.btn-topbar-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    background: var(--st-primary-soft);
+    color: var(--st-primary);
+}
+
+.btn-topbar:hover {
+    border-color: var(--st-primary-light);
+    color: var(--st-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--st-shadow-low);
 }
 
 .btn-topbar-accent {
-    background: #2563eb;
+    background: var(--st-accent);
+    border-color: var(--st-accent);
     color: #fff;
-    border: none;
+    box-shadow: 0 10px 22px -8px rgba(var(--st-accent-rgb), 0.5);
+}
+
+.btn-topbar-accent .btn-topbar-icon {
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+}
+
+.btn-topbar-accent:hover {
+    color: #fff;
+    border-color: var(--st-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 26px -8px rgba(var(--st-accent-rgb), 0.6);
 }
 
 .app-main-body {
-    padding: 1.5rem;
+    padding: 0.5rem 1.5rem 1.5rem;
 }
 
 .sidebar-backdrop {

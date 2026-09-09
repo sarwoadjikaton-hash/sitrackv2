@@ -5,6 +5,7 @@ import { Letter } from '@/types';
 
 const props = defineProps<{
     letter: Letter;
+    qrCodeBase64: string;
 }>();
 
 // Buat state lokal agar checkbox bisa diklik (interaktif)
@@ -59,7 +60,8 @@ const goBack = () => window.history.back();
                 <td width="25%" class="border-left text-center">
                     {{ letter.received_date ? new Date(letter.received_date).toLocaleDateString('id-ID', {
                         day:
-                            '2-digit', month: 'long', year: 'numeric' }) : '-' }}
+                            '2-digit', month: 'long', year: 'numeric'
+                    }) : '-' }}
                 </td>
             </tr>
             <tr>
@@ -149,7 +151,8 @@ const goBack = () => window.history.back();
                     <td>:</td>
                     <td>{{ letter.received_date ? new Date(letter.received_date).toLocaleDateString('id-ID', {
                         day:
-                            '2-digit', month: 'long', year: 'numeric' }) : '-' }}</td>
+                            '2-digit', month: 'long', year: 'numeric'
+                    }) : '-' }}</td>
                 </tr>
             </table>
         </div>
@@ -157,8 +160,9 @@ const goBack = () => window.history.back();
         <div class="qr-footer mt-4" contenteditable="false">
             <div class="d-flex align-items-center border border-dark p-2">
                 <div class="qr-img me-3">
-                    <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://sitrack.test/tracking/${letter.tracking_code}`"
-                        width="80" height="80">
+                    <div class="qr-img me-3">
+                        <img :src="qrCodeBase64" width="80" height="80">
+                    </div>
                 </div>
                 <div class="qr-text small" style="font-size: 11px; line-height: 1.2;">
                     <p class="mb-0 fw-bold">Scan QR untuk Update Status Surat</p>

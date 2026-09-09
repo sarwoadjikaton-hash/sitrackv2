@@ -6,7 +6,9 @@ use App\Models\Letter;
 use App\Models\LetterCategory;
 use App\Models\LetterStatusLog;
 use App\Models\Unit;
+use App\Models\LetterNumberType;
 use App\Services\LetterNumberService;
+use App\Services\PdfTextExtractor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -47,11 +49,12 @@ class SignatureLetterController extends Controller
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('tracking_code', 'ILIKE', "%{$search}%")
-                  ->orWhere('agenda_number', 'ILIKE', "%{$search}%")
-                  ->orWhere('letter_number', 'ILIKE', "%{$search}%")
-                  ->orWhere('subject', 'ILIKE', "%{$search}%")
-                  ->orWhere('sender_name', 'ILIKE', "%{$search}%")
-                  ->orWhere('sender_unit', 'ILIKE', "%{$search}%");
+                    ->orWhere('agenda_number', 'ILIKE', "%{$search}%")
+                    ->orWhere('letter_number', 'ILIKE', "%{$search}%")
+                    ->orWhere('subject', 'ILIKE', "%{$search}%")
+                    ->orWhere('sender_name', 'ILIKE', "%{$search}%")
+                    ->orWhere('sender_unit', 'ILIKE', "%{$search}%")
+                    ->orWhere('pdf_content', 'ILIKE', "%{$search}%");
             });
         }
 
@@ -78,11 +81,16 @@ class SignatureLetterController extends Controller
     {
         $categories = LetterCategory::where('is_active', true)->orderBy('category_name')->get();
         $units = Unit::where('is_active', true)->orderBy('unit_name')->get();
+        $letterNumberTypes = LetterNumberType::where('is_active', true)
+            ->orderBy('display_order')
+            ->orderBy('type_name')
+            ->get();
 
         return Inertia::render('TindakLanjut/Form', [
             'letter' => null,
             'categories' => $categories,
             'units' => $units,
+            'letterNumberTypes' => $letterNumberTypes,
             'allowedStatuses' => self::allowedStatuses(),
         ]);
     }
@@ -97,6 +105,7 @@ class SignatureLetterController extends Controller
             'letter_type' => ['required', 'in:in,out'],
             'sender_unit' => ['nullable', 'string', 'max:150'],
             'category_id' => ['nullable', 'exists:letter_categories,id'],
+            'letter_number_type_id' => ['nullable', 'exists:letter_number_types,id'],
             'sender_name' => ['required', 'string', 'max:150'],
             'sender_phone' => ['nullable', 'string', 'max:50'],
             'recipient_unit_id' => ['nullable', 'exists:units,id'],
@@ -113,9 +122,6 @@ class SignatureLetterController extends Controller
             'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
         ]);
 
-        $trackingCode = LetterNumberService::generateTrackingCode();
-        $agendaNumber = LetterNumberService::nextAgendaNumber($validated['letter_type']);
-
         $attachmentPath = null;
         if ($request->hasFile('attachment')) {
             $file = $request->file('attachment');
@@ -128,6 +134,18 @@ class SignatureLetterController extends Controller
 
         DB::beginTransaction();
         try {
+            $letterNumberType = !empty($validated['letter_number_type_id'])
+                ? LetterNumberType::find($validated['letter_number_type_id'])
+                : null;
+
+            if ($validated['letter_source'] === 'SRIKANDI') {
+                $trackingCode = null;
+                $agendaNumber = null;
+            } else {
+                $trackingCode = LetterNumberService::generateTrackingCode($letterNumberType?->type_code);
+                $agendaNumber = LetterNumberService::nextAgendaNumber($validated['letter_type']);
+            }
+
             $letter = Letter::create([
                 'tracking_code' => $trackingCode,
                 'agenda_number' => $agendaNumber,
@@ -136,6 +154,7 @@ class SignatureLetterController extends Controller
                 'process_lane' => 'signature',
                 'sender_unit' => $validated['sender_unit'] ?? null,
                 'category_id' => $validated['category_id'] ?: null,
+                'letter_number_type_id' => $letterNumberType?->id,
                 'sender_name' => $validated['sender_name'],
                 'sender_phone' => $validated['sender_phone'] ?? null,
                 'recipient_unit_id' => $validated['recipient_unit_id'] ?: null,
@@ -180,11 +199,16 @@ class SignatureLetterController extends Controller
         $letter = Letter::findOrFail($id);
         $categories = LetterCategory::where('is_active', true)->orderBy('category_name')->get();
         $units = Unit::where('is_active', true)->orderBy('unit_name')->get();
+        $letterNumberTypes = LetterNumberType::where('is_active', true)
+            ->orderBy('display_order')
+            ->orderBy('type_name')
+            ->get();
 
         return Inertia::render('TindakLanjut/Form', [
             'letter' => $letter,
             'categories' => $categories,
             'units' => $units,
+            'letterNumberTypes' => $letterNumberTypes,
             'allowedStatuses' => self::allowedStatuses(),
         ]);
     }
@@ -200,6 +224,7 @@ class SignatureLetterController extends Controller
             'letter_number' => ['nullable', 'string', 'max:150'],
             'sender_unit' => ['nullable', 'string', 'max:150'],
             'category_id' => ['nullable', 'exists:letter_categories,id'],
+            'letter_number_type_id' => ['nullable', 'exists:letter_number_types,id'],
             'sender_name' => ['required', 'string', 'max:150'],
             'sender_phone' => ['nullable', 'string', 'max:50'],
             'recipient_unit_id' => ['nullable', 'exists:units,id'],
@@ -217,11 +242,13 @@ class SignatureLetterController extends Controller
         ]);
 
         $attachmentPath = $letter->attachment_path;
+        $pdfContent = $letter->pdf_content;
         if ($request->hasFile('attachment')) {
             if ($attachmentPath) {
                 Storage::disk('public')->delete($attachmentPath);
             }
             $attachmentPath = $request->file('attachment')->store('letters', 'public');
+            $pdfContent = PdfTextExtractor::extract($attachmentPath);
         }
 
         $actions = !empty($validated['requested_actions'])
@@ -234,6 +261,7 @@ class SignatureLetterController extends Controller
             'letter_number' => $validated['letter_number'] ?? null,
             'sender_unit' => $validated['sender_unit'] ?? null,
             'category_id' => $validated['category_id'] ?: null,
+            'letter_number_type_id' => $validated['letter_number_type_id'] ?: null,
             'sender_name' => $validated['sender_name'],
             'sender_phone' => $validated['sender_phone'] ?? null,
             'recipient_unit_id' => $validated['recipient_unit_id'] ?: null,

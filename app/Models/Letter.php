@@ -18,6 +18,7 @@ class Letter extends Model
         'process_lane',
         'sender_unit',
         'category_id',
+        'letter_number_type_id',
         'sender_name',
         'sender_phone',
         'recipient_unit_id',
@@ -31,6 +32,7 @@ class Letter extends Model
         'requested_actions',
         'notes',
         'attachment_path',
+        'pdf_content',
         'created_by',
         'archive_classification_code',
         'signatory_name',
@@ -51,6 +53,11 @@ class Letter extends Model
     public function recipientUnit()
     {
         return $this->belongsTo(Unit::class, 'recipient_unit_id');
+    }
+
+    public function letterNumberType()
+    {
+        return $this->belongsTo(\App\Models\LetterNumberType::class, 'letter_number_type_id');
     }
 
     public function creator()

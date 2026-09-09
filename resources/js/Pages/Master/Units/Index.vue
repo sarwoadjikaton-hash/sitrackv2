@@ -174,7 +174,7 @@ const deleteUnit = (id: number) => {
                     </div>
                     <div class="col-6">
                         <label class="form-label small fw-bold">Email Dinas</label>
-                        <input v-model="form.email" type="email" class="form-control" placeholder="unit@instansi.go.id" />
+                        <input v-model="form.email" type="email" class="form-control" placeholder="unit@kemnaker.go.id" />
                     </div>
                 </div>
 

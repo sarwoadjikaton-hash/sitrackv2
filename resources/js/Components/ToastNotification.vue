@@ -1,90 +1,91 @@
 <script setup lang="ts">
 import { usePage } from '@inertiajs/vue3';
-import { computed, watch, ref } from 'vue';
+import { computed, watch, ref, nextTick } from 'vue';
 
 const page = usePage<any>();
-const flash = computed(() => page.props.flash || {});
 
 const show = ref(false);
+const expanded = ref(false);
 const message = ref('');
 const type = ref('success');
+const barVisible = ref(true);
 let timer: any = null;
+
+const DURATION = 5000;
+
+const typeMeta = computed(() => {
+    switch (type.value) {
+        case 'success': return { icon: 'bi-check-circle-fill', color: 'var(--st-success)' };
+        case 'danger': return { icon: 'bi-exclamation-triangle-fill', color: 'var(--st-danger)' };
+        case 'warning': return { icon: 'bi-exclamation-circle-fill', color: 'var(--st-warning)' };
+        default: return { icon: 'bi-info-circle-fill', color: 'var(--st-info)' };
+    }
+});
+
+const isLong = computed(() => message.value.length > 70);
 
 watch(
     () => page.props.flash,
     (newFlash) => {
-        if (newFlash?.success) {
-            type.value = 'success';
-            message.value = newFlash.success;
-            displayToast();
-        } else if (newFlash?.error) {
-            type.value = 'danger';
-            message.value = newFlash.error;
-            displayToast();
-        } else if (newFlash?.warning) {
-            type.value = 'warning';
-            message.value = newFlash.warning;
-            displayToast();
-        } else if (newFlash?.info) {
-            type.value = 'info';
-            message.value = newFlash.info;
-            displayToast();
-        }
+        if (newFlash?.success) { type.value = 'success'; message.value = newFlash.success; displayToast(); }
+        else if (newFlash?.error) { type.value = 'danger'; message.value = newFlash.error; displayToast(); }
+        else if (newFlash?.warning) { type.value = 'warning'; message.value = newFlash.warning; displayToast(); }
+        else if (newFlash?.info) { type.value = 'info'; message.value = newFlash.info; displayToast(); }
     },
-    { deep: true }
+    { deep: true, immediate: true }
 );
 
-function displayToast() {
+async function displayToast() {
+    expanded.value = false;
     show.value = true;
+    barVisible.value = false;
+    await nextTick();
+    barVisible.value = true;
+
     if (timer) clearTimeout(timer);
-    timer = setTimeout(() => {
-        show.value = false;
-    }, 4500);
+    timer = setTimeout(() => { show.value = false; }, DURATION);
 }
 
 function closeToast() {
     show.value = false;
     if (timer) clearTimeout(timer);
 }
+
+function toggleExpand() {
+    expanded.value = !expanded.value;
+}
+
+function pauseTimer() {
+    if (timer) clearTimeout(timer);
+}
+
+function resumeTimer() {
+    if (!expanded.value) {
+        timer = setTimeout(() => { show.value = false; }, 1800);
+    }
+}
 </script>
 
 <template>
-    <div
-        v-if="show"
-        class="toast-container position-fixed top-0 end-0 p-3"
-        style="z-index: 9999;"
-    >
-        <div
-            class="toast show align-items-center text-white border-0 shadow-lg animate__animated animate__fadeInRight"
-            :class="{
-                'bg-success': type === 'success',
-                'bg-danger': type === 'danger',
-                'bg-warning text-dark': type === 'warning',
-                'bg-primary': type === 'info',
-            }"
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-        >
-            <div class="d-flex p-2">
-                <div class="toast-body d-flex align-items-center gap-2 fw-semibold">
-                    <i
-                        class="bi fs-5"
-                        :class="{
-                            'bi-check-circle-fill': type === 'success',
-                            'bi-exclamation-triangle-fill': type === 'danger',
-                            'bi-exclamation-circle-fill': type === 'warning',
-                            'bi-info-circle-fill': type === 'info',
-                        }"
-                    ></i>
-                    <span>{{ message }}</span>
+    <div v-if="show" class="dsh-toast-wrap">
+        <div class="dsh-toast" :class="{ 'is-expanded': expanded }" @mouseenter="pauseTimer" @mouseleave="resumeTimer">
+            <div class="dsh-toast-main">
+                <span class="dsh-toast-icon" :style="{ background: `${typeMeta.color}1a`, color: typeMeta.color }">
+                    <i class="bi" :class="typeMeta.icon"></i>
+                </span>
+                <div class="dsh-toast-body">
+                    <p class="dsh-toast-msg" :class="{ 'is-clamped': isLong && !expanded }">{{ message }}</p>
                 </div>
-                <button
-                    type="button"
-                    class="btn-close btn-close-white me-2 m-auto"
-                    :class="{ 'btn-close-dark': type === 'warning' }"
-                    @click="closeToast"
-                ></button>
+                <button v-if="isLong" type="button" class="dsh-toast-expand" @click="toggleExpand">
+                    <i class="bi" :class="expanded ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                </button>
+                <button type="button" class="dsh-toast-close" @click="closeToast">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="dsh-toast-timer-track">
+                <div v-if="barVisible" class="dsh-toast-timer-bar"
+                    :style="{ background: typeMeta.color, animationDuration: DURATION + 'ms' }"></div>
             </div>
         </div>
     </div>

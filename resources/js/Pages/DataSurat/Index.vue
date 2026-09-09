@@ -9,6 +9,7 @@ import Pagination from '@/Components/Pagination.vue';
 import Modal from '@/Components/Modal.vue';
 import { LetterNumberType, Unit, LetterNumber, PaginatedData } from '@/types';
 import axios from 'axios';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps<{
     records: PaginatedData<LetterNumber> | LetterNumber[];
@@ -21,6 +22,7 @@ const props = defineProps<{
         search: string;
         year: number;
         periode?: string;
+        sort?: string;
     };
     stats: {
         used: number;
@@ -34,8 +36,21 @@ const props = defineProps<{
 const search = ref(props.filters.search || '');
 const currentWorkbookId = ref(props.selectedWorkbookId || 0);
 const filterPeriode = ref(props.filters.periode || 'all');
+const filterSort = ref(props.filters.sort || 'number_desc');
 const filterTanggal = ref(new Date().toISOString().substring(0, 10));
 const filterBulan = ref(new Date().getMonth() + 1);
+
+const workbookOptions = computed(() => [
+    { value: 0, label: 'Semua Workbook' },
+    ...props.types.map((t) => ({ value: t.id, label: t.workbook_name })),
+]);
+
+const sortOptions = [
+    { value: 'number_desc', label: 'No. Urut (Besar → Kecil)' },
+    { value: 'number_asc', label: 'No. Urut (Kecil → Besar)' },
+    { value: 'date_desc', label: 'Tanggal Terbaru' },
+    { value: 'date_asc', label: 'Tanggal Terlama' },
+];
 
 // Modal state
 const showEditModal = ref(false);
@@ -63,12 +78,35 @@ const form = useForm({
     technical_officer: '',
     scan_result: '',
     nd_pengantar: '',
+    attachment: null as File | null,
 });
 
 const importForm = useForm({
     type_id: null as number | null,
     file: null as File | null,
 });
+
+const importStatusMessages = [
+    'Membaca file Excel...',
+    'Memvalidasi setiap baris...',
+    'Menyimpan data ke database...',
+    'Menghasilkan nomor resi...',
+    'Hampir selesai, mohon tunggu...',
+];
+const importStatusIndex = ref(0);
+let importStatusTimer: ReturnType<typeof setInterval> | null = null;
+
+const startImportStatusCycle = () => {
+    importStatusIndex.value = 0;
+    importStatusTimer = setInterval(() => {
+        importStatusIndex.value = (importStatusIndex.value + 1) % importStatusMessages.length;
+    }, 4000);
+};
+
+const stopImportStatusCycle = () => {
+    if (importStatusTimer) clearInterval(importStatusTimer);
+    importStatusTimer = null;
+};
 
 // LOGIKA DATA UNTUK TABEL (Anti-Crash)
 const displayRecords = computed(() => {
@@ -88,16 +126,22 @@ const handleFile = (e: any) => {
 };
 
 const submitImport = () => {
-    if (!importForm.type_id || !importForm.file) {
+    if (importForm.type_id === null || !importForm.file) {
         alert("Pilih jenis naskah dan file Excel terlebih dahulu.");
         return;
     }
-    importForm.post(route('letters.import.store'), {
+    startImportStatusCycle();
+    importForm.transform((data) => ({
+        ...data,
+        type_id: data.type_id === 0 ? null : data.type_id,
+    })).post(route('letters.import.store'), {
         preserveScroll: true,
         onSuccess: () => {
             showImportModal.value = false;
             importForm.reset();
-            alert("Import Berhasil!");
+        },
+        onFinish: () => {
+            stopImportStatusCycle();
         },
     });
 };
@@ -114,8 +158,8 @@ const previewNumber = computed(() => {
     const year = slot.number_year || new Date().getFullYear();
     const dateObj = new Date(form.letter_date);
     const monthNum = isNaN(dateObj.getTime()) ? new Date().getMonth() + 1 : dateObj.getMonth() + 1;
-    const romanMonths = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
-    const monthRoman = romanMonths[monthNum] || 'I';
+    const romanMonthsList = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+    const monthRoman = romanMonthsList[monthNum] || 'I';
 
     return selectedType.value.number_pattern
         .replace('{sequence}', seq)
@@ -159,10 +203,13 @@ const applyFilter = () => {
         tanggal: filterTanggal.value,
         bulan: filterBulan.value,
         tahun: props.selectedYear,
+        sort: filterSort.value,
     }, { preserveState: true });
 };
 
 watch(filterPeriode, () => applyFilter());
+watch(filterSort, () => applyFilter());
+watch(currentWorkbookId, () => applyFilter());
 
 const openCreateModal = () => {
     isEditing.value = false;
@@ -191,6 +238,7 @@ const openEditModal = (record: LetterNumber) => {
     form.technical_officer = record.technical_officer || '';
     form.scan_result = record.scan_result || '';
     form.nd_pengantar = record.nd_pengantar || '';
+    form.attachment = null;
 
     showEditModal.value = true;
 };
@@ -198,12 +246,22 @@ const openEditModal = (record: LetterNumber) => {
 const closeModal = () => {
     showEditModal.value = false;
     showImportModal.value = false;
+    showViewModal.value = false;
 };
 
 const submitDataSurat = () => {
     const action = isEditing.value ? `/data-surat/${editingId.value}` : '/data-surat';
-    const method = isEditing.value ? 'put' : 'post';
-    (form as any)[method](action, { onSuccess: () => closeModal() });
+    if (isEditing.value) {
+        form.transform((data) => ({ ...data, _method: 'put' })).post(action, {
+            forceFormData: true,
+            onSuccess: () => closeModal(),
+        });
+    } else {
+        form.post(action, {
+            forceFormData: true,
+            onSuccess: () => closeModal(),
+        });
+    }
 };
 
 const printData = () => {
@@ -220,7 +278,45 @@ const exportExcel = () => {
     window.location.href = route('data-surat.export', {
         workbook: currentWorkbookId.value,
         search: search.value,
+        year: props.selectedYear,
     });
+};
+
+// ===== Modal View Detail =====
+const showViewModal = ref(false);
+const viewingRecord = ref<LetterNumber | null>(null);
+
+const romanMonths = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+
+const toRoman = (dateStr: string | null | undefined) => {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '-';
+    return romanMonths[d.getMonth() + 1] || '-';
+};
+
+const formatTanggal = (dateStr: string | null | undefined) => {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '-';
+    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+};
+
+const openViewModal = (record: LetterNumber) => {
+    viewingRecord.value = record;
+    showViewModal.value = true;
+};
+
+const closeViewModal = () => {
+    showViewModal.value = false;
+    viewingRecord.value = null;
+};
+
+const switchToEdit = () => {
+    if (!viewingRecord.value) return;
+    const record = viewingRecord.value;
+    closeViewModal();
+    openEditModal(record);
 };
 </script>
 
@@ -231,13 +327,14 @@ const exportExcel = () => {
 
         <!-- Header Section -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 no-print">
-            <div>
-                <span class="eyebrow-text">BUKU REGISTER FINAL</span>
-                <h2 class="fw-bold mb-1 text-dark">Laporan Data Surat</h2>
-                <p class="text-muted mb-0 small">Pencatatan data surat final yang menggunakan alokasi nomor naskah
-                    dinas.</p>
-            </div>
 
+            <div>
+                <span class="eyebrow-text">BUKU REGISTER SURAT</span>
+                <h2 class="fw-bold mb-1 text-dark">Data Surat</h2>
+                <p class="text-muted mb-0 small">
+                    Catat, kelola, dan pantau seluruh data surat dalam satu tempat.
+                </p>
+            </div>
             <div class="d-flex align-items-center gap-2">
                 <div class="dropdown">
                     <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle"
@@ -275,10 +372,12 @@ const exportExcel = () => {
             <div class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label class="form-label small fw-bold">Filter Workbook</label>
-                    <select v-model="currentWorkbookId" class="form-select" @change="applyFilter">
-                        <option :value="0">Semua Workbook</option>
-                        <option v-for="t in types" :key="t.id" :value="t.id">{{ t.workbook_name }}</option>
-                    </select>
+                    <SearchableSelect v-model="currentWorkbookId" :options="workbookOptions"
+                        placeholder="Pilih Workbook" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Urutkan</label>
+                    <SearchableSelect v-model="filterSort" :options="sortOptions" placeholder="Urutkan" />
                 </div>
                 <div class="col-md-2">
                     <label class="form-label small fw-bold">Periode</label>
@@ -299,8 +398,8 @@ const exportExcel = () => {
                 <div class="col-md-5">
                     <label class="form-label small fw-bold">Pencarian</label>
                     <div class="input-group">
-                        <input v-model="search" type="text" class="form-control" placeholder="Cari perihal, nomor..."
-                            @keyup.enter="applyFilter" />
+                        <input v-model="search" type="text" class="form-control"
+                            placeholder="Cari perihal, nomor, atau isi PDF..." @keyup.enter="applyFilter" />
                         <button class="btn btn-primary-blue" @click="applyFilter">Cari</button>
                     </div>
                 </div>
@@ -359,9 +458,16 @@ const exportExcel = () => {
                             </td>
                             <td><small>{{ record.scan_result || record.nd_pengantar || '-' }}</small></td>
                             <td v-if="!isPrintMode" class="text-end no-print">
-                                <button @click="openEditModal(record)"
-                                    class="btn btn-sm btn-outline-primary border-0"><i
-                                        class="bi bi-pencil-square"></i></button>
+                                <div class="d-inline-flex gap-1">
+                                    <button @click="openViewModal(record)"
+                                        class="btn btn-sm btn-outline-secondary border-0" title="Lihat Detail">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button @click="openEditModal(record)"
+                                        class="btn btn-sm btn-outline-primary border-0" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         <tr v-if="displayRecords.length === 0">
@@ -379,33 +485,161 @@ const exportExcel = () => {
             </div>
         </div>
 
+        <!-- MODAL VIEW DETAIL -->
+        <Modal :show="showViewModal" max-width="lg" @close="closeViewModal">
+            <div class="p-4" v-if="viewingRecord">
+                <div class="d-flex justify-content-between align-items-start mb-4 pb-3 border-bottom">
+                    <div>
+                        <span class="text-uppercase fw-bold small text-primary" style="letter-spacing:.06em;">
+                            Detail Surat
+                        </span>
+                        <h5 class="fw-bold mb-0 text-dark">
+                            {{ viewingRecord.number_text || '-' }}
+                        </h5>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary px-3 py-2">
+                        No. Urut {{ String(viewingRecord.sequence_number).padStart(viewingRecord.type?.sequence_padding
+                            || 4, '0') }}
+                    </span>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="detail-item mb-3">
+                            <label>Tanggal Masuk</label>
+                            <p>{{ formatTanggal(viewingRecord.incoming_date) }}</p>
+                        </div>
+                        <div class="detail-item mb-3">
+                            <label>Unit Pengolah Arsip</label>
+                            <p>{{ viewingRecord.processing_unit_text || '-' }}</p>
+                        </div>
+                        <div class="detail-item mb-3">
+                            <label>Penandatangan Surat</label>
+                            <p>{{ viewingRecord.signatory || '-' }}</p>
+                        </div>
+                        <div class="detail-item mb-3">
+                            <label>Permohonan</label>
+                            <p>{{ viewingRecord.request_type || '-' }}</p>
+                        </div>
+                        <div class="detail-item mb-3">
+                            <label>Tujuan Surat</label>
+                            <p>{{ viewingRecord.destination || '-' }}</p>
+                        </div>
+                        <div class="detail-item mb-0">
+                            <label>Tanggal Surat</label>
+                            <p>{{ formatTanggal(viewingRecord.letter_date) }}</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <div class="detail-item">
+                                    <label>Keamanan Akses</label>
+                                    <p>{{ viewingRecord.security_access || '-' }}</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="detail-item">
+                                    <label>Bulan (Romawi)</label>
+                                    <p>{{ toRoman(viewingRecord.letter_date) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="detail-item mb-3">
+                            <label>Kode Klas. Arsip</label>
+                            <p class="font-monospace">{{ viewingRecord.classification_code || '-' }}</p>
+                        </div>
+                        <div class="detail-item mb-3">
+                            <label>Nomor Surat</label>
+                            <p class="font-monospace fw-bold text-primary">{{ viewingRecord.number_text || '-' }}</p>
+                        </div>
+                        <div class="detail-item mb-3">
+                            <label>Petugas Unit Teknis</label>
+                            <p>{{ viewingRecord.technical_officer || '-' }}</p>
+                        </div>
+                        <div class="detail-item mb-0">
+                            <label>ND Pengantar</label>
+                            <p>{{ viewingRecord.nd_pengantar || '-' }}</p>
+                        </div>
+                    </div>
+
+                    <div class="col-12" v-if="viewingRecord.attachment_path">
+                        <div class="detail-item">
+                            <label>Lampiran PDF</label>
+                            <a :href="`/storage/${viewingRecord.attachment_path}`" target="_blank"
+                                class="btn btn-sm btn-outline-primary mt-1">
+                                <i class="bi bi-file-earmark-pdf me-1"></i> Buka File PDF
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="detail-item">
+                            <label>Perihal Surat</label>
+                            <p class="mb-0">{{ viewingRecord.subject || '-' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 pt-4 mt-4 border-top">
+                    <button type="button" class="btn btn-secondary" @click="closeViewModal">Tutup</button>
+                    <button type="button" class="btn btn-primary-blue" @click="switchToEdit">
+                        <i class="bi bi-pencil-square me-1"></i> Edit Data Ini
+                    </button>
+                </div>
+            </div>
+        </Modal>
+
         <!-- MODAL IMPORT -->
-        <Modal :show="showImportModal" @close="closeModal">
+        <Modal :show="showImportModal" @close="importForm.processing ? null : closeModal()">
             <div class="p-4">
                 <h4 class="fw-bold mb-1">Import Data Massal</h4>
                 <p class="text-muted small mb-4">Gunakan format template yang sudah disediakan.</p>
-                <div class="mb-4">
-                    <label class="form-label small fw-bold">Target Jenis Naskah</label>
-                    <select v-model="importForm.type_id" class="form-select">
-                        <option :value="null" disabled>-- Pilih Jenis Naskah --</option>
-                        <option v-for="t in types" :key="t.id" :value="t.id">{{ t.workbook_name }}</option>
-                    </select>
-                </div>
-                <div class="border-dashed p-5 text-center rounded-4 mb-3" @click="fileInput?.click()"
-                    style="cursor:pointer; background: #f8fafc;">
-                    <i class="bi bi-cloud-arrow-up display-4 text-primary"></i>
-                    <h6 class="mt-2 fw-bold">{{ importForm.file ? importForm.file.name : 'Klik untuk pilih file' }}</h6>
-                    <input type="file" ref="fileInput" class="d-none" @change="handleFile" accept=".xlsx, .xls">
-                </div>
-                <div class="d-flex justify-content-between align-items-center mt-4">
-                    <a :href="route('template.dataSurat')" class="text-primary small fw-bold text-decoration-none"><i
-                            class="bi bi-download me-1"></i> Template</a>
-                    <div class="d-flex gap-2">
-                        <button @click="closeModal" class="btn btn-light">Batal</button>
-                        <button @click="submitImport" class="btn btn-primary-blue"
-                            :disabled="importForm.processing">Mulai Import</button>
+
+                <template v-if="!importForm.processing">
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Target Jenis Naskah</label>
+                        <select v-model="importForm.type_id" class="form-select">
+                            <option :value="null" disabled>-- Pilih Jenis Naskah --</option>
+                            <option :value="0">Semua Jenis Naskah (deteksi dari kolom Excel)</option>
+                            <option v-for="t in types" :key="t.id" :value="t.id">{{ t.workbook_name }}</option>
+                        </select>
+                        <small class="text-muted">
+                            Pilih "Semua Jenis Naskah" kalau file Excel-mu sudah punya kolom JENIS NASKAH per baris.
+                        </small>
                     </div>
-                </div>
+                    <div class="border-dashed p-5 text-center rounded-4 mb-3" @click="fileInput?.click()"
+                        style="cursor:pointer; background: #f8fafc;">
+                        <i class="bi bi-cloud-arrow-up display-4 text-primary"></i>
+                        <h6 class="mt-2 fw-bold">{{ importForm.file ? importForm.file.name : 'Klik untuk pilih file' }}
+                        </h6>
+                        <input type="file" ref="fileInput" class="d-none" @change="handleFile" accept=".xlsx, .xls">
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <a :href="route('template.dataSurat')"
+                            class="text-primary small fw-bold text-decoration-none"><i class="bi bi-download me-1"></i>
+                            Template</a>
+                        <div class="d-flex gap-2">
+                            <button @click="closeModal" class="btn btn-light">Batal</button>
+                            <button @click="submitImport" class="btn btn-primary-blue">Mulai Import</button>
+                        </div>
+                    </div>
+                </template>
+
+                <template v-else>
+                    <div class="import-progress py-4 text-center">
+                        <div class="import-progress-ring mx-auto mb-3"></div>
+                        <h6 class="fw-bold text-dark mb-1">{{ importStatusMessages[importStatusIndex] }}</h6>
+                        <p class="text-muted small mb-4">
+                            Proses ini bisa memakan waktu beberapa menit untuk file besar.<br>Jangan tutup atau refresh
+                            halaman ini.
+                        </p>
+                        <div class="import-progress-bar">
+                            <div class="import-progress-bar-fill"></div>
+                        </div>
+                    </div>
+                </template>
             </div>
         </Modal>
 
@@ -428,10 +662,97 @@ const exportExcel = () => {
                             <div class="alert alert-primary py-2 px-3 small font-monospace">Preview: <strong>{{
                                 previewNumber }}</strong></div>
                         </div>
-                        <!-- ... sisa field input ... -->
+                        <!-- Tanggal -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Tanggal Masuk</label>
+                            <input type="date" v-model="form.incoming_date" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Tanggal Surat</label>
+                            <input type="date" v-model="form.letter_date" class="form-control" required />
+                        </div>
+
+                        <!-- Unit Pengolah -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Unit Pengolah</label>
+                            <select v-model="form.unit_id" class="form-select" @change="onUnitSelect">
+                                <option :value="null">-- Pilih Unit --</option>
+                                <option v-for="unit in units" :key="unit.id" :value="unit.id">
+                                    {{ unit.unit_name }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Penandatangan</label>
+                            <input type="text" v-model="form.signatory" class="form-control"
+                                placeholder="Nama penandatangan" />
+                        </div>
+
+                        <!-- Permohonan & Tujuan -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Jenis Permohonan</label>
+                            <input type="text" v-model="form.request_type" class="form-control"
+                                placeholder="Jenis permohonan" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Tujuan Surat</label>
+                            <input type="text" v-model="form.destination" class="form-control"
+                                placeholder="Tujuan surat" />
+                        </div>
+
+                        <!-- Keamanan & Klasifikasi -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Keamanan Akses</label>
+                            <select v-model="form.security_access" class="form-select">
+                                <option value="B">B - Biasa</option>
+                                <option value="T">T - Terbatas</option>
+                                <option value="R">R - Rahasia</option>
+                                <option value="SR">SR - Sangat Rahasia</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Kode Klasifikasi Arsip</label>
+                            <input type="text" v-model="form.classification_code" class="form-control font-monospace"
+                                placeholder="Contoh: UM.01" />
+                        </div>
+
+                        <!-- Unit Teknis -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Petugas Unit Teknis</label>
+                            <input type="text" v-model="form.technical_officer" class="form-control"
+                                placeholder="Nama petugas" />
+                        </div>
+
+                        <!-- Hasil / ND -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Hasil Scan</label>
+                            <input type="text" v-model="form.scan_result" class="form-control"
+                                placeholder="Hasil scan / keterangan" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">ND Pengantar</label>
+                            <input type="text" v-model="form.nd_pengantar" class="form-control"
+                                placeholder="Nomor ND pengantar" />
+                        </div>
                         <div class="col-12">
                             <label class="form-label small fw-bold">Perihal Surat</label>
                             <textarea v-model="form.subject" class="form-control" rows="2" required></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Lampiran PDF (opsional, isinya bisa dicari)</label>
+                            <input type="file" class="form-control" accept=".pdf"
+                                @change="(e: any) => form.attachment = e.target.files[0]" />
+                            <small class="text-muted">
+                                Isi teks di dalam PDF akan otomatis bisa dicari lewat kolom pencarian.
+                                <span v-if="isEditing && viewingRecord === null">Kosongkan jika tidak ingin mengganti
+                                    file yang sudah ada.</span>
+                            </small>
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
@@ -464,6 +785,23 @@ const exportExcel = () => {
     padding: 12px;
     border-bottom: 1px solid #f1f5f9;
     vertical-align: top;
+}
+
+.detail-item label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+}
+
+.detail-item p {
+    font-size: 0.9rem;
+    color: #1e293b;
+    margin-bottom: 0;
+    word-break: break-word;
 }
 
 @media print {
@@ -500,5 +838,55 @@ const exportExcel = () => {
 .border-dashed:hover {
     background-color: #eff6ff !important;
     border-color: #2563eb !important;
+}
+
+.import-progress-ring {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, rgba(29, 78, 216, 0) 0%, #1d4ed8 60%, #14b8a6 100%);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 5px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 5px));
+    animation: importRingSpin 1s linear infinite;
+}
+
+@keyframes importRingSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.import-progress-bar {
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+    position: relative;
+}
+
+.import-progress-bar-fill {
+    position: absolute;
+    top: 0;
+    left: -40%;
+    width: 40%;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #1d4ed8, #14b8a6);
+    animation: importBarSlide 1.4s ease-in-out infinite;
+}
+
+@keyframes importBarSlide {
+    0% {
+        left: -40%;
+    }
+
+    50% {
+        left: 60%;
+    }
+
+    100% {
+        left: 100%;
+    }
 }
 </style>

@@ -36,9 +36,9 @@ class LetterNumberTypeSeeder extends Seeder
                 'display_order' => 2,
             ],
             [
-                'type_code' => 'KEPUtusAN',
+                'type_code' => 'KEPUTUSAN',
                 'type_name' => 'Keputusan',
-                'workbook_name' => 'KEPUtusAN',
+                'workbook_name' => 'KEPUTUSAN',
                 'uses_security_access' => true,
                 'extra_field' => 'scan_result',
                 'number_pattern' => '{security}-{signer}/{sequence}/{classification}/{month_roman}/{year}',

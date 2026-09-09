@@ -48,6 +48,9 @@ const actionOptions = [
 ];
 
 const openStatusModal = (letter: Letter) => {
+    // Guard tambahan: data dari SRIKANDI tidak boleh diubah progressnya dari sini
+    if (letter.letter_source === 'SRIKANDI') return;
+
     activeLetter.value = letter;
     statusForm.status = letter.status;
     statusForm.current_position = letter.current_position;
@@ -77,6 +80,7 @@ const deleteLetter = (id: number) => {
 
 <template>
     <AppLayout title="Tindak Lanjut / Penandatanganan">
+
         <Head title="Tindak Lanjut & TTD" />
 
         <!-- Header -->
@@ -86,7 +90,8 @@ const deleteLetter = (id: number) => {
                     <i class="bi bi-pen-fill"></i> Lajur Pertama
                 </span>
                 <h2 class="fw-bold mb-1 text-dark">Tindak Lanjut / Penandatanganan</h2>
-                <p class="text-muted mb-0 small">Pemeriksaan administrasi, pengendalian tata naskah, paraf, dan tanda tangan pimpinan.</p>
+                <p class="text-muted mb-0 small">Pemeriksaan administrasi, pengendalian tata naskah, paraf, dan tanda
+                    tangan pimpinan.</p>
             </div>
 
             <div class="d-flex align-items-center gap-2">
@@ -104,13 +109,9 @@ const deleteLetter = (id: number) => {
             <div class="row g-3 align-items-center">
                 <div class="col-md-7">
                     <label class="form-label small fw-bold mb-1">Cari Dokumen</label>
-                    <input
-                        v-model="search"
-                        type="text"
-                        class="form-control"
+                    <input v-model="search" type="text" class="form-control"
                         placeholder="Agenda, kode tracking, perihal, nomor surat, pengirim..."
-                        @keyup.enter="handleFilter"
-                    />
+                        @keyup.enter="handleFilter" />
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small fw-bold mb-1">Filter Status</label>
@@ -144,18 +145,29 @@ const deleteLetter = (id: number) => {
                     <tbody>
                         <tr v-for="letter in letters.data" :key="letter.id">
                             <td>
-                                <div class="fw-bold text-primary">{{ letter.agenda_number || '-' }}</div>
-                                <span class="badge bg-light text-dark font-monospace border">{{ letter.tracking_code }}</span>
+                                <template v-if="letter.letter_source === 'SRIKANDI'">
+                                    <span class="badge bg-info-subtle text-info fw-bold px-2 py-1">
+                                        <i class="bi bi-cloud-check-fill me-1"></i>SRIKANDI
+                                    </span>
+                                </template>
+                                <template v-else>
+                                    <div class="fw-bold text-primary">{{ letter.agenda_number || '-' }}</div>
+                                    <span class="badge bg-light text-dark font-monospace border">{{ letter.tracking_code
+                                        }}</span>
+                                </template>
                             </td>
                             <td>
-                                <div class="fw-bold text-dark text-truncate" style="max-width: 260px;" :title="letter.subject">
+                                <div class="fw-bold text-dark text-truncate" style="max-width: 260px;"
+                                    :title="letter.subject">
                                     {{ letter.subject }}
                                 </div>
-                                <small class="text-muted d-block">No: {{ letter.letter_number || '(Belum ada nomor)' }}</small>
+                                <small class="text-muted d-block">No: {{ letter.letter_number || '(Belum ada nomor)'
+                                    }}</small>
                             </td>
                             <td>
                                 <div class="fw-semibold text-dark">{{ letter.sender_unit || letter.sender_name }}</div>
-                                <small class="text-muted">&rarr; {{ letter.recipient_unit?.unit_name || 'Tata Usaha' }}</small>
+                                <small class="text-muted">&rarr; {{ letter.recipient_unit?.unit_name || 'Tata Usaha'
+                                    }}</small>
                             </td>
                             <td>
                                 <span class="badge bg-primary-subtle text-primary fw-semibold px-2 py-1">
@@ -170,35 +182,25 @@ const deleteLetter = (id: number) => {
                             </td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-primary"
-                                        title="Update Status Cepat"
-                                        @click="openStatusModal(letter)"
-                                    >
+                                    <button v-if="letter.letter_source !== 'SRIKANDI'" type="button"
+                                        class="btn btn-outline-primary" title="Update Status Cepat"
+                                        @click="openStatusModal(letter)">
                                         <i class="bi bi-arrow-repeat"></i>
                                     </button>
-                                    <Link
-                                        :href="`/cetak/pendamping/${letter.id}`"
-                                        class="btn btn-outline-secondary"
-                                        title="Cetak Lembar Pendamping"
-                                        target="_blank"
-                                    >
+                                    <button v-else type="button" class="btn btn-outline-secondary"
+                                        title="Progres dikelola di SRIKANDI, tidak dapat diubah di sini" disabled>
+                                        <i class="bi bi-lock-fill"></i>
+                                    </button>
+                                    <Link :href="`/cetak/pendamping/${letter.id}`" class="btn btn-outline-secondary"
+                                        title="Cetak Lembar Pendamping" target="_blank">
                                         <i class="bi bi-printer"></i>
                                     </Link>
-                                    <Link
-                                        :href="`/tindak-lanjut/${letter.id}/edit`"
-                                        class="btn btn-outline-secondary"
-                                        title="Ubah Detail"
-                                    >
+                                    <Link :href="`/tindak-lanjut/${letter.id}/edit`" class="btn btn-outline-secondary"
+                                        title="Ubah Detail">
                                         <i class="bi bi-pencil-square"></i>
                                     </Link>
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-danger"
-                                        title="Hapus Surat"
-                                        @click="deleteLetter(letter.id)"
-                                    >
+                                    <button type="button" class="btn btn-outline-danger" title="Hapus Surat"
+                                        @click="deleteLetter(letter.id)">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -237,13 +239,8 @@ const deleteLetter = (id: number) => {
 
                 <div class="mb-3">
                     <label class="form-label small fw-bold">Posisi Berkas Terkini</label>
-                    <input
-                        v-model="statusForm.current_position"
-                        type="text"
-                        class="form-control"
-                        placeholder="Contoh: Meja Sekjen / Arsiparis / TU"
-                        required
-                    />
+                    <input v-model="statusForm.current_position" type="text" class="form-control"
+                        placeholder="Contoh: Meja Sekjen / Arsiparis / TU" required />
                 </div>
 
                 <div class="mb-3">
@@ -251,13 +248,8 @@ const deleteLetter = (id: number) => {
                     <div class="row g-2">
                         <div v-for="opt in actionOptions" :key="opt" class="col-6">
                             <div class="form-check">
-                                <input
-                                    :id="`act-${opt}`"
-                                    v-model="statusForm.requested_actions"
-                                    type="checkbox"
-                                    class="form-check-input"
-                                    :value="opt"
-                                />
+                                <input :id="`act-${opt}`" v-model="statusForm.requested_actions" type="checkbox"
+                                    class="form-check-input" :value="opt" />
                                 <label :for="`act-${opt}`" class="form-check-label small">
                                     {{ opt }}
                                 </label>
@@ -268,12 +260,8 @@ const deleteLetter = (id: number) => {
 
                 <div class="mb-3">
                     <label class="form-label small fw-bold">Catatan Perubahan</label>
-                    <textarea
-                        v-model="statusForm.note"
-                        class="form-control"
-                        rows="2"
-                        placeholder="Catatan perpindahan atau instruksi tambahan..."
-                    ></textarea>
+                    <textarea v-model="statusForm.note" class="form-control" rows="2"
+                        placeholder="Catatan perpindahan atau instruksi tambahan..."></textarea>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 pt-2 border-top">

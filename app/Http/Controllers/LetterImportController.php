@@ -22,24 +22,36 @@ class LetterImportController extends Controller
     public function importDataSurat(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'type_id' => ['required', 'integer', 'exists:letter_number_types,id'],
+            'type_id' => ['nullable', 'integer', 'exists:letter_number_types,id'],
             'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
         ]);
 
-        $import = new DataSuratImport((int) $data['type_id']);
+        $import = new DataSuratImport();
 
         try {
-            Excel::import($import, $request->file('file'));
+            $import->import(
+                $request->file('file')->getRealPath(),
+                !empty($data['type_id']) ? (int) $data['type_id'] : null
+            );
         } catch (\Throwable $e) {
             return back()->with('error', 'Import gagal: ' . $e->getMessage());
         }
 
-        if (!empty($import->failures)) {
-            $firstErrors = collect($import->failures)->take(3)
-                ->map(fn($f) => "Baris {$f['row']}: " . implode(', ', (array) $f['errors']))
-                ->implode(' | ');
+        $messages = [];
 
-            return back()->with('warning', "{$import->imported} data surat berhasil diimpor, " . count($import->failures) . " baris gagal. {$firstErrors}");
+        if (!empty($import->skippedSheets)) {
+            $messages[] = count($import->skippedSheets) . ' sheet dilewati karena bukan Jenis Naskah: ' . implode(', ', $import->skippedSheets);
+        }
+
+        if (!empty($import->failures)) {
+            $firstErrors = collect($import->failures)->take(5)
+                ->map(fn($f) => "[{$f['sheet']}] Baris {$f['row']}: " . implode(', ', (array) $f['errors']))
+                ->implode(' | ');
+            $messages[] = count($import->failures) . ' baris gagal: ' . $firstErrors;
+        }
+
+        if (!empty($messages)) {
+            return back()->with('warning', "{$import->imported} data surat berhasil diimpor. " . implode(' | ', $messages));
         }
 
         return back()->with('success', "{$import->imported} data surat berhasil diimpor.");

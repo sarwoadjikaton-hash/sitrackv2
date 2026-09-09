@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
+import { ref, onMounted, onUnmounted } from 'vue';
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 
 const model = defineModel<string>({ required: true });
 
@@ -11,6 +14,236 @@ const handleSubmit = () => {
     if (!model.value) return;
     emit('search');
 };
+
+// ===== 3D Hero: Mailbox + elemen melayang =====
+const threeContainer = ref<HTMLDivElement | null>(null);
+let renderer: THREE.WebGLRenderer | null = null;
+let scene: THREE.Scene | null = null;
+let camera: THREE.PerspectiveCamera | null = null;
+let animationId: number | null = null;
+let resizeObserver: ResizeObserver | null = null;
+const floaters: { mesh: THREE.Object3D; speed: number; offset: number; baseY: number }[] = [];
+let mailbox: THREE.Group | null = null;
+
+function softMaterial(color: number, _opts: Record<string, unknown> = {}) {
+    return new THREE.MeshStandardMaterial({
+        color,
+        roughness: 0.55,
+        metalness: 0.05,
+    });
+}
+
+// Objek hero besar: kotak pos membulat
+function createMailbox(): THREE.Group {
+    const group = new THREE.Group();
+
+    const body = new THREE.Mesh(
+        new RoundedBoxGeometry(2.4, 2.7, 2.2, 6, 0.5),
+        softMaterial(0xf7fafc, { clearcoat: 0.8, clearcoatRoughness: 0.15 })
+    );
+    body.position.y = 0.2;
+    group.add(body);
+
+    // Slot surat (celah gelap di badan)
+    const slot = new THREE.Mesh(
+        new RoundedBoxGeometry(1.1, 0.16, 0.1, 3, 0.06),
+        new THREE.MeshStandardMaterial({ color: 0x0b1120, roughness: 0.6 })
+    );
+    slot.position.set(0, 0.6, 1.11);
+    group.add(slot);
+
+    // Bendera aksen oranye di sisi
+    const flagPole = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.04, 0.04, 0.9, 8),
+        softMaterial(0xeaf8ff)
+    );
+    flagPole.position.set(1.35, 0.7, 0);
+    group.add(flagPole);
+
+    const flag = new THREE.Mesh(
+        new RoundedBoxGeometry(0.5, 0.35, 0.04, 2, 0.05),
+        softMaterial(0xf59e71, { clearcoat: 0.7, emissive: 0xf59e71, emissiveIntensity: 0.08 })
+    );
+    flag.position.set(1.6, 1.05, 0);
+    group.add(flag);
+
+    // Jendela/lubang lengkung kecil bernuansa biru (aksen kaca)
+    const window_ = new THREE.Mesh(
+        new THREE.CircleGeometry(0.4, 24),
+        new THREE.MeshStandardMaterial({
+            color: 0x5b96b8,
+            roughness: 0.2,
+            metalness: 0.1,
+            transparent: true,
+            opacity: 0.75,
+        })
+    );
+    window_.position.set(-0.6, 0.3, 1.101);
+    group.add(window_);
+
+    return group;
+}
+
+function createEnvelope(color: number): THREE.Group {
+    const group = new THREE.Group();
+    const body = new THREE.Mesh(
+        new RoundedBoxGeometry(0.9, 0.6, 0.06, 3, 0.06),
+        softMaterial(color)
+    );
+    group.add(body);
+
+    const flapShape = new THREE.Shape();
+    flapShape.moveTo(-0.45, 0.3);
+    flapShape.lineTo(0.45, 0.3);
+    flapShape.lineTo(0, -0.05);
+    flapShape.lineTo(-0.45, 0.3);
+    const flap = new THREE.Mesh(
+        new THREE.ExtrudeGeometry(flapShape, { depth: 0.02, bevelEnabled: false }),
+        softMaterial(0xf59e71, { clearcoat: 0.7 })
+    );
+    flap.position.z = 0.031;
+    group.add(flap);
+
+    return group;
+}
+
+function createDocumentStack(color: number): THREE.Group {
+    const group = new THREE.Group();
+    for (let i = 0; i < 3; i++) {
+        const sheet = new THREE.Mesh(
+            new RoundedBoxGeometry(0.7, 0.9, 0.02, 2, 0.03),
+            softMaterial(i === 0 ? color : 0xffffff, { clearcoat: 0.3 })
+        );
+        sheet.position.set(i * 0.03, -i * 0.02, i * 0.025);
+        group.add(sheet);
+    }
+    return group;
+}
+
+function createStamp(): THREE.Group {
+    const group = new THREE.Group();
+    const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(0.38, 0.07, 12, 28),
+        softMaterial(0xf59e71, { clearcoat: 0.8, emissive: 0xf59e71, emissiveIntensity: 0.12 })
+    );
+    group.add(ring);
+    const core = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.28, 0.28, 0.06, 28),
+        softMaterial(0xffffff)
+    );
+    core.rotation.x = Math.PI / 2;
+    group.add(core);
+    return group;
+}
+
+function initThree() {
+    if (!threeContainer.value) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const el = threeContainer.value;
+    const width = el.clientWidth || 1;
+    const height = el.clientHeight || 1;
+
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
+    camera.position.set(2.2, 1.6, 9);
+    camera.lookAt(2, 0, 0);
+
+    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false, powerPreference: 'low-power' });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1));
+    el.appendChild(renderer.domElement);
+
+    const dirLight = new THREE.DirectionalLight(0xeaf8ff, 1.6);
+    dirLight.position.set(4, 6, 5);
+    scene.add(dirLight);
+    const rimLight = new THREE.DirectionalLight(0xf59e71, 0.5);
+    rimLight.position.set(-5, -2, 3);
+    scene.add(rimLight);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+
+    // Hero object: mailbox, diposisikan di sisi kanan
+    mailbox = createMailbox();
+    mailbox.position.set(3, -0.3, 0);
+    mailbox.rotation.y = -0.35;
+    scene.add(mailbox);
+
+    // Elemen kecil melayang di sekitar mailbox
+    const smallObjects: { build: () => THREE.Group; pos: [number, number, number]; scale: number }[] = [
+        { build: () => createEnvelope(0x5b96b8), pos: [0.2, 1.8, 1.5], scale: 1 },
+        { build: () => createEnvelope(0x003a63), pos: [-1.2, -1.5, 0.5], scale: 0.85 },
+        { build: () => createDocumentStack(0x5b96b8), pos: [4.8, 1.6, -0.5], scale: 0.9 },
+        { build: () => createStamp(), pos: [1.6, -1.8, 1.8], scale: 0.8 },
+    ];
+
+    smallObjects.forEach((item, i) => {
+        const obj = item.build();
+        obj.position.set(...item.pos);
+        obj.scale.setScalar(item.scale);
+        obj.rotation.set(Math.random() * 0.4, Math.random() * 1, Math.random() * 0.3);
+        scene!.add(obj);
+        floaters.push({ mesh: obj, speed: 0.35 + i * 0.1, offset: i * 1.8, baseY: item.pos[1] });
+    });
+
+    const clock = new THREE.Clock();
+    let lastFrameTime = 0;
+    const frameInterval = 1000 / 30;
+    const animate = (now = 0) => {
+        animationId = requestAnimationFrame(animate);
+        if (now - lastFrameTime < frameInterval) return;
+        lastFrameTime = now;
+        const t = clock.getElapsedTime();
+
+        if (mailbox) {
+            mailbox.rotation.y = -0.35 + Math.sin(t * 0.15) * 0.06;
+            mailbox.position.y = -0.3 + Math.sin(t * 0.3) * 0.05;
+        }
+
+        floaters.forEach((f) => {
+            f.mesh.position.y = f.baseY + Math.sin(t * f.speed + f.offset) * 0.18;
+            f.mesh.rotation.y += 0.0025;
+        });
+
+        renderer!.render(scene!, camera!);
+    };
+    animate();
+
+    resizeObserver = new ResizeObserver(() => {
+        if (!renderer || !camera || !el) return;
+        const w = el.clientWidth || 1;
+        const h = el.clientHeight || 1;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+    });
+    resizeObserver.observe(el);
+}
+
+function disposeThree() {
+    if (animationId !== null) cancelAnimationFrame(animationId);
+    resizeObserver?.disconnect();
+    if (scene) {
+        scene.traverse((obj) => {
+            const mesh = obj as THREE.Mesh;
+            mesh.geometry?.dispose?.();
+            const mat = mesh.material as THREE.Material | THREE.Material[] | undefined;
+            if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+            else mat?.dispose?.();
+        });
+    }
+    renderer?.dispose();
+    if (renderer && threeContainer.value?.contains(renderer.domElement)) {
+        threeContainer.value.removeChild(renderer.domElement);
+    }
+    renderer = null;
+    scene = null;
+    camera = null;
+    mailbox = null;
+    floaters.length = 0;
+}
+
+onMounted(initThree);
+onUnmounted(disposeThree);
 </script>
 
 <template>
@@ -27,7 +260,7 @@ const handleSubmit = () => {
             </defs>
         </svg>
 
-        <!-- Mesh gradient background (pengganti @paper-design/shaders-react) -->
+        <!-- Mesh gradient background -->
         <div class="hero-mesh">
             <div class="mesh-blob mesh-blob-1"></div>
             <div class="mesh-blob mesh-blob-2"></div>
@@ -36,6 +269,9 @@ const handleSubmit = () => {
             <div class="mesh-sheen"></div>
             <div class="mesh-grid-overlay"></div>
         </div>
+
+        <!-- Layer 3D ringan: amplop melayang -->
+        <div ref="threeContainer" class="hero-three-layer" aria-hidden="true"></div>
 
         <!-- Dekorasi tema dokumen & tracking -->
         <div class="hero-bg-icons">
@@ -54,13 +290,11 @@ const handleSubmit = () => {
 
         <div class="container hero-container">
             <div class="hero-text-block">
-                <!-- Badge melayang -->
                 <div class="hero-badge">
                     <span class="hero-badge-dot"></span>
                     <span>Terverifikasi &bull; Realtime &bull; Log Transparan</span>
                 </div>
 
-                <!-- Tipografi bertingkat -->
                 <h1 class="hero-heading">
                     <span class="heading-kicker">SiTrack &mdash; Portal Resmi</span>
                     <span class="heading-main">Lacak Naskah</span>
@@ -69,21 +303,22 @@ const handleSubmit = () => {
 
                 <p class="hero-desc">
                     Pantau posisi surat Anda secara realtime dengan memasukkan Nomor Resi
-                    (contoh: <span class="fw-bold text-info">TUS-YYYYMMDD-XXX</span>)
                 </p>
 
-                <!-- Search box -->
                 <div class="search-wrapper">
                     <form @submit.prevent="handleSubmit" class="search-glass-box">
-                        <input v-model="model" type="text" placeholder="TUS-YYYYMMDD-XXX" required />
+                        <input v-model="model" type="text" placeholder="Contoh: ND-20260906-001" required />
                         <button type="submit" class="btn-track">
                             <span class="d-none d-sm-inline">Lacak Sekarang</span>
                             <i class="bi bi-search d-sm-none"></i>
                         </button>
                     </form>
+                    <small class="d-flex align-items-center gap-1 mt-2" style="color: rgba(255,255,255,0.55);">
+                        <i class="bi bi-info-circle"></i>
+                        Format: <span class="fw-semibold">[KODE-JENIS]-YYYYMMDD-XXX</span>
+                    </small>
                 </div>
 
-                <!-- CTA sekunder, gooey button style -->
                 <div class="hero-cta-row">
                     <Link href="/ajukan-surat" class="gooey-cta-wrapper" style="filter: url(#gooey-filter);">
                         <span class="gooey-arrow">
@@ -97,7 +332,6 @@ const handleSubmit = () => {
             </div>
         </div>
 
-        <!-- Badge muter di pojok, pengganti PulsingBorder -->
         <div class="hero-orb">
             <div class="orb-ring"></div>
             <div class="orb-core"><i class="bi bi-shield-check"></i></div>
@@ -116,13 +350,21 @@ const handleSubmit = () => {
 </template>
 
 <style scoped>
+/* Palet lokal "Dark Ocean + Ice + Orange" — sengaja TIDAK pakai var(--st-*) global,
+   supaya halaman publik ini punya identitas sendiri, lepas dari tema hijau dashboard admin. */
+.hero-section {
+    --ocean-primary: #002b4c;
+    --ocean-primary-dark: #001a2e;
+    --ocean-primary-light: #5b96b8;
+    --ocean-accent: #f59e71;
+}
+
 .sr-only-defs {
     position: absolute;
     width: 0;
     height: 0;
 }
 
-/* ============ HERO ============ */
 .hero-section {
     position: relative;
     min-height: calc(100vh - 90px);
@@ -130,16 +372,23 @@ const handleSubmit = () => {
     display: flex;
     align-items: center;
     overflow: hidden;
-    background: var(--st-primary-dark);
+    background: var(--ocean-primary-dark);
     margin-top: -88px;
     padding-top: 88px;
 }
 
-/* ---- Mesh gradient (pengganti MeshGradient shader) ---- */
 .hero-mesh {
     position: absolute;
     inset: 0;
     overflow: hidden;
+}
+
+.hero-three-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0.85;
 }
 
 .mesh-blob {
@@ -158,10 +407,8 @@ const handleSubmit = () => {
     max-height: 640px;
     top: -15%;
     left: -10%;
-    background: radial-gradient(circle,
-            #5b96b8 0%,
-            transparent 70%);
-    opacity: .55;
+    background: radial-gradient(circle, #5b96b8 0%, transparent 70%);
+    opacity: .7;
 }
 
 .mesh-blob-2 {
@@ -171,10 +418,8 @@ const handleSubmit = () => {
     max-height: 560px;
     top: 10%;
     right: -12%;
-    background: radial-gradient(circle,
-            #003a63 0%,
-            transparent 70%);
-    opacity: .5;
+    background: radial-gradient(circle, #003a63 0%, transparent 70%);
+    opacity: .6;
     animation-duration: 26s;
     animation-delay: -6s;
 }
@@ -186,10 +431,8 @@ const handleSubmit = () => {
     max-height: 480px;
     bottom: -18%;
     left: 20%;
-    background: radial-gradient(circle,
-            #002b4c 0%,
-            transparent 70%);
-    opacity: .6;
+    background: radial-gradient(circle, #002b4c 0%, transparent 70%);
+    opacity: .7;
     animation-duration: 30s;
     animation-delay: -12s;
 }
@@ -201,10 +444,8 @@ const handleSubmit = () => {
     max-height: 380px;
     bottom: -5%;
     right: 10%;
-    background: radial-gradient(circle,
-            #f59e71 0%,
-            transparent 70%);
-    opacity: .4;
+    background: radial-gradient(circle, #f59e71 0%, transparent 70%);
+    opacity: .55;
     animation-duration: 19s;
     animation-delay: -3s;
 }
@@ -228,12 +469,7 @@ const handleSubmit = () => {
 .mesh-sheen {
     position: absolute;
     inset: -20%;
-    background: conic-gradient(from 0deg,
-            transparent 0%,
-            rgba(19, 78, 74, .06) 20%,
-            transparent 35%,
-            rgba(45, 212, 191, .07) 55%,
-            transparent 75%);
+    background: conic-gradient(from 0deg, transparent 0%, rgba(19, 78, 74, .06) 20%, transparent 35%, rgba(45, 212, 191, .07) 55%, transparent 75%);
     animation: sheenSpin 40s linear infinite;
 }
 
@@ -263,9 +499,12 @@ const handleSubmit = () => {
     .orb-text {
         animation: none !important;
     }
+
+    .hero-three-layer {
+        display: none;
+    }
 }
 
-/* ---- Dekorasi dokumen & tracking ---- */
 .hero-bg-icons {
     position: absolute;
     inset: 0;
@@ -305,7 +544,6 @@ const handleSubmit = () => {
     }
 }
 
-/* ---- Konten teks hero ---- */
 .hero-container {
     position: relative;
     z-index: 10;
@@ -324,8 +562,8 @@ const handleSubmit = () => {
     gap: .5rem;
     padding: .5rem 1.1rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, .06);
-    border: 1px solid rgba(255, 255, 255, .14);
+    background: rgba(255, 255, 255, .1);
+    border: 1px solid rgba(255, 255, 255, .22);
     backdrop-filter: blur(8px);
     color: rgba(255, 255, 255, .85);
     font-size: .78rem;
@@ -351,7 +589,7 @@ const handleSubmit = () => {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #f59e71;
+    background: var(--ocean-accent);
     box-shadow: 0 0 8px 2px rgba(245, 158, 113, .55);
     flex: none;
 }
@@ -382,11 +620,7 @@ const handleSubmit = () => {
     font-size: clamp(1.8rem, 4vw, 3rem);
     font-weight: 300;
     font-style: italic;
-    background: linear-gradient(135deg,
-            #ffffff 0%,
-            #eaf8ff 40%,
-            #5b96b8 70%,
-            #ffffff 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #eaf8ff 40%, #5b96b8 70%, #ffffff 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -414,14 +648,17 @@ const handleSubmit = () => {
 }
 
 .search-glass-box {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, .35);
     padding: 10px;
     border-radius: 60px;
     display: flex;
     width: 100%;
     max-width: 560px;
+    position: relative;
+    z-index: 10;
 }
 
 .search-glass-box input {
@@ -451,14 +688,15 @@ const handleSubmit = () => {
 }
 
 .btn-track:hover {
-    background: var(--st-accent);
+    background: var(--ocean-accent);
     color: #fff;
     transform: translateY(-2px);
 }
 
-/* ---- Tombol gooey (CSS murni, tanpa JS) ---- */
 .hero-cta-row {
     display: flex;
+    position: relative;
+    z-index: 10;
 }
 
 .gooey-cta-wrapper {
@@ -476,9 +714,7 @@ const handleSubmit = () => {
     justify-content: center;
     height: 44px;
     border-radius: 999px;
-    background: linear-gradient(135deg,
-            #5b96b8,
-            #002b4c);
+    background: linear-gradient(135deg, var(--ocean-primary-light), var(--ocean-primary));
     color: #fff;
     font-weight: 700;
     font-size: .85rem;
@@ -513,7 +749,6 @@ const handleSubmit = () => {
     filter: brightness(.95);
 }
 
-/* ---- Orb muter pojok bawah (pengganti PulsingBorder) ---- */
 .hero-orb {
     position: absolute;
     z-index: 10;
@@ -534,12 +769,7 @@ const handleSubmit = () => {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: conic-gradient(from 0deg,
-            #5b96b8,
-            #003a63,
-            #001a2e,
-            #f59e71,
-            #5b96b8);
+    background: conic-gradient(from 0deg, var(--ocean-primary-light), #003a63, var(--ocean-primary-dark), var(--ocean-accent), var(--ocean-primary-light));
     animation: orbSpin 6s linear infinite;
     filter: blur(1px);
 }
@@ -565,7 +795,7 @@ const handleSubmit = () => {
     background: rgba(255, 255, 255, .06);
     display: grid;
     place-items: center;
-    color: #f59e71;
+    color: var(--ocean-accent);
     font-size: 1.15rem;
     box-shadow: 0 0 16px 2px rgba(45, 212, 191, .35);
     animation: orbPulse 2.4s ease-in-out infinite;
@@ -605,6 +835,10 @@ const handleSubmit = () => {
     .hero-section {
         min-height: auto;
         padding: 4rem 0 3rem;
+    }
+
+    .hero-three-layer {
+        opacity: 0.5;
     }
 }
 </style>

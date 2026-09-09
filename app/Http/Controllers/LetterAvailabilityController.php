@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Letter;
 use App\Models\LetterNumber;
 use App\Models\LetterNumberAvailabilityBatch;
 use App\Models\LetterNumberType;
@@ -40,7 +41,29 @@ class LetterAvailabilityController extends Controller
             ->orderBy('sequence_number', 'asc')
             ->get(['type_id', 'sequence_number'])
             ->groupBy('type_id')
-            ->map(fn ($group) => $group->pluck('sequence_number')->all());
+            ->map(fn($group) => $group->pluck('sequence_number')->all());
+
+
+        // Get ALL sequence numbers (with detail) by type, for the visual grid
+        $allNumbers = LetterNumber::with('unit:id,unit_name')
+            ->where('number_year', $year)
+            ->orderBy('sequence_number', 'asc')
+            ->get([
+                'id',
+                'type_id',
+                'sequence_number',
+                'status',
+                'unit_id',
+                'processing_unit_text',
+                'signatory',
+                'destination',
+                'subject',
+                'reserved_for',
+                'letter_date',
+                'used_at',
+                'created_at',
+            ])
+            ->groupBy('type_id');
 
         // Get all batches with slot counts
         $batches = LetterNumberAvailabilityBatch::with(['type', 'unit', 'creator'])
@@ -56,6 +79,7 @@ class LetterAvailabilityController extends Controller
                         COUNT(*) as total,
                         SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) as available,
                         SUM(CASE WHEN status = 'reserved' THEN 1 ELSE 0 END) as reserved,
+                        SUM(CASE WHEN status = 'preorder' THEN 1 ELSE 0 END) as preorder,
                         SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END) as used
                     ")
                     ->first();
@@ -63,6 +87,7 @@ class LetterAvailabilityController extends Controller
                 $batch->slot_total = (int) ($counts->total ?? 0);
                 $batch->slot_available = (int) ($counts->available ?? 0);
                 $batch->slot_reserved = (int) ($counts->reserved ?? 0);
+                $batch->slot_preorder = (int) ($counts->preorder ?? 0);
                 $batch->slot_used = (int) ($counts->used ?? 0);
 
                 return $batch;
@@ -76,6 +101,7 @@ class LetterAvailabilityController extends Controller
             'types' => $types,
             'units' => $units,
             'availableSlots' => $availableSlots,
+            'allNumbers' => $allNumbers,
             'batchesByType' => $batches,
             'openTypeId' => $openTypeId,
         ]);
@@ -242,16 +268,6 @@ class LetterAvailabilityController extends Controller
 
         DB::beginTransaction();
         try {
-            $usedCount = LetterNumber::where('type_id', $batch->type_id)
-                ->where('number_year', $batch->number_year)
-                ->whereBetween('sequence_number', [$batch->start_sequence, $batch->end_sequence])
-                ->where('status', 'used')
-                ->count();
-
-            if ($usedCount > 0) {
-                throw new RuntimeException('Tidak dapat dihapus karena ' . $usedCount . ' nomor sudah digunakan dalam Data Surat.');
-            }
-
             if ($batch->purpose === 'available') {
                 LetterNumber::where('type_id', $batch->type_id)
                     ->where('number_year', $batch->number_year)
@@ -280,10 +296,141 @@ class LetterAvailabilityController extends Controller
             DB::commit();
 
             return redirect()->route('ketersediaan-nomor.index', ['year' => $year, 'open_type' => $typeId])
-                ->with('success', 'Data ketersediaan berhasil dihapus.');
+                ->with('success', 'Batch berhasil dihapus. Nomor yang sudah terpakai tetap dipertahankan.');
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function destroyNumber($id)
+    {
+        $number = LetterNumber::findOrFail($id);
+
+        if ($number->status === 'used') {
+            return back()->with('error', 'Nomor berstatus Terpakai tidak bisa langsung dihapus. Ubah statusnya terlebih dahulu jika benar-benar ingin menghapus.');
+        }
+
+        $typeId = $number->type_id;
+        $year = $number->number_year;
+        $number->delete();
+
+        return redirect()->route('ketersediaan-nomor.index', ['year' => $year, 'open_type' => $typeId])
+            ->with('success', 'Nomor surat berhasil dihapus.');
+    }
+
+    public function updateNumberStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'in:available,reserved,preorder,used'],
+        ]);
+        $number = LetterNumber::findOrFail($id);
+
+        DB::transaction(function () use ($number, $validated) {
+            $this->applyStatusChange($number, $validated['status']);
+        });
+
+        return back()->with('success', 'Status nomor berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus banyak nomor sekaligus. Nomor berstatus 'used' dilewati (tidak dihapus),
+     * sesuai aturan yang sama seperti destroyNumber() single-item.
+     */
+    public function destroyNumbersBulk(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:letter_numbers,id'],
+        ]);
+
+        $numbers = LetterNumber::whereIn('id', $validated['ids'])->get();
+        $typeId = $numbers->first()?->type_id;
+        $year = $numbers->first()?->number_year;
+
+        $blockedCount = $numbers->where('status', 'used')->count();
+        $deletable = $numbers->where('status', '!=', 'used');
+
+        foreach ($deletable as $number) {
+            $number->delete();
+        }
+
+        $message = $deletable->count() . ' nomor berhasil dihapus.';
+        if ($blockedCount > 0) {
+            $message .= ' ' . $blockedCount . ' nomor berstatus Terpakai dilewati (ubah status dulu jika ingin dihapus).';
+        }
+
+        return redirect()->route('ketersediaan-nomor.index', ['year' => $year, 'open_type' => $typeId])
+            ->with($blockedCount > 0 ? 'warning' : 'success', $message);
+    }
+
+    /**
+     * Ubah status banyak nomor sekaligus, memakai logika yang sama persis
+     * dengan update status single-item (termasuk pembersihan data & Letter terkait
+     * saat dikembalikan ke 'available').
+     */
+    public function updateNumberStatusBulk(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:letter_numbers,id'],
+            'status' => ['required', 'in:available,reserved,preorder,used'],
+        ]);
+
+        $numbers = LetterNumber::whereIn('id', $validated['ids'])->get();
+        $typeId = $numbers->first()?->type_id;
+        $year = $numbers->first()?->number_year;
+
+        DB::transaction(function () use ($numbers, $validated) {
+            foreach ($numbers as $number) {
+                $this->applyStatusChange($number, $validated['status']);
+            }
+        });
+
+        return redirect()->route('ketersediaan-nomor.index', ['year' => $year, 'open_type' => $typeId])
+            ->with('success', $numbers->count() . ' nomor berhasil diperbarui statusnya.');
+    }
+
+    /**
+     * Logika inti ubah status satu LetterNumber. Diekstrak dari updateNumberStatus()
+     * lama supaya bisa dipakai bareng oleh versi single & bulk.
+     */
+    private function applyStatusChange(LetterNumber $number, string $status): void
+    {
+        $payload = [
+            'status' => $status,
+            'used_at' => $status === 'used' ? ($number->used_at ?? now()) : null,
+            'reserved_at' => in_array($status, ['reserved', 'preorder'], true) ? ($number->reserved_at ?? now()) : null,
+        ];
+
+        if ($status === 'available') {
+            if ($number->linked_letter_id) {
+                Letter::find($number->linked_letter_id)?->delete();
+            }
+
+            $payload = array_merge($payload, [
+                'security_access' => null,
+                'classification_code' => null,
+                'month_number' => null,
+                'number_text' => null,
+                'incoming_date' => null,
+                'unit_id' => null,
+                'processing_unit_text' => null,
+                'signatory' => null,
+                'request_type' => null,
+                'destination' => null,
+                'letter_date' => null,
+                'subject' => null,
+                'technical_officer' => null,
+                'scan_result' => null,
+                'nd_pengantar' => null,
+                'linked_letter_id' => null,
+                'reserved_for' => null,
+                'attachment_path' => null,
+                'pdf_content' => null,
+            ]);
+        }
+
+        $number->update($payload);
     }
 }

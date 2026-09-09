@@ -2,50 +2,37 @@
 
 namespace App\Imports;
 
+use App\Models\Letter;
 use App\Models\LetterNumber;
+use App\Models\LetterNumberAvailabilityBatch;
 use App\Models\LetterNumberType;
 use App\Models\Unit;
-use Illuminate\Support\Collection;
+use App\Services\LetterNumberService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Concerns\Importable;
-use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
-use Maatwebsite\Excel\Concerns\SkipsOnError;
-use Maatwebsite\Excel\Concerns\SkipsOnFailure;
-use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Validators\Failure;
-use App\Models\Letter;
-use App\Services\LetterNumberService;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use Throwable;
 
 /**
- * Imports the legacy "Data Surat" workbook format:
- *
- * NO | TANGGAL MASUK | UNIT PENGOLAH ARSIP | PENANDATANGAN SURAT | PERMOHONAN |
- * TUJUAN SURAT | TANGGAL SURAT | KEAMANAN AKSES | NOMOR URUT | KODE KLAS. ARSIP |
- * BULAN | NOMOR SURAT | PERIHAL SURAT | PETUGAS UNIT TEKNIS | ND Pengantar
- *
- * One file = one Jenis Naskah (type_id chosen in the upload form), because the
- * sheet itself has no "jenis naskah" column — same convention as the legacy
- * per-workbook Excel books.
- *
- * Existing "available"/"reserved" slots (from Ketersediaan Nomor) are upgraded
- * to "used". If a NOMOR URUT has no matching slot yet (pure historical import),
- * the row is created directly as "used".
+ * Imports the legacy "REKAP NOMOR" workbook: one Excel sheet per Jenis Naskah,
+ * sheet name matched against LetterNumberType::workbook_name. Header row is
+ * auto-detected (not assumed to be row 1), and placeholder/未-filled rows are
+ * silently skipped.
  */
-class DataSuratImport implements ToCollection, WithHeadingRow, SkipsOnError, SkipsOnFailure, SkipsEmptyRows
+class DataSuratImport
 {
-    use Importable;
-
-    public function __construct(private readonly int $typeId)
-    {
-    }
-
     public int $imported = 0;
 
-    /** @var array<int, array{row:int, errors:array}> */
+    /** @var array<int, array{sheet:string, row:int, errors:array}> */
     public array $failures = [];
+
+    /** @var string[] sheet titles that didn't match any Jenis Naskah */
+    public array $skippedSheets = [];
+
+
+    /** @var array<string, array{type_id:int, year:int, min:int, max:int, count:int}> */
+    private array $touchedRanges = [];
 
     private const MONTHS = [
         'januari' => 1,
@@ -60,83 +47,277 @@ class DataSuratImport implements ToCollection, WithHeadingRow, SkipsOnError, Ski
         'oktober' => 10,
         'november' => 11,
         'desember' => 12,
+        'jan' => 1,
+        'feb' => 2,
+        'mar' => 3,
+        'apr' => 4,
+        'jun' => 6,
+        'jul' => 7,
+        'agu' => 8,
+        'sep' => 9,
+        'okt' => 10,
+        'nov' => 11,
+        'des' => 12,
     ];
 
-    public function collection(Collection $rows): void
+    /** normalized legacy header label => internal key */
+    private const HEADER_MAP = [
+        'no' => 'no',
+        'tanggal masuk' => 'tanggal_masuk',
+        'unit pengolah arsip' => 'unit_pengolah_arsip',
+        'penandatangan surat' => 'penandatangan_surat',
+        'permohonan' => 'permohonan',
+        'tujuan surat' => 'tujuan_surat',
+        'tanggal surat' => 'tanggal_surat',
+        'keamanan akses' => 'keamanan_akses',
+        'nomor urut' => 'nomor_urut',
+        'kode klas. arsip' => 'kode_klas_arsip',
+        'bulan' => 'bulan',
+        'nomor surat' => 'nomor_surat',
+        'perihal surat' => 'perihal_surat',
+        'petugas unit teknis' => 'petugas_unit_teknis',
+        'nd pengantar' => 'nd_pengantar',
+        'hasil pindai' => 'scan_result',
+    ];
+
+    public function import(string $filePath, ?int $fallbackTypeId = null): void
     {
-        $type = LetterNumberType::findOrFail($this->typeId);
+        @ini_set('memory_limit', '1024M');
+        @set_time_limit(300);
 
-        foreach ($rows as $index => $row) {
-            $rowNumber = $index + 2;
+        $reader = IOFactory::createReaderForFile($filePath);
+        $reader->setReadDataOnly(true);
+        if (method_exists($reader, 'setReadEmptyCells')) {
+            $reader->setReadEmptyCells(false);
+        }
+        $spreadsheet = $reader->load($filePath);
 
-            try {
-                $this->importRow($type, $row, $rowNumber);
-            } catch (Throwable $e) {
-                $this->failures[] = ['row' => $rowNumber, 'errors' => [$e->getMessage()]];
+        $typesByName = LetterNumberType::all()->keyBy(fn($t) => mb_strtolower(trim($t->workbook_name)));
+
+        // Kalau user memilih target Jenis Naskah spesifik (bukan "Semua Jenis Naskah"),
+// import HANYA memproses sheet yang namanya cocok dengan Jenis Naskah itu.
+// Sheet lain di file yang sama sengaja dilewati (bukan error, jadi tidak dicatat sebagai skipped).
+        $targetType = $fallbackTypeId ? $typesByName->firstWhere('id', $fallbackTypeId) : null;
+
+        foreach ($spreadsheet->getAllSheets() as $sheet) {
+            $title = trim($sheet->getTitle());
+            $matchedType = $typesByName->get(mb_strtolower($title));
+
+            if ($targetType) {
+                if (!$matchedType || $matchedType->id !== $targetType->id) {
+                    continue; // bukan sheet target, lewati diam-diam
+                }
+                $type = $targetType;
+            } else {
+                $type = $matchedType;
             }
+
+            if (!$type) {
+                $this->skippedSheets[] = $title;
+                continue;
+            }
+
+            $rows = $sheet->toArray(null, true, false, false);
+
+            $headerRowIndex = $this->findHeaderRowIndex($rows);
+            if ($headerRowIndex === null) {
+                $this->skippedSheets[] = "{$title} (baris header tidak ditemukan)";
+                continue;
+            }
+
+            $columnMap = $this->buildColumnMap($rows[$headerRowIndex]);
+
+            for ($r = $headerRowIndex + 1; $r < count($rows); $r++) {
+                $data = $this->mapRow($rows[$r], $columnMap);
+
+                $sequenceRaw = $data['nomor_urut'] ?? null;
+                if ($sequenceRaw === null || $sequenceRaw === '' || (int) $sequenceRaw <= 0) {
+                    continue;
+                }
+
+                $rowNumber = $r + 1;
+
+                try {
+                    $this->importRow($type, $data);
+                } catch (Throwable $e) {
+                    $this->failures[] = ['sheet' => $title, 'row' => $rowNumber, 'errors' => [$e->getMessage()]];
+                }
+            }
+        }
+
+        foreach ($this->touchedRanges as $range) {
+            LetterNumberAvailabilityBatch::create([
+                'type_id' => $range['type_id'],
+                'number_year' => $range['year'],
+                'purpose' => 'available',
+                'start_sequence' => $range['min'],
+                'end_sequence' => $range['max'],
+                'period_month' => now()->toDateString(),
+                'status' => 'active',
+                'notes' => "Hasil import Excel: {$range['count']} nomor (rentang {$range['min']}–{$range['max']}).",
+                'created_by' => Auth::id(),
+            ]);
         }
     }
 
-    private function importRow(LetterNumberType $type, Collection $row, int $rowNumber): void
+    private function findHeaderRowIndex(array $rows): ?int
     {
-        $sequence = (int) $this->val($row, ['nomor_urut']);
+        foreach ($rows as $i => $row) {
+            $normalized = array_map(fn($c) => mb_strtolower(trim((string) $c)), $row);
+            if (in_array('no', $normalized, true) && in_array('nomor urut', $normalized, true)) {
+                return $i;
+            }
+        }
+
+        return null;
+    }
+
+    private function buildColumnMap(array $headerRow): array
+    {
+        $map = [];
+
+        foreach ($headerRow as $colIndex => $label) {
+            $norm = mb_strtolower(trim(preg_replace('/\s+/', ' ', str_replace("\n", ' ', (string) $label))));
+            if ($norm === '') {
+                continue;
+            }
+
+            if (isset(self::HEADER_MAP[$norm])) {
+                $map[self::HEADER_MAP[$norm]] = $colIndex;
+            }
+        }
+
+        return $map;
+    }
+
+    private function mapRow(array $row, array $map): array
+    {
+        $data = [];
+        foreach ($map as $key => $colIndex) {
+            $value = $row[$colIndex] ?? null;
+            $data[$key] = is_string($value) ? trim($value) : $value;
+        }
+
+        return $data;
+    }
+
+    private function hasMeaningfulData(array $data): bool
+    {
+        foreach (['unit_pengolah_arsip', 'penandatangan_surat', 'tanggal_surat', 'nomor_surat'] as $field) {
+            if ($this->clean($data[$field] ?? null) !== null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function importRow(LetterNumberType $type, array $data): void
+    {
+        $sequence = (int) ($data['nomor_urut'] ?? 0);
         if ($sequence <= 0) {
             throw new \RuntimeException('NOMOR URUT kosong / tidak valid.');
         }
 
-        $letterDate = $this->parseDate($this->val($row, ['tanggal_surat']));
-        $incomingDate = $this->parseDate($this->val($row, ['tanggal_masuk'])) ?? $letterDate ?? now()->toDateString();
+        $letterDate = $this->parseDate($data['tanggal_surat'] ?? null);
+        $incomingDate = $this->parseDate($data['tanggal_masuk'] ?? null) ?? $letterDate ?? now()->toDateString();
         $year = $letterDate ? (int) date('Y', strtotime($letterDate)) : (int) date('Y', strtotime($incomingDate));
 
-        $unitName = trim((string) $this->val($row, ['unit_pengolah_arsip']));
-        $unitId = $unitName !== '' ? Unit::where('unit_name', $unitName)->value('id') : null;
+        $unitName = $this->clean($data['unit_pengolah_arsip'] ?? null);
+        $unitId = $unitName ? Unit::where('unit_name', $unitName)->value('id') : null;
 
-        $monthRaw = trim((string) $this->val($row, ['bulan']));
+        $monthRaw = trim((string) ($data['bulan'] ?? ''));
         $monthNumber = is_numeric($monthRaw)
             ? (int) $monthRaw
             : (self::MONTHS[mb_strtolower($monthRaw)] ?? ($letterDate ? (int) date('n', strtotime($letterDate)) : now()->month));
 
+        $numberText = $this->clean($data['nomor_surat'] ?? null);
+        $signatory = $this->clean($data['penandatangan_surat'] ?? null);
+        $destination = $this->clean($data['tujuan_surat'] ?? null);
+        $requestType = $this->clean($data['permohonan'] ?? null);
+        $subject = $this->clean($data['perihal_surat'] ?? null);
+        $technicalOfficer = $this->clean($data['petugas_unit_teknis'] ?? null);
+
+        // TAMBAHAN: deteksi keyword "booking [nama]" -> selalu reserved, apa pun kondisi lain
+        $reservedFor = null;
+        $isBooking = false;
+        if ($technicalOfficer !== null && stripos($technicalOfficer, 'booking') !== false) {
+            $isBooking = true;
+            if (preg_match('/booking\s+(.+)/i', $technicalOfficer, $m)) {
+                $reservedFor = trim($m[1]);
+            }
+        }
+
+        $hasOtherMeta = $unitName !== null || $signatory !== null || $letterDate !== null;
+
+        // TAMBAHAN: logika 5 tingkat prioritas
+        $status = match (true) {
+            $isBooking => 'reserved',
+            $numberText !== null => 'used',
+            $destination !== null || $subject !== null => 'preorder',
+            $hasOtherMeta => 'reserved',
+            default => 'available',
+        };
+        $isUsed = $status === 'used';
+
         $payload = [
             'incoming_date' => $incomingDate,
             'unit_id' => $unitId,
-            'processing_unit_text' => $unitName ?: null,
-            'signatory' => $this->val($row, ['penandatangan_surat']),
-            'request_type' => $this->val($row, ['permohonan']),
-            'destination' => $this->val($row, ['tujuan_surat']),
+            'processing_unit_text' => $unitName,
+            'signatory' => $signatory,
+            'request_type' => $requestType,
+            'destination' => $destination,
             'letter_date' => $letterDate,
-            'security_access' => $this->nullableUpper($this->val($row, ['keamanan_akses'])),
-            'classification_code' => $this->nullableUpper($this->val($row, ['kode_klas_arsip', 'kode_klas', 'kode_klasifikasi_arsip'])),
+            'security_access' => ($v = $this->clean($data['keamanan_akses'] ?? null)) ? strtoupper($v) : null,
+            'classification_code' => ($v = $this->clean($data['kode_klas_arsip'] ?? null)) ? strtoupper($v) : null,
             'month_number' => $monthNumber,
-            'number_text' => $this->val($row, ['nomor_surat']),
-            'subject' => $this->val($row, ['perihal_surat']),
-            'technical_officer' => $this->val($row, ['petugas_unit_teknis', 'petugas_unit__teknis']),
-            'nd_pengantar' => $type->extra_field === 'nd_pengantar' ? $this->val($row, ['nd_pengantar']) : null,
-            'scan_result' => $type->extra_field === 'scan_result' ? $this->val($row, ['nd_pengantar']) : null,
-            'status' => 'used',
-            'used_at' => now(),
+            'number_text' => $numberText,
+            'subject' => $subject,
+            'technical_officer' => $technicalOfficer,
+            'nd_pengantar' => $type->extra_field === 'nd_pengantar' ? $this->clean($data['nd_pengantar'] ?? null) : null,
+            'scan_result' => $type->extra_field === 'scan_result'
+                ? ($this->clean($data['scan_result'] ?? null) ?? $this->clean($data['nd_pengantar'] ?? null))
+                : null,
+            'status' => $status,
+            'reserved_for' => $status === 'reserved' ? $reservedFor : null,
+            'reserved_at' => $status === 'reserved' ? now() : null,
+            'used_at' => $isUsed ? now() : null,
             'created_by' => Auth::id(),
         ];
 
-        DB::transaction(function () use ($type, $year, $sequence, $payload) {
-            $letterNumber = LetterNumber::updateOrCreate(
-                ['type_id' => $type->id, 'number_year' => $year, 'sequence_number' => $sequence],
-                array_merge($payload, [
-                    'signer_code' => $type->default_signer_code ?: '1',
-                ])
-            );
+        $isCurrentMonth = $letterDate
+            && \Carbon\Carbon::parse($letterDate)->format('Y-m') === now()->format('Y-m');
 
-            // Only create a Letter (signature-lane record) once per LetterNumber,
-            // so re-importing the same row doesn't create duplicates.
-            if (!$letterNumber->linked_letter_id) {
+        DB::transaction(function () use ($type, $year, $sequence, $payload, $isCurrentMonth, $isUsed) {
+            if ($isCurrentMonth && $isUsed) {
+                $existing = LetterNumber::where('type_id', $type->id)
+                    ->where('number_year', $year)
+                    ->where('sequence_number', $sequence)
+                    ->first();
+
+                if (!$existing || !in_array($existing->status, ['available', 'reserved'])) {
+                    throw new \RuntimeException("Nomor urut {$sequence} untuk bulan berjalan belum tersedia di stok Ketersediaan Nomor.");
+                }
+
+                $letterNumber = tap($existing)->update($payload);
+            } else {
+                $letterNumber = LetterNumber::updateOrCreate(
+                    ['type_id' => $type->id, 'number_year' => $year, 'sequence_number' => $sequence],
+                    array_merge($payload, ['signer_code' => $type->default_signer_code ?: '1'])
+                );
+            }
+
+            if ($isUsed && !$letterNumber->linked_letter_id) {
                 $letter = Letter::create([
-                    'tracking_code' => LetterNumberService::generateTrackingCode(),
+                    'tracking_code' => LetterNumberService::generateTrackingCode($type->type_code),
                     'agenda_number' => LetterNumberService::nextAgendaNumber('out'),
                     'letter_number' => $letterNumber->number_text,
+                    'letter_number_type_id' => $type->id,
                     'letter_type' => 'out',
                     'process_lane' => 'signature',
                     'sender_unit' => $letterNumber->processing_unit_text,
                     'sender_name' => $letterNumber->signatory ?: '-',
-                    'subject' => $letterNumber->subject,
+                    'subject' => $letterNumber->subject ?: '-',
                     'letter_date' => $letterNumber->letter_date,
                     'received_date' => $letterNumber->incoming_date,
                     'priority' => 'normal',
@@ -155,48 +336,78 @@ class DataSuratImport implements ToCollection, WithHeadingRow, SkipsOnError, Ski
         });
 
         $this->imported++;
+
+        $key = $type->id . '|' . $year;
+        if (!isset($this->touchedRanges[$key])) {
+            $this->touchedRanges[$key] = [
+                'type_id' => $type->id,
+                'year' => $year,
+                'min' => $sequence,
+                'max' => $sequence,
+                'count' => 0,
+            ];
+        }
+        $this->touchedRanges[$key]['min'] = min($this->touchedRanges[$key]['min'], $sequence);
+        $this->touchedRanges[$key]['max'] = max($this->touchedRanges[$key]['max'], $sequence);
+        $this->touchedRanges[$key]['count']++;
     }
 
-    /** Fetch a value trying several possible normalized header-key variants. */
-    private function val(Collection $row, array $candidates): ?string
+    private const EXCEL_ERROR_TOKENS = ['#N/A', '#REF!', '#DIV/0!', '#VALUE!', '#NAME?', '#NULL!', '#NUM!'];
+
+    private function clean(mixed $value): ?string
     {
-        foreach ($candidates as $key) {
-            if ($row->has($key) && trim((string) $row->get($key)) !== '') {
-                return trim((string) $row->get($key));
+        if ($value === null) {
+            return null;
+        }
+        $value = trim((string) $value);
+
+        if ($value === '' || $value === '…') {
+            return null;
+        }
+
+        // Exact match: seluruh sel cuma berisi token error
+        if (in_array($value, self::EXCEL_ERROR_TOKENS, true)) {
+            return null;
+        }
+
+        // Substring match: token error "menempel" di dalam string gabungan
+        // (kasus formula lama pakai IFERROR(...,"#N/A") sebagai placeholder teks)
+        foreach (self::EXCEL_ERROR_TOKENS as $token) {
+            if (str_contains($value, $token)) {
+                return null;
             }
         }
 
-        return null;
+        return $value;
     }
 
-    private function nullableUpper(?string $value): ?string
+    private function parseDate(mixed $value): ?string
     {
-        return $value ? strtoupper($value) : null;
-    }
-
-    private function parseDate(?string $value): ?string
-    {
-        if (!$value) {
+        $value = $this->clean($value);
+        if ($value === null) {
             return null;
+        }
+
+        if (is_numeric($value)) {
+            try {
+                return ExcelDate::excelToDateTimeObject((float) $value)->format('Y-m-d');
+            } catch (Throwable) {
+                return null;
+            }
         }
 
         try {
-            // handles both Excel serial dates (already converted by the reader) and text dates
             return \Carbon\Carbon::parse($value)->toDateString();
         } catch (Throwable) {
+            // fallback: "02 Januari 2026" (nama bulan Indonesia, Carbon default locale tidak paham)
+            if (preg_match('/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/u', $value, $m)) {
+                $month = self::MONTHS[mb_strtolower($m[2])] ?? null;
+                if ($month) {
+                    return sprintf('%04d-%02d-%02d', (int) $m[3], $month, (int) $m[1]);
+                }
+            }
+
             return null;
-        }
-    }
-
-    public function onError(Throwable $e): void
-    {
-        $this->failures[] = ['row' => 0, 'errors' => [$e->getMessage()]];
-    }
-
-    public function onFailure(Failure ...$failures): void
-    {
-        foreach ($failures as $failure) {
-            $this->failures[] = ['row' => $failure->row(), 'errors' => $failure->errors()];
         }
     }
 }

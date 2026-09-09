@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm, Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import ToastNotification from '@/Components/ToastNotification.vue';
 
 const form = useForm({
@@ -13,10 +13,32 @@ const showPassword = ref(false);
 const togglePassword = () => (showPassword.value = !showPassword.value);
 
 const submit = () => {
-    form.post('/login', {
-        onFinish: () => form.reset('password'),
-    });
+    transitioning.value = true;
+    // beri jeda kecil supaya animasi ripple sempat "membuka" sebelum request jalan
+    setTimeout(() => {
+        form.post('/login', {
+            onError: () => {
+                transitioning.value = false;
+            },
+            onFinish: () => form.reset('password'),
+        });
+    }, 350);
 };
+
+const transitioning = ref(false);
+const overlayOrigin = ref({ x: '50%', y: '50%' });
+const submitBtn = ref<HTMLButtonElement | null>(null);
+
+const captureOrigin = (e: MouseEvent) => {
+    const x = (e.clientX / window.innerWidth) * 100;
+    const y = (e.clientY / window.innerHeight) * 100;
+    overlayOrigin.value = { x: `${x}%`, y: `${y}%` };
+};
+
+const overlayStyle = computed(() => ({
+    '--origin-x': overlayOrigin.value.x,
+    '--origin-y': overlayOrigin.value.y,
+}));
 </script>
 
 <template>
@@ -113,9 +135,13 @@ const submit = () => {
                     </div>
 
                     <!-- Submit Button with Glow -->
-                    <button type="submit" class="btn-glow w-100" :disabled="form.processing">
-                        <span v-if="form.processing" class="spinner-border spinner-border-sm me-2"></span>
-                        <span>Masuk ke Sistem</span>
+                    <button ref="submitBtn" type="submit" class="btn-glow w-100" :disabled="form.processing"
+                        @click="captureOrigin">
+                        <span v-if="form.processing" class="btn-loading">
+                            <span class="btn-loading-ring"></span>
+                            <span>Memeriksa akun...</span>
+                        </span>
+                        <span v-else>Masuk ke Sistem</span>
                     </button>
                 </form>
 
@@ -131,6 +157,18 @@ const submit = () => {
                 <i class="bi bi-c-circle"></i> 2026 SiTrack — Tata Usaha &amp; Kearsipan
             </p>
         </div>
+
+        <Transition name="ripple">
+            <div v-if="transitioning" class="login-transition-overlay" :style="overlayStyle">
+                <div class="login-transition-content">
+                    <div class="login-transition-logo-badge">
+                        <img src="/images/sitrack_logo.svg" alt="" width="40" height="40"
+                            class="login-transition-logo" />
+                    </div>
+                    <p class="login-transition-text">Memverifikasi kredensial...</p>
+                </div>
+            </div>
+        </Transition>
     </div>
 </template>
 
@@ -445,6 +483,46 @@ $teal-300: #5eead4;
     }
 }
 
+.btn-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-loading-ring {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: conic-gradient(from 0deg, rgba(255, 255, 255, 0) 0%, #fff 100%);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    animation: btnRingSpin 0.8s linear infinite;
+}
+
+.btn-glow:disabled {
+    cursor: wait;
+    animation: btnPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes btnRingSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes btnPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 10px 20px -5px rgba(20, 184, 166, 0.35);
+    }
+
+    50% {
+        box-shadow: 0 14px 30px -5px rgba(20, 184, 166, 0.55);
+    }
+}
+
 .back-link {
     color: #64748b;
     font-size: .85rem;
@@ -481,6 +559,98 @@ $teal-300: #5eead4;
 
     75% {
         transform: translateX(6px);
+    }
+}
+
+.login-transition-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at var(--origin-x) var(--origin-y), $teal-400 0%, $blue-600 45%, $blue-900 100%);
+    clip-path: circle(150% at var(--origin-x) var(--origin-y));
+}
+
+.ripple-enter-active,
+.ripple-leave-active {
+    transition: clip-path 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ripple-enter-from,
+.ripple-leave-to {
+    clip-path: circle(0% at var(--origin-x) var(--origin-y));
+}
+
+.login-transition-content {
+    text-align: center;
+    color: #fff;
+    opacity: 0;
+    animation: transitionFadeIn 0.4s ease 0.3s forwards;
+}
+
+.login-transition-logo-badge {
+    width: 76px;
+    height: 76px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    animation: transitionLogoPulse 1.4s ease-in-out infinite;
+}
+
+.login-transition-logo {
+    display: block;
+}
+
+.login-transition-text {
+    margin-top: 0.85rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+@keyframes transitionFadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes transitionLogoPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .ripple-enter-active,
+    .ripple-leave-active {
+        transition: opacity 0.3s ease;
+    }
+
+    .ripple-enter-from,
+    .ripple-leave-to {
+        opacity: 0;
+        clip-path: none;
+    }
+
+    .login-transition-overlay {
+        clip-path: none;
+    }
+
+    .login-transition-logo {
+        animation: none;
     }
 }
 </style>

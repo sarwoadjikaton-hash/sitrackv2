@@ -46,6 +46,22 @@ class AuthController extends Controller
     }
 
     /**
+     * Update the authenticated user's password
+     */
+    public function updatePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $request->user()->update([
+            'password' => $validated['password'],
+        ]);
+
+        return back()->with('success', 'Password berhasil diubah.');
+    }
+    /**
      * Handle logout
      */
     public function logout(Request $request)

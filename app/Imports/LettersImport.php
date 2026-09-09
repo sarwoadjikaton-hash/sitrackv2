@@ -51,7 +51,7 @@ class LettersImport implements ToCollection, WithHeadingRow, WithValidation, Ski
 
                 // Buat record Surat
                 $letter = Letter::create([
-                    'tracking_code' => $this->generateTrackingCode(),
+                    'tracking_code' => \App\Services\LetterNumberService::generateTrackingCode('DSP'),
                     'agenda_number' => $this->nextAgendaNumber(),
                     'process_lane' => 'disposition',
                     'letter_source' => in_array($letterSource, ['Manual', 'SRIKANDI'], true) ? $letterSource : 'Manual',
@@ -85,7 +85,7 @@ class LettersImport implements ToCollection, WithHeadingRow, WithValidation, Ski
                 $this->imported++;
             }
         });
-    } // <--- PASTIKAN KURUNG INI ADA. Jika hilang, 'private' di bawah akan error.
+    }
 
     public function rules(): array
     {
@@ -128,23 +128,6 @@ class LettersImport implements ToCollection, WithHeadingRow, WithValidation, Ski
         } catch (Throwable) {
             return null;
         }
-    }
-
-    private function generateTrackingCode(): string
-    {
-        $today = now()->format('Ymd');
-        $prefix = "TUS-{$today}-";
-        $last = Letter::where('tracking_code', 'LIKE', "{$prefix}%")
-            ->orderByDesc('tracking_code')
-            ->first();
-
-        $next = 1;
-        if ($last) {
-            $lastNum = (int) Str::afterLast($last->tracking_code, '-');
-            $next = $lastNum + 1;
-        }
-
-        return $prefix . str_pad((string) $next, 3, '0', STR_PAD_LEFT);
     }
 
     private function nextAgendaNumber(): string

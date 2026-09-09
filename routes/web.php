@@ -43,6 +43,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
+    Route::put('/password', [AuthController::class, 'updatePassword'])->name('password.update');
+
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('permission:view dashboard')->name('dashboard');
 
@@ -58,6 +60,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/ketersediaan-nomor', [LetterAvailabilityController::class, 'index'])->middleware('permission:view number availability')->name('ketersediaan-nomor.index');
     Route::post('/ketersediaan-nomor', [LetterAvailabilityController::class, 'store'])->middleware('permission:manage number availability')->name('ketersediaan-nomor.store');
     Route::delete('/ketersediaan-nomor/{id}', [LetterAvailabilityController::class, 'destroy'])->middleware('permission:manage number availability')->name('ketersediaan-nomor.destroy');
+    Route::delete('/ketersediaan-nomor/number/bulk-destroy', [LetterAvailabilityController::class, 'destroyNumbersBulk'])->middleware('permission:manage number availability')->name('ketersediaan-nomor.number.bulk-destroy');
+    Route::put('/ketersediaan-nomor/number/bulk-status', [LetterAvailabilityController::class, 'updateNumberStatusBulk'])->middleware('permission:manage number availability')->name('ketersediaan-nomor.number.bulk-status');
+    Route::delete('/ketersediaan-nomor/number/{id}', [LetterAvailabilityController::class, 'destroyNumber'])->middleware('permission:manage number availability')->name('ketersediaan-nomor.number.destroy');
+    Route::put('/ketersediaan-nomor/number/{id}/status', [LetterAvailabilityController::class, 'updateNumberStatus'])->middleware('permission:manage number availability')->name('ketersediaan-nomor.number.status');
 
     // Penomoran: Data Surat
     Route::get('/data-surat', [DataSuratController::class, 'index'])->middleware('permission:view letter data')->name('data-surat.index');
@@ -87,6 +93,7 @@ Route::middleware(['auth'])->group(function () {
     // Relasi Surat Lintas Lajur
     Route::post('/letter-relations', [LetterRelationController::class, 'store'])->middleware('permission:manage letter relations')->name('letter-relations.store');
     Route::delete('/letter-relations/{id}', [LetterRelationController::class, 'destroy'])->middleware('permission:manage letter relations')->name('letter-relations.destroy');
+    Route::get('/letter-relations/search', [LetterRelationController::class, 'search'])->middleware('permission:manage letter relations')->name('letter-relations.search');
 
     // Scan QR Status
     Route::get('/scan-status', [ScanQrController::class, 'index'])->middleware('permission:update status qr')->name('scan-status.index');

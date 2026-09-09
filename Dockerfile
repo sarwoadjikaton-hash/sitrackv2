@@ -1,3 +1,12 @@
+# ===== Stage 1: Build frontend assets =====
+FROM node:20-alpine AS assets
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# ===== Stage 2: PHP application =====
 FROM php:8.3-fpm-alpine
 
 RUN apk add --no-cache \
@@ -30,10 +39,11 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copy seluruh project terlebih dahulu
 COPY . .
 
-# Install PHP dependencies
+# Ambil hasil build Vite dari stage 1
+COPY --from=assets /app/public/build ./public/build
+
 RUN composer install \
     --prefer-dist \
     --no-interaction \

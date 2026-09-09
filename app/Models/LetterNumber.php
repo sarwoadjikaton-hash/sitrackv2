@@ -62,6 +62,8 @@ class LetterNumber extends Model
         'technical_officer',
         'scan_result',
         'nd_pengantar',
+        'attachment_path',
+        'pdf_content',
         'linked_letter_id',
         'reserved_for',
         'reserved_at',

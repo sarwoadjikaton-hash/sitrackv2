@@ -119,6 +119,11 @@ const handleSearch = () => {
 
 <style scoped>
 .tracking-viewport {
+    --ocean-primary: #002b4c;
+    --ocean-primary-dark: #001a2e;
+    --ocean-primary-light: #5b96b8;
+    --ocean-accent: #f59e71;
+
     background: #f1f5f9;
     min-height: 100%;
 }
@@ -130,15 +135,15 @@ const handleSearch = () => {
 }
 
 .text-teal {
-    color: #14b8a6;
+    color: var(--ocean-primary);
 }
 
 .bg-teal {
-    background-color: #14b8a6;
+    background-color: var(--ocean-accent);
 }
 
 .bg-teal-subtle {
-    background-color: rgba(20, 184, 166, 0.1);
+    background-color: rgba(0, 43, 76, 0.08);
 }
 
 .ls-2 {
@@ -172,10 +177,10 @@ const handleSearch = () => {
     top: 5px;
     width: 16px;
     height: 16px;
-    background: #14b8a6;
+    background: var(--ocean-accent);
     border: 4px solid #fff;
     border-radius: 50%;
-    box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.15);
+    box-shadow: 0 0 0 4px rgba(245, 158, 113, 0.2);
 }
 
 .timeline-item-v2 {
@@ -206,7 +211,7 @@ const handleSearch = () => {
 @media (max-width: 767.98px) {
 
     .tracking-viewport {
-        background: var(--st-primary-dark);
+        background: var(--ocean-primary-dark);
     }
 
     /* Result tidak terlalu menabrak Hero */

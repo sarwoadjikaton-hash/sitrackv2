@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
 
 class SecurityHeaders
@@ -15,7 +16,12 @@ class SecurityHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $response = $next($request);
+        URL::forceRootUrl($request->getSchemeAndHttpHost());
+        if ($request->header('x-forwarded-proto') === 'https' || $request->isSecure()) {
+            URL::forceScheme('https');
+        }
+
+        $response = $next($request);    
 
         $response->headers->set('X-Frame-Options', 'DENY');
         $response->headers->set('X-Content-Type-Options', 'nosniff');

@@ -132,7 +132,7 @@ class PublicTrackingController extends Controller
                 'month_number' => $monthNumber,
             ]);
 
-            $trackingCode = LetterNumberService::generateTrackingCode();
+            $trackingCode = LetterNumberService::generateTrackingCode($type->type_code);
             $agendaNumber = LetterNumberService::nextAgendaNumber('in');
 
             $letter = Letter::create([

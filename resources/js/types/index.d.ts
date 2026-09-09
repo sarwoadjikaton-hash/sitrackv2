@@ -95,6 +95,8 @@ export interface LetterNumber {
     technical_officer?: string;
     scan_result?: string;
     nd_pengantar?: string;
+    attachment_path?: string | null;
+    pdf_content?: string | null;
     linked_letter_id?: number;
     reserved_for?: string;
     reserved_at?: string;
@@ -115,6 +117,7 @@ export interface Letter {
     process_lane: 'signature' | 'disposition';
     sender_unit?: string;
     category_id?: number;
+    letter_number_type_id?: number | null;
     sender_name?: string;
     sender_phone?: string;
     recipient_unit_id?: number;
@@ -150,6 +153,7 @@ export interface Disposition {
     due_date?: string;
     status: string;
     follow_up_note?: string;
+    attachment_path?: string | null;
     is_koordinator: boolean;
     created_by?: number;
     disposition_date: string;

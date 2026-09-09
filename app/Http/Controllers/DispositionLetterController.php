@@ -8,6 +8,7 @@ use App\Models\LetterCategory;
 use App\Models\LetterRelation;
 use App\Models\LetterStatusLog;
 use App\Models\Unit;
+use App\Models\LetterNumberType;
 use App\Services\LetterNumberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -50,11 +51,11 @@ class DispositionLetterController extends Controller
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('tracking_code', 'ILIKE', "%{$search}%")
-                  ->orWhere('agenda_number', 'ILIKE', "%{$search}%")
-                  ->orWhere('letter_number', 'ILIKE', "%{$search}%")
-                  ->orWhere('subject', 'ILIKE', "%{$search}%")
-                  ->orWhere('sender_name', 'ILIKE', "%{$search}%")
-                  ->orWhere('sender_unit', 'ILIKE', "%{$search}%");
+                    ->orWhere('agenda_number', 'ILIKE', "%{$search}%")
+                    ->orWhere('letter_number', 'ILIKE', "%{$search}%")
+                    ->orWhere('subject', 'ILIKE', "%{$search}%")
+                    ->orWhere('sender_name', 'ILIKE', "%{$search}%")
+                    ->orWhere('sender_unit', 'ILIKE', "%{$search}%");
             });
         }
 
@@ -112,7 +113,7 @@ class DispositionLetterController extends Controller
             'security_level' => ['required', 'string', 'max:50'],
             'notes' => ['nullable', 'string'],
             'letter_source' => ['required', 'in:Manual,SRIKANDI'],
-            
+
             // Initial Disposition fields (optional)
             'instruction' => ['nullable', 'string'],
             'to_unit_id' => ['nullable', 'exists:units,id'],
@@ -122,27 +123,38 @@ class DispositionLetterController extends Controller
             'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
         ]);
 
-        $trackingCode = LetterNumberService::generateTrackingCode();
-        $agendaNumber = LetterNumberService::nextAgendaNumber('in');
-
         $attachmentPath = null;
         if ($request->hasFile('attachment')) {
             $attachmentPath = $request->file('attachment')->store('letters', 'public');
         }
 
         $instruction = trim((string) ($validated['instruction'] ?? ''));
-        $status = $instruction !== '' ? 'Didisposisikan' : 'Diajukan ke Sekjen';
-        
         $toUnit = !empty($validated['to_unit_id']) ? Unit::find($validated['to_unit_id']) : null;
-        $position = $instruction !== '' 
-            ? ($toUnit?->unit_name ?: ($validated['to_name'] ?: 'Penerima Disposisi'))
-            : 'Sekretaris Jenderal';
-
         $userId = Auth::id();
         $userName = Auth::user()->name ?: Auth::user()->username;
 
         DB::beginTransaction();
         try {
+            // Data dari SRIKANDI tidak dapat nomor agenda/resi internal —
+            // penomoran & tracking sudah dikelola oleh sistem SRIKANDI sendiri.
+            if ($validated['letter_source'] === 'SRIKANDI') {
+                $trackingCode = null;
+                $agendaNumber = null;
+            } else {
+                $trackingCode = LetterNumberService::generateTrackingCode('DSP');
+                $agendaNumber = LetterNumberService::nextAgendaNumber('in');
+            }
+
+            $status = $instruction !== '' ? 'Didisposisikan' : 'Diajukan ke Sekjen';
+            if ($instruction !== '') {
+                $position = $toUnit?->unit_name ?: 'Penerima Disposisi';
+                if (!empty($validated['to_name'])) {
+                    $position .= ' (a.n. ' . $validated['to_name'] . ')';
+                }
+            } else {
+                $position = 'Sekretaris Jenderal';
+            }
+
             $letter = Letter::create([
                 'tracking_code' => $trackingCode,
                 'agenda_number' => $agendaNumber,
@@ -204,7 +216,10 @@ class DispositionLetterController extends Controller
             DB::commit();
 
             return redirect()->route('disposisi.show', $letter->id)
-                ->with('success', "Surat berhasil dicatat ke Lajur Disposisi dengan agenda: {$agendaNumber}");
+                ->with('success', $agendaNumber
+                    ? "Surat berhasil dicatat ke Lajur Disposisi dengan agenda: {$agendaNumber}"
+                    : "Surat SRIKANDI berhasil dicatat ke Lajur Disposisi.");
+
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->with('error', $e->getMessage());
@@ -238,10 +253,9 @@ class DispositionLetterController extends Controller
 
         $units = Unit::where('is_active', true)->orderBy('unit_name')->get();
 
-        $otherLetters = Letter::where('id', '!=', $id)
-            ->select('id', 'agenda_number', 'tracking_code', 'subject', 'process_lane')
-            ->orderBy('id', 'desc')
-            ->limit(100)
+        $letterNumberTypes = LetterNumberType::where('is_active', true)
+            ->orderBy('display_order')
+            ->orderBy('type_name')
             ->get();
 
         return Inertia::render('Disposisi/Detail', [
@@ -250,7 +264,7 @@ class DispositionLetterController extends Controller
             'statusLogs' => $statusLogs,
             'relations' => $relations,
             'units' => $units,
-            'otherLetters' => $otherLetters,
+            'letterNumberTypes' => $letterNumberTypes,
             'allowedStatuses' => self::allowedStatuses(),
         ]);
     }
@@ -265,35 +279,68 @@ class DispositionLetterController extends Controller
         $validated = $request->validate([
             'parent_disposition_id' => ['nullable', 'exists:dispositions,id'],
             'from_name' => ['required', 'string', 'max:150'],
-            'to_unit_id' => ['nullable', 'exists:units,id'],
+            'to_unit_ids' => ['required', 'array', 'min:1'],
+            'to_unit_ids.*' => ['exists:units,id'],
+            'koordinator_unit_id' => ['nullable', 'exists:units,id'],
             'to_name' => ['nullable', 'string', 'max:150'],
             'instruction' => ['required', 'string'],
             'due_date' => ['nullable', 'date'],
-            'is_koordinator' => ['nullable', 'boolean'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
             'item_status' => ['nullable', 'string'],
         ]);
 
-        $toUnit = !empty($validated['to_unit_id']) ? Unit::find($validated['to_unit_id']) : null;
-        $targetName = $toUnit?->unit_name ?: ($validated['to_name'] ?: 'Unit Penerima');
+        $toUnitIds = $validated['to_unit_ids'];
+        $koordinatorId = $validated['koordinator_unit_id'] ?? null;
+
+        if ($koordinatorId && !in_array($koordinatorId, $toUnitIds, true)) {
+            $koordinatorId = null;
+        }
+
+        $units = Unit::whereIn('id', $toUnitIds)->get()->keyBy('id');
 
         $userId = Auth::id();
         $userName = Auth::user()->name ?: Auth::user()->username;
 
+        $attachmentPath = null;
+        if ($request->hasFile('attachment')) {
+            $attachmentPath = $request->file('attachment')->store('dispositions', 'public');
+        }
+
+        $unitNamesList = collect($toUnitIds)->map(fn($uid) => $units->get($uid)?->unit_name)->filter()->values();
+        $targetName = $koordinatorId
+            ? $units->get($koordinatorId)?->unit_name
+            : $unitNamesList->implode(', ');
+
+        if ($targetName === '' || $targetName === null) {
+            $targetName = 'Unit Penerima';
+        }
+
+        if (!empty($validated['to_name'])) {
+            $targetName .= ' (a.n. ' . $validated['to_name'] . ')';
+        }
+
+        if ($koordinatorId) {
+            $targetName .= ' - Koordinator';
+        }
+
         DB::beginTransaction();
         try {
-            Disposition::create([
-                'letter_id' => $letter->id,
-                'parent_disposition_id' => $validated['parent_disposition_id'] ?: null,
-                'from_name' => $validated['from_name'],
-                'to_unit_id' => $validated['to_unit_id'] ?: null,
-                'to_name' => $validated['to_name'] ?? null,
-                'instruction' => $validated['instruction'],
-                'due_date' => $validated['due_date'] ?? null,
-                'status' => $validated['item_status'] ?: 'Didisposisikan',
-                'is_koordinator' => !empty($validated['is_koordinator']),
-                'created_by' => $userId,
-                'disposition_date' => now(),
-            ]);
+            foreach ($toUnitIds as $unitId) {
+                Disposition::create([
+                    'letter_id' => $letter->id,
+                    'parent_disposition_id' => $validated['parent_disposition_id'] ?: null,
+                    'from_name' => $validated['from_name'],
+                    'to_unit_id' => $unitId,
+                    'to_name' => $validated['to_name'] ?? null,
+                    'instruction' => $validated['instruction'],
+                    'due_date' => $validated['due_date'] ?? null,
+                    'status' => $validated['item_status'] ?: 'Didisposisikan',
+                    'is_koordinator' => $koordinatorId !== null && (int) $unitId === (int) $koordinatorId,
+                    'attachment_path' => $attachmentPath,
+                    'created_by' => $userId,
+                    'disposition_date' => now(),
+                ]);
+            }
 
             $letter->update([
                 'status' => 'Didisposisikan',
@@ -304,14 +351,14 @@ class DispositionLetterController extends Controller
                 'letter_id' => $letter->id,
                 'status' => 'Didisposisikan',
                 'position' => $targetName,
-                'note' => "Disposisi oleh {$validated['from_name']}: " . substr($validated['instruction'], 0, 100),
+                'note' => "Disposisi oleh {$validated['from_name']} ke " . $unitNamesList->count() . " unit: " . substr($validated['instruction'], 0, 100),
                 'changed_by' => $userName,
                 'changed_at' => now(),
             ]);
 
             DB::commit();
 
-            return back()->with('success', 'Instruksi disposisi berhasil ditambahkan.');
+            return back()->with('success', 'Instruksi disposisi berhasil ditambahkan ke ' . count($toUnitIds) . ' unit.');
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->with('error', $e->getMessage());
@@ -329,15 +376,22 @@ class DispositionLetterController extends Controller
         $validated = $request->validate([
             'status' => ['required', 'in:Didisposisikan,Dalam Tindak Lanjut,Selesai,Dikembalikan'],
             'follow_up_note' => ['nullable', 'string'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
         ]);
 
         $userName = Auth::user()->name ?: Auth::user()->username;
+
+        $attachmentPath = $disposition->attachment_path;
+        if ($request->hasFile('attachment')) {
+            $attachmentPath = $request->file('attachment')->store('dispositions', 'public');
+        }
 
         DB::beginTransaction();
         try {
             $disposition->update([
                 'status' => $validated['status'],
                 'follow_up_note' => $validated['follow_up_note'] ?? null,
+                'attachment_path' => $attachmentPath,
             ]);
 
             // Check if all disposition items for this letter are completed
@@ -380,6 +434,10 @@ class DispositionLetterController extends Controller
     public function updateLetterStatus(Request $request, $id)
     {
         $letter = Letter::findOrFail($id);
+
+        if ($letter->letter_source === 'SRIKANDI') {
+            return back()->with('error', 'Progres surat dari SRIKANDI dikelola di sistem SRIKANDI, tidak dapat diubah di sini.');
+        }
 
         $validated = $request->validate([
             'status' => ['required', 'string'],

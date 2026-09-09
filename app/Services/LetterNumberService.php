@@ -9,31 +9,16 @@ use RuntimeException;
 
 class LetterNumberService
 {
-    /**
-     * Convert integer month to Roman numeral
-     */
     public static function romanMonth(int $month): string
     {
         return match ($month) {
-            1 => 'I',
-            2 => 'II',
-            3 => 'III',
-            4 => 'IV',
-            5 => 'V',
-            6 => 'VI',
-            7 => 'VII',
-            8 => 'VIII',
-            9 => 'IX',
-            10 => 'X',
-            11 => 'XI',
-            12 => 'XII',
+            1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV',
+            5 => 'V', 6 => 'VI', 7 => 'VII', 8 => 'VIII',
+            9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII',
             default => '',
         };
     }
 
-    /**
-     * Build formatted letter number string from pattern and variables
-     */
     public static function buildNumberText(LetterNumberType $type, array $data): string
     {
         $pattern = trim($type->number_pattern ?? '');
@@ -59,11 +44,7 @@ class LetterNumberService
         ];
 
         $result = strtr($pattern, $replacements);
-
-        // Remove any unused placeholders like {something_else}
         $result = preg_replace('/\{[a-zA-Z0-9_]+\}/', '', $result);
-
-        // Clean up double dashes or slashes resulting from empty security code
         $result = preg_replace('/^-+/', '', $result);
         $result = preg_replace('/\/+/', '/', $result);
 
@@ -71,46 +52,61 @@ class LetterNumberService
     }
 
     /**
-     * Generate unique tracking code: tus-YYYYMMDD-XXX
+     * Generate unique tracking code: {PREFIX}-YYYYMMDD-XXX
+     *
+     * @param string|null $prefixCode Kode jenis naskah (mis. type_code dari LetterNumberType).
+     *                                 Kalau null/kosong, pakai prefix fallback generik.
+     *
+     * WAJIB dipanggil di dalam DB::beginTransaction()/DB::transaction() —
+     * advisory lock ini transaction-scoped, cuma menahan request lain
+     * selama transaksi pemanggil belum commit/rollback.
      */
-    public static function generateTrackingCode(): string
+    public static function generateTrackingCode(?string $prefixCode = null): string
     {
-        $today = date('Ymd');
-        $prefix = 'TUS-' . $today . '-';
-
-        $lastCode = DB::table('letters')
-            ->where('tracking_code', 'LIKE', $prefix . '%')
-            ->orderBy('tracking_code', 'desc')
-            ->value('tracking_code');
-
-        $nextNumber = 1;
-        if ($lastCode) {
-            $parts = explode('-', $lastCode);
-            $nextNumber = ((int) end($parts)) + 1;
+        $code = strtoupper(trim((string) $prefixCode));
+        $code = preg_replace('/[^A-Z0-9_]/', '', $code);
+        if ($code === '') {
+            $code = 'DSP'; // fallback generik untuk surat tanpa jenis naskah spesifik
         }
+
+        $today = date('Ymd');
+
+        $lockKey = crc32('tracking_code_' . $code . '_' . $today);
+        DB::select('SELECT pg_advisory_xact_lock(?)', [$lockKey]);
+
+        $prefix = $code . '-' . $today . '-';
+
+        $maxNumber = DB::table('letters')
+            ->where('tracking_code', 'LIKE', $prefix . '%')
+            ->selectRaw("MAX(CAST(substr(tracking_code, ?) AS INTEGER)) as max_num", [strlen($prefix) + 1])
+            ->value('max_num');
+
+        $nextNumber = ((int) $maxNumber) + 1;
 
         return $prefix . str_pad((string) $nextNumber, 3, '0', STR_PAD_LEFT);
     }
 
     /**
      * Generate agenda number: AG-K-YYYY-0001 (out) or AG-M-YYYY-0001 (in)
+     *
+     * WAJIB dipanggil di dalam DB::beginTransaction()/DB::transaction() —
+     * lihat catatan di generateTrackingCode().
      */
     public static function nextAgendaNumber(string $type = 'in'): string
     {
         $prefix = ($type === 'out') ? 'K' : 'M';
         $year = date('Y');
-        $pattern = "AG-$prefix-$year-%";
+        $fixedPrefix = "AG-{$prefix}-{$year}-";
 
-        $lastAgenda = DB::table('letters')
-            ->where('agenda_number', 'LIKE', $pattern)
-            ->orderBy('agenda_number', 'desc')
-            ->value('agenda_number');
+        $lockKey = crc32('agenda_number_' . $prefix . '_' . $year);
+        DB::select('SELECT pg_advisory_xact_lock(?)', [$lockKey]);
 
-        $nextNumber = 1;
-        if ($lastAgenda) {
-            $parts = explode('-', $lastAgenda);
-            $nextNumber = ((int) end($parts)) + 1;
-        }
+        $maxNumber = DB::table('letters')
+            ->where('agenda_number', 'LIKE', $fixedPrefix . '%')
+            ->selectRaw("MAX(CAST(substr(agenda_number, ?) AS INTEGER)) as max_num", [strlen($fixedPrefix) + 1])
+            ->value('max_num');
+
+        $nextNumber = ((int) $maxNumber) + 1;
 
         return sprintf('AG-%s-%s-%04d', $prefix, $year, $nextNumber);
     }

@@ -20,6 +20,7 @@ class Disposition extends Model
         'status',
         'follow_up_note',
         'is_koordinator',
+        'attachment_path',
         'created_by',
         'disposition_date',
     ];

@@ -7,10 +7,13 @@ use App\Models\LetterNumberType;
 use App\Models\Unit;
 use App\Services\LetterNumberService;
 use App\Exports\DataSuratExport;
+use App\Exports\DataSuratMultiSheetExport;
+use App\Services\PdfTextExtractor;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -35,29 +38,26 @@ class DataSuratController extends Controller
         $search = trim((string) $request->input('search', ''));
         $year = (int) $request->input('year', date('Y'));
         $periode = $request->input('periode', 'all');
+        $sort = $request->input('sort', 'number_desc');
 
-        // --- PERBAIKAN UTAMA: Tambahkan filter status = 'used' ---
-        // Laporan data surat hanya menampilkan slot yang sudah terisi data surat.
         $query = LetterNumber::with(['type', 'unit'])
             ->where('number_year', $year)
-            ->where('status', 'used'); // <--- PENTING: Hanya tampilkan yang sudah terpakai
+            ->where('status', 'used');
 
-        // 1. Filter Workbook
         if ($selectedWorkbookId > 0) {
             $query->where('type_id', $selectedWorkbookId);
         }
 
-        // 2. Filter Search
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('subject', 'ILIKE', '%' . $search . '%')
                     ->orWhere('number_text', 'ILIKE', '%' . $search . '%')
                     ->orWhere('processing_unit_text', 'ILIKE', '%' . $search . '%')
-                    ->orWhere('destination', 'ILIKE', '%' . $search . '%');
+                    ->orWhere('destination', 'ILIKE', '%' . $search . '%')
+                    ->orWhere('pdf_content', 'ILIKE', '%' . $search . '%');
             });
         }
 
-        // 3. Logic Filter Periode
         $periodeLabel = "Semua Waktu";
 
         if ($periode === 'hari') {
@@ -75,26 +75,33 @@ class DataSuratController extends Controller
             $periodeLabel = "Bulan Ke-" . $bulan . " Tahun " . $year;
         }
 
-        // Gunakan orderBy sequence_number desc agar data terbaru di atas
-        $records = $query->orderBy('sequence_number', 'desc')->paginate(20)->withQueryString();
+        // --- FIX: satu titik penentu urutan, sesuai pilihan dropdown sort ---
+        $applySort = function ($q) use ($sort) {
+            return match ($sort) {
+                'number_asc' => $q->orderBy('sequence_number', 'asc'),
+                'date_desc' => $q->orderBy('letter_date', 'desc')->orderBy('sequence_number', 'desc'),
+                'date_asc' => $q->orderBy('letter_date', 'asc')->orderBy('sequence_number', 'asc'),
+                default => $q->orderBy('sequence_number', 'desc'),
+            };
+        };
 
-        // 4. Hitung Stats (Harus sinkron dengan tahun yang dipilih)
+        if ($request->has('print')) {
+            // Cetak selalu urut nomor naik (sesuai buku register fisik), terlepas dari pilihan sort di layar
+            $records = (clone $query)->orderBy('sequence_number', 'asc')->get();
+        } else {
+            $records = $applySort(clone $query)->paginate(20)->withQueryString();
+        }
+
         $statsBase = LetterNumber::where('number_year', $year);
         if ($selectedWorkbookId > 0) {
             $statsBase->where('type_id', $selectedWorkbookId);
         }
 
         $statsRow = $statsBase->selectRaw("
-            COUNT(*) FILTER (WHERE status = 'used') as used,
-            COUNT(*) FILTER (WHERE status = 'available') as available,
-            COUNT(*) FILTER (WHERE status = 'reserved') as reserved
-        ")->first();
-
-        if ($request->has('print')) {
-            $records = $query->orderBy('sequence_number', 'asc')->get(); // Ambil SEMUA data dari urutan 1
-        } else {
-            $records = $query->orderBy('sequence_number', 'desc')->paginate(20)->withQueryString();
-        }
+        COUNT(*) FILTER (WHERE status = 'used') as used,
+        COUNT(*) FILTER (WHERE status = 'available') as available,
+        COUNT(*) FILTER (WHERE status = 'reserved') as reserved
+    ")->first();
 
         return Inertia::render('DataSurat/Index', [
             'records' => $records,
@@ -109,6 +116,7 @@ class DataSuratController extends Controller
                 'search' => $search,
                 'year' => $year,
                 'periode' => $periode,
+                'sort' => $sort,
             ],
             'stats' => [
                 'used' => (int) ($statsRow->used ?? 0),
@@ -161,6 +169,7 @@ class DataSuratController extends Controller
             'technical_officer' => ['nullable', 'string', 'max:150'],
             'scan_result' => ['nullable', 'string', 'max:255'],
             'nd_pengantar' => ['nullable', 'string', 'max:255'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
         ]);
 
         DB::beginTransaction();
@@ -197,6 +206,16 @@ class DataSuratController extends Controller
             $scanResult = ($type->extra_field === 'nd_pengantar') ? null : ($validated['scan_result'] ?? null);
             $ndPengantar = ($type->extra_field === 'nd_pengantar') ? ($validated['nd_pengantar'] ?? null) : null;
 
+            $attachmentPath = $slot->attachment_path;
+            $pdfContent = $slot->pdf_content;
+            if ($request->hasFile('attachment')) {
+                if ($attachmentPath) {
+                    Storage::disk('public')->delete($attachmentPath);
+                }
+                $attachmentPath = $request->file('attachment')->store('data-surat', 'public');
+                $pdfContent = PdfTextExtractor::extract($attachmentPath);
+            }
+
             $slot->update([
                 'status' => 'used',
                 'number_text' => $numberText,
@@ -215,6 +234,8 @@ class DataSuratController extends Controller
                 'technical_officer' => $validated['technical_officer'] ?? null,
                 'scan_result' => $scanResult,
                 'nd_pengantar' => $ndPengantar,
+                'attachment_path' => $attachmentPath,
+                'pdf_content' => $pdfContent,
                 'used_at' => now(),
                 'created_by' => $slot->created_by ?: Auth::id(),
             ]);
@@ -248,6 +269,7 @@ class DataSuratController extends Controller
             'technical_officer' => ['nullable', 'string', 'max:150'],
             'scan_result' => ['nullable', 'string', 'max:255'],
             'nd_pengantar' => ['nullable', 'string', 'max:255'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
         ]);
 
         DB::beginTransaction();
@@ -279,6 +301,16 @@ class DataSuratController extends Controller
             $scanResult = ($type->extra_field === 'nd_pengantar') ? null : ($validated['scan_result'] ?? null);
             $ndPengantar = ($type->extra_field === 'nd_pengantar') ? ($validated['nd_pengantar'] ?? null) : null;
 
+            $attachmentPath = $slot->attachment_path;
+            $pdfContent = $slot->pdf_content;
+            if ($request->hasFile('attachment')) {
+                if ($attachmentPath) {
+                    Storage::disk('public')->delete($attachmentPath);
+                }
+                $attachmentPath = $request->file('attachment')->store('data-surat', 'public');
+                $pdfContent = PdfTextExtractor::extract($attachmentPath);
+            }
+
             $slot->update([
                 'number_text' => $numberText,
                 'incoming_date' => $validated['incoming_date'],
@@ -295,6 +327,8 @@ class DataSuratController extends Controller
                 'technical_officer' => $validated['technical_officer'] ?? null,
                 'scan_result' => $scanResult,
                 'nd_pengantar' => $ndPengantar,
+                'attachment_path' => $attachmentPath,
+                'pdf_content' => $pdfContent,
             ]);
 
             DB::commit();
@@ -309,11 +343,12 @@ class DataSuratController extends Controller
 
     public function export(Request $request)
     {
-        $workbookId = (int) $request->input('workbook', 0);
+        $typeId = (int) $request->input('workbook', 0);
+        $year = (int) $request->input('year', date('Y'));
         $search = trim((string) $request->input('search', ''));
 
         return Excel::download(
-            new DataSuratExport($workbookId, $search),
+            new DataSuratMultiSheetExport($typeId, $year, $search),
             'laporan-data-surat-' . now()->format('Ymd-His') . '.xlsx'
         );
     }

@@ -15,6 +15,7 @@ class DataSuratTemplateExport implements FromArray, WithHeadings, ShouldAutoSize
     {
         return [
             'NO',
+            'JENIS NASKAH',
             'TANGGAL MASUK',
             'UNIT PENGOLAH ARSIP',
             'PENANDATANGAN SURAT',
@@ -38,6 +39,7 @@ class DataSuratTemplateExport implements FromArray, WithHeadings, ShouldAutoSize
         return [
             [
                 1,
+                'Nota Dinas / Memorandum',
                 '2026-01-15',
                 'Biro Umum',
                 'Sekretaris Jenderal',
@@ -61,8 +63,8 @@ class DataSuratTemplateExport implements FromArray, WithHeadings, ShouldAutoSize
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $event->sheet->getStyle('A1:O1')->getFont()->setBold(true);
-                $event->sheet->getStyle('A1:O1')->getFill()
+                $event->sheet->getStyle('A1:P1')->getFont()->setBold(true);
+                $event->sheet->getStyle('A1:P1')->getFill()
                     ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                     ->getStartColor()->setRGB('DBEAFE');
             },
