@@ -60,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
     // Penomoran: Ketersediaan Nomor Surat
     Route::get('/ketersediaan-nomor', [LetterAvailabilityController::class, 'index'])->middleware('permission:view number availability')->name('ketersediaan-nomor.index');
     Route::post('/ketersediaan-nomor', [LetterAvailabilityController::class, 'store'])->middleware('permission:manage number availability')->name('ketersediaan-nomor.store');
+    Route::post('/ketersediaan-nomor/sync-spreadsheet', [LetterAvailabilityController::class, 'syncSpreadsheet'])->middleware('permission:manage number availability')->name('ketersediaan-nomor.sync-spreadsheet');
     Route::delete('/ketersediaan-nomor/{id}', [LetterAvailabilityController::class, 'destroy'])->middleware('permission:manage number availability')->name('ketersediaan-nomor.destroy');
     Route::delete('/ketersediaan-nomor/number/bulk-destroy', [LetterAvailabilityController::class, 'destroyNumbersBulk'])->middleware('permission:manage number availability')->name('ketersediaan-nomor.number.bulk-destroy');
     Route::put('/ketersediaan-nomor/number/bulk-status', [LetterAvailabilityController::class, 'updateNumberStatusBulk'])->middleware('permission:manage number availability')->name('ketersediaan-nomor.number.bulk-status');

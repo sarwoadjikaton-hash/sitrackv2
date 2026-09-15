@@ -7,6 +7,7 @@ use App\Models\LetterNumber;
 use App\Models\LetterNumberAvailabilityBatch;
 use App\Models\LetterNumberType;
 use App\Models\Unit;
+use App\Services\GoogleSpreadsheetSyncService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -43,15 +44,15 @@ class LetterAvailabilityController extends Controller
             ->groupBy('type_id')
             ->map(fn($group) => $group->pluck('sequence_number')->all());
 
-
-        // Get ALL sequence numbers (with detail) by type, for the visual grid
-        $allNumbers = LetterNumber::with('unit:id,unit_name')
+        // Get ALL sequence numbers (with detail) by type, for the visual grid and data table
+        $allNumbers = LetterNumber::with(['unit:id,unit_name', 'letter:id,tracking_code,agenda_number'])
             ->where('number_year', $year)
             ->orderBy('sequence_number', 'asc')
             ->get([
                 'id',
                 'type_id',
                 'sequence_number',
+                'number_text',
                 'status',
                 'unit_id',
                 'processing_unit_text',
@@ -60,8 +61,11 @@ class LetterAvailabilityController extends Controller
                 'subject',
                 'reserved_for',
                 'letter_date',
+                'incoming_date',
                 'used_at',
                 'created_at',
+                'letter_id',
+                'linked_letter_id',
             ])
             ->groupBy('type_id');
 
@@ -104,6 +108,7 @@ class LetterAvailabilityController extends Controller
             'allNumbers' => $allNumbers,
             'batchesByType' => $batches,
             'openTypeId' => $openTypeId,
+            'defaultSpreadsheetUrl' => 'https://docs.google.com/spreadsheets/d/' . GoogleSpreadsheetSyncService::DEFAULT_SPREADSHEET_ID . '/edit',
         ]);
     }
 
@@ -542,4 +547,42 @@ class LetterAvailabilityController extends Controller
 
         $number->update($payload);
     }
+
+    /**
+     * Tarik data langsung dari Google Spreadsheet via API
+     */
+    public function syncSpreadsheet(Request $request, GoogleSpreadsheetSyncService $syncService)
+    {
+        $validated = $request->validate([
+            'spreadsheet_url' => ['nullable', 'string'],
+            'type_id' => ['nullable', 'exists:letter_number_types,id'],
+            'year' => ['nullable', 'integer', 'min:2000', 'max:2200'],
+        ]);
+
+        $url = !empty($validated['spreadsheet_url']) ? trim($validated['spreadsheet_url']) : GoogleSpreadsheetSyncService::DEFAULT_SPREADSHEET_ID;
+        $typeId = !empty($validated['type_id']) ? (int) $validated['type_id'] : null;
+        $year = (int) ($validated['year'] ?? date('Y'));
+
+        try {
+            $result = $syncService->sync($url, $typeId, $year);
+
+            $syncedCount = $result['total_synced'];
+            $msg = "Sinkronisasi Google Spreadsheet berhasil! {$syncedCount} nomor berhasil ditarik.";
+
+            if (!empty($result['errors'])) {
+                $msg .= ' Namun terdapat beberapa catatan: ' . implode('; ', $result['errors']);
+            }
+
+            return redirect()->route('ketersediaan-nomor.index', [
+                'year' => $year,
+                'open_type' => $typeId,
+            ])->with($syncedCount > 0 ? 'success' : 'info', $msg);
+        } catch (\Throwable $e) {
+            return redirect()->route('ketersediaan-nomor.index', [
+                'year' => $year,
+                'open_type' => $typeId,
+            ])->with('error', 'Gagal menarik data dari Google Spreadsheet: ' . $e->getMessage());
+        }
+    }
 }
+
