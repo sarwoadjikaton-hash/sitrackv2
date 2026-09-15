@@ -24,7 +24,12 @@ class PublicTrackingController extends Controller
      */
     public function index(Request $request): Response
     {
-        $code = strtoupper(trim((string) $request->input('code', '')));
+        $rawCode = trim((string) $request->input('code', ''));
+        $code = $rawCode;
+        if (preg_match('/tracking\/([A-Za-z0-9_\-]+)/i', $rawCode, $matches)) {
+            $code = $matches[1];
+        }
+
         $letter = null;
         $logs = [];
         $dispositions = [];
@@ -32,9 +37,14 @@ class PublicTrackingController extends Controller
 
         if ($code !== '') {
             $letter = Letter::with(['category', 'recipientUnit'])
-                ->where('tracking_code', $code)
-                ->orWhere('agenda_number', $code)
-                ->orWhere('letter_number', $code)
+                ->where(function ($q) use ($code, $rawCode) {
+                    $q->where('tracking_code', $code)
+                        ->orWhere('tracking_code', $rawCode)
+                        ->orWhere('agenda_number', $code)
+                        ->orWhere('agenda_number', $rawCode)
+                        ->orWhere('letter_number', $code)
+                        ->orWhere('letter_number', $rawCode);
+                })
                 ->first();
 
             if ($letter) {
@@ -188,5 +198,14 @@ class PublicTrackingController extends Controller
         return Inertia::render('Tracking/Success', [
             'letter' => $letter,
         ]);
+    }
+
+    /**
+     * Handle direct URL tracking: /tracking/{code}
+     */
+    public function showByCode(Request $request, string $code): Response
+    {
+        $request->merge(['code' => $code]);
+        return $this->index($request);
     }
 }

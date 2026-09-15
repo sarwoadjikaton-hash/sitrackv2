@@ -45,15 +45,22 @@ const actionOptions = [
     'Mohon Paraf', 'Mohon Tanda Tangan'
 ];
 
+const extractCode = (str: string) => {
+    if (!str) return '';
+    const m = str.match(/tracking\/([A-Za-z0-9_\-]+)/i);
+    if (m) return m[1];
+    return str.trim();
+};
+
 // --- LOGIKA PENCARIAN & SCAN ---
 const handleManualSearch = () => {
     if (!manualId.value) return;
-    router.get(route('scan-status.index'), { tracking: manualId.value }, { preserveState: true });
+    router.get(route('scan-status.index'), { tracking: extractCode(manualId.value) }, { preserveState: true });
 };
 
 const onScanSuccess = (decodedText: string) => {
     if (scanner) scanner.clear(); // Hentikan kamera setelah berhasil scan
-    router.get(route('scan-status.index'), { tracking: decodedText });
+    router.get(route('scan-status.index'), { tracking: extractCode(decodedText) });
 };
 
 const submitUpdate = () => {

@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/tracking', 301);
 
 Route::get('/tracking', [PublicTrackingController::class, 'index'])->name('tracking.index');
+Route::get('/tracking/{code}', [PublicTrackingController::class, 'showByCode'])->name('tracking.show');
 Route::get('/ajukan-surat', [PublicTrackingController::class, 'create'])->name('tracking.create');
 Route::post('/ajukan-surat', [PublicTrackingController::class, 'store'])->name('tracking.store');
 Route::get('/surat-berhasil/{code}', [PublicTrackingController::class, 'success'])->name('tracking.success');
