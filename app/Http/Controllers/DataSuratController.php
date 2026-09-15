@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Letter;
 use App\Models\LetterNumber;
 use App\Models\LetterNumberType;
+use App\Models\LetterStatusLog;
 use App\Models\Unit;
 use App\Services\LetterNumberService;
 use App\Exports\DataSuratExport;
@@ -246,6 +248,63 @@ class DataSuratController extends Controller
                 'created_by' => $slot->created_by ?: Auth::id(),
             ]);
 
+            if ($slot->linked_letter_id) {
+                $linkedLetter = Letter::find($slot->linked_letter_id);
+                if ($linkedLetter) {
+                    $linkedLetter->update([
+                        'letter_number' => $numberText,
+                        'sender_unit' => $validated['processing_unit_text'],
+                        'sender_name' => $validated['signatory'] ?: $linkedLetter->sender_name,
+                        'subject' => $validated['subject'],
+                        'letter_date' => $letterDate,
+                        'received_date' => $validated['incoming_date'],
+                        'archive_classification_code' => $classificationCode,
+                        'signatory_name' => $validated['signatory'],
+                        'technical_officer' => $validated['technical_officer'] ?? null,
+                        'destination' => $validated['destination'] ?? null,
+                        'attachment_path' => $attachmentPath ?: $linkedLetter->attachment_path,
+                        'pdf_content' => $pdfContent ?: $linkedLetter->pdf_content,
+                    ]);
+                }
+            } else {
+                $letter = Letter::create([
+                    'tracking_code' => LetterNumberService::generateTrackingCode($type->type_code),
+                    'agenda_number' => LetterNumberService::nextAgendaNumber('out'),
+                    'letter_number' => $numberText,
+                    'letter_number_type_id' => $type->id,
+                    'letter_type' => 'out',
+                    'process_lane' => 'signature',
+                    'sender_unit' => $validated['processing_unit_text'],
+                    'sender_name' => $validated['signatory'] ?: 'Arsiparis',
+                    'subject' => $validated['subject'],
+                    'letter_date' => $letterDate,
+                    'received_date' => $validated['incoming_date'],
+                    'priority' => 'Biasa',
+                    'security_level' => $securityAccess ?: 'Biasa',
+                    'status' => 'Dokumen Diterima dan Diinput',
+                    'current_position' => 'Arsiparis',
+                    'archive_classification_code' => $classificationCode,
+                    'signatory_name' => $validated['signatory'],
+                    'technical_officer' => $validated['technical_officer'] ?? null,
+                    'destination' => $validated['destination'] ?? null,
+                    'attachment_path' => $attachmentPath,
+                    'pdf_content' => $pdfContent,
+                    'letter_source' => 'Manual',
+                    'created_by' => Auth::id(),
+                ]);
+
+                LetterStatusLog::create([
+                    'letter_id' => $letter->id,
+                    'status' => 'Dokumen Diterima dan Diinput',
+                    'position' => 'Arsiparis',
+                    'note' => 'Dokumen baru dicatat ke sistem SiTrack dari Data Surat.',
+                    'changed_by' => Auth::user()?->name ?: 'Admin',
+                    'changed_at' => now(),
+                ]);
+
+                $slot->update(['linked_letter_id' => $letter->id]);
+            }
+
             DB::commit();
 
             return redirect()->route('data-surat.index', ['workbook' => $type->id])
@@ -335,6 +394,63 @@ class DataSuratController extends Controller
                 'pdf_content' => $pdfContent,
                 'used_at' => $slot->used_at ?? now(),
             ]);
+
+            if ($slot->linked_letter_id) {
+                $linkedLetter = Letter::find($slot->linked_letter_id);
+                if ($linkedLetter) {
+                    $linkedLetter->update([
+                        'letter_number' => $numberText,
+                        'sender_unit' => $validated['processing_unit_text'],
+                        'sender_name' => $validated['signatory'] ?: $linkedLetter->sender_name,
+                        'subject' => $validated['subject'],
+                        'letter_date' => $letterDate,
+                        'received_date' => $validated['incoming_date'],
+                        'archive_classification_code' => $classificationCode,
+                        'signatory_name' => $validated['signatory'],
+                        'technical_officer' => $validated['technical_officer'] ?? null,
+                        'destination' => $validated['destination'] ?? null,
+                        'attachment_path' => $attachmentPath ?: $linkedLetter->attachment_path,
+                        'pdf_content' => $pdfContent ?: $linkedLetter->pdf_content,
+                    ]);
+                }
+            } else {
+                $letter = Letter::create([
+                    'tracking_code' => LetterNumberService::generateTrackingCode($type->type_code),
+                    'agenda_number' => LetterNumberService::nextAgendaNumber('out'),
+                    'letter_number' => $numberText,
+                    'letter_number_type_id' => $type->id,
+                    'letter_type' => 'out',
+                    'process_lane' => 'signature',
+                    'sender_unit' => $validated['processing_unit_text'],
+                    'sender_name' => $validated['signatory'] ?: 'Arsiparis',
+                    'subject' => $validated['subject'],
+                    'letter_date' => $letterDate,
+                    'received_date' => $validated['incoming_date'],
+                    'priority' => 'Biasa',
+                    'security_level' => $securityAccess ?: 'Biasa',
+                    'status' => 'Dokumen Diterima dan Diinput',
+                    'current_position' => 'Arsiparis',
+                    'archive_classification_code' => $classificationCode,
+                    'signatory_name' => $validated['signatory'],
+                    'technical_officer' => $validated['technical_officer'] ?? null,
+                    'destination' => $validated['destination'] ?? null,
+                    'attachment_path' => $attachmentPath,
+                    'pdf_content' => $pdfContent,
+                    'letter_source' => 'Manual',
+                    'created_by' => Auth::id(),
+                ]);
+
+                LetterStatusLog::create([
+                    'letter_id' => $letter->id,
+                    'status' => 'Dokumen Diterima dan Diinput',
+                    'position' => 'Arsiparis',
+                    'note' => 'Dokumen baru dicatat ke sistem SiTrack dari Data Surat.',
+                    'changed_by' => Auth::user()?->name ?: 'Admin',
+                    'changed_at' => now(),
+                ]);
+
+                $slot->update(['linked_letter_id' => $letter->id]);
+            }
 
             DB::commit();
 

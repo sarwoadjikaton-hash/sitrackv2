@@ -219,18 +219,73 @@ class LetterAvailabilityController extends Controller
                     throw new RuntimeException('Gagal! Sebagian atau seluruh nomor dalam rentang sudah terpakai/direservasi.');
                 }
 
-                LetterNumber::where('type_id', $typeId)
-                    ->where('number_year', $year)
-                    ->whereBetween('sequence_number', [$start, $end])
-                    ->where('status', 'available')
-                    ->update([
-                        'status' => 'reserved',
-                        'unit_id' => $unitId,
-                        'processing_unit_text' => $unitText,
-                        'reserved_for' => $picName,
-                        'letter_date' => $letterDate,
-                        'reserved_at' => now(),
+                $status = ($purpose === 'preorder') ? 'preorder' : 'reserved';
+                $senderUnit = $unitText ?: ($unitId ? Unit::find($unitId)?->unit_name : null);
+                $senderName = $picName ?: 'Pemohon';
+                $monthNumber = $letterDate ? (int) date('n', strtotime($letterDate)) : (int) date('n');
+
+                for ($n = $start; $n <= $end; $n++) {
+                    $numberText = LetterNumberService::buildNumberText($type, [
+                        'sequence_number' => $n,
+                        'number_year' => $year,
+                        'signer_code' => $signerCode,
+                        'month_number' => $monthNumber,
                     ]);
+
+                    $trackingCode = LetterNumberService::generateTrackingCode($type->type_code);
+                    $agendaNumber = LetterNumberService::nextAgendaNumber('out');
+                    $letterSubject = $notes ?: ($purpose === 'preorder' ? "Pre-Order Naskah ({$type->type_name})" : "Reservasi Naskah ({$type->type_name})");
+
+                    $letter = Letter::create([
+                        'tracking_code' => $trackingCode,
+                        'agenda_number' => $agendaNumber,
+                        'letter_number' => $numberText,
+                        'letter_number_type_id' => $type->id,
+                        'letter_type' => 'out',
+                        'process_lane' => 'signature',
+                        'sender_unit' => $senderUnit,
+                        'sender_name' => $senderName,
+                        'subject' => $letterSubject,
+                        'letter_date' => $letterDate ?: now()->toDateString(),
+                        'received_date' => $periodDate ?: now()->toDateString(),
+                        'priority' => 'Biasa',
+                        'security_level' => 'Biasa',
+                        'status' => 'Dokumen Diterima dan Diinput',
+                        'current_position' => 'Arsiparis',
+                        'notes' => $notes,
+                        'letter_source' => 'Manual',
+                        'created_by' => $userId,
+                    ]);
+
+                    LetterStatusLog::create([
+                        'letter_id' => $letter->id,
+                        'status' => 'Dokumen Diterima dan Diinput',
+                        'position' => 'Arsiparis',
+                        'note' => $purpose === 'preorder'
+                            ? "Pre-Order nomor surat ({$numberText}) dialokasikan dari Ketersediaan Nomor."
+                            : "Reservasi nomor surat ({$numberText}) dialokasikan dari Ketersediaan Nomor.",
+                        'changed_by' => Auth::user()?->name ?: 'Admin',
+                        'changed_at' => now(),
+                    ]);
+
+                    LetterNumber::where('type_id', $typeId)
+                        ->where('number_year', $year)
+                        ->where('sequence_number', $n)
+                        ->update([
+                            'status' => $status,
+                            'number_text' => $numberText,
+                            'unit_id' => $unitId,
+                            'processing_unit_text' => $senderUnit,
+                            'reserved_for' => $picName,
+                            'letter_date' => $letterDate,
+                            'incoming_date' => $periodDate ?: now()->toDateString(),
+                            'subject' => $letterSubject,
+                            'signer_code' => $signerCode,
+                            'month_number' => $monthNumber,
+                            'linked_letter_id' => $letter->id,
+                            'reserved_at' => now(),
+                        ]);
+                }
 
                 LetterNumberAvailabilityBatch::create([
                     'type_id' => $typeId,
@@ -241,7 +296,7 @@ class LetterAvailabilityController extends Controller
                     'period_month' => $periodDate,
                     'letter_date' => $letterDate,
                     'unit_id' => $unitId,
-                    'unit_text' => $unitText,
+                    'unit_text' => $senderUnit,
                     'pic_name' => $picName,
                     'status' => 'active',
                     'notes' => $notes,
@@ -285,18 +340,28 @@ class LetterAvailabilityController extends Controller
                     ->where('status', 'available')
                     ->delete();
             } else {
-                LetterNumber::where('type_id', $batch->type_id)
+                $slots = LetterNumber::where('type_id', $batch->type_id)
                     ->where('number_year', $batch->number_year)
                     ->whereBetween('sequence_number', [$batch->start_sequence, $batch->end_sequence])
-                    ->where('status', 'reserved')
-                    ->update([
+                    ->whereIn('status', ['reserved', 'preorder'])
+                    ->get();
+
+                foreach ($slots as $slot) {
+                    if ($slot->linked_letter_id) {
+                        Letter::find($slot->linked_letter_id)?->delete();
+                    }
+                    $slot->update([
                         'status' => 'available',
                         'unit_id' => null,
                         'processing_unit_text' => null,
                         'reserved_for' => null,
                         'letter_date' => null,
                         'reserved_at' => null,
+                        'number_text' => null,
+                        'subject' => null,
+                        'linked_letter_id' => null,
                     ]);
+                }
             }
 
             $typeId = $batch->type_id;

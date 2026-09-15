@@ -6,6 +6,7 @@ use App\Models\Letter;
 use App\Models\LetterNumber;
 use App\Models\LetterNumberAvailabilityBatch;
 use App\Models\LetterNumberType;
+use App\Models\LetterStatusLog;
 use App\Models\Unit;
 use App\Services\LetterNumberService;
 use Illuminate\Support\Facades\Auth;
@@ -307,28 +308,47 @@ class DataSuratImport
                 );
             }
 
-            if ($isUsed && !$letterNumber->linked_letter_id) {
+            if ($status !== 'available' && !$letterNumber->linked_letter_id) {
+                $letterNum = $letterNumber->number_text ?: LetterNumberService::buildNumberText($type, [
+                    'sequence_number' => $sequence,
+                    'number_year' => $year,
+                    'signer_code' => $type->default_signer_code ?: '1',
+                    'month_number' => $monthNumber,
+                ]);
+
+                $letterSubject = $letterNumber->subject ?: ($status === 'preorder' ? "Pre-Order Naskah ({$type->type_name})" : ($status === 'reserved' ? "Reservasi Naskah ({$type->type_name})" : '-'));
+
                 $letter = Letter::create([
                     'tracking_code' => LetterNumberService::generateTrackingCode($type->type_code),
                     'agenda_number' => LetterNumberService::nextAgendaNumber('out'),
-                    'letter_number' => $letterNumber->number_text,
+                    'letter_number' => $letterNum,
                     'letter_number_type_id' => $type->id,
                     'letter_type' => 'out',
                     'process_lane' => 'signature',
                     'sender_unit' => $letterNumber->processing_unit_text,
-                    'sender_name' => $letterNumber->signatory ?: '-',
-                    'subject' => $letterNumber->subject ?: '-',
+                    'sender_name' => $letterNumber->signatory ?: $letterNumber->reserved_for ?: 'Arsiparis',
+                    'subject' => $letterSubject,
                     'letter_date' => $letterNumber->letter_date,
                     'received_date' => $letterNumber->incoming_date,
-                    'priority' => 'normal',
-                    'security_level' => $letterNumber->security_access ?: 'B',
+                    'priority' => 'Biasa',
+                    'security_level' => $letterNumber->security_access ?: 'Biasa',
                     'status' => 'Dokumen Diterima dan Diinput',
                     'current_position' => 'Arsiparis',
                     'archive_classification_code' => $letterNumber->classification_code,
                     'signatory_name' => $letterNumber->signatory,
                     'technical_officer' => $letterNumber->technical_officer,
-                    'letter_source' => 'Manual',
+                    'destination' => $letterNumber->destination,
+                    'letter_source' => 'Import Excel',
                     'created_by' => Auth::id(),
+                ]);
+
+                LetterStatusLog::create([
+                    'letter_id' => $letter->id,
+                    'status' => 'Dokumen Diterima dan Diinput',
+                    'position' => 'Arsiparis',
+                    'note' => 'Data surat diimpor dari file Excel.',
+                    'changed_by' => Auth::user()?->name ?: 'Admin',
+                    'changed_at' => now(),
                 ]);
 
                 $letterNumber->update(['linked_letter_id' => $letter->id]);
