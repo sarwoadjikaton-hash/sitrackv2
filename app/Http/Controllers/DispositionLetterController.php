@@ -116,7 +116,10 @@ class DispositionLetterController extends Controller
 
             // Initial Disposition fields (optional)
             'instruction' => ['nullable', 'string'],
-            'to_unit_id' => ['nullable', 'exists:units,id'],
+            'to_unit_ids' => ['nullable', 'array'],
+            'to_unit_ids.*' => ['exists:units,id'],
+            'to_unit_id' => ['nullable', 'exists:units,id'], // fallback
+            'koordinator_unit_id' => ['nullable', 'exists:units,id'],
             'to_name' => ['nullable', 'string', 'max:150'],
             'due_date' => ['nullable', 'date'],
             'is_koordinator' => ['nullable', 'boolean'],
@@ -129,7 +132,20 @@ class DispositionLetterController extends Controller
         }
 
         $instruction = trim((string) ($validated['instruction'] ?? ''));
-        $toUnit = !empty($validated['to_unit_id']) ? Unit::find($validated['to_unit_id']) : null;
+        
+        $toUnitIds = $validated['to_unit_ids'] ?? [];
+        if (empty($toUnitIds) && !empty($validated['to_unit_id'])) {
+            $toUnitIds = [$validated['to_unit_id']];
+        }
+
+        $koordinatorId = $validated['koordinator_unit_id'] ?? null;
+        if ($koordinatorId && !in_array($koordinatorId, $toUnitIds, true)) {
+            $koordinatorId = null;
+        }
+
+        $units = !empty($toUnitIds) ? Unit::whereIn('id', $toUnitIds)->get()->keyBy('id') : collect();
+        $unitNamesList = collect($toUnitIds)->map(fn($uid) => $units->get($uid)?->unit_name)->filter()->values();
+
         $userId = Auth::id();
         $userName = Auth::user()->name ?: Auth::user()->username;
 
@@ -145,15 +161,20 @@ class DispositionLetterController extends Controller
                 $agendaNumber = LetterNumberService::nextAgendaNumber('in');
             }
 
-            $status = $instruction !== '' ? 'Didisposisikan' : 'Diajukan ke Sekjen';
-            if ($instruction !== '') {
-                $position = $toUnit?->unit_name ?: 'Penerima Disposisi';
-                if (!empty($validated['to_name'])) {
-                    $position .= ' (a.n. ' . $validated['to_name'] . ')';
-                }
-            } else {
-                $position = 'Sekretaris Jenderal';
+            $targetName = 'Penerima Disposisi';
+            if ($koordinatorId && $units->has($koordinatorId)) {
+                $targetName = $units->get($koordinatorId)->unit_name . ' (Koordinator)';
+            } elseif ($unitNamesList->isNotEmpty()) {
+                $targetName = $unitNamesList->implode(', ');
             }
+
+            if (!empty($validated['to_name'])) {
+                $targetName .= ' (a.n. ' . $validated['to_name'] . ')';
+            }
+
+            $hasDisposition = $instruction !== '' || !empty($toUnitIds);
+            $status = $hasDisposition ? 'Didisposisikan' : 'Diajukan ke Sekjen';
+            $position = $hasDisposition ? $targetName : 'Sekretaris Jenderal';
 
             $letter = Letter::create([
                 'tracking_code' => $trackingCode,
@@ -178,19 +199,21 @@ class DispositionLetterController extends Controller
                 'created_by' => $userId,
             ]);
 
-            if ($instruction !== '') {
-                Disposition::create([
-                    'letter_id' => $letter->id,
-                    'from_name' => 'Sekretaris Jenderal',
-                    'to_unit_id' => $validated['to_unit_id'] ?: null,
-                    'to_name' => $validated['to_name'] ?? null,
-                    'instruction' => $instruction,
-                    'due_date' => $validated['due_date'] ?? null,
-                    'status' => 'Didisposisikan',
-                    'is_koordinator' => !empty($validated['is_koordinator']),
-                    'created_by' => $userId,
-                    'disposition_date' => now(),
-                ]);
+            if ($hasDisposition) {
+                foreach ($toUnitIds as $unitId) {
+                    Disposition::create([
+                        'letter_id' => $letter->id,
+                        'from_name' => 'Sekretaris Jenderal',
+                        'to_unit_id' => $unitId,
+                        'to_name' => $validated['to_name'] ?? null,
+                        'instruction' => $instruction !== '' ? $instruction : 'Mohon ditindaklanjuti sesuai ketentuan.',
+                        'due_date' => $validated['due_date'] ?? null,
+                        'status' => 'Didisposisikan',
+                        'is_koordinator' => $koordinatorId !== null && (int) $unitId === (int) $koordinatorId,
+                        'created_by' => $userId,
+                        'disposition_date' => now(),
+                    ]);
+                }
             }
 
             LetterStatusLog::create([
@@ -202,12 +225,13 @@ class DispositionLetterController extends Controller
                 'changed_at' => now(),
             ]);
 
-            if ($instruction !== '') {
+            if ($hasDisposition) {
+                $koorLabel = $koordinatorId ? " [Koordinator: {$units->get($koordinatorId)?->unit_name}]" : '';
                 LetterStatusLog::create([
                     'letter_id' => $letter->id,
                     'status' => $status,
                     'position' => $position,
-                    'note' => 'Disposisi awal dicatat: ' . substr($instruction, 0, 100),
+                    'note' => "Disposisi awal dicatat ke {$unitNamesList->count()} unit{$koorLabel}: " . substr($instruction, 0, 100),
                     'changed_by' => $userName,
                     'changed_at' => now()->addSecond(),
                 ]);
