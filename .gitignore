@@ -1,22 +1,6 @@
 # Environment
 .env
 .env.*
-!.env.example
-
-# Logs
-*.log
-logs/
-
-# Temporary
-tmp/
-temp/
-cache/
-
-# Upload runtime
-uploads/*
-!uploads/.gitkeep
-
-# IDE
 .vscode/
 .idea/
 

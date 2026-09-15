@@ -44,6 +44,14 @@ COPY . .
 # Ambil hasil build Vite dari stage 1
 COPY --from=assets /app/public/build ./public/build
 
+RUN mkdir -p \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs \
+    bootstrap/cache \
+    && chmod -R 777 storage bootstrap/cache
+
 RUN composer install \
     --prefer-dist \
     --no-interaction \
@@ -55,13 +63,7 @@ COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-RUN mkdir -p \
-    storage/framework/cache \
-    storage/framework/sessions \
-    storage/framework/views \
-    storage/logs \
-    bootstrap/cache \
-    && chown -R www-data:www-data storage bootstrap/cache \
+RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R ug+rwX storage bootstrap/cache
 
 EXPOSE 9000
