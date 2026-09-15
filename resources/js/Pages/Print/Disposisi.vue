@@ -143,10 +143,6 @@ const toggleAction = (actionName: string) => {
         selectedActions.value.push(actionName);
     }
 };
-
-// Custom unit line
-const customUnit = ref('');
-const isCustomUnitChecked = ref(false);
 </script>
 
 <template>
@@ -260,24 +256,6 @@ const isCustomUnitChecked = ref(false);
                             <span v-if="isUnitChecked(u)">✓</span>
                         </div>
                         <span class="unit-name">{{ u }}</span>
-                    </div>
-
-                    <!-- Custom / Other Unit -->
-                    <div class="unit-row d-flex align-items-center mt-1" @click.stop>
-                        <div
-                            class="custom-checkbox me-2"
-                            :class="{ 'checked': isCustomUnitChecked }"
-                            @click="isCustomUnitChecked = !isCustomUnitChecked"
-                        >
-                            <span v-if="isCustomUnitChecked">✓</span>
-                        </div>
-                        <div
-                            class="unit-name flex-grow-1 border-bottom border-secondary border-dotted custom-unit-input"
-                            contenteditable="true"
-                            placeholder="..........................................................................."
-                        >
-                            {{ customUnit }}
-                        </div>
                     </div>
                 </div>
 
@@ -408,9 +386,8 @@ const isCustomUnitChecked = ref(false);
 
 /* --- KOP SURAT --- */
 .kop-header {
-    border-bottom: 2px solid black;
-    padding-bottom: 8px;
-    margin-bottom: 10px;
+    padding-bottom: 4px;
+    margin-bottom: 12px;
 }
 
 .logo-text {
