@@ -47,7 +47,7 @@ const leftColumnUnits = [
     'Staf Ahli Menteri Bidang Ekonomi Ketenagakerjaan',
     'Staf Ahli Menteri Bidang Hubungan Internasional',
     'Staf Ahli Menteri Bidang Hubungan Antarlembaga',
-    'Staf Ahli Menteri Bidang Sosial, Politik dan Kebijakan Publik',
+    'Staff Ahli Menteri Sosial, Politik, dan Kebijakan Publik',
 ];
 
 const rightColumnUnits = [
@@ -178,35 +178,9 @@ const isCustomUnitChecked = ref(false);
     <div class="print-container shadow-lg my-4">
         <!-- HEADER KOP SURAT KEMNAKER -->
         <div class="kop-header d-flex align-items-center mb-2">
-            <div class="logo-box me-3">
-                <!-- Kemnaker Emblem SVG -->
-                <svg width="65" height="65" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- 9 petals / gear emblem of Kemnaker -->
-                    <g fill="#1a365d">
-                        <circle cx="50" cy="50" r="14" fill="#0f172a" />
-                        <!-- 9 stylized rounded segments in circle -->
-                        <path d="M47 8 C47 5 53 5 53 8 L54 28 C54 30 46 30 46 28 Z" fill="#1e3a8a" />
-                        <path d="M47 8 C47 5 53 5 53 8 L54 28 C54 30 46 30 46 28 Z" fill="#1e3a8a" transform="rotate(40 50 50)" />
-                        <path d="M47 8 C47 5 53 5 53 8 L54 28 C54 30 46 30 46 28 Z" fill="#1e3a8a" transform="rotate(80 50 50)" />
-                        <path d="M47 8 C47 5 53 5 53 8 L54 28 C54 30 46 30 46 28 Z" fill="#1e3a8a" transform="rotate(120 50 50)" />
-                        <path d="M47 8 C47 5 53 5 53 8 L54 28 C54 30 46 30 46 28 Z" fill="#1e3a8a" transform="rotate(160 50 50)" />
-                        <path d="M47 8 C47 5 53 5 53 8 L54 28 C54 30 46 30 46 28 Z" fill="#1e3a8a" transform="rotate(200 50 50)" />
-                        <path d="M47 8 C47 5 53 5 53 8 L54 28 C54 30 46 30 46 28 Z" fill="#1e3a8a" transform="rotate(240 50 50)" />
-                        <path d="M47 8 C47 5 53 5 53 8 L54 28 C54 30 46 30 46 28 Z" fill="#1e3a8a" transform="rotate(280 50 50)" />
-                        <path d="M47 8 C47 5 53 5 53 8 L54 28 C54 30 46 30 46 28 Z" fill="#1e3a8a" transform="rotate(320 50 50)" />
-                    </g>
-                    <!-- Outer Dots -->
-                    <circle cx="50" cy="5" r="3.5" fill="#0f172a" />
-                    <circle cx="50" cy="5" r="3.5" fill="#0f172a" transform="rotate(40 50 50)" />
-                    <circle cx="50" cy="5" r="3.5" fill="#0f172a" transform="rotate(80 50 50)" />
-                    <circle cx="50" cy="5" r="3.5" fill="#0f172a" transform="rotate(120 50 50)" />
-                    <circle cx="50" cy="5" r="3.5" fill="#0f172a" transform="rotate(160 50 50)" />
-                    <circle cx="50" cy="5" r="3.5" fill="#0f172a" transform="rotate(200 50 50)" />
-                    <circle cx="50" cy="5" r="3.5" fill="#0f172a" transform="rotate(240 50 50)" />
-                    <circle cx="50" cy="5" r="3.5" fill="#0f172a" transform="rotate(280 50 50)" />
-                    <circle cx="50" cy="5" r="3.5" fill="#0f172a" transform="rotate(320 50 50)" />
-                </svg>
-                <div class="logo-text text-center fw-bold">KEMNAKER</div>
+            <div class="logo-box me-3 text-center" style="min-width: 70px;">
+                <img src="/images/kemnaker_logo.png" alt="KEMNAKER" width="56" height="56" class="d-block mx-auto" />
+                <div class="logo-text text-center fw-bold mt-1">KEMNAKER</div>
             </div>
             <div class="header-titles flex-grow-1 text-center pe-5">
                 <div class="instansi-name fw-bold">KEMENTERIAN KETENAGAKERJAAN REPUBLIK INDONESIA</div>

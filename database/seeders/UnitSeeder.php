@@ -22,7 +22,7 @@ class UnitSeeder extends Seeder
             'Staf Ahli Menteri Bidang Ekonomi Ketenagakerjaan',
             'Staf Ahli Menteri Bidang Hubungan Internasional',
             'Staf Ahli Menteri Bidang Hubungan Antarlembaga',
-            'Staf Ahli Menteri Bidang Sosial, Politik dan Kebijakan Publik',
+            'Staff Ahli Menteri Sosial, Politik, dan Kebijakan Publik',
             'PPSDM Ketenagakerjaan',
             'Pusat Pasar Kerja',
             'Biro Perencanaan & Manj. Kinerja',
