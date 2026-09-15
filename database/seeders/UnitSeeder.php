@@ -13,18 +13,18 @@ class UnitSeeder extends Seeder
     public function run(): void
     {
         $targetUnits = [
-            'Direktorat Jendral Pembinaan Pelatihan Vokasi & Produktivitas',
-            'Direktorat Jendral Pembinaan Penempatan Tenaga Kerja & PKK',
-            'Direktorat Jendral Pembinaan Hubungan Industrial & Jamsosnaker',
-            'Direktorat Jendral Pembinaan Pengawasan Ketenagakerjaan & K3',
-            'Inspektorat Jendral',
+            'Direktorat Jenderal Pembinaan Pelatihan Vokasi & Produktivitas',
+            'Direktorat Jenderal Pembinaan Penempatan Tenaga Kerja & PKK',
+            'Direktorat Jenderal Pembinaan Hubungan Industrial & Jamsosnaker',
+            'Direktorat Jenderal Pembinaan Pengawasan Ketenagakerjaan & K3',
+            'Inspektorat Jenderal',
             'Badan Perencanaan Pengembangan Ketenagakerjaan',
-            'Staff Ahli Menteri Bidang Ekonomi Ketenagakerjaan',
-            'Staff Ahli Menteri Bidang Hubungan Internasional',
-            'Staff Ahli Menteri Bidang Hubungan Antarlembaga',
-            'Politeknik Ketenagakerjaan',
-            'Pusat Pasar Kerja',
+            'Staf Ahli Menteri Bidang Ekonomi Ketenagakerjaan',
+            'Staf Ahli Menteri Bidang Hubungan Internasional',
+            'Staf Ahli Menteri Bidang Hubungan Antarlembaga',
+            'Staf Ahli Menteri Bidang Sosial, Politik dan Kebijakan Publik',
             'PPSDM Ketenagakerjaan',
+            'Pusat Pasar Kerja',
             'Biro Perencanaan & Manj. Kinerja',
             'Biro Keuangan & BMN',
             'Biro Organisasi & SDM Aparatur',
@@ -32,7 +32,9 @@ class UnitSeeder extends Seeder
             'Biro Umum',
             'Biro Kerja Sama',
             'Biro Hubungan Masyarakat',
-            'Subbagian TU Sekjen, SAM, dan SKM',
+            'Politeknik Ketenagakerjaan',
+            'Bagian TU Pimpinan dan Protokol',
+            'Subbagian TU Sekjen, SAM dan SKM',
         ];
 
         // Deactivate units not in the list

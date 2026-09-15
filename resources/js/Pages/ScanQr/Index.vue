@@ -183,7 +183,7 @@ onUnmounted(() => {
                     <form @submit.prevent="submitUpdate">
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold small">STAtus BARU</label>
+                                <label class="form-label fw-bold small">STATUS BARU</label>
                                 <select v-model="form.status" class="form-select" required>
                                     <option v-for="s in allowedStatuses" :key="s" :value="s">{{ s }}</option>
                                 </select>
