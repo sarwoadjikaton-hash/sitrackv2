@@ -278,13 +278,13 @@ const toggleAction = (actionName: string) => {
             <!-- LAJUR DISPOSISI & CATATAN + TTD (BOTTOM SECTION) -->
             <div class="bottom-section d-flex border-top border-dark">
                 <!-- LAJUR DISPOSISI (KIRI: 2 SUB-KOLOM CHECKBOX) -->
-                <div class="lajur-box border-end border-dark p-2" style="width: 53%;">
+                <div class="lajur-box border-end border-dark p-2" style="width: 52%;">
                     <div class="lajur-header text-center fw-bold border-bottom border-dark pb-1 mb-2">
                         LAJUR DISPOSISI
                     </div>
                     <div class="d-flex">
                         <!-- Sub Kolom 1 -->
-                        <div class="lajur-subcol flex-fill pe-1 border-end border-dark">
+                        <div class="lajur-subcol flex-fill pe-2 border-end border-dark">
                             <div
                                 v-for="act in lajurActionsLeft"
                                 :key="act"
@@ -316,26 +316,27 @@ const toggleAction = (actionName: string) => {
                 </div>
 
                 <!-- CATATAN & TANDA TANGAN (KANAN) -->
-                <div class="notes-box flex-fill d-flex flex-column justify-content-between p-2">
-                    <div>
-                        <div class="notes-header fw-bold mb-1">Catatan</div>
+                <div class="notes-and-signature-col flex-fill d-flex flex-column">
+                    <!-- KOTAK CATATAN (ATAS) -->
+                    <div class="notes-box p-2 flex-grow-1">
+                        <div class="notes-header text-center fw-bold mb-1">Catatan</div>
                         <div
                             class="notes-content"
                             contenteditable="true"
-                            style="min-height: 120px; font-size: 13px; line-height: 1.4;"
+                            style="min-height: 80px; font-size: 13px; line-height: 1.4;"
                         >
                             {{ letter.notes || letter.dispositions?.[0]?.instruction || '' }}
                         </div>
                     </div>
 
-                    <!-- Pejabat Penandatangan -->
-                    <div class="signature-section text-center mt-3 pt-2">
-                        <div class="fw-bold mb-4" style="font-size: 13px;">Sekretaris Jenderal,</div>
-                        <div class="signature-space" style="height: 45px;"></div>
-                        <div class="pejabat-name fw-bold text-decoration-underline" style="font-size: 13px;">
+                    <!-- KOTAK PEJABAT PENANDATANGAN (BAWAH) -->
+                    <div class="signature-box border-top border-dark p-2 text-center">
+                        <div class="fw-bold mb-1" style="font-size: 13px;">Sekretaris Jenderal,</div>
+                        <div class="signature-space" style="height: 50px;"></div>
+                        <div class="pejabat-name fw-bold" style="font-size: 13px;">
                             Dr. Cris Kuntadi, S.E., M.M.
                         </div>
-                        <div class="pejabat-nip" style="font-size: 12px;">
+                        <div class="pejabat-nip fw-bold" style="font-size: 12px;">
                             NIP 19690624 199003 1 004
                         </div>
                     </div>
