@@ -286,27 +286,11 @@ class DataSuratImport
             'created_by' => Auth::id(),
         ];
 
-        $isCurrentMonth = $letterDate
-            && \Carbon\Carbon::parse($letterDate)->format('Y-m') === now()->format('Y-m');
-
-        DB::transaction(function () use ($type, $year, $sequence, $payload, $isCurrentMonth, $isUsed) {
-            if ($isCurrentMonth && $isUsed) {
-                $existing = LetterNumber::where('type_id', $type->id)
-                    ->where('number_year', $year)
-                    ->where('sequence_number', $sequence)
-                    ->first();
-
-                if (!$existing || !in_array($existing->status, ['available', 'reserved'])) {
-                    throw new \RuntimeException("Nomor urut {$sequence} untuk bulan berjalan belum tersedia di stok Ketersediaan Nomor.");
-                }
-
-                $letterNumber = tap($existing)->update($payload);
-            } else {
-                $letterNumber = LetterNumber::updateOrCreate(
-                    ['type_id' => $type->id, 'number_year' => $year, 'sequence_number' => $sequence],
-                    array_merge($payload, ['signer_code' => $type->default_signer_code ?: '1'])
-                );
-            }
+        DB::transaction(function () use ($type, $year, $sequence, $payload, $status, $monthNumber) {
+            $letterNumber = LetterNumber::updateOrCreate(
+                ['type_id' => $type->id, 'number_year' => $year, 'sequence_number' => $sequence],
+                array_merge($payload, ['signer_code' => $type->default_signer_code ?: '1'])
+            );
 
             if ($status !== 'available' && !$letterNumber->linked_letter_id) {
                 $letterNum = $letterNumber->number_text ?: LetterNumberService::buildNumberText($type, [
@@ -317,27 +301,28 @@ class DataSuratImport
                 ]);
 
                 $letterSubject = $letterNumber->subject ?: ($status === 'preorder' ? "Pre-Order Naskah ({$type->type_name})" : ($status === 'reserved' ? "Reservasi Naskah ({$type->type_name})" : '-'));
+                $senderName = $letterNumber->signatory ?: $letterNumber->reserved_for ?: 'Arsiparis';
 
                 $letter = Letter::create([
                     'tracking_code' => LetterNumberService::generateTrackingCode($type->type_code),
                     'agenda_number' => LetterNumberService::nextAgendaNumber('out'),
-                    'letter_number' => $letterNum,
+                    'letter_number' => mb_substr($letterNum, 0, 150),
                     'letter_number_type_id' => $type->id,
                     'letter_type' => 'out',
                     'process_lane' => 'signature',
-                    'sender_unit' => $letterNumber->processing_unit_text,
-                    'sender_name' => $letterNumber->signatory ?: $letterNumber->reserved_for ?: 'Arsiparis',
+                    'sender_unit' => $letterNumber->processing_unit_text ? mb_substr($letterNumber->processing_unit_text, 0, 150) : null,
+                    'sender_name' => mb_substr($senderName, 0, 150),
                     'subject' => $letterSubject,
                     'letter_date' => $letterNumber->letter_date,
                     'received_date' => $letterNumber->incoming_date,
                     'priority' => 'Biasa',
-                    'security_level' => $letterNumber->security_access ?: 'Biasa',
+                    'security_level' => $letterNumber->security_access ? mb_substr($letterNumber->security_access, 0, 20) : 'Biasa',
                     'status' => 'Dokumen Diterima dan Diinput',
                     'current_position' => 'Arsiparis',
-                    'archive_classification_code' => $letterNumber->classification_code,
-                    'signatory_name' => $letterNumber->signatory,
-                    'technical_officer' => $letterNumber->technical_officer,
-                    'destination' => $letterNumber->destination,
+                    'archive_classification_code' => $letterNumber->classification_code ? mb_substr($letterNumber->classification_code, 0, 80) : null,
+                    'signatory_name' => $letterNumber->signatory ? mb_substr($letterNumber->signatory, 0, 150) : null,
+                    'technical_officer' => $letterNumber->technical_officer ? mb_substr($letterNumber->technical_officer, 0, 150) : null,
+                    'destination' => $letterNumber->destination ? mb_substr($letterNumber->destination, 0, 255) : null,
                     'letter_source' => 'Import Excel',
                     'created_by' => Auth::id(),
                 ]);
