@@ -3,7 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 
 const signatureSteps = [
-    { num: 1, title: 'Dokumen Diterima dan Diinput', desc: 'Surat dicatat oleh petugas TU, menerima Nomor Agenda dan Kode Resi Tracking.', role: 'Admin Operator' },
+    { num: 1, title: 'Pengajuan Berhasil', desc: 'Permohonan paraf diajukan oleh unit pengusul, menerima Nomor Agenda dan Kode Resi Tracking.', role: 'Unit Pengusul' },
     { num: 2, title: 'Diperiksa Arsiparis', desc: 'Verifikasi kelengkapan berkas, format naskah dinas, dan arsip pendukung.', role: 'Arsiparis' },
     { num: 3, title: 'Paraf Pengendalian Administrasi', desc: 'Pemeriksaan keabsahan redaksional dan paraf oleh Ktus / Subkoordinator.', role: 'Kasubbag / Ktus' },
     { num: 4, title: 'Proses Paraf/TTD Sekjen', desc: 'Penyampaian berkas ke meja pimpinan untuk penandatanganan resmi.', role: 'Sekretaris Jenderal' },

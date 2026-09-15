@@ -61,20 +61,50 @@ const handleSearch = () => {
                                     </div>
 
                                     <div class="meta-info-grid">
-                                        <div class="meta-box mb-4">
+                                        <div class="meta-box mb-3">
                                             <label>Kode Tracking</label>
-                                            <p class="fw-bold text-teal font-monospace fs-5">{{ letter.tracking_code }}
-                                            </p>
+                                            <p class="fw-bold text-teal font-monospace fs-5">{{ letter.tracking_code }}</p>
                                         </div>
-                                        <div class="meta-box mb-4">
-                                            <label>Posisi Sekarang</label>
+                                        <div class="meta-box mb-3">
+                                            <label>Posisi Berkas Sekarang</label>
                                             <p class="fw-bold text-dark"><i
                                                     class="bi bi-geo-alt-fill text-danger me-1"></i>{{
                                                         letter.current_position }}</p>
                                         </div>
-                                        <div class="meta-box">
-                                            <label>Pengirim</label>
-                                            <p class="text-dark">{{ letter.sender_unit || letter.sender_name }}</p>
+                                        <div class="meta-box mb-3">
+                                            <label>Unit Pengusul / Pengirim</label>
+                                            <p class="text-dark fw-semibold mb-0">{{ letter.sender_unit || letter.sender_name }}</p>
+                                            <small v-if="letter.sender_unit && letter.sender_name" class="text-muted">Oleh: {{ letter.sender_name }}</small>
+                                        </div>
+                                        <div v-if="letter.destination || letter.recipient_unit" class="meta-box mb-3">
+                                            <label>Unit Tujuan</label>
+                                            <p class="text-dark mb-0">{{ letter.destination || letter.recipient_unit?.unit_name }}</p>
+                                        </div>
+                                        <div class="meta-box mb-3">
+                                            <label>Nomor Surat</label>
+                                            <p v-if="letter.letter_number" class="fw-bold text-dark font-monospace mb-0">{{ letter.letter_number }}</p>
+                                            <p v-else class="text-muted fst-italic small mb-0"><i class="bi bi-hourglass-split me-1 text-warning"></i>Menunggu input Admin/TU</p>
+                                        </div>
+                                        <div v-if="letter.priority" class="meta-box mb-3">
+                                            <label>Sifat Naskah</label>
+                                            <p class="text-dark mb-0"><span class="badge bg-light text-dark border">{{ letter.priority }}</span></p>
+                                        </div>
+                                        <div v-if="letter.attachment_path" class="meta-box mb-3 p-3 rounded-3 border" style="background: #f8fafc;">
+                                            <label class="d-flex align-items-center gap-1 text-primary fw-bold mb-2">
+                                                <i class="bi bi-paperclip fs-6"></i> Lampiran Berkas Naskah
+                                            </label>
+                                            <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2">
+                                                <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                                    <i class="bi bi-file-earmark-text text-primary fs-4"></i>
+                                                    <span class="small text-truncate fw-semibold text-dark" style="max-width: 170px;" :title="letter.attachment_path.split('/').pop()">
+                                                        {{ letter.attachment_path.split('/').pop() }}
+                                                    </span>
+                                                </div>
+                                                <a :href="`/storage/${letter.attachment_path}`" target="_blank"
+                                                    class="btn btn-sm btn-primary-blue d-inline-flex align-items-center gap-1 px-3 py-1 text-nowrap">
+                                                    <i class="bi bi-eye"></i> Lihat / Unduh
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -93,6 +123,18 @@ const handleSearch = () => {
                                                 </div>
                                                 <div class="small text-teal fw-semibold mb-1">{{ log.position }}</div>
                                                 <p class="small text-muted mb-0">{{ log.note }}</p>
+                                                <div v-if="log.attachment_path" class="mt-2 p-2 rounded-2 bg-light border d-flex align-items-center justify-content-between gap-2">
+                                                    <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                                        <i class="bi bi-paperclip text-primary fs-5"></i>
+                                                        <span class="small text-truncate fw-semibold text-dark" style="max-width: 220px;" :title="log.attachment_name || log.attachment_path.split('/').pop()">
+                                                            {{ log.attachment_name || log.attachment_path.split('/').pop() }}
+                                                        </span>
+                                                    </div>
+                                                    <a :href="`/storage/${log.attachment_path}`" target="_blank"
+                                                        class="btn btn-sm btn-outline-primary py-1 px-2 text-nowrap d-inline-flex align-items-center gap-1 small">
+                                                        <i class="bi bi-eye"></i> Buka Lampiran
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

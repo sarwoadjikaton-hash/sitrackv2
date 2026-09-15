@@ -771,11 +771,16 @@ const deleteBatch = (id: number) => {
                 </dl>
             </div>
 
-            <div class="d-flex justify-content-between pt-3 border-top mt-3">
-                <button type="button" class="btn btn-outline-danger" @click="deleteNumber">
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-3">
+                <button type="button" class="btn btn-outline-danger btn-sm" @click="deleteNumber">
                     <i class="bi bi-trash me-1"></i> Hapus Nomor Ini
                 </button>
-                <button type="button" class="btn btn-secondary" @click="showDetailModal = false">Tutup</button>
+                <div class="d-flex gap-2">
+                    <a v-if="selectedNumber" :href="`/data-surat?workbook=${activeTypeId}&search=${selectedNumber.sequence_number}`" class="btn btn-primary-blue btn-sm">
+                        <i class="bi bi-pencil-square me-1"></i> Edit Data / Detail Surat
+                    </a>
+                    <button type="button" class="btn btn-secondary btn-sm" @click="showDetailModal = false">Tutup</button>
+                </div>
             </div>
         </Modal>
     </AppLayout>

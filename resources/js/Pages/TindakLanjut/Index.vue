@@ -35,17 +35,20 @@ const statusForm = useForm({
     current_position: '',
     requested_actions: [] as string[],
     note: '',
+    attachment: null as File | null,
 });
 
 const actionOptions = [
     'Mohon Paraf',
     'Mohon Tanda Tangan',
-    'Informasi',
-    'Aksi',
-    'Mohon Arahan',
-    'Mohon Keputusan',
-    'Mohon Persetujuan',
 ];
+
+const handleFileUpload = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+        statusForm.attachment = target.files[0];
+    }
+};
 
 const openStatusModal = (letter: Letter) => {
     // Guard tambahan: data dari SRIKANDI tidak boleh diubah progressnya dari sini
@@ -56,17 +59,20 @@ const openStatusModal = (letter: Letter) => {
     statusForm.current_position = letter.current_position;
     statusForm.requested_actions = letter.requested_actions ? letter.requested_actions.split(', ') : [];
     statusForm.note = '';
+    statusForm.attachment = null;
     showStatusModal.value = true;
 };
 
 const closeStatusModal = () => {
     showStatusModal.value = false;
     activeLetter.value = null;
+    statusForm.attachment = null;
 };
 
 const submitStatusUpdate = () => {
     if (!activeLetter.value) return;
     statusForm.post(`/tindak-lanjut/${activeLetter.value.id}/status`, {
+        forceFormData: true,
         onSuccess: () => closeStatusModal(),
     });
 };
@@ -97,9 +103,6 @@ const deleteLetter = (id: number) => {
             <div class="d-flex align-items-center gap-2">
                 <Link href="/scan-status" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-qr-code-scan me-1"></i> Update via QR
-                </Link>
-                <Link href="/tindak-lanjut/create" class="btn btn-sm btn-primary-blue">
-                    <i class="bi bi-plus-lg me-1"></i> Input TTD Baru
                 </Link>
             </div>
         </div>
@@ -256,6 +259,14 @@ const deleteLetter = (id: number) => {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Unggah / Perbarui Lampiran Naskah</label>
+                    <input type="file" class="form-control"
+                        accept=".pdf,.docx,.doc,.jpg,.jpeg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+                        @change="handleFileUpload" />
+                    <small class="text-muted">Maksimal 20 MB (Opsional, untuk menambahkan atau memperbarui file lampiran naskah)</small>
                 </div>
 
                 <div class="mb-3">

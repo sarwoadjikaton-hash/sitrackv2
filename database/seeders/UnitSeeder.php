@@ -12,25 +12,42 @@ class UnitSeeder extends Seeder
      */
     public function run(): void
     {
-        $units = [
-            ['unit_name' => 'Mentri Ketenagakerjaan', 'pic_name' => 'Tata Usaha Pimpinan', 'phone' => '081234567810', 'email' => 'tu.pimpinan@kemnaker.go.id', 'address' => 'Kementerian Ketenagakerjaan RI'],
-            ['unit_name' => 'Wakil Mentri Ketenagakerjaan', 'pic_name' => 'Tata Usaha Pimpinan', 'phone' => '081234567810', 'email' => 'tu.pimpinan@kemnaker.go.id', 'address' => 'Kementerian Ketenagakerjaan RI'],
-            ['unit_name' => 'Sekretariat Jenderal', 'pic_name' => 'Drs. H. Mulyadi, M.M.', 'phone' => '081234567809', 'email' => 'sekjen@kemnaker.go.id', 'address' => 'Kementerian Ketenagakerjaan RI'],
-            ['unit_name' => 'Inspektur Jendral', 'pic_name' => 'Inspektur Jendral', 'phone' => '081234567807', 'email' => 'irjen@kemnaker.go.id', 'address' => 'Kementerian Ketenagakerjaan RI'],
-            ['unit_name' => 'Biro Umum', 'pic_name' => 'Tata Usaha Biro Umum', 'phone' => '081234567805', 'email' => 'biro.umum@kemnaker.go.id', 'address' => 'Kementerian Ketenagakerjaan RI Gedung B Lantai 3'],
-            ['unit_name' => 'Biro Perencanaan', 'pic_name' => 'Tata Usaha Biro Perencanaan', 'phone' => '081234567806', 'email' => 'biro.perencanaan.adm@kemnaker.go.id', 'address' => 'Kementerian Ketenagakerjaan RI'],
-            ['unit_name' => 'Biro Keuangan', 'pic_name' => 'Tata Usaha Biro Keuangan', 'phone' => '081234567804', 'email' => 'biro.keuangan@kemnaker.go.id', 'address' => 'Kementerian Ketenagakerjaan RI'],
-            ['unit_name' => 'Biro Hukum', 'pic_name' => 'Tata Usaha Biro Hukum', 'phone' => '081234567803', 'email' => 'biro.hukum@kemnaker.go.id', 'address' => 'Kementerian Ketenagakerjaan RI'],
-            ['unit_name' => 'Biro Kerjasama', 'pic_name' => 'Tata Usaha Biro Kerjasama', 'phone' => '081234567802', 'email' => 'biro.kerjasama@kemnaker.go.id', 'address' => 'Kementerian Ketenagakerjaan RI'],
-            ['unit_name' => 'Biro OSDMA', 'pic_name' => 'Tata Usaha Biro OSDMA', 'phone' => '081234567805', 'email' => 'biro.osdma@kemnaker.go.id', 'address' => 'Kementerian Ketenagakerjaan RI'],
-            ['unit_name' => 'PPSDM', 'pic_name' => 'Tata Usaha PPSDM', 'phone' => '081234567808', 'email' => 'ppsdm@kemnaker.go.id', 'address' => 'Kementerian Ketenagakerjaan RI'],
-            ['unit_name' => 'Pusat Pasar Kerja', 'pic_name' => 'Tata Usaha Pusat Pasar Kerja', 'phone' => '081234567812', 'email' => 'pusatpasarkerja@kemnaker.go.id', 'address' => 'Kementerian Ketenagakerjaan RI'],
+        $targetUnits = [
+            'Direktorat Jendral Pembinaan Pelatihan Vokasi & Produktivitas',
+            'Direktorat Jendral Pembinaan Penempatan Tenaga Kerja & PKK',
+            'Direktorat Jendral Pembinaan Hubungan Industrial & Jamsosnaker',
+            'Direktorat Jendral Pembinaan Pengawasan Ketenagakerjaan & K3',
+            'Inspektorat Jendral',
+            'Badan Perencanaan Pengembangan Ketenagakerjaan',
+            'Staff Ahli Menteri Bidang Ekonomi Ketenagakerjaan',
+            'Staff Ahli Menteri Bidang Hubungan Internasional',
+            'Staff Ahli Menteri Bidang Hubungan Antarlembaga',
+            'Politeknik Ketenagakerjaan',
+            'Pusat Pasar Kerja',
+            'PPSDM Ketenagakerjaan',
+            'Biro Perencanaan & Manj. Kinerja',
+            'Biro Keuangan & BMN',
+            'Biro Organisasi & SDM Aparatur',
+            'Biro Hukum',
+            'Biro Umum',
+            'Biro Kerja Sama',
+            'Biro Hubungan Masyarakat',
+            'Subbagian TU Sekjen, SAM, dan SKM',
         ];
 
-        foreach ($units as $unit) {
+        // Deactivate units not in the list
+        Unit::whereNotIn('unit_name', $targetUnits)->update(['is_active' => false]);
+
+        foreach ($targetUnits as $unitName) {
             Unit::updateOrCreate(
-                ['unit_name' => $unit['unit_name']],
-                array_merge($unit, ['is_active' => true])
+                ['unit_name' => $unitName],
+                [
+                    'pic_name' => 'Tata Usaha ' . $unitName,
+                    'phone' => '081234567800',
+                    'email' => strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $unitName)) . '@kemnaker.go.id',
+                    'address' => 'Kementerian Ketenagakerjaan RI',
+                    'is_active' => true,
+                ]
             );
         }
     }

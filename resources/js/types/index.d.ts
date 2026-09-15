@@ -121,10 +121,11 @@ export interface Letter {
     sender_name?: string;
     sender_phone?: string;
     recipient_unit_id?: number;
+    destination?: string;
     subject: string;
     letter_date?: string;
     received_date?: string;
-    priority: 'urgent' | 'high' | 'normal' | 'low';
+    priority: string;
     security_level: string;
     status: string;
     current_position: string;
@@ -170,6 +171,8 @@ export interface LetterStatusLog {
     status: string;
     position?: string;
     note?: string;
+    attachment_path?: string | null;
+    attachment_name?: string | null;
     changed_by: string;
     changed_at: string;
 }

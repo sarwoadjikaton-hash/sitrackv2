@@ -90,33 +90,12 @@ const goBack = () => window.history.back();
                             <i class="bi" :class="isChecked('Mohon Paraf') ? 'bi-check-square-fill' : 'bi-square'"></i>
                             Mohon Paraf
                         </div>
-                        <div class="check-item" @click="toggleAction('Informasi')">
-                            <i class="bi" :class="isChecked('Informasi') ? 'bi-check-square-fill' : 'bi-square'"></i>
-                            Informasi
-                        </div>
-                        <div class="check-item" @click="toggleAction('Mohon Arahan')">
-                            <i class="bi" :class="isChecked('Mohon Arahan') ? 'bi-check-square-fill' : 'bi-square'"></i>
-                            Mohon Arahan
-                        </div>
-                        <div class="check-item" @click="toggleAction('Mohon Persetujuan')">
-                            <i class="bi"
-                                :class="isChecked('Mohon Persetujuan') ? 'bi-check-square-fill' : 'bi-square'"></i>
-                            Mohon Persetujuan
-                        </div>
                     </div>
                     <div class="col-6">
                         <div class="check-item" @click="toggleAction('Mohon Tanda Tangan')">
                             <i class="bi"
                                 :class="isChecked('Mohon Tanda Tangan') ? 'bi-check-square-fill' : 'bi-square'"></i>
                             Mohon Tanda Tangan
-                        </div>
-                        <div class="check-item" @click="toggleAction('Aksi')">
-                            <i class="bi" :class="isChecked('Aksi') ? 'bi-check-square-fill' : 'bi-square'"></i> Aksi
-                        </div>
-                        <div class="check-item" @click="toggleAction('Mohon KepuTUSan')">
-                            <i class="bi"
-                                :class="isChecked('Mohon KepuTUSan') ? 'bi-check-square-fill' : 'bi-square'"></i> Mohon
-                            KepuTUSan
                         </div>
                     </div>
                 </div>

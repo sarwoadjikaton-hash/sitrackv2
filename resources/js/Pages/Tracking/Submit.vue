@@ -1,78 +1,35 @@
 <script setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref, computed, watch } from 'vue';
+import { Head, useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
-import { LetterCategory, Unit, LetterNumberType, LetterNumber } from '@/types';
-import axios from 'axios';
+import { Unit, LetterNumberType } from '@/types';
 
 const props = defineProps<{
-    categories: LetterCategory[];
     units: Unit[];
     types: LetterNumberType[];
 }>();
 
-const selectedTypeId = ref(props.types[0]?.id || 1);
-const availableSlots = ref<LetterNumber[]>([]);
-const loadingSlots = ref(false);
-
 const form = useForm({
     sender_name: '',
     sender_phone: '',
-    recipient_unit_id: null as number | null,
-    category_id: null as number | null,
+    unit_id: null as number | null,
+    destination: '',
+    priority: 'Biasa',
+    type_id: (props.types[0]?.id || 1) as number,
     subject: '',
     letter_date: new Date().toISOString().substring(0, 10),
-    letter_number_id: '' as number | string,
     notes: '',
 });
 
-// Opsi untuk SearchableSelect (butuh format { value, label })
+// Opsi untuk Unit Pengusul (SearchableSelect)
 const unitOptions = computed(() =>
     props.units.map((u) => ({ value: u.id, label: u.unit_name }))
-);
-
-const categoryOptions = computed(() =>
-    props.categories.map((c) => ({ value: c.id, label: c.category_name }))
 );
 
 const typeOptions = computed(() =>
     props.types.map((t) => ({ value: t.id, label: t.workbook_name }))
 );
-
-const slotOptions = computed(() =>
-    availableSlots.value.map((slot) => ({
-        value: slot.id,
-        label: `Nomor Urut ${slot.sequence_number}`,
-    }))
-);
-
-const fetchSlots = async (typeId: number) => {
-    loadingSlots.value = true;
-    try {
-        const res = await axios.get('/data-surat/slots', {
-            params: { type_id: typeId, year: new Date().getFullYear() },
-        });
-        if (res.data.ok) {
-            availableSlots.value = res.data.items;
-            if (availableSlots.value.length > 0) {
-                form.letter_number_id = availableSlots.value[0].id;
-            } else {
-                form.letter_number_id = '';
-            }
-        }
-    } catch (e) {
-        console.error(e);
-    } finally {
-        loadingSlots.value = false;
-    }
-};
-
-fetchSlots(selectedTypeId.value);
-
-watch(selectedTypeId, (newVal) => {
-    if (newVal) fetchSlots(newVal as number);
-});
 
 const submit = () => {
     form.post('/ajukan-surat');
@@ -82,26 +39,26 @@ const submit = () => {
 <template>
     <PublicLayout>
 
-        <Head title="Pengajuan Surat Mandiri" />
+        <Head title="Permohonan Paraf Naskah Dinas" />
 
         <div class="container py-5">
             <div class="row justify-content-center">
-                <div class="col-lg-8">
+                <div class="col-lg-9">
                     <div class="st-card shadow-lg p-4 p-md-5 animate-card">
                         <div class="text-center mb-5">
                             <span
                                 class="badge-floating badge bg-info-subtle text-info px-3 py-2 rounded-pill fw-bold mb-3">
-                                <i class="bi bi-send-fill me-1"></i> Layanan Pengajuan Mandiri
+                                <i class="bi bi-pen-fill me-1"></i> Layanan Permohonan Paraf Naskah Dinas
                             </span>
-                            <h2 class="fw-bold text-dark mb-1">Pengajuan Surat & Permohonan</h2>
-                            <p class="text-muted small">Dapatkan kode tracking dan nomor naskah dinas resmi secara
-                                instan.</p>
+                            <h2 class="fw-bold text-dark mb-1">Permohonan Paraf & Tanda Tangan Naskah Dinas</h2>
+                            <p class="text-muted small">Lengkapi formulir permohonan paraf untuk registrasi naskah dinas dan perolehan nomor serta kode tracking resmi.</p>
                         </div>
 
                         <form @submit.prevent="submit">
                             <div class="row g-4 mb-4">
+                                <!-- 1. Identitas Pengirim & Kontak -->
                                 <div class="col-md-6 animate-field" style="--delay: 1">
-                                    <label class="form-label small fw-bold">Nama Lengkap Pengirim</label>
+                                    <label class="form-label small fw-bold">Nama Lengkap Pengirim / Pembawa</label>
                                     <input v-model="form.sender_name" type="text" class="form-control custom-input"
                                         placeholder="Nama lengkap Anda" required />
                                     <Transition name="fade-error">
@@ -120,53 +77,75 @@ const submit = () => {
                                     </Transition>
                                 </div>
 
+                                <!-- 2. Unit Pengusul & Sifat Naskah -->
                                 <div class="col-md-6 animate-field" style="--delay: 3">
-                                    <label class="form-label small fw-bold">Unit Tujuan</label>
-                                    <SearchableSelect v-model="form.recipient_unit_id" :options="unitOptions"
-                                        placeholder="-- Pilih Unit Tujuan --" />
+                                    <label class="form-label small fw-bold">Unit Pengusul</label>
+                                    <SearchableSelect v-model="form.unit_id" :options="unitOptions"
+                                        placeholder="-- Pilih Unit Pengusul --" />
+                                    <Transition name="fade-error">
+                                        <div v-if="form.errors.unit_id" class="text-danger small mt-1">{{
+                                            form.errors.unit_id }}</div>
+                                    </Transition>
                                 </div>
 
                                 <div class="col-md-6 animate-field" style="--delay: 4">
-                                    <label class="form-label small fw-bold">Kategori Naskah</label>
-                                    <SearchableSelect v-model="form.category_id" :options="categoryOptions"
-                                        placeholder="-- Pilih Kategori --" />
+                                    <label class="form-label small fw-bold">Sifat Naskah</label>
+                                    <select v-model="form.priority" class="form-select custom-input" required>
+                                        <option value="Biasa">Biasa</option>
+                                        <option value="Segera">Segera</option>
+                                    </select>
+                                    <Transition name="fade-error">
+                                        <div v-if="form.errors.priority" class="text-danger small mt-1">{{
+                                            form.errors.priority }}</div>
+                                    </Transition>
                                 </div>
 
-                                <div class="col-md-6 animate-field" style="--delay: 5">
+                                <!-- 3. Unit Tujuan & Jenis Naskah -->
+                                <div class="col-12 animate-field" style="--delay: 5">
+                                    <label class="form-label small fw-bold">Unit Tujuan</label>
+                                    <input v-model="form.destination" type="text" class="form-control custom-input"
+                                        placeholder="Contoh: Direktur Jenderal Pembinaan Hubungan Industrial dan Jaminan Sosial Tenaga Kerja" required />
+                                    <div class="form-text text-muted small mt-1">
+                                        <i class="bi bi-info-circle me-1 text-primary"></i>Ketik nama lengkap unit tujuan dan jangan gunakan singkatan.
+                                    </div>
+                                    <Transition name="fade-error">
+                                        <div v-if="form.errors.destination" class="text-danger small mt-1">{{
+                                            form.errors.destination }}</div>
+                                    </Transition>
+                                </div>
+
+                                <div class="col-12 animate-field" style="--delay: 6">
                                     <label class="form-label small fw-bold">Jenis Naskah</label>
-                                    <SearchableSelect v-model="selectedTypeId" :options="typeOptions" />
+                                    <SearchableSelect v-model="form.type_id" :options="typeOptions"
+                                        placeholder="-- Pilih Jenis Naskah --" />
+                                    <Transition name="fade-error">
+                                        <div v-if="form.errors.type_id" class="text-danger small mt-1">{{
+                                            form.errors.type_id }}</div>
+                                    </Transition>
                                 </div>
 
-                                <div class="col-md-6 animate-field" style="--delay: 6">
-                                    <label class="form-label small fw-bold">Alokasi Nomor Tersedia</label>
-                                    <SearchableSelect v-model="form.letter_number_id" :options="slotOptions"
-                                        :loading="loadingSlots" loading-text="Memuat slot..."
-                                        placeholder="-- Pilih Nomor Tersedia --"
-                                        empty-text="Tidak ada slot nomor tersedia" />
-                                </div>
-
-                                <div class="col-md-6 animate-field" style="--delay: 7">
-                                    <label class="form-label small fw-bold">Tanggal Surat</label>
-                                    <input v-model="form.letter_date" type="date" class="form-control custom-input" />
+                                <!-- 4. Perihal & Keterangan -->
+                                <div class="col-12 animate-field" style="--delay: 7">
+                                    <label class="form-label small fw-bold">Perihal Naskah Dinas</label>
+                                    <textarea v-model="form.subject" class="form-control custom-input" rows="3"
+                                        placeholder="Tuliskan perihal surat / naskah dinas permohonan paraf secara lengkap..." required></textarea>
+                                    <Transition name="fade-error">
+                                        <div v-if="form.errors.subject" class="text-danger small mt-1">{{
+                                            form.errors.subject }}</div>
+                                    </Transition>
                                 </div>
 
                                 <div class="col-12 animate-field" style="--delay: 8">
-                                    <label class="form-label small fw-bold">Perihal Naskah</label>
-                                    <textarea v-model="form.subject" class="form-control custom-input" rows="3"
-                                        placeholder="Tuliskan perihal surat Anda..." required></textarea>
-                                </div>
-
-                                <div class="col-12 animate-field" style="--delay: 9">
-                                    <label class="form-label small fw-bold">Keterangan Tambahan</label>
+                                    <label class="form-label small fw-bold">Keterangan Tambahan / Catatan Khusus</label>
                                     <textarea v-model="form.notes" class="form-control custom-input" rows="2"
-                                        placeholder="Catatan pengantar berkas..."></textarea>
+                                         placeholder="Catatan pengantar berkas atau instruksi tambahan..."></textarea>
                                 </div>
                             </div>
 
                             <button type="submit" class="btn btn-submit-track w-100 py-3" :disabled="form.processing">
                                 <span v-if="form.processing" class="spinner-border spinner-border-sm me-2"></span>
                                 <i v-else class="bi bi-send-check-fill me-2"></i>
-                                Kirim Pengajuan Surat
+                                Kirim Permohonan Paraf Naskah Dinas
                             </button>
                         </form>
                     </div>
@@ -177,7 +156,6 @@ const submit = () => {
 </template>
 
 <style scoped>
-/* Animasi tetap sama seperti sebelumnya */
 .animate-card {
     animation: fadeInUp 0.8s ease-out forwards;
 }
@@ -186,8 +164,8 @@ const submit = () => {
     opacity: 0;
     transform: translateY(15px);
     animation:
-        fadeInUp 0.5s ease-out calc(var(--delay) * 0.1s) forwards,
-        clearFieldTransform 0.01s linear calc(var(--delay) * 0.1s + 0.5s) forwards;
+        fadeInUp 0.5s ease-out calc(var(--delay) * 0.08s) forwards,
+        clearFieldTransform 0.01s linear calc(var(--delay) * 0.08s + 0.5s) forwards;
 }
 
 @keyframes clearFieldTransform {
@@ -214,7 +192,6 @@ const submit = () => {
 }
 
 @keyframes float {
-
     0%,
     100% {
         transform: translateY(0);

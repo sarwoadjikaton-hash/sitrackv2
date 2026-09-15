@@ -6,8 +6,6 @@ import { Letter } from '@/types';
 defineProps<{
     letter: Letter;
 }>();
-
-// Fungsi printReceipt telah dihapus
 </script>
 
 <template>
@@ -26,8 +24,7 @@ defineProps<{
 
                         <h2 class="fw-bold text-dark mb-1">Pengajuan Surat Berhasil!</h2>
                         <p class="text-muted small mb-4">
-                            Naskah dinas Anda telah terdaftar dalam sistem SiTrack. Simpan Nomor Resi / Kode Tracking di
-                            bawah ini.
+                            Permohonan paraf naskah dinas Anda telah berhasil diajukan dan terdaftar dalam sistem SiTrack. Simpan Nomor Resi / Kode Tracking di bawah ini.
                         </p>
 
                         <!-- Tracking Code Box -->
@@ -37,9 +34,13 @@ defineProps<{
                             <div class="small text-dark fw-semibold">
                                 Nomor Agenda: <span class="font-monospace">{{ letter.agenda_number }}</span>
                             </div>
-                            <div class="small text-muted mt-1">
-                                Nomor Surat: <span class="font-monospace fw-bold text-dark">{{ letter.letter_number
-                                    }}</span>
+                            <div class="small text-muted mt-2 pt-2 border-top">
+                                <span v-if="letter.letter_number">
+                                    Nomor Surat: <span class="font-monospace fw-bold text-dark">{{ letter.letter_number }}</span>
+                                </span>
+                                <span v-else class="text-secondary fst-italic">
+                                    <i class="bi bi-hourglass-split me-1 text-warning"></i>Nomor surat belum diterbitkan (menunggu verifikasi & input Admin/TU).
+                                </span>
                             </div>
                         </div>
 
@@ -48,11 +49,20 @@ defineProps<{
                             <dt class="col-5 text-muted">Pengirim / Pemohon</dt>
                             <dd class="col-7 fw-bold text-dark">{{ letter.sender_name }}</dd>
 
+                            <dt class="col-5 text-muted">Unit Pengusul</dt>
+                            <dd class="col-7 fw-semibold text-dark">{{ letter.sender_unit || '-' }}</dd>
+
                             <dt class="col-5 text-muted">Unit Tujuan</dt>
-                            <dd class="col-7">{{ letter.recipient_unit?.unit_name || 'Tata Usaha' }}</dd>
+                            <dd class="col-7 text-dark">{{ letter.destination || (letter.recipient_unit?.unit_name || '-') }}</dd>
+
+                            <dt class="col-5 text-muted">Sifat Naskah</dt>
+                            <dd class="col-7"><span class="badge bg-light text-dark border">{{ letter.priority || 'Biasa' }}</span></dd>
 
                             <dt class="col-5 text-muted">Perihal</dt>
-                            <dd class="col-7 text-truncate">{{ letter.subject }}</dd>
+                            <dd class="col-7 text-truncate" :title="letter.subject">{{ letter.subject }}</dd>
+
+                            <dt class="col-5 text-muted">Posisi Berkas Awal</dt>
+                            <dd class="col-7 fw-semibold text-primary"><i class="bi bi-geo-alt-fill me-1"></i>{{ letter.current_position }}</dd>
 
                             <dt class="col-5 text-muted">Status</dt>
                             <dd class="col-7 fw-bold text-success">{{ letter.status }}</dd>
@@ -60,7 +70,6 @@ defineProps<{
 
                         <!-- Actions -->
                         <div class="d-flex justify-content-center">
-                            <!-- Tombol Cetak Tanda Terima telah dihapus -->
                             <Link :href="`/tracking?code=${letter.tracking_code}`" class="btn btn-primary-blue">
                                 <i class="bi bi-search me-1"></i> Pantau Status Surat
                             </Link>

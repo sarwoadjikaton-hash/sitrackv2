@@ -42,8 +42,7 @@ watch(() => props.letter, (newVal) => {
 }, { immediate: true });
 
 const actionOptions = [
-    'Mohon Paraf', 'Mohon Tanda Tangan', 'Informasi',
-    'Aksi', 'Mohon Arahan', 'Mohon Keputusan', 'Mohon Persetujuan'
+    'Mohon Paraf', 'Mohon Tanda Tangan'
 ];
 
 // --- LOGIKA PENCARIAN & SCAN ---

@@ -24,6 +24,7 @@ class SignatureLetterController extends Controller
     public static function allowedStatuses(): array
     {
         return [
+            'Pengajuan Berhasil',
             'Dokumen Diterima dan Diinput',
             'Diperiksa Arsiparis',
             'Paraf Pengendalian Administrasi (KtusSAMSKM)',
@@ -102,7 +103,8 @@ class SignatureLetterController extends Controller
     {
         $validated = $request->validate([
             'letter_number' => ['nullable', 'string', 'max:150'],
-            'letter_type' => ['required', 'in:in,out'],
+            'slot_id' => ['nullable', 'exists:letter_numbers,id'],
+            'letter_type' => ['nullable', 'in:in,out'],
             'sender_unit' => ['nullable', 'string', 'max:150'],
             'category_id' => ['nullable', 'exists:letter_categories,id'],
             'letter_number_type_id' => ['nullable', 'exists:letter_number_types,id'],
@@ -112,13 +114,13 @@ class SignatureLetterController extends Controller
             'subject' => ['required', 'string', 'max:500'],
             'letter_date' => ['nullable', 'date'],
             'received_date' => ['nullable', 'date'],
-            'priority' => ['required', 'in:urgent,high,normal,low'],
-            'security_level' => ['required', 'string', 'max:50'],
+            'priority' => ['nullable', 'string', 'max:50'],
+            'security_level' => ['nullable', 'string', 'max:50'],
             'status' => ['required', 'string'],
             'current_position' => ['required', 'string', 'max:150'],
-            'requested_actions' => ['nullable', 'array'],
+            'requested_actions' => ['nullable'],
             'notes' => ['nullable', 'string'],
-            'letter_source' => ['required', 'in:Manual,SRIKANDI'],
+            'letter_source' => ['nullable', 'string', 'max:50'],
             'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
         ]);
 
@@ -128,9 +130,11 @@ class SignatureLetterController extends Controller
             $attachmentPath = $file->store('letters', 'public');
         }
 
-        $actions = !empty($validated['requested_actions'])
+        $actions = is_array($validated['requested_actions'] ?? null)
             ? implode(', ', $validated['requested_actions'])
-            : null;
+            : ($validated['requested_actions'] ?? null);
+
+        $letterType = $validated['letter_type'] ?? 'in';
 
         DB::beginTransaction();
         try {
@@ -143,14 +147,14 @@ class SignatureLetterController extends Controller
                 $agendaNumber = null;
             } else {
                 $trackingCode = LetterNumberService::generateTrackingCode($letterNumberType?->type_code);
-                $agendaNumber = LetterNumberService::nextAgendaNumber($validated['letter_type']);
+                $agendaNumber = LetterNumberService::nextAgendaNumber($letterType);
             }
 
             $letter = Letter::create([
                 'tracking_code' => $trackingCode,
                 'agenda_number' => $agendaNumber,
                 'letter_number' => $validated['letter_number'] ?? null,
-                'letter_type' => $validated['letter_type'],
+                'letter_type' => $letterType,
                 'process_lane' => 'signature',
                 'sender_unit' => $validated['sender_unit'] ?? null,
                 'category_id' => $validated['category_id'] ?: null,
@@ -172,11 +176,30 @@ class SignatureLetterController extends Controller
                 'created_by' => Auth::id(),
             ]);
 
+            if (!empty($validated['slot_id'])) {
+                $slot = LetterNumber::find($validated['slot_id']);
+                if ($slot) {
+                    $slot->update([
+                        'status' => 'used',
+                        'used_at' => now(),
+                        'linked_letter_id' => $letter->id,
+                        'number_text' => $letter->letter_number,
+                        'subject' => $letter->subject,
+                        'letter_date' => $letter->letter_date ?? date('Y-m-d'),
+                        'incoming_date' => $letter->received_date ?? date('Y-m-d'),
+                        'processing_unit_text' => $letter->sender_unit,
+                        'unit_id' => $letter->recipient_unit_id,
+                    ]);
+                }
+            }
+
             LetterStatusLog::create([
                 'letter_id' => $letter->id,
                 'status' => $letter->status,
                 'position' => $letter->current_position,
-                'note' => 'Dokumen baru dicatat ke sistem.',
+                'note' => 'Dokumen baru dicatat ke sistem SiTrack.',
+                'attachment_path' => $attachmentPath,
+                'attachment_name' => $request->hasFile('attachment') ? $request->file('attachment')->getClientOriginalName() : null,
                 'changed_by' => Auth::user()->name ?: Auth::user()->username,
                 'changed_at' => now(),
             ]);
@@ -222,6 +245,7 @@ class SignatureLetterController extends Controller
 
         $validated = $request->validate([
             'letter_number' => ['nullable', 'string', 'max:150'],
+            'slot_id' => ['nullable', 'exists:letter_numbers,id'],
             'sender_unit' => ['nullable', 'string', 'max:150'],
             'category_id' => ['nullable', 'exists:letter_categories,id'],
             'letter_number_type_id' => ['nullable', 'exists:letter_number_types,id'],
@@ -231,29 +255,28 @@ class SignatureLetterController extends Controller
             'subject' => ['required', 'string', 'max:500'],
             'letter_date' => ['nullable', 'date'],
             'received_date' => ['nullable', 'date'],
-            'priority' => ['required', 'in:urgent,high,normal,low'],
-            'security_level' => ['required', 'string', 'max:50'],
+            'priority' => ['nullable', 'string', 'max:50'],
+            'security_level' => ['nullable', 'string', 'max:50'],
             'status' => ['required', 'string'],
             'current_position' => ['required', 'string', 'max:150'],
-            'requested_actions' => ['nullable', 'array'],
+            'requested_actions' => ['nullable'],
             'notes' => ['nullable', 'string'],
-            'letter_source' => ['required', 'in:Manual,SRIKANDI'],
+            'letter_source' => ['nullable', 'string', 'max:50'],
             'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
         ]);
 
         $attachmentPath = $letter->attachment_path;
         $pdfContent = $letter->pdf_content;
+        $uploadedAttachmentName = null;
         if ($request->hasFile('attachment')) {
-            if ($attachmentPath) {
-                Storage::disk('public')->delete($attachmentPath);
-            }
             $attachmentPath = $request->file('attachment')->store('letters', 'public');
+            $uploadedAttachmentName = $request->file('attachment')->getClientOriginalName();
             $pdfContent = PdfTextExtractor::extract($attachmentPath);
         }
 
-        $actions = !empty($validated['requested_actions'])
+        $actions = is_array($validated['requested_actions'] ?? null)
             ? implode(', ', $validated['requested_actions'])
-            : null;
+            : ($validated['requested_actions'] ?? null);
 
         $statusChanged = ($letter->status !== $validated['status'] || $letter->current_position !== $validated['current_position']);
 
@@ -268,22 +291,42 @@ class SignatureLetterController extends Controller
             'subject' => $validated['subject'],
             'letter_date' => $validated['letter_date'] ?? null,
             'received_date' => $validated['received_date'] ?? null,
-            'priority' => $validated['priority'],
-            'security_level' => $validated['security_level'],
+            'priority' => $validated['priority'] ?? 'Biasa',
+            'security_level' => $validated['security_level'] ?? 'Biasa',
             'status' => $validated['status'],
             'current_position' => $validated['current_position'],
             'requested_actions' => $actions,
             'notes' => $validated['notes'] ?? null,
             'attachment_path' => $attachmentPath,
-            'letter_source' => $validated['letter_source'],
+            'letter_source' => $validated['letter_source'] ?? $letter->letter_source ?? 'Manual',
         ]);
 
-        if ($statusChanged) {
+        if (!empty($validated['slot_id'])) {
+            $slot = LetterNumber::find($validated['slot_id']);
+            if ($slot) {
+                $slot->update([
+                    'status' => 'used',
+                    'used_at' => now(),
+                    'linked_letter_id' => $letter->id,
+                    'number_text' => $letter->letter_number,
+                    'subject' => $letter->subject,
+                    'letter_date' => $letter->letter_date ?? date('Y-m-d'),
+                    'incoming_date' => $letter->received_date ?? date('Y-m-d'),
+                    'processing_unit_text' => $letter->sender_unit,
+                    'destination' => $letter->destination ?? null,
+                    'unit_id' => $letter->recipient_unit_id,
+                ]);
+            }
+        }
+
+        if ($statusChanged || $request->hasFile('attachment')) {
             LetterStatusLog::create([
                 'letter_id' => $letter->id,
                 'status' => $letter->status,
                 'position' => $letter->current_position,
-                'note' => 'Pembaruan data surat dan status operasional.',
+                'note' => $request->hasFile('attachment') ? 'Pembaruan data surat dan unggah berkas naskah baru.' : 'Pembaruan data surat dan status operasional.',
+                'attachment_path' => $uploadedAttachmentName ? $attachmentPath : null,
+                'attachment_name' => $uploadedAttachmentName,
                 'changed_by' => Auth::user()->name ?: Auth::user()->username,
                 'changed_at' => now(),
             ]);
@@ -301,27 +344,41 @@ class SignatureLetterController extends Controller
         $validated = $request->validate([
             'status' => ['required', 'string'],
             'current_position' => ['required', 'string', 'max:150'],
-            'requested_actions' => ['nullable', 'array'],
+            'requested_actions' => ['nullable'],
             'note' => ['nullable', 'string', 'max:255'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
         ]);
 
         $letter = Letter::findOrFail($id);
 
-        $actions = !empty($validated['requested_actions'])
+        $attachmentPath = $letter->attachment_path;
+        $pdfContent = $letter->pdf_content;
+        $uploadedAttachmentName = null;
+        if ($request->hasFile('attachment')) {
+            $attachmentPath = $request->file('attachment')->store('letters', 'public');
+            $uploadedAttachmentName = $request->file('attachment')->getClientOriginalName();
+            $pdfContent = PdfTextExtractor::extract($attachmentPath);
+        }
+
+        $actions = is_array($validated['requested_actions'] ?? null)
             ? implode(', ', $validated['requested_actions'])
-            : $letter->requested_actions;
+            : ($validated['requested_actions'] ?? $letter->requested_actions);
 
         $letter->update([
             'status' => $validated['status'],
             'current_position' => $validated['current_position'],
             'requested_actions' => $actions,
+            'attachment_path' => $attachmentPath,
+            'pdf_content' => $pdfContent,
         ]);
 
         LetterStatusLog::create([
             'letter_id' => $letter->id,
             'status' => $validated['status'],
             'position' => $validated['current_position'],
-            'note' => $validated['note'] ?: 'Pembaruan status dokumen.',
+            'note' => $validated['note'] ?: ($request->hasFile('attachment') ? 'Pembaruan status dokumen dan berkas lampiran.' : 'Pembaruan status dokumen.'),
+            'attachment_path' => $uploadedAttachmentName ? $attachmentPath : null,
+            'attachment_name' => $uploadedAttachmentName,
             'changed_by' => Auth::user()->name ?: Auth::user()->username,
             'changed_at' => now(),
         ]);

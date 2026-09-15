@@ -33,7 +33,10 @@ services:
     restart: unless-stopped
 
   app:
-    image: indmrtprg/sitrack-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sitrack-app:latest
     container_name: sitrack_app
     env_file: .env
     depends_on:
@@ -42,13 +45,17 @@ services:
       redis:
         condition: service_healthy
     volumes:
+      - .:/var/www/html
       - storage_data:/var/www/html/storage/app
     networks:
       - sitrack_net
     restart: unless-stopped
 
   queue:
-    image: indmrtprg/sitrack-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sitrack-app:latest
     container_name: sitrack_queue
     command: [ "php", "artisan", "queue:work", "redis", "--sleep=2", "--tries=3", "--timeout=90" ]
     env_file: .env
@@ -58,17 +65,22 @@ services:
       redis:
         condition: service_healthy
     volumes:
+      - .:/var/www/html
       - storage_data:/var/www/html/storage/app
     networks:
       - sitrack_net
     restart: unless-stopped
 
   web:
-    image: indmrtprg/sitrack-web:latest
+    build:
+      context: .
+      dockerfile: docker/nginx.Dockerfile
+    image: sitrack-web:latest
     container_name: sitrack_web
     depends_on:
       - app
     volumes:
+      - .:/var/www/html
       - storage_data:/var/www/html/storage/app
     ports:
       - "8081:80"

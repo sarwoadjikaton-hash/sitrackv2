@@ -152,12 +152,6 @@ const isActive = (path: string, exact = false) =>
                     <template v-if="!isSekjen">
                         <div class="sidebar-caption">Tindak Lanjut / TTD</div>
                         <nav class="sidebar-nav">
-                            <Link href="/tindak-lanjut/create" class="nav-link-item"
-                                :class="{ active: isActive('/tindak-lanjut/create', true) }" @click="closeMobileNav"
-                                data-tooltip="Input TTD Baru">
-                                <i class="bi bi-file-earmark-check-fill"></i>
-                                <span class="nav-label">Input TTD Baru</span>
-                            </Link>
                             <Link href="/tindak-lanjut" class="nav-link-item"
                                 :class="{ active: isActive('/tindak-lanjut', true) }" @click="closeMobileNav"
                                 data-tooltip="Data Tindak Lanjut">

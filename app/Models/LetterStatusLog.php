@@ -14,6 +14,8 @@ class LetterStatusLog extends Model
         'status',
         'position',
         'note',
+        'attachment_path',
+        'attachment_name',
         'changed_by',
         'changed_at',
     ];

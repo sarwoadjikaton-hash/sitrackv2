@@ -9,8 +9,10 @@ use App\Models\LetterNumberType;
 use App\Models\LetterStatusLog;
 use App\Models\Unit;
 use App\Services\LetterNumberService;
+use App\Services\PdfTextExtractor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 use RuntimeException;
@@ -46,6 +48,7 @@ class PublicTrackingController extends Controller
 
                 // Calculate progress %
                 $progress = match ($letter->status) {
+                    'Pengajuan Berhasil' => 15,
                     'Dokumen Diterima dan Diinput' => 15,
                     'Diperiksa Arsiparis' => 35,
                     'Paraf Pengendalian Administrasi (KtusSAMSKM)' => 55,
@@ -100,80 +103,69 @@ class PublicTrackingController extends Controller
         $validated = $request->validate([
             'sender_name' => ['required', 'string', 'max:150'],
             'sender_phone' => ['required', 'string', 'max:50'],
-            'recipient_unit_id' => ['nullable', 'exists:units,id'],
-            'category_id' => ['nullable', 'exists:letter_categories,id'],
+            'unit_id' => ['required', 'exists:units,id'],
+            'destination' => ['required', 'string', 'max:255'],
+            'priority' => ['required', 'in:Biasa,Segera'],
+            'type_id' => ['required', 'exists:letter_number_types,id'],
             'subject' => ['required', 'string', 'max:500'],
             'letter_date' => ['nullable', 'date'],
-            'letter_number_id' => ['required', 'exists:letter_numbers,id'],
             'notes' => ['nullable', 'string', 'max:500'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
         ]);
 
         DB::beginTransaction();
         try {
-            /** @var LetterNumber $slot */
-            $slot = LetterNumber::with('type')->where('id', $validated['letter_number_id'])
-                ->lockForUpdate()
-                ->firstOrFail();
+            /** @var LetterNumberType $type */
+            $type = LetterNumberType::findOrFail($validated['type_id']);
 
-            if (!in_array($slot->status, ['available', 'reserved'])) {
-                throw new RuntimeException('Nomor surat sudah digunakan orang lain. Silakan pilih nomor yang lain.');
-            }
-
-            $type = $slot->type;
-            $monthNumber = (int) date('n');
-            $signerCode = $type->default_signer_code ?: '1';
-
-            $numberText = LetterNumberService::buildNumberText($type, [
-                'sequence_number' => $slot->sequence_number,
-                'number_year' => $slot->number_year,
-                'security_access' => 'B',
-                'signer_code' => $signerCode,
-                'classification_code' => 'UM.01',
-                'month_number' => $monthNumber,
-            ]);
+            $unit = Unit::find($validated['unit_id']);
+            $unitPengusulName = $unit ? $unit->unit_name : 'Unit Pengusul';
 
             $trackingCode = LetterNumberService::generateTrackingCode($type->type_code);
             $agendaNumber = LetterNumberService::nextAgendaNumber('in');
 
+            $attachmentPath = null;
+            $pdfContent = null;
+            $uploadedAttachmentName = null;
+            if ($request->hasFile('attachment')) {
+                $attachmentPath = $request->file('attachment')->store('letters', 'public');
+                $uploadedAttachmentName = $request->file('attachment')->getClientOriginalName();
+                $pdfContent = PdfTextExtractor::extract($attachmentPath);
+            }
+
             $letter = Letter::create([
                 'tracking_code' => $trackingCode,
                 'agenda_number' => $agendaNumber,
-                'letter_number' => $numberText,
+                'letter_number' => null,
                 'letter_type' => 'in',
                 'letter_source' => 'Manual',
                 'process_lane' => 'signature',
-                'category_id' => $validated['category_id'] ?: null,
+                'letter_number_type_id' => $type->id,
+                'sender_unit' => $unitPengusulName,
                 'sender_name' => $validated['sender_name'],
                 'sender_phone' => $validated['sender_phone'],
-                'recipient_unit_id' => $validated['recipient_unit_id'] ?: null,
+                'recipient_unit_id' => null,
+                'destination' => $validated['destination'],
                 'subject' => $validated['subject'],
-                'letter_date' => $validated['letter_date'] ?? null,
+                'letter_date' => $validated['letter_date'] ?? date('Y-m-d'),
                 'received_date' => date('Y-m-d'),
-                'status' => 'Dokumen Diterima dan Diinput',
-                'priority' => 'normal',
+                'status' => 'Pengajuan Berhasil',
+                'priority' => $validated['priority'],
                 'security_level' => 'Biasa',
-                'current_position' => 'Tata Usaha',
+                'current_position' => $unitPengusulName,
                 'notes' => $validated['notes'] ?? null,
-            ]);
-
-            $slot->update([
-                'status' => 'used',
-                'used_at' => now(),
-                'linked_letter_id' => $letter->id,
-                'subject' => $validated['subject'],
-                'letter_date' => $validated['letter_date'] ?? null,
-                'incoming_date' => date('Y-m-d'),
-                'processing_unit_text' => $validated['sender_name'],
-                'unit_id' => $validated['recipient_unit_id'] ?: null,
-                'number_text' => $numberText,
+                'attachment_path' => $attachmentPath,
+                'pdf_content' => $pdfContent,
             ]);
 
             LetterStatusLog::create([
                 'letter_id' => $letter->id,
-                'status' => 'Dokumen Diterima dan Diinput',
-                'position' => 'Tata Usaha',
-                'note' => 'Pengajuan dokumen mandiri via portal publik SiTrack.',
-                'changed_by' => 'Publik',
+                'status' => 'Pengajuan Berhasil',
+                'position' => $unitPengusulName,
+                'note' => 'Permohonan paraf naskah dinas berhasil diajukan via portal SiTrack.',
+                'attachment_path' => $attachmentPath,
+                'attachment_name' => $uploadedAttachmentName,
+                'changed_by' => 'Pemohon (Publik)',
                 'changed_at' => now(),
             ]);
 

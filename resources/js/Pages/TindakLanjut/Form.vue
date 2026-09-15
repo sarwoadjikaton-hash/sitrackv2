@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Letter, LetterCategory, Unit, LetterNumberType } from '@/types';
+import { Letter, LetterCategory, Unit, LetterNumberType, LetterNumber } from '@/types';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import axios from 'axios';
 
 const props = defineProps<{
     letter?: Letter | null;
@@ -15,9 +16,30 @@ const props = defineProps<{
 
 const isEditing = !!props.letter;
 
+const extractClassification = (numStr?: string | null): string => {
+    if (!numStr) return 'UM.01';
+    const parts = numStr.split('/');
+    if (parts.length >= 4) {
+        return parts[2] || 'UM.01';
+    }
+    return 'UM.01';
+};
+
+const classificationCode = ref(extractClassification(props.letter?.letter_number));
+const selectedSlotId = ref<number | null>(null);
+const availableSlots = ref<LetterNumber[]>([]);
+const loadingSlots = ref(false);
+
+const getInitialActions = (action?: string | string[] | null): string[] => {
+    if (!action) return ['Mohon Paraf'];
+    if (Array.isArray(action)) return action;
+    return action.split(',').map((s) => s.trim()).filter(Boolean);
+};
+
 const form = useForm({
     letter_number: props.letter?.letter_number || '',
-    letter_number_type_id: props.letter?.letter_number_type_id || null,
+    letter_number_type_id: props.letter?.letter_number_type_id || props.letterNumberTypes[0]?.id || null,
+    slot_id: null as number | null,
     letter_type: props.letter?.letter_type || 'in',
     letter_source: props.letter?.letter_source || 'Manual',
     sender_unit: props.letter?.sender_unit || '',
@@ -28,23 +50,123 @@ const form = useForm({
     subject: props.letter?.subject || '',
     letter_date: props.letter?.letter_date ? props.letter.letter_date.substring(0, 10) : new Date().toISOString().substring(0, 10),
     received_date: props.letter?.received_date ? props.letter.received_date.substring(0, 10) : new Date().toISOString().substring(0, 10),
-    priority: props.letter?.priority || 'normal',
+    priority: props.letter?.priority || 'Biasa',
     security_level: props.letter?.security_level || 'Biasa',
     status: props.letter?.status || 'Dokumen Diterima dan Diinput',
     current_position: props.letter?.current_position || 'Tata Usaha',
-    requested_actions: props.letter?.requested_actions ? props.letter.requested_actions.split(', ') : [],
+    requested_actions: getInitialActions(props.letter?.requested_actions),
     notes: props.letter?.notes || '',
     attachment: null as File | null,
+});
+
+const selectedType = computed(() =>
+    props.letterNumberTypes.find((t) => t.id === Number(form.letter_number_type_id))
+);
+
+const fetchSlots = async (typeId: number) => {
+    if (!typeId) {
+        availableSlots.value = [];
+        return;
+    }
+    loadingSlots.value = true;
+    try {
+        const year = new Date(form.letter_date || new Date()).getFullYear();
+        const res = await axios.get('/data-surat/slots', {
+            params: { type_id: typeId, year },
+        });
+        if (res.data.ok) {
+            availableSlots.value = res.data.items;
+        }
+    } catch (e) {
+        console.error(e);
+    } finally {
+        loadingSlots.value = false;
+    }
+};
+
+watch(() => form.letter_number_type_id, (newVal) => {
+    if (newVal) {
+        fetchSlots(Number(newVal));
+    }
+}, { immediate: true });
+
+const romanMonths = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+
+const previewNumberText = computed(() => {
+    if (!selectedType.value) return form.letter_number || '-';
+
+    const padding = selectedType.value.sequence_padding || 4;
+    let seq = 'xxxx';
+    let year = new Date().getFullYear();
+
+    if (selectedSlotId.value) {
+        const slot = availableSlots.value.find((s) => s.id === Number(selectedSlotId.value));
+        if (slot) {
+            seq = String(slot.sequence_number).padStart(padding, '0');
+            year = slot.number_year || year;
+        }
+    } else if (form.letter_number) {
+        const match = form.letter_number.match(/\/(\d{3,6})\//);
+        if (match) {
+            seq = match[1];
+        }
+    }
+
+    const dateObj = new Date(form.letter_date);
+    const monthNum = isNaN(dateObj.getTime()) ? new Date().getMonth() + 1 : dateObj.getMonth() + 1;
+    const monthRoman = romanMonths[monthNum] || 'I';
+    const signer = selectedType.value.default_signer_code || '1';
+    const security = form.security_level === 'Rahasia' ? 'R' : (form.security_level === 'Sangat Rahasia' ? 'SR' : 'B');
+    const pattern = selectedType.value.number_pattern || 'B-{signer}/{sequence}/{classification}/{month_roman}/{year}';
+
+    const classCode = classificationCode.value ? classificationCode.value.trim() : '';
+
+    return pattern
+        .replace('{sequence}', seq)
+        .replace('{year}', String(year))
+        .replace('{month_roman}', monthRoman)
+        .replace('{month}', String(monthNum).padStart(2, '0'))
+        .replace('{signer}', signer)
+        .replace('{security}', security)
+        .replace('{classification}', classCode)
+        .replace(/\{[a-zA-Z0-9_]+\}/g, '')
+        .replace(/^-+/, '')
+        .replace(/\/+/g, '/');
+});
+
+const applyGeneratedNumber = () => {
+    if (previewNumberText.value && previewNumberText.value !== '-') {
+        form.letter_number = previewNumberText.value;
+    }
+};
+
+const availableOnlySlots = computed(() =>
+    availableSlots.value.filter((s) => s.status === 'available')
+);
+
+const slotOptions = computed(() =>
+    availableOnlySlots.value.map((slot) => ({
+        value: slot.id,
+        label: `No. Urut ${String(slot.sequence_number).padStart(selectedType.value?.sequence_padding || 4, '0')}`,
+    }))
+);
+
+watch(selectedSlotId, (newVal) => {
+    form.slot_id = newVal ? Number(newVal) : null;
+    if (newVal) {
+        applyGeneratedNumber();
+    }
+});
+
+watch(classificationCode, () => {
+    if (selectedSlotId.value) {
+        applyGeneratedNumber();
+    }
 });
 
 const actionOptions = [
     'Mohon Paraf',
     'Mohon Tanda Tangan',
-    'Informasi',
-    'Aksi',
-    'Mohon Arahan',
-    'Mohon Keputusan',
-    'Mohon Persetujuan',
 ];
 
 const handleFileUpload = (e: Event) => {
@@ -83,17 +205,14 @@ const submit = () => {
     }
 };
 
-const letterTypeOptions = [
-    { value: 'in', label: 'Surat Masuk' },
-    { value: 'out', label: 'Surat Keluar' },
-];
-
 const letterSourceOptions = [
     { value: 'Manual', label: 'Manual / Fisik' },
     { value: 'SRIKANDI', label: 'Aplikasi SRIKANDI' },
 ];
 
 const priorityOptions = [
+    { value: 'Biasa', label: 'Biasa' },
+    { value: 'Segera', label: 'Segera' },
     { value: 'normal', label: 'Biasa / Normal' },
     { value: 'high', label: 'Penting' },
     { value: 'urgent', label: 'Amat Segera / Mendesak' },
@@ -107,10 +226,6 @@ const securityOptions = [
 
 const letterNumberTypeOptions = computed(() =>
     props.letterNumberTypes.map((t) => ({ value: t.id, label: t.type_name }))
-);
-
-const categoryOptions = computed(() =>
-    props.categories.map((c) => ({ value: c.id, label: c.category_name }))
 );
 
 const unitOptions = computed(() =>
@@ -147,48 +262,72 @@ const statusOptions = computed(() =>
             <div class="col-lg-10">
                 <div class="st-card">
                     <form @submit.prevent="submit">
+                        <!-- Alert Kesalahan Validasi jika ada -->
+                        <div v-if="Object.keys(form.errors).length > 0" class="alert alert-danger mb-4 rounded-3">
+                            <div class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> Mohon lengkapi atau perbaiki field berikut:</div>
+                            <ul class="mb-0 ps-3 small">
+                                <li v-for="(err, key) in form.errors" :key="key">{{ err }}</li>
+                            </ul>
+                        </div>
+
                         <!-- Informasi Utama -->
                         <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">1. Informasi & Identitas Dokumen</h5>
 
                         <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold">Jenis Surat</label>
-                                <SearchableSelect v-model="form.letter_type" :options="letterTypeOptions"
-                                    placeholder="Pilih Jenis Surat" search-placeholder="Cari jenis surat..." />
-                            </div>
-
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label small fw-bold">Jenis Naskah Dinas</label>
                                 <SearchableSelect v-model="form.letter_number_type_id"
-                                    :options="letterNumberTypeOptions" placeholder="Pilih Jenis Naskah (Opsional)"
-                                    search-placeholder="Cari jenis naskah..." clearable />
-                                <small class="text-muted">Menentukan awalan kode resi (mis. ND_MEMO-...)</small>
+                                    :options="letterNumberTypeOptions" placeholder="Pilih Jenis Naskah"
+                                    search-placeholder="Cari jenis naskah..." />
+                                <small class="text-muted">Menentukan awalan kode resi dan pola format nomor dinas</small>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label small fw-bold">Sumber Naskah</label>
                                 <SearchableSelect v-model="form.letter_source" :options="letterSourceOptions"
                                     placeholder="Pilih Sumber Naskah" search-placeholder="Cari sumber..." />
                             </div>
 
+                            <!-- Alokasi / Penomoran Surat -->
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold">Kategori Dokumen</label>
-                                <SearchableSelect v-model="form.category_id" :options="categoryOptions"
-                                    placeholder="Pilih Kategori" search-placeholder="Cari kategori..." clearable />
+                                <label class="form-label small fw-bold">Pilih Slot Nomor Tersedia (Opsional)</label>
+                                <SearchableSelect
+                                    v-model="selectedSlotId"
+                                    :options="slotOptions"
+                                    :loading="loadingSlots"
+                                    loading-text="Memuat slot..."
+                                    placeholder="-- Pilih Nomor Tersedia --"
+                                    search-placeholder="Cari nomor urut..."
+                                    empty-text="Tidak ada slot nomor tersedia"
+                                />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Kode Klasifikasi Arsip</label>
+                                <input v-model="classificationCode" type="text" class="form-control font-monospace"
+                                    placeholder="Contoh: UM.01 / KS.06 / KP.09.00" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Nomor Surat Resmi</label>
+                                <div class="input-group">
+                                    <input v-model="form.letter_number" type="text" class="form-control font-monospace fw-bold"
+                                        placeholder="Contoh: B-1/0758/UM.01/VIII/2026" />
+                                    <button type="button" class="btn btn-outline-primary" @click="applyGeneratedNumber" title="Terapkan Formula">
+                                        <i class="bi bi-magic"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted d-block mt-1">
+                                    Formula: <span class="text-primary font-monospace">{{ previewNumberText }}</span>
+                                </small>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Nomor Surat Asal / Konsep</label>
-                                <input v-model="form.letter_number" type="text" class="form-control"
-                                    placeholder="Contoh: B-123/TU/08/2026 (Opsional)" />
-                            </div>
-
-                            <div class="col-md-3">
                                 <label class="form-label small fw-bold">Tanggal Surat</label>
                                 <input v-model="form.letter_date" type="date" class="form-control" />
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <label class="form-label small fw-bold">Tanggal Diterima</label>
                                 <input v-model="form.received_date" type="date" class="form-control" />
                             </div>
@@ -261,21 +400,19 @@ const statusOptions = computed(() =>
 
                             <div class="col-12">
                                 <label class="form-label small fw-bold">Tindakan yang Dimohonkan</label>
-                                <div class="row g-2">
-                                    <div v-for="opt in actionOptions" :key="opt" class="col-md-3 col-6">
-                                        <div class="form-check">
-                                            <input :id="`form-act-${opt}`" v-model="form.requested_actions"
-                                                type="checkbox" class="form-check-input" :value="opt" />
-                                            <label :for="`form-act-${opt}`" class="form-check-label small">
-                                                {{ opt }}
-                                            </label>
-                                        </div>
+                                <div class="d-flex gap-4 mt-1">
+                                    <div v-for="opt in actionOptions" :key="opt" class="form-check">
+                                        <input :id="`form-act-${opt}`" v-model="form.requested_actions"
+                                            type="checkbox" class="form-check-input" :value="opt" />
+                                        <label :for="`form-act-${opt}`" class="form-check-label fw-semibold small" style="cursor: pointer;">
+                                            {{ opt }}
+                                        </label>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Unggah Lampiran Naskah (PDF/DOCX)</label>
+                                <label class="form-label small fw-bold">Unggah Lampiran (PDF/DOCX)</label>
                                 <input type="file" class="form-control"
                                     accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                                     @change="handleFileUpload" />

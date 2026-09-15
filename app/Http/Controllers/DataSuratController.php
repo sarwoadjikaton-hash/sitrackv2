@@ -39,10 +39,16 @@ class DataSuratController extends Controller
         $year = (int) $request->input('year', date('Y'));
         $periode = $request->input('periode', 'all');
         $sort = $request->input('sort', 'number_desc');
+        $statusFilter = $request->input('status', 'all');
 
         $query = LetterNumber::with(['type', 'unit'])
-            ->where('number_year', $year)
-            ->where('status', 'used');
+            ->where('number_year', $year);
+
+        if ($statusFilter === 'all') {
+            $query->whereIn('status', ['used', 'reserved', 'preorder']);
+        } else {
+            $query->where('status', $statusFilter);
+        }
 
         if ($selectedWorkbookId > 0) {
             $query->where('type_id', $selectedWorkbookId);
@@ -269,7 +275,7 @@ class DataSuratController extends Controller
             'technical_officer' => ['nullable', 'string', 'max:150'],
             'scan_result' => ['nullable', 'string', 'max:255'],
             'nd_pengantar' => ['nullable', 'string', 'max:255'],
-            'attachment' => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
         ]);
 
         DB::beginTransaction();
@@ -278,8 +284,8 @@ class DataSuratController extends Controller
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($slot->status !== 'used') {
-                throw new RuntimeException('Data tidak ditemukan atau belum digunakan.');
+            if (!in_array($slot->status, ['used', 'reserved', 'preorder'])) {
+                throw new RuntimeException('Data nomor tidak ditemukan atau belum tersedia untuk diubah.');
             }
 
             $type = $slot->type;
@@ -304,14 +310,12 @@ class DataSuratController extends Controller
             $attachmentPath = $slot->attachment_path;
             $pdfContent = $slot->pdf_content;
             if ($request->hasFile('attachment')) {
-                if ($attachmentPath) {
-                    Storage::disk('public')->delete($attachmentPath);
-                }
                 $attachmentPath = $request->file('attachment')->store('data-surat', 'public');
                 $pdfContent = PdfTextExtractor::extract($attachmentPath);
             }
 
             $slot->update([
+                'status' => 'used',
                 'number_text' => $numberText,
                 'incoming_date' => $validated['incoming_date'],
                 'unit_id' => $validated['unit_id'] ?: null,
@@ -329,6 +333,7 @@ class DataSuratController extends Controller
                 'nd_pengantar' => $ndPengantar,
                 'attachment_path' => $attachmentPath,
                 'pdf_content' => $pdfContent,
+                'used_at' => $slot->used_at ?? now(),
             ]);
 
             DB::commit();

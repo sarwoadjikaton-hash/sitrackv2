@@ -22,6 +22,7 @@ class Letter extends Model
         'sender_name',
         'sender_phone',
         'recipient_unit_id',
+        'destination',
         'subject',
         'letter_date',
         'received_date',
