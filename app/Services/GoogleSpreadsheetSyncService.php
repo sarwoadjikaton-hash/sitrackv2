@@ -446,17 +446,17 @@ class GoogleSpreadsheetSyncService
                 'created_by' => Auth::id() ?? 1,
             ];
 
-            if ($letterNumber->letter_id) {
-                $letter = Letter::find($letterNumber->letter_id);
+            if ($letterNumber->linked_letter_id) {
+                $letter = Letter::find($letterNumber->linked_letter_id);
                 if ($letter) {
                     $letter->update($letterData);
                 } else {
                     $newLetter = Letter::create($letterData);
-                    $letterNumber->update(['letter_id' => $newLetter->id]);
+                    $letterNumber->update(['linked_letter_id' => $newLetter->id]);
                 }
             } else {
                 $newLetter = Letter::create($letterData);
-                $letterNumber->update(['letter_id' => $newLetter->id]);
+                $letterNumber->update(['linked_letter_id' => $newLetter->id]);
             }
         }
     }

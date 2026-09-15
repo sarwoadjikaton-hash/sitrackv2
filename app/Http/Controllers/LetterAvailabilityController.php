@@ -64,7 +64,6 @@ class LetterAvailabilityController extends Controller
                 'incoming_date',
                 'used_at',
                 'created_at',
-                'letter_id',
                 'linked_letter_id',
             ])
             ->groupBy('type_id');

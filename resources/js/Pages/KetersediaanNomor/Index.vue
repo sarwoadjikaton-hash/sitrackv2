@@ -22,7 +22,7 @@ type NumberDetail = {
     incoming_date?: string | null;
     used_at?: string | null;
     created_at?: string | null;
-    letter_id?: number | null;
+    linked_letter_id?: number | null;
     letter?: { id: number; tracking_code: string; agenda_number?: string | null };
 };
 
