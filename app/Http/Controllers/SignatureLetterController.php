@@ -24,15 +24,15 @@ class SignatureLetterController extends Controller
     public static function allowedStatuses(): array
     {
         return [
-            'Pengajuan Berhasil',
-            'Dokumen Diterima dan Diinput',
-            'Diperiksa Arsiparis',
-            'Paraf Pengendalian Administrasi (KtusSAMSKM)',
-            'Proses Paraf/TTD Sekjen',
-            'Surat Selesai di Paraf/TTD dan bisa diambil',
-            'Dokumen Sudah diambil',
+            'Diregistrasi',
+            'Diterima',
+            'Diperiksa Oleh TU Sekjen',
+            'Diperiksa Oleh Kasubag TU Sekjen',
+            'Diperiksa Oleh Sekjen',
+            'Selesai',
             'Revisi',
             'Ditolak',
+            'Dokumen Sudah diambil',
         ];
     }
 

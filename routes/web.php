@@ -104,6 +104,7 @@ Route::middleware(['auth'])->group(function () {
     // Cetak Dokumen A4
     Route::get('/cetak/disposisi/{id}', [PrintController::class, 'disposisi'])->middleware('permission:view disposition lane')->name('print.disposisi');
     Route::get('/cetak/pendamping/{id}', [PrintController::class, 'pendamping'])->middleware('permission:view signature lane')->name('print.pendamping');
+    Route::post('/cetak/pendamping/{id}/signature', [PrintController::class, 'saveSignature'])->middleware('permission:view signature lane')->name('print.pendamping.signature');
 
     // Panduan Alur Status
     Route::get('/alur-status', [AlurStatusController::class, 'index'])->middleware('permission:view dashboard')->name('alur-status.index');

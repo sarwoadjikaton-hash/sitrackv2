@@ -43,4 +43,64 @@ class PrintController extends Controller
             'qrCodeBase64' => $qrCodeBase64,
         ]);
     }
+
+    /**
+     * Simpan Tanda Tangan Langsung Lembar Pendamping & Auto Update Status Dokumen Sudah Diambil
+     */
+    public function saveSignature(Request $request, $id)
+    {
+        $request->validate([
+            'signature_base64' => ['required', 'string'],
+            'receiver_name' => ['nullable', 'string', 'max:150'],
+            'auto_update_status' => ['nullable', 'boolean'],
+        ]);
+
+        $letter = Letter::findOrFail($id);
+
+        $base64 = $request->input('signature_base64');
+        if (preg_match('/^data:image\/(\w+);base64,/', $base64, $type)) {
+            $data = substr($base64, strpos($base64, ',') + 1);
+            $type = strtolower($type[1]);
+            $data = base64_decode($data);
+            if ($data === false) {
+                return response()->json(['ok' => false, 'message' => 'Format gambar tanda tangan tidak valid'], 422);
+            }
+        } else {
+            return response()->json(['ok' => false, 'message' => 'Data base64 tidak valid'], 422);
+        }
+
+        $filename = 'signatures/sig_' . $letter->id . '_' . time() . '.' . $type;
+        \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $data);
+
+        $receiverName = $request->input('receiver_name') ?: $letter->sender_name ?: 'Penerima Berkas';
+
+        // Update letter attachment_path
+        $updates = [
+            'attachment_path' => $filename,
+        ];
+
+        $shouldUpdateStatus = $request->boolean('auto_update_status', true);
+        if ($shouldUpdateStatus) {
+            $updates['status'] = 'Dokumen Sudah diambil';
+            $updates['current_position'] = 'Unit Pengolah / Pemohon';
+
+            \App\Models\LetterStatusLog::create([
+                'letter_id' => $letter->id,
+                'status' => 'Dokumen Sudah diambil',
+                'position' => 'Unit Pengolah / Pemohon',
+                'note' => "Dokumen fisik telah diambil oleh {$receiverName} dengan tanda tangan digital lembar pendamping.",
+                'attachment_path' => $filename,
+                'changed_by' => \Illuminate\Support\Facades\Auth::user()?->name ?: 'Petugas TU',
+                'changed_at' => now(),
+            ]);
+        }
+
+        $letter->update($updates);
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Tanda tangan digital berhasil disimpan dan berkas otomatis terlampir!',
+            'attachment_path' => $filename,
+        ]);
+    }
 }

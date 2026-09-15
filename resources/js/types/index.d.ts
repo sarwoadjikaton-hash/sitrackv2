@@ -136,6 +136,7 @@ export interface Letter {
     created_at: string;
     updated_at: string;
     category?: LetterCategory;
+    letter_number_type?: LetterNumberType;
     recipient_unit?: Unit;
     creator?: User;
     dispositions_count?: number;

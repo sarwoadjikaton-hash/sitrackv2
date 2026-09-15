@@ -6,6 +6,7 @@ use App\Models\Letter;
 use App\Models\LetterNumber;
 use App\Models\LetterNumberAvailabilityBatch;
 use App\Models\LetterNumberType;
+use App\Models\LetterStatusLog;
 use App\Models\Unit;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -434,15 +435,31 @@ class GoogleSpreadsheetSyncService
 
         // Sync with Letter model for tracking & tindak lanjut
         if ($status !== 'available' && ($numberText || $subject || $letterDate)) {
+            $senderName = $technicalOfficer ?: ($reservedFor ?: ($signatory ?: 'Petugas Unit'));
+            $letterSubject = $subject ?: ($status === 'reserved' ? ('[Reservasi] ' . ($reservedFor ?: 'Nomor Surat')) : ($status === 'preorder' ? '[Pre-Order] Alokasi Nomor' : 'Nomor Surat Terpakai'));
+            $initialStatus = in_array($status, ['preorder', 'reserved'], true) ? 'Diregistrasi' : 'Diterima';
+
             $letterData = [
                 'letter_number' => $numberText ?: sprintf('%04d', $sequence),
+                'letter_number_type_id' => $type->id,
+                'letter_type' => 'out',
+                'process_lane' => 'signature',
+                'sender_unit' => $unitName ?: 'Unit Pengolah Arsip',
+                'sender_name' => $senderName,
+                'recipient_unit_id' => $unitId,
+                'subject' => $letterSubject,
                 'letter_date' => $letterDate ?: now()->toDateString(),
                 'received_date' => $incomingDate ?: now()->toDateString(),
-                'sender' => $unitName ?: 'Unit Pengolah Arsip',
-                'subject' => $subject ?: ($status === 'reserved' ? ('[Reservasi] ' . ($reservedFor ?: 'Nomor Surat')) : ($status === 'preorder' ? '[Pre-Order] Alokasi Nomor' : 'Nomor Surat Terpakai')),
-                'processing_unit' => $unitName ?: 'Biro Umum',
-                'letter_type_id' => $type->id,
-                'status' => in_array($status, ['preorder', 'reserved'], true) ? 'registered' : 'processed',
+                'priority' => 'Biasa',
+                'security_level' => $securityAccess ?: 'Biasa',
+                'status' => $initialStatus,
+                'current_position' => 'Tata Usaha Sekjen',
+                'requested_actions' => ($type->type_code === 'ND_MEMO' ? 'Mohon Paraf' : 'Mohon Tanda Tangan'),
+                'archive_classification_code' => $classificationCode,
+                'signatory_name' => $signatory,
+                'technical_officer' => $technicalOfficer,
+                'destination' => $destination,
+                'letter_source' => 'Google Spreadsheet',
                 'created_by' => Auth::id() ?? 1,
             ];
 
@@ -451,12 +468,34 @@ class GoogleSpreadsheetSyncService
                 if ($letter) {
                     $letter->update($letterData);
                 } else {
+                    $letterData['tracking_code'] = LetterNumberService::generateTrackingCode($type->type_code);
+                    $letterData['agenda_number'] = LetterNumberService::nextAgendaNumber('out');
                     $newLetter = Letter::create($letterData);
                     $letterNumber->update(['linked_letter_id' => $newLetter->id]);
+
+                    LetterStatusLog::create([
+                        'letter_id' => $newLetter->id,
+                        'status' => $initialStatus,
+                        'position' => 'Tata Usaha Sekjen',
+                        'note' => 'Data surat ditarik otomatis dari Google Spreadsheet.',
+                        'changed_by' => Auth::user()?->name ?: 'Admin',
+                        'changed_at' => now(),
+                    ]);
                 }
             } else {
+                $letterData['tracking_code'] = LetterNumberService::generateTrackingCode($type->type_code);
+                $letterData['agenda_number'] = LetterNumberService::nextAgendaNumber('out');
                 $newLetter = Letter::create($letterData);
                 $letterNumber->update(['linked_letter_id' => $newLetter->id]);
+
+                LetterStatusLog::create([
+                    'letter_id' => $newLetter->id,
+                    'status' => $initialStatus,
+                    'position' => 'Tata Usaha Sekjen',
+                    'note' => 'Data surat ditarik otomatis dari Google Spreadsheet.',
+                    'changed_by' => Auth::user()?->name ?: 'Admin',
+                    'changed_at' => now(),
+                ]);
             }
         }
     }

@@ -1,21 +1,22 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
-import { ref, computed, onMounted } from 'vue';
+import { Head, router } from '@inertiajs/vue3';
+import { ref, onMounted } from 'vue';
 import { Letter } from '@/types';
+import axios from 'axios';
 
 const props = defineProps<{
     letter: Letter;
     qrCodeBase64: string;
 }>();
 
-// Buat state lokal agar checkbox bisa diklik (interaktif)
+// Checkboxes state
 const tempActions = ref<string[]>(
-    props.letter.requested_actions ? props.letter.requested_actions.split(', ') : []
+    props.letter.requested_actions ? props.letter.requested_actions.split(',').map((s) => s.trim()) : ['Mohon Tanda Tangan']
 );
 
 const toggleAction = (action: string) => {
     if (tempActions.value.includes(action)) {
-        tempActions.value = tempActions.value.filter(a => a !== action);
+        tempActions.value = tempActions.value.filter((a) => a !== action);
     } else {
         tempActions.value.push(action);
     }
@@ -23,130 +24,282 @@ const toggleAction = (action: string) => {
 
 const isChecked = (action: string) => tempActions.value.includes(action);
 
+// --- Digital Signature Canvas ---
+const canvasRef = ref<HTMLCanvasElement | null>(null);
+const isDrawing = ref(false);
+const hasSignature = ref(false);
+const isSaving = ref(false);
+const saveSuccessMessage = ref('');
+const receiverName = ref(props.letter.sender_name || 'Petugas Pengambil');
+
+let ctx: CanvasRenderingContext2D | null = null;
+
+const initCanvas = () => {
+    if (!canvasRef.value) return;
+    const canvas = canvasRef.value;
+    ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+};
+
+const startDrawing = (e: MouseEvent | TouchEvent) => {
+    if (!ctx || !canvasRef.value) return;
+    isDrawing.value = true;
+    hasSignature.value = true;
+    const rect = canvasRef.value.getBoundingClientRect();
+    const x = 'touches' in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
+    const y = 'touches' in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+};
+
+const draw = (e: MouseEvent | TouchEvent) => {
+    if (!isDrawing.value || !ctx || !canvasRef.value) return;
+    const rect = canvasRef.value.getBoundingClientRect();
+    const x = 'touches' in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
+    const y = 'touches' in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
+    ctx.lineTo(x, y);
+    ctx.stroke();
+};
+
+const stopDrawing = () => {
+    if (!isDrawing.value) return;
+    isDrawing.value = false;
+};
+
+const clearSignature = () => {
+    if (!ctx || !canvasRef.value) return;
+    ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height);
+    hasSignature.value = false;
+};
+
+const saveDigitalSignature = async () => {
+    if (!canvasRef.value || !hasSignature.value) {
+        alert('Silakan buat tanda tangan terlebih dahulu pada kotak tanda tangan.');
+        return;
+    }
+
+    isSaving.value = true;
+    saveSuccessMessage.value = '';
+
+    try {
+        const dataUrl = canvasRef.value.toDataURL('image/png');
+        const res = await axios.post(`/cetak/pendamping/${props.letter.id}/signature`, {
+            signature_base64: dataUrl,
+            receiver_name: receiverName.value,
+            auto_update_status: true,
+        });
+
+        if (res.data.ok) {
+            saveSuccessMessage.value = '✓ Tanda tangan berhasil disimpan & status diubah menjadi "Dokumen Sudah diambil"!';
+            setTimeout(() => {
+                saveSuccessMessage.value = '';
+            }, 5000);
+        }
+    } catch (err: any) {
+        alert('Gagal menyimpan tanda tangan: ' + (err.response?.data?.message || err.message));
+    } finally {
+        isSaving.value = false;
+    }
+};
+
+onMounted(() => {
+    initCanvas();
+});
+
 const printPage = () => window.print();
 const goBack = () => window.history.back();
 </script>
 
 <template>
-
     <Head :title="`Cetak Lembar Pendamping - ${letter.tracking_code}`" />
 
+    <!-- Print & Action Toolbar -->
     <div class="print-toolbar no-print">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div class="container-fluid d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="toolbar-info">
-                <h6 class="mb-0 fw-bold text-dark">Format Pendamping: {{ letter.agenda_number }}</h6>
-                <small class="text-muted">Klik teks untuk edit, klik kotak untuk centang/uncheck.</small>
+                <h6 class="mb-0 fw-bold text-dark">Format Pendamping: {{ letter.agenda_number || letter.tracking_code }}</h6>
+                <small class="text-muted">Tanda tangani langsung di layar, klik teks untuk edit, lalu klik Simpan atau Cetak.</small>
             </div>
-            <div class="toolbar-actions d-flex gap-2">
-                <button @click="goBack" class="btn btn-outline-dark btn-sm px-3">Kembali</button>
-                <button @click="printPage" class="btn btn-teal btn-sm px-4 fw-bold">Cetak</button>
+            <div class="toolbar-actions d-flex align-items-center gap-2 flex-wrap">
+                <button
+                    type="button"
+                    class="btn btn-outline-danger btn-sm"
+                    title="Hapus coretan tanda tangan"
+                    @click="clearSignature"
+                >
+                    <i class="bi bi-eraser me-1"></i> Hapus TTD
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-success btn-sm fw-bold px-3 d-flex align-items-center gap-1"
+                    :disabled="isSaving || !hasSignature"
+                    @click="saveDigitalSignature"
+                >
+                    <span v-if="isSaving" class="spinner-border spinner-border-sm me-1"></span>
+                    <i v-else class="bi bi-check2-circle"></i>
+                    Simpan TTD & Ambil Dokumen
+                </button>
+                <button @click="printPage" class="btn btn-primary-blue btn-sm px-4 fw-bold">
+                    <i class="bi bi-printer me-1"></i> Cetak Dokumen
+                </button>
+                <button @click="goBack" class="btn btn-outline-secondary btn-sm px-3">
+                    Kembali
+                </button>
             </div>
+        </div>
+
+        <div v-if="saveSuccessMessage" class="alert alert-success py-2 px-3 mb-0 mt-2 text-center fw-bold small">
+            {{ saveSuccessMessage }}
         </div>
     </div>
 
-    <!-- Area Kertas -->
-    <div class="print-container shadow-lg my-4" contenteditable="true">
-
+    <!-- Area Kertas A4 -->
+    <div class="print-container shadow-lg my-4">
         <div class="header-box">
             <h2 class="text-center fw-bold mb-0">KEMENTERIAN KETENAGAKERJAAN REPUBLIK INDONESIA</h2>
-            <h2 class="text-center fw-bold">SUB BAGIAN TATA USAHA SEKJEN, SAHLI, STAFSUS</h2>
+            <h2 class="text-center fw-bold mb-0">SUB BAGIAN TATA USAHA SEKJEN, SAHLI, STAFSUS</h2>
         </div>
 
         <table class="main-table">
             <tr>
                 <td width="20%">Asal Surat</td>
                 <td width="2%">:</td>
-                <td width="53%">{{ letter.sender_unit || letter.sender_name }}</td>
+                <td width="53%" contenteditable="true">{{ letter.sender_unit || letter.sender_name }}</td>
                 <td width="25%" class="border-left text-center">
-                    {{ letter.received_date ? new Date(letter.received_date).toLocaleDateString('id-ID', {
-                        day:
-                            '2-digit', month: 'long', year: 'numeric'
-                    }) : '-' }}
+                    {{
+                        letter.received_date
+                            ? new Date(letter.received_date).toLocaleDateString('id-ID', {
+                                  day: '2-digit',
+                                  month: 'long',
+                                  year: 'numeric',
+                              })
+                            : '-'
+                    }}
                 </td>
             </tr>
             <tr>
                 <td>Jenis Naskah Dinas</td>
                 <td>:</td>
-                <td colspan="2">{{ letter.category?.category_name || 'ND/Memo' }}</td>
+                <td colspan="2" contenteditable="true">{{ letter.letter_number_type?.workbook_name || letter.category?.category_name || 'ND/Memo' }}</td>
             </tr>
             <tr>
                 <td>Agenda Nomor</td>
                 <td>:</td>
-                <td colspan="2" class="fw-bold">{{ letter.agenda_number }}</td>
+                <td colspan="2" class="fw-bold font-monospace" contenteditable="true">{{ letter.agenda_number || '-' }}</td>
             </tr>
             <tr>
                 <td valign="top">Hal</td>
                 <td valign="top">:</td>
-                <td colspan="2" valign="top">{{ letter.subject }}</td>
+                <td colspan="2" valign="top" contenteditable="true">{{ letter.subject }}</td>
             </tr>
         </table>
 
         <div class="middle-section">
             <!-- Checkbox Area -->
-            <div class="checkbox-area" contenteditable="false"> <!-- Kita kunci agar ikon tidak terhapus saat ngetik -->
+            <div class="checkbox-area">
                 <div class="row">
                     <div class="col-6">
                         <div class="check-item" @click="toggleAction('Mohon Paraf')">
-                            <i class="bi" :class="isChecked('Mohon Paraf') ? 'bi-check-square-fill' : 'bi-square'"></i>
-                            Mohon Paraf
+                            <i class="bi" :class="isChecked('Mohon Paraf') ? 'bi-check-square-fill text-primary' : 'bi-square'"></i>
+                            <span class="ms-1">Mohon Paraf</span>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="check-item" @click="toggleAction('Mohon Tanda Tangan')">
-                            <i class="bi"
-                                :class="isChecked('Mohon Tanda Tangan') ? 'bi-check-square-fill' : 'bi-square'"></i>
-                            Mohon Tanda Tangan
+                            <i class="bi" :class="isChecked('Mohon Tanda Tangan') ? 'bi-check-square-fill text-primary' : 'bi-square'"></i>
+                            <span class="ms-1">Mohon Tanda Tangan</span>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Receiver Signature Area (With Canvas TTD Langsung) -->
             <div class="receiver-area">
-                <p class="mb-0 text-center small fw-bold">Yang Menerima <br> Surat :</p>
-                <div class="signature-space"></div>
-                <p class="mb-0 text-center small">(....................................)</p>
+                <p class="mb-1 text-center small fw-bold">
+                    Yang Menerima Surat :
+                </p>
+
+                <!-- Interactive Signature Canvas -->
+                <div class="signature-canvas-box position-relative">
+                    <canvas
+                        ref="canvasRef"
+                        width="200"
+                        height="85"
+                        class="signature-canvas"
+                        @mousedown="startDrawing"
+                        @mousemove="draw"
+                        @mouseup="stopDrawing"
+                        @mouseleave="stopDrawing"
+                        @touchstart.passive="startDrawing"
+                        @touchmove.passive="draw"
+                        @touchend.passive="stopDrawing"
+                    ></canvas>
+                    <span v-if="!hasSignature" class="signature-hint no-print">
+                        Goreskan TTD di sini
+                    </span>
+                </div>
+
+                <div class="text-center mt-1">
+                    <input
+                        v-model="receiverName"
+                        type="text"
+                        class="text-center border-0 fw-bold small text-dark receiver-input"
+                        placeholder="( Nama Penerima )"
+                    />
+                </div>
             </div>
         </div>
 
-        <div class="notes-section" contenteditable="true">
+        <div class="notes-section">
             <p class="fw-bold mb-1">Catatan / Tindak Lanjut Sekjen :</p>
-            <div class="notes-content">{{ letter.notes }}</div>
+            <div class="notes-content" contenteditable="true">{{ letter.notes || '' }}</div>
         </div>
 
         <!-- Metadata Bawah -->
-        <div class="bottom-info mt-3" contenteditable="true">
+        <div class="bottom-info mt-3">
             <table class="border-0 w-100">
                 <tr>
                     <td width="15%">Jenis Naskah</td>
                     <td width="2%">:</td>
-                    <td>{{ letter.category?.category_name || 'ND/Memo' }}</td>
+                    <td contenteditable="true">{{ letter.letter_number_type?.workbook_name || letter.category?.category_name || 'ND/Memo' }}</td>
                 </tr>
                 <tr>
-                    <td>Nomor</td>
+                    <td>Nomor Surat</td>
                     <td>:</td>
-                    <td>{{ letter.letter_number || '-' }}</td>
+                    <td class="font-monospace fw-bold" contenteditable="true">{{ letter.letter_number || '-' }}</td>
                 </tr>
                 <tr>
                     <td>Tanggal</td>
                     <td>:</td>
-                    <td>{{ letter.received_date ? new Date(letter.received_date).toLocaleDateString('id-ID', {
-                        day:
-                            '2-digit', month: 'long', year: 'numeric'
-                    }) : '-' }}</td>
+                    <td>
+                        {{
+                            letter.received_date
+                                ? new Date(letter.received_date).toLocaleDateString('id-ID', {
+                                      day: '2-digit',
+                                      month: 'long',
+                                      year: 'numeric',
+                                  })
+                                : '-'
+                        }}
+                    </td>
                 </tr>
             </table>
         </div>
 
-        <div class="qr-footer mt-4" contenteditable="false">
+        <div class="qr-footer mt-4">
             <div class="d-flex align-items-center border border-dark p-2">
                 <div class="qr-img me-3">
-                    <div class="qr-img me-3">
-                        <img :src="qrCodeBase64" width="80" height="80">
-                    </div>
+                    <img :src="qrCodeBase64" width="80" height="80" alt="QR Code" />
                 </div>
-                <div class="qr-text small" style="font-size: 11px; line-height: 1.2;">
-                    <p class="mb-0 fw-bold">Scan QR untuk Update Status Surat</p>
-                    <p class="mb-0">Kode Tracking: <strong>{{ letter.tracking_code }}</strong></p>
-                    <p class="mb-0 text-muted">Petugas wajib login terlebih dahulu.</p>
+                <div class="qr-text small" style="font-size: 11px; line-height: 1.3;">
+                    <p class="mb-0 fw-bold">Scan QR untuk Update Status & Tracking Surat</p>
+                    <p class="mb-0">Kode Resi: <strong class="font-monospace">{{ letter.tracking_code }}</strong></p>
+                    <p class="mb-0 text-muted">Aplikasi SiTrack - Biro Umum Kemnaker RI</p>
                 </div>
             </div>
         </div>
@@ -164,18 +317,18 @@ const goBack = () => window.history.back();
     z-index: 2000;
 }
 
-.btn-teal {
-    background-color: #38a89d;
+.btn-primary-blue {
+    background-color: #0284c7;
     color: white;
     border: none;
 }
 
-.btn-teal:hover {
-    background-color: #2d8a81;
+.btn-primary-blue:hover {
+    background-color: #0369a1;
     color: white;
 }
 
-/* KERTAS */
+/* KERTAS A4 */
 .print-container {
     width: 210mm;
     margin: 30px auto;
@@ -183,17 +336,20 @@ const goBack = () => window.history.back();
     background: white;
     font-family: Arial, sans-serif;
     color: black;
-    /* PERBAIKAN KURSOR */
-    cursor: text !important;
-    caret-color: black !important;
+    cursor: text;
+    caret-color: black;
     outline: none;
     position: relative;
+    box-sizing: border-box;
 }
 
-/* Memastikan teks yang bisa diedit punya kursor yang jelas */
 [contenteditable="true"] {
     min-height: 1em;
     cursor: text !important;
+}
+
+[contenteditable="true"]:hover {
+    background: #f8fafc;
 }
 
 /* AREA CHECKBOX */
@@ -203,7 +359,6 @@ const goBack = () => window.history.back();
     border-right: 2px solid black;
     background-color: #fff;
     cursor: default;
-    /* Area ini tidak untuk ngetik, tapi klik */
 }
 
 .check-item {
@@ -212,18 +367,15 @@ const goBack = () => window.history.back();
     display: flex;
     align-items: center;
     cursor: pointer;
-    /* Memberi tanda bisa diklik */
     user-select: none;
 }
 
 .check-item:hover {
-    color: #2563eb;
+    color: #0284c7;
 }
 
 .check-item i {
-    margin-right: 10px;
     font-size: 18px;
-    color: #000;
 }
 
 /* STYLE TABEL & GARIS */
@@ -234,7 +386,7 @@ const goBack = () => window.history.back();
 }
 
 .header-box h2 {
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.4;
 }
 
@@ -247,7 +399,7 @@ const goBack = () => window.history.back();
 .main-table td {
     border: 1px solid black;
     padding: 8px;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .middle-section {
@@ -257,22 +409,60 @@ const goBack = () => window.history.back();
 }
 
 .receiver-area {
-    flex: 1.2;
-    padding: 10px;
+    flex: 1.4;
+    padding: 8px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    align-items: center;
 }
 
-.signature-space {
-    height: 90px;
+.signature-canvas-box {
+    width: 200px;
+    height: 85px;
+    border: 1px dashed #94a3b8;
+    background: #fafafa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: crosshair;
+}
+
+.signature-canvas {
+    width: 200px;
+    height: 85px;
+    touch-action: none;
+}
+
+.signature-hint {
+    position: absolute;
+    font-size: 10px;
+    color: #94a3b8;
+    pointer-events: none;
+    user-select: none;
+}
+
+.receiver-input {
+    width: 180px;
+    text-align: center;
+    background: transparent;
+    outline: none;
+}
+
+.receiver-input:focus {
+    border-bottom: 1px solid #0284c7 !important;
 }
 
 .notes-section {
     border: 2px solid black;
     border-top: none;
     padding: 10px;
-    min-height: 200px;
+    min-height: 160px;
+}
+
+.notes-content {
+    min-height: 120px;
+    outline: none;
 }
 
 @media print {
@@ -282,18 +472,18 @@ const goBack = () => window.history.back();
 
     .print-container {
         margin: 0 !important;
-        padding: 0 !important;
+        padding: 10mm !important;
         width: 100% !important;
         box-shadow: none !important;
     }
 
-    /* Matikan warna hover saat print */
-    .print-container {
-        background: white !important;
+    .signature-canvas-box {
+        border: none !important;
+        background: transparent !important;
     }
 
-    .check-item i {
-        color: black !important;
+    [contenteditable="true"]:hover {
+        background: transparent !important;
     }
 }
 </style>
