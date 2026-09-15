@@ -285,7 +285,7 @@ class DataSuratImport
             ? (int) $monthRaw
             : (self::MONTHS[mb_strtolower($monthRaw)] ?? ($letterDate ? (int) date('n', strtotime($letterDate)) : now()->month));
 
-        $numberText = $this->clean($data['nomor_surat'] ?? null);
+        $rawNumberText = $this->clean($data['nomor_surat'] ?? null);
         $signatory = $this->clean($data['penandatangan_surat'] ?? null);
         $destination = $this->clean($data['tujuan_surat'] ?? null);
         $requestType = $this->clean($data['permohonan'] ?? null);
@@ -301,11 +301,37 @@ class DataSuratImport
                 $reservedFor = trim($m[1]);
             }
         }
+        if ($subject !== null && stripos($subject, 'booking') !== false) {
+            $isBooking = true;
+            if (preg_match('/booking\s+(.+)/i', $subject, $m)) {
+                $reservedFor = trim($m[1]);
+            }
+        }
+
+        $isPreorder = ($requestType !== null && (stripos($requestType, 'preorder') !== false || stripos($requestType, 'pre order') !== false))
+            || ($technicalOfficer !== null && (stripos($technicalOfficer, 'preorder') !== false || stripos($technicalOfficer, 'pre order') !== false))
+            || ($subject !== null && (stripos($subject, 'preorder') !== false || stripos($subject, 'pre order') !== false));
+
+        $isReservation = $isBooking
+            || ($requestType !== null && (stripos($requestType, 'reservasi') !== false || stripos($requestType, 'reserve') !== false))
+            || ($technicalOfficer !== null && stripos($technicalOfficer, 'reservasi') !== false);
+
+        $hasLetterContent = ($subject !== null || $unitName !== null || $letterDate !== null || $signatory !== null || $rawNumberText !== null);
+
+        $status = match (true) {
+            $isReservation => 'reserved',
+            $isPreorder => 'preorder',
+            $hasLetterContent => 'used',
+            default => 'available',
+        };
+        $isUsed = ($status === 'used');
 
         $securityAccess = ($v = $this->clean($data['keamanan_akses'] ?? null)) ? strtoupper($v) : null;
         $classificationCode = ($v = $this->clean($data['kode_klas_arsip'] ?? null)) ? strtoupper($v) : null;
 
-        if (!$numberText) {
+        // Build numberText ONLY for non-available slots if empty in Excel
+        $numberText = $rawNumberText;
+        if ($status !== 'available' && !$numberText) {
             $numberText = LetterNumberService::buildNumberText($type, [
                 'sequence_number' => $sequence,
                 'number_year' => $year,
@@ -315,39 +341,31 @@ class DataSuratImport
                 'classification_code' => $classificationCode ?? '',
             ]);
         }
-
-        $hasLetterContent = ($subject !== null || $unitName !== null || $letterDate !== null || $signatory !== null || $destination !== null);
-
-        $status = match (true) {
-            $isBooking => 'reserved',
-            $requestType !== null && stripos($requestType, 'preorder') !== false => 'preorder',
-            $requestType !== null && stripos($requestType, 'reservasi') !== false => 'reserved',
-            $hasLetterContent || $numberText !== null => 'used',
-            default => 'available',
-        };
-        $isUsed = ($status === 'used');
+        if ($status === 'available') {
+            $numberText = null;
+        }
 
         $payload = [
-            'incoming_date' => $incomingDate,
-            'unit_id' => $unitId,
-            'processing_unit_text' => $unitName,
-            'signatory' => $signatory,
-            'request_type' => $requestType,
-            'destination' => $destination,
-            'letter_date' => $letterDate,
-            'security_access' => $securityAccess,
-            'classification_code' => $classificationCode,
-            'month_number' => $monthNumber,
+            'incoming_date' => $status !== 'available' ? $incomingDate : null,
+            'unit_id' => $status !== 'available' ? $unitId : null,
+            'processing_unit_text' => $status !== 'available' ? $unitName : null,
+            'signatory' => $status !== 'available' ? $signatory : null,
+            'request_type' => $status !== 'available' ? $requestType : null,
+            'destination' => $status !== 'available' ? $destination : null,
+            'letter_date' => $status !== 'available' ? $letterDate : null,
+            'security_access' => $status !== 'available' ? $securityAccess : null,
+            'classification_code' => $status !== 'available' ? $classificationCode : null,
+            'month_number' => $status !== 'available' ? $monthNumber : null,
             'number_text' => $numberText,
-            'subject' => $subject,
-            'technical_officer' => $technicalOfficer,
-            'nd_pengantar' => $type->extra_field === 'nd_pengantar' ? $this->clean($data['nd_pengantar'] ?? null) : null,
-            'scan_result' => $type->extra_field === 'scan_result'
+            'subject' => $status !== 'available' ? $subject : null,
+            'technical_officer' => $status !== 'available' ? $technicalOfficer : null,
+            'nd_pengantar' => ($status !== 'available' && $type->extra_field === 'nd_pengantar') ? $this->clean($data['nd_pengantar'] ?? null) : null,
+            'scan_result' => ($status !== 'available' && $type->extra_field === 'scan_result')
                 ? ($this->clean($data['scan_result'] ?? null) ?? $this->clean($data['nd_pengantar'] ?? null))
                 : null,
             'status' => $status,
             'reserved_for' => $status === 'reserved' ? $reservedFor : null,
-            'reserved_at' => $status === 'reserved' ? now() : null,
+            'reserved_at' => in_array($status, ['reserved', 'preorder'], true) ? now() : null,
             'used_at' => $isUsed ? now() : null,
             'created_by' => Auth::id(),
         ];
