@@ -30,7 +30,7 @@ const isDrawing = ref(false);
 const hasSignature = ref(false);
 const isSaving = ref(false);
 const saveSuccessMessage = ref('');
-const receiverName = ref(props.letter.sender_name || 'Petugas Pengambil');
+const receiverName = ref('');
 
 let ctx: CanvasRenderingContext2D | null = null;
 
@@ -244,13 +244,10 @@ const goBack = () => window.history.back();
                     </span>
                 </div>
 
-                <div class="text-center mt-1">
-                    <input
-                        v-model="receiverName"
-                        type="text"
-                        class="text-center border-0 fw-bold small text-dark receiver-input"
-                        placeholder="( Nama Penerima )"
-                    />
+                <div class="text-center mt-2">
+                    <p class="mb-0 text-center small text-dark" contenteditable="true">
+                        ( {{ receiverName ? receiverName : '....................................' }} )
+                    </p>
                 </div>
             </div>
         </div>

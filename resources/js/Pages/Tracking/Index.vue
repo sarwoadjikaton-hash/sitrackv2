@@ -89,7 +89,28 @@ const handleSearch = () => {
                                             <label>Sifat Naskah</label>
                                             <p class="text-dark mb-0"><span class="badge bg-light text-dark border">{{ letter.priority }}</span></p>
                                         </div>
-                                        <div v-if="letter.attachment_path" class="meta-box mb-3 p-3 rounded-3 border" style="background: #f8fafc;">
+                                        <!-- Lembar Pendamping Resmi (Lajur Tindak Lanjut / Semua Naskah Dinas) -->
+                                        <div v-if="letter.process_lane === 'signature' || !letter.process_lane" class="meta-box mb-3 p-3 rounded-3 border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
+                                            <label class="d-flex align-items-center gap-1 text-success fw-bold mb-2">
+                                                <i class="bi bi-file-earmark-check fs-6"></i> Lembar Pendamping Resmi
+                                            </label>
+                                            <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2">
+                                                <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                                    <i class="bi bi-file-earmark-pdf text-success fs-3"></i>
+                                                    <div>
+                                                        <div class="small fw-bold text-dark">Format Lembar Pendamping</div>
+                                                        <small class="text-muted">Agenda: {{ letter.agenda_number || letter.tracking_code }}</small>
+                                                    </div>
+                                                </div>
+                                                <a :href="`/cetak/pendamping/${letter.id}`" target="_blank"
+                                                    class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 px-3 py-1 text-nowrap fw-semibold">
+                                                    <i class="bi bi-printer"></i> Buka Lembar Pendamping
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <!-- Lampiran Berkas Naskah Digital (Bila ada dokumen asli yang diupload) -->
+                                        <div v-if="letter.attachment_path && !letter.attachment_path.includes('signatures/')" class="meta-box mb-3 p-3 rounded-3 border" style="background: #f8fafc;">
                                             <label class="d-flex align-items-center gap-1 text-primary fw-bold mb-2">
                                                 <i class="bi bi-paperclip fs-6"></i> Lampiran Berkas Naskah
                                             </label>

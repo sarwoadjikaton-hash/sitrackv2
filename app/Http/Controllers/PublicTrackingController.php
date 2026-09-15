@@ -58,12 +58,12 @@ class PublicTrackingController extends Controller
 
                 // Calculate progress %
                 $progress = match ($letter->status) {
-                    'Pengajuan Berhasil' => 15,
-                    'Dokumen Diterima dan Diinput' => 15,
-                    'Diperiksa Arsiparis' => 35,
-                    'Paraf Pengendalian Administrasi (KtusSAMSKM)' => 55,
-                    'Proses Paraf/TTD Sekjen' => 75,
-                    'Surat Selesai di Paraf/TTD dan bisa diambil' => 90,
+                    'Diregistrasi' => 10,
+                    'Diterima' => 20,
+                    'Diperiksa Oleh TU Sekjen' => 40,
+                    'Diperiksa Oleh Kasubag TU Sekjen' => 60,
+                    'Diperiksa Oleh Sekjen' => 80,
+                    'Selesai' => 95,
                     'Dokumen Sudah diambil' => 100,
 
                     'Surat Diterima TU' => 20,
@@ -71,9 +71,8 @@ class PublicTrackingController extends Controller
                     'Didisposisikan' => 65,
                     'Diteruskan ke Unit' => 80,
                     'Dalam Tindak Lanjut' => 85,
-                    'Selesai' => 100,
 
-                    'Revisi' => 40,
+                    'Revisi' => 35,
                     'Ditolak', 'Dikembalikan' => 100,
                     default => 25,
                 };
