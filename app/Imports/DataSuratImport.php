@@ -64,21 +64,81 @@ class DataSuratImport
     /** normalized legacy header label => internal key */
     private const HEADER_MAP = [
         'no' => 'no',
-        'tanggal masuk' => 'tanggal_masuk',
-        'unit pengolah arsip' => 'unit_pengolah_arsip',
-        'penandatangan surat' => 'penandatangan_surat',
-        'permohonan' => 'permohonan',
-        'tujuan surat' => 'tujuan_surat',
-        'tanggal surat' => 'tanggal_surat',
-        'keamanan akses' => 'keamanan_akses',
+        'no.' => 'no',
+        'nomor' => 'nomor_urut',
+        'no urut' => 'nomor_urut',
+        'no. urut' => 'nomor_urut',
         'nomor urut' => 'nomor_urut',
+
+        'tanggal masuk' => 'tanggal_masuk',
+        'tgl masuk' => 'tanggal_masuk',
+        'tgl. masuk' => 'tanggal_masuk',
+        'tanggal diterima' => 'tanggal_masuk',
+        'tgl diterima' => 'tanggal_masuk',
+
+        'unit pengolah arsip' => 'unit_pengolah_arsip',
+        'unit pengolah' => 'unit_pengolah_arsip',
+        'unit kerja' => 'unit_pengolah_arsip',
+        'unit pemohon' => 'unit_pengolah_arsip',
+        'asal surat' => 'unit_pengolah_arsip',
+        'unit' => 'unit_pengolah_arsip',
+
+        'penandatangan surat' => 'penandatangan_surat',
+        'penandatangan' => 'penandatangan_surat',
+        'pejabat penandatangan' => 'penandatangan_surat',
+        'ttd' => 'penandatangan_surat',
+
+        'permohonan' => 'permohonan',
+        'jenis permohonan' => 'permohonan',
+
+        'tujuan surat' => 'tujuan_surat',
+        'tujuan' => 'tujuan_surat',
+        'kepada' => 'tujuan_surat',
+        'penerima' => 'tujuan_surat',
+
+        'tanggal surat' => 'tanggal_surat',
+        'tgl surat' => 'tanggal_surat',
+        'tgl. surat' => 'tanggal_surat',
+
+        'keamanan akses' => 'keamanan_akses',
+        'keamanan' => 'keamanan_akses',
+        'akses' => 'keamanan_akses',
+
         'kode klas. arsip' => 'kode_klas_arsip',
+        'kode klas arsip' => 'kode_klas_arsip',
+        'kode klasifikasi' => 'kode_klas_arsip',
+        'kode klas' => 'kode_klas_arsip',
+        'klasifikasi' => 'kode_klas_arsip',
+
         'bulan' => 'bulan',
+        'bln' => 'bulan',
+
         'nomor surat' => 'nomor_surat',
+        'no surat' => 'nomor_surat',
+        'no. surat' => 'nomor_surat',
+        'nomor naskah' => 'nomor_surat',
+        'no naskah' => 'nomor_surat',
+        'no. naskah' => 'nomor_surat',
+
         'perihal surat' => 'perihal_surat',
+        'perihal' => 'perihal_surat',
+        'hal' => 'perihal_surat',
+        'isi ringkas' => 'perihal_surat',
+        'tentang' => 'perihal_surat',
+
         'petugas unit teknis' => 'petugas_unit_teknis',
+        'petugas teknis' => 'petugas_unit_teknis',
+        'petugas' => 'petugas_unit_teknis',
+        'operator' => 'petugas_unit_teknis',
+
         'nd pengantar' => 'nd_pengantar',
+        'nd. pengantar' => 'nd_pengantar',
+        'nota dinas pengantar' => 'nd_pengantar',
+
         'hasil pindai' => 'scan_result',
+        'hasil scan' => 'scan_result',
+        'scan' => 'scan_result',
+        'keterangan' => 'scan_result',
     ];
 
     public function import(string $filePath, ?int $fallbackTypeId = null): void
@@ -96,8 +156,8 @@ class DataSuratImport
         $typesByName = LetterNumberType::all()->keyBy(fn($t) => mb_strtolower(trim($t->workbook_name)));
 
         // Kalau user memilih target Jenis Naskah spesifik (bukan "Semua Jenis Naskah"),
-// import HANYA memproses sheet yang namanya cocok dengan Jenis Naskah itu.
-// Sheet lain di file yang sama sengaja dilewati (bukan error, jadi tidak dicatat sebagai skipped).
+        // import HANYA memproses sheet yang namanya cocok dengan Jenis Naskah itu.
+        // Sheet lain di file yang sama sengaja dilewati (bukan error, jadi tidak dicatat sebagai skipped).
         $targetType = $fallbackTypeId ? $typesByName->firstWhere('id', $fallbackTypeId) : null;
 
         foreach ($spreadsheet->getAllSheets() as $sheet) {
@@ -164,8 +224,12 @@ class DataSuratImport
     private function findHeaderRowIndex(array $rows): ?int
     {
         foreach ($rows as $i => $row) {
-            $normalized = array_map(fn($c) => mb_strtolower(trim((string) $c)), $row);
-            if (in_array('no', $normalized, true) && in_array('nomor urut', $normalized, true)) {
+            $normalized = array_map(fn($c) => mb_strtolower(trim(preg_replace('/\s+/', ' ', (string) $c))), $row);
+            $hasNo = in_array('no', $normalized, true) || in_array('no.', $normalized, true);
+            $hasUrut = in_array('nomor urut', $normalized, true) || in_array('no urut', $normalized, true) || in_array('no. urut', $normalized, true);
+            $hasPerihal = in_array('perihal', $normalized, true) || in_array('perihal surat', $normalized, true) || in_array('hal', $normalized, true);
+            
+            if (($hasNo && $hasUrut) || ($hasUrut && $hasPerihal) || ($hasNo && $hasPerihal)) {
                 return $i;
             }
         }
@@ -202,17 +266,6 @@ class DataSuratImport
         return $data;
     }
 
-    private function hasMeaningfulData(array $data): bool
-    {
-        foreach (['unit_pengolah_arsip', 'penandatangan_surat', 'tanggal_surat', 'nomor_surat'] as $field) {
-            if ($this->clean($data[$field] ?? null) !== null) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private function importRow(LetterNumberType $type, array $data): void
     {
         $sequence = (int) ($data['nomor_urut'] ?? 0);
@@ -239,7 +292,7 @@ class DataSuratImport
         $subject = $this->clean($data['perihal_surat'] ?? null);
         $technicalOfficer = $this->clean($data['petugas_unit_teknis'] ?? null);
 
-        // TAMBAHAN: deteksi keyword "booking [nama]" -> selalu reserved, apa pun kondisi lain
+        // Deteksi booking / reservasi
         $reservedFor = null;
         $isBooking = false;
         if ($technicalOfficer !== null && stripos($technicalOfficer, 'booking') !== false) {
@@ -249,17 +302,30 @@ class DataSuratImport
             }
         }
 
-        $hasOtherMeta = $unitName !== null || $signatory !== null || $letterDate !== null;
+        $securityAccess = ($v = $this->clean($data['keamanan_akses'] ?? null)) ? strtoupper($v) : null;
+        $classificationCode = ($v = $this->clean($data['kode_klas_arsip'] ?? null)) ? strtoupper($v) : null;
 
-        // TAMBAHAN: logika 5 tingkat prioritas
+        if (!$numberText) {
+            $numberText = LetterNumberService::buildNumberText($type, [
+                'sequence_number' => $sequence,
+                'number_year' => $year,
+                'signer_code' => $type->default_signer_code ?: '1',
+                'month_number' => $monthNumber,
+                'security_access' => $securityAccess ?? '',
+                'classification_code' => $classificationCode ?? '',
+            ]);
+        }
+
+        $hasLetterContent = ($subject !== null || $unitName !== null || $letterDate !== null || $signatory !== null || $destination !== null);
+
         $status = match (true) {
             $isBooking => 'reserved',
-            $numberText !== null => 'used',
-            $destination !== null || $subject !== null => 'preorder',
-            $hasOtherMeta => 'reserved',
+            $requestType !== null && stripos($requestType, 'preorder') !== false => 'preorder',
+            $requestType !== null && stripos($requestType, 'reservasi') !== false => 'reserved',
+            $hasLetterContent || $numberText !== null => 'used',
             default => 'available',
         };
-        $isUsed = $status === 'used';
+        $isUsed = ($status === 'used');
 
         $payload = [
             'incoming_date' => $incomingDate,
@@ -269,8 +335,8 @@ class DataSuratImport
             'request_type' => $requestType,
             'destination' => $destination,
             'letter_date' => $letterDate,
-            'security_access' => ($v = $this->clean($data['keamanan_akses'] ?? null)) ? strtoupper($v) : null,
-            'classification_code' => ($v = $this->clean($data['kode_klas_arsip'] ?? null)) ? strtoupper($v) : null,
+            'security_access' => $securityAccess,
+            'classification_code' => $classificationCode,
             'month_number' => $monthNumber,
             'number_text' => $numberText,
             'subject' => $subject,
