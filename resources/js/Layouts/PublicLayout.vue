@@ -78,7 +78,7 @@ const isLoggedIn = computed(() => !!page.props.auth.user);
                 <!-- Info Hak Cipta -->
                 <p class="text-muted small mb-1">Sistem Elektronik Administrasi & Tracking Persuratan</p>
                 <p class="text-secondary mb-0" style="font-size: 12px;">
-                    &copy; 2026 Tata Usaha & Kearsipan. All rights reserved.
+                    &copy; 2026 TU SEKJEN · SiTrack. All rights reserved.
                 </p>
             </div>
         </footer>

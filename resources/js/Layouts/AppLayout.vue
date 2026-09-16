@@ -280,7 +280,7 @@ const isActive = (path: string, exact = false) =>
 
             <footer class="app-page-footer no-print">
                 <img src="/images/sitrack_logo.svg" alt="SiTrack" width="18" height="20" />
-                <span>SiTrack &copy; 2026</span>
+                <span>SiTrack &copy; TU SEKJEN</span>
             </footer>
         </div>
 

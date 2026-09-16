@@ -154,7 +154,7 @@ const overlayStyle = computed(() => ({
 
             <!-- Footer Statis 2026 -->
             <p class="auth-footer-note">
-                <i class="bi bi-c-circle"></i> 2026 SiTrack — Tata Usaha &amp; Kearsipan
+                <i class="bi bi-c-circle"></i> 2026 SiTrack — TU SEKJEN
             </p>
         </div>
 

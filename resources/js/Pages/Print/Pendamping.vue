@@ -347,7 +347,7 @@ const goBack = () => window.history.back();
                 <div class="qr-text small" style="font-size: 11px; line-height: 1.3;">
                     <p class="mb-0 fw-bold">Scan QR untuk Update Status & Tracking Surat</p>
                     <p class="mb-0">Kode Resi: <strong class="font-monospace">{{ letter.tracking_code }}</strong></p>
-                    <p class="mb-0 text-muted">Aplikasi SiTrack - Biro Umum Kemnaker RI</p>
+                    <p class="mb-0 text-muted">Aplikasi SiTrack - TU SEKJEN</p>
                 </div>
             </div>
         </div>
