@@ -25,21 +25,21 @@
        ========================================= */
 
   /* Brand */
-  --st-primary: #002b4c;
-  --st-primary-rgb: 0, 43, 76;
+  --st-primary: #2743AF;
+  --st-primary-rgb: 39, 67, 175;
 
-  --st-primary-hover: #003a63;
-  --st-primary-dark: #001a2e;
-  --st-primary-light: #5b96b8;
-  --st-primary-soft: #eaf8ff;
+  --st-primary-hover: #1f3693;
+  --st-primary-dark: #182b78;
+  --st-primary-light: #4A9CF0;
+  --st-primary-soft: #edf5fd;
 
   /* Accent */
-  --st-accent: #f59e71;
-  --st-accent-rgb: 245, 158, 113;
+  --st-accent: #3DA5F9;
+  --st-accent-rgb: 61, 165, 249;
 
   /* Navy / Slate */
-  --st-navy: #002b4c;
-  --st-navy-light: #0d3a5c;
+  --st-navy: #2743AF;
+  --st-navy-light: #3654cb;
 
   --st-slate: #1e293b;
   --st-slate-muted: #5b6b8c;
@@ -53,7 +53,7 @@
   --st-danger: #dc2626;
 
   /* Optional semantic blue */
-  --st-info: #0284c7;
+  --st-info: #3DA5F9;
 
   /* =========================================
        Surfaces
@@ -693,13 +693,13 @@ body {
 }
 
 .mesh-blob-1 {
-  width: 55vw;
-  height: 55vw;
-  max-width: 640px;
-  max-height: 640px;
+  width: 50vw;
+  height: 50vw;
+  max-width: 600px;
+  max-height: 600px;
   top: -15%;
   left: -10%;
-  background: radial-gradient(circle, #5b96b8 0%, transparent 70%);
+  background: radial-gradient(circle, #4A9CF0 0%, transparent 70%);
   opacity: 0.55;
 }
 
@@ -710,7 +710,7 @@ body {
   max-height: 560px;
   top: 10%;
   right: -12%;
-  background: radial-gradient(circle, #003a63 0%, transparent 70%);
+  background: radial-gradient(circle, #3DA5F9 0%, transparent 70%);
   opacity: 0.5;
   animation-duration: 26s;
   animation-delay: -6s;
@@ -723,7 +723,7 @@ body {
   max-height: 480px;
   bottom: -18%;
   left: 20%;
-  background: radial-gradient(circle, #002b4c 0%, transparent 70%);
+  background: radial-gradient(circle, #2743AF 0%, transparent 70%);
   opacity: 0.6;
   animation-duration: 30s;
   animation-delay: -12s;
@@ -736,7 +736,7 @@ body {
   max-height: 380px;
   bottom: -5%;
   right: 10%;
-  background: radial-gradient(circle, #f59e71 0%, transparent 70%);
+  background: radial-gradient(circle, #3DA5F9 0%, transparent 70%);
   opacity: 0.4;
   animation-duration: 19s;
   animation-delay: -3s;
@@ -991,7 +991,7 @@ body {
   justify-content: center;
   height: 44px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #5b96b8, #002b4c);
+  background: linear-gradient(135deg, #2743AF, #4A9CF0, #3DA5F9);
   color: #fff;
   font-weight: 700;
   font-size: 0.85rem;
@@ -1048,11 +1048,11 @@ body {
   border-radius: 50%;
   background: conic-gradient(
     from 0deg,
-    #5b96b8,
-    #003a63,
-    #001a2e,
-    #f59e71,
-    #5b96b8
+    #4A9CF0,
+    #2743AF,
+    #182b78,
+    #3DA5F9,
+    #4A9CF0
   );
   animation: orbSpin 6s linear infinite;
   filter: blur(1px);

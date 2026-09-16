@@ -353,10 +353,10 @@ onUnmounted(disposeThree);
 /* Palet lokal "Dark Ocean + Ice + Orange" — sengaja TIDAK pakai var(--st-*) global,
    supaya halaman publik ini punya identitas sendiri, lepas dari tema hijau dashboard admin. */
 .hero-section {
-    --ocean-primary: #002b4c;
-    --ocean-primary-dark: #001a2e;
-    --ocean-primary-light: #5b96b8;
-    --ocean-accent: #f59e71;
+    --ocean-primary: #2743AF;
+    --ocean-primary-dark: #182b78;
+    --ocean-primary-light: #4A9CF0;
+    --ocean-accent: #3DA5F9;
 }
 
 .sr-only-defs {
@@ -407,7 +407,7 @@ onUnmounted(disposeThree);
     max-height: 640px;
     top: -15%;
     left: -10%;
-    background: radial-gradient(circle, #5b96b8 0%, transparent 70%);
+    background: radial-gradient(circle, #4A9CF0 0%, transparent 70%);
     opacity: .7;
 }
 
@@ -418,7 +418,7 @@ onUnmounted(disposeThree);
     max-height: 560px;
     top: 10%;
     right: -12%;
-    background: radial-gradient(circle, #003a63 0%, transparent 70%);
+    background: radial-gradient(circle, #3DA5F9 0%, transparent 70%);
     opacity: .6;
     animation-duration: 26s;
     animation-delay: -6s;
@@ -431,7 +431,7 @@ onUnmounted(disposeThree);
     max-height: 480px;
     bottom: -18%;
     left: 20%;
-    background: radial-gradient(circle, #002b4c 0%, transparent 70%);
+    background: radial-gradient(circle, #2743AF 0%, transparent 70%);
     opacity: .7;
     animation-duration: 30s;
     animation-delay: -12s;
@@ -444,7 +444,7 @@ onUnmounted(disposeThree);
     max-height: 380px;
     bottom: -5%;
     right: 10%;
-    background: radial-gradient(circle, #f59e71 0%, transparent 70%);
+    background: radial-gradient(circle, #3DA5F9 0%, transparent 70%);
     opacity: .55;
     animation-duration: 19s;
     animation-delay: -3s;

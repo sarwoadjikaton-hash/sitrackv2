@@ -348,7 +348,7 @@ const isActive = (path: string, exact = false) =>
     inset: 1rem auto 1rem 1rem;
     width: var(--sidebar-width);
     z-index: 1050;
-    background: linear-gradient(175deg, #0b1739 0%, #0f2b6b 45%, #1d4ed8 110%);
+    background: linear-gradient(175deg, #182b78 0%, #2743AF 45%, #4A9CF0 110%);
     color: #fff;
     border-radius: 2rem;
     transition: width var(--transition), transform var(--transition);
@@ -392,7 +392,7 @@ const isActive = (path: string, exact = false) =>
     top: 50px;
     width: 28px;
     height: 28px;
-    background: #2563eb;
+    background: #3DA5F9;
     color: #fff;
     border: 3px solid #f1f5f9;
     border-radius: 50%;

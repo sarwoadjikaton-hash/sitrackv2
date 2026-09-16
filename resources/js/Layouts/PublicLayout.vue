@@ -110,25 +110,25 @@ const isLoggedIn = computed(() => !!page.props.auth.user);
 
 /* Logo Styling */
 .brand-logo-container {
-    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    background: linear-gradient(135deg, #2743AF, #3DA5F9);
     width: 38px;
     height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 4px 12px rgba(39, 67, 175, 0.25);
 }
 
 .text-primary-dark {
-    color: #002b4c;
+    color: #2743AF;
     font-size: 1.2rem;
 }
 
 /* Nav Pill Buttons */
 .nav-pill-btn {
     text-decoration: none;
-    color: #36566b;
+    color: #475569;
     padding: 8px 16px;
     border-radius: 50px;
     font-weight: 500;
@@ -137,18 +137,18 @@ const isLoggedIn = computed(() => !!page.props.auth.user);
 }
 
 .nav-pill-btn:hover {
-    background: #eaf8ff;
-    color: #002b4c;
+    background: #edf5fd;
+    color: #2743AF;
 }
 
 .nav-pill-btn.active {
-    background: #dff3ff;
-    color: #002b4c;
+    background: #dbeafe;
+    color: #2743AF;
 }
 
 /* Login Button Epic */
 .btn-login-epic {
-    background: #002b4c;
+    background: linear-gradient(135deg, #2743AF, #4A9CF0);
     color: #fff;
     border: none;
     padding: 8px 20px;
@@ -157,12 +157,13 @@ const isLoggedIn = computed(() => !!page.props.auth.user);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
+    box-shadow: 0 4px 14px rgba(39, 67, 175, 0.3);
 }
 
 .btn-login-epic:hover {
-    background: #0f172a;
+    background: linear-gradient(135deg, #1f3693, #3DA5F9);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 18px rgba(39, 67, 175, 0.4);
     color: white;
 }
 

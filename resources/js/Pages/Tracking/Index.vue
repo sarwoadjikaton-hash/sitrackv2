@@ -188,10 +188,10 @@ const handleSearch = () => {
 
 <style scoped>
 .tracking-viewport {
-    --ocean-primary: #002b4c;
-    --ocean-primary-dark: #001a2e;
-    --ocean-primary-light: #5b96b8;
-    --ocean-accent: #f59e71;
+    --ocean-primary: #2743AF;
+    --ocean-primary-dark: #182b78;
+    --ocean-primary-light: #4A9CF0;
+    --ocean-accent: #3DA5F9;
 
     background: #f1f5f9;
     min-height: 100%;
@@ -212,7 +212,7 @@ const handleSearch = () => {
 }
 
 .bg-teal-subtle {
-    background-color: rgba(0, 43, 76, 0.08);
+    background-color: rgba(39, 67, 175, 0.08);
 }
 
 .ls-2 {

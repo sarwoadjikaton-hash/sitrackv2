@@ -173,13 +173,13 @@ const overlayStyle = computed(() => ({
 </template>
 
 <style scoped lang="scss">
-$blue-900: #0b1739;
-$blue-800: #0f2b6b;
-$blue-600: #1d4ed8;
-$blue-500: #2563eb;
-$teal-500: #14b8a6;
-$teal-400: #2dd4bf;
-$teal-300: #5eead4;
+$blue-900: #182b78;
+$blue-800: #2743AF;
+$blue-600: #2743AF;
+$blue-500: #4A9CF0;
+$teal-500: #3DA5F9;
+$teal-400: #3DA5F9;
+$teal-300: #7ec5fc;
 
 .auth-shell {
     position: relative;
@@ -188,8 +188,8 @@ $teal-300: #5eead4;
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Gradient blue -> teal */
-    background: linear-gradient(160deg, $blue-900 0%, $blue-800 35%, $blue-500 65%, $teal-500 100%);
+    /* Gradient blue royal -> sky */
+    background: linear-gradient(160deg, $blue-900 0%, $blue-800 35%, $blue-500 70%, $teal-500 100%);
     padding: 2rem 1rem;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
