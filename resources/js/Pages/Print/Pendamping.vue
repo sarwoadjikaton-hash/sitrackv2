@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { Letter } from '@/types';
 import axios from 'axios';
 
 const props = defineProps<{
     letter: Letter;
     qrCodeBase64: string;
+    signaturePath?: string | null;
+    receiverName?: string | null;
 }>();
 
 // Checkboxes state
@@ -24,13 +26,19 @@ const toggleAction = (action: string) => {
 
 const isChecked = (action: string) => tempActions.value.includes(action);
 
-// --- Digital Signature Canvas ---
+// --- Digital Signature State ---
+const currentSignaturePath = ref<string | null>(
+    props.signaturePath ||
+    (props.letter.attachment_path && (props.letter.attachment_path.includes('signatures/') || props.letter.attachment_path.includes('sig_')) ? props.letter.attachment_path : null)
+);
+const receiverName = ref(props.receiverName || props.letter.sender_name || '');
+const isEditingSignature = ref(!currentSignaturePath.value);
+
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const isDrawing = ref(false);
 const hasSignature = ref(false);
 const isSaving = ref(false);
 const saveSuccessMessage = ref('');
-const receiverName = ref('');
 
 let ctx: CanvasRenderingContext2D | null = null;
 
@@ -44,6 +52,18 @@ const initCanvas = () => {
     ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+};
+
+const openSignatureCanvas = () => {
+    isEditingSignature.value = true;
+    hasSignature.value = false;
+    nextTick(() => {
+        initCanvas();
+    });
+};
+
+const cancelEditSignature = () => {
+    isEditingSignature.value = false;
 };
 
 const startDrawing = (e: MouseEvent | TouchEvent) => {
@@ -95,6 +115,8 @@ const saveDigitalSignature = async () => {
         });
 
         if (res.data.ok) {
+            currentSignaturePath.value = res.data.attachment_path;
+            isEditingSignature.value = false;
             saveSuccessMessage.value = '✓ Tanda tangan berhasil disimpan & status diubah menjadi "Dokumen Sudah diambil"!';
             setTimeout(() => {
                 saveSuccessMessage.value = '';
@@ -108,7 +130,9 @@ const saveDigitalSignature = async () => {
 };
 
 onMounted(() => {
-    initCanvas();
+    if (isEditingSignature.value) {
+        initCanvas();
+    }
 });
 
 const printPage = () => window.print();
@@ -123,27 +147,49 @@ const goBack = () => window.history.back();
         <div class="container-fluid d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="toolbar-info">
                 <h6 class="mb-0 fw-bold text-dark">Format Pendamping: {{ letter.agenda_number || letter.tracking_code }}</h6>
-                <small class="text-muted">Tanda tangani langsung di layar, klik teks untuk edit, lalu klik Simpan atau Cetak.</small>
+                <small class="text-muted">
+                    <span v-if="currentSignaturePath" class="text-success fw-semibold">✓ Lembar Pendamping sudah bertanda tangan / diparaf. </span>
+                    <span v-else>Tanda tangani langsung di layar, lalu klik Simpan atau Cetak.</span>
+                </small>
             </div>
             <div class="toolbar-actions d-flex align-items-center gap-2 flex-wrap">
-                <button
-                    type="button"
-                    class="btn btn-outline-danger btn-sm"
-                    title="Hapus coretan tanda tangan"
-                    @click="clearSignature"
-                >
-                    <i class="bi bi-eraser me-1"></i> Hapus TTD
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-success btn-sm fw-bold px-3 d-flex align-items-center gap-1"
-                    :disabled="isSaving || !hasSignature"
-                    @click="saveDigitalSignature"
-                >
-                    <span v-if="isSaving" class="spinner-border spinner-border-sm me-1"></span>
-                    <i v-else class="bi bi-check2-circle"></i>
-                    Simpan TTD & Ambil Dokumen
-                </button>
+                <template v-if="isEditingSignature">
+                    <button
+                        type="button"
+                        class="btn btn-outline-danger btn-sm"
+                        title="Hapus coretan tanda tangan"
+                        @click="clearSignature"
+                    >
+                        <i class="bi bi-eraser me-1"></i> Hapus Coretan
+                    </button>
+                    <button
+                        v-if="currentSignaturePath"
+                        type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        @click="cancelEditSignature"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-success btn-sm fw-bold px-3 d-flex align-items-center gap-1"
+                        :disabled="isSaving || !hasSignature"
+                        @click="saveDigitalSignature"
+                    >
+                        <span v-if="isSaving" class="spinner-border spinner-border-sm me-1"></span>
+                        <i v-else class="bi bi-check2-circle"></i>
+                        Simpan TTD & Ambil Dokumen
+                    </button>
+                </template>
+                <template v-else>
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        @click="openSignatureCanvas"
+                    >
+                        <i class="bi bi-pen me-1"></i> Ubah / TTD Ulang
+                    </button>
+                </template>
                 <button @click="printPage" class="btn btn-primary-blue btn-sm px-4 fw-bold">
                     <i class="bi bi-printer me-1"></i> Cetak Dokumen
                 </button>
@@ -218,14 +264,19 @@ const goBack = () => window.history.back();
                 </div>
             </div>
 
-            <!-- Receiver Signature Area (With Canvas TTD Langsung) -->
+            <!-- Receiver Signature Area (With Existing TTD Image or Canvas) -->
             <div class="receiver-area">
                 <p class="mb-1 text-center small fw-bold">
                     Yang Menerima Surat :
                 </p>
 
-                <!-- Interactive Signature Canvas -->
-                <div class="signature-canvas-box position-relative">
+                <!-- If already signed and not currently drawing new one -->
+                <div v-if="currentSignaturePath && !isEditingSignature" class="signature-display-box position-relative">
+                    <img :src="`/storage/${currentSignaturePath}`" alt="Tanda Tangan Penerima" class="signature-img" />
+                </div>
+
+                <!-- Interactive Signature Canvas (When signing / re-signing) -->
+                <div v-else class="signature-canvas-box position-relative">
                     <canvas
                         ref="canvasRef"
                         width="200"
@@ -245,7 +296,7 @@ const goBack = () => window.history.back();
                 </div>
 
                 <div class="text-center mt-2">
-                    <p class="mb-0 text-center small text-dark" contenteditable="true">
+                    <p class="mb-0 text-center small text-dark" contenteditable="true" @input="receiverName = ($event.target as HTMLElement).innerText">
                         ( {{ receiverName ? receiverName : '....................................' }} )
                     </p>
                 </div>
@@ -423,6 +474,21 @@ const goBack = () => window.history.back();
     align-items: center;
     justify-content: center;
     cursor: crosshair;
+}
+
+.signature-display-box {
+    width: 200px;
+    height: 85px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.signature-img {
+    max-width: 195px;
+    max-height: 80px;
+    object-fit: contain;
 }
 
 .signature-canvas {

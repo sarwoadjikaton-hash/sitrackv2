@@ -91,9 +91,14 @@ const handleSearch = () => {
                                         </div>
                                         <!-- Lembar Pendamping Resmi (Lajur Tindak Lanjut / Semua Naskah Dinas) -->
                                         <div v-if="letter.process_lane === 'signature' || !letter.process_lane" class="meta-box mb-3 p-3 rounded-3 border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
-                                            <label class="d-flex align-items-center gap-1 text-success fw-bold mb-2">
-                                                <i class="bi bi-file-earmark-check fs-6"></i> Lembar Pendamping Resmi
-                                            </label>
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <label class="d-flex align-items-center gap-1 text-success fw-bold mb-0">
+                                                    <i class="bi bi-file-earmark-check fs-6"></i> Lembar Pendamping Resmi
+                                                </label>
+                                                <span v-if="letter.status === 'Dokumen Sudah diambil' || (letter.attachment_path && letter.attachment_path.includes('sig_'))" class="badge bg-success text-white small" style="font-size: 10px;">
+                                                    <i class="bi bi-check2-circle me-1"></i>Sudah Bertanda Tangan
+                                                </span>
+                                            </div>
                                             <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2">
                                                 <div class="d-flex align-items-center gap-2 overflow-hidden">
                                                     <i class="bi bi-file-earmark-pdf text-success fs-3"></i>
@@ -104,13 +109,13 @@ const handleSearch = () => {
                                                 </div>
                                                 <a :href="`/cetak/pendamping/${letter.id}`" target="_blank"
                                                     class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 px-3 py-1 text-nowrap fw-semibold">
-                                                    <i class="bi bi-printer"></i> Buka Lembar Pendamping
+                                                    <i class="bi bi-file-earmark-check"></i> Buka Lembar Pendamping
                                                 </a>
                                             </div>
                                         </div>
 
-                                        <!-- Lampiran Berkas Naskah Digital (Bila ada dokumen asli yang diupload) -->
-                                        <div v-if="letter.attachment_path && !letter.attachment_path.includes('signatures/')" class="meta-box mb-3 p-3 rounded-3 border" style="background: #f8fafc;">
+                                        <!-- Lampiran Berkas Naskah Digital (Bila ada dokumen asli yang diupload, BUKAN file tanda tangan) -->
+                                        <div v-if="letter.attachment_path && !letter.attachment_path.includes('signatures/') && !letter.attachment_path.includes('sig_')" class="meta-box mb-3 p-3 rounded-3 border" style="background: #f8fafc;">
                                             <label class="d-flex align-items-center gap-1 text-primary fw-bold mb-2">
                                                 <i class="bi bi-paperclip fs-6"></i> Lampiran Berkas Naskah
                                             </label>
@@ -140,11 +145,12 @@ const handleSearch = () => {
                                                     class="d-flex flex-column flex-sm-row justify-content-between gap-1">
                                                     <h6 class="fw-bold mb-1 text-dark">{{ log.status }}</h6>
                                                     <small class="text-muted">{{ new
-                                                        Date(log.changed_at).toLocaleDateString('id-ID') }}</small>
+                                                         Date(log.changed_at).toLocaleDateString('id-ID') }}</small>
                                                 </div>
                                                 <div class="small text-teal fw-semibold mb-1">{{ log.position }}</div>
                                                 <p class="small text-muted mb-0">{{ log.note }}</p>
-                                                <div v-if="log.attachment_path" class="mt-2 p-2 rounded-2 bg-light border d-flex align-items-center justify-content-between gap-2">
+                                                <!-- Lampiran Dokumen Asli (Hanya jika BUKAN file raw tanda tangan) -->
+                                                <div v-if="log.attachment_path && !log.attachment_path.includes('signatures/') && !log.attachment_path.includes('sig_')" class="mt-2 p-2 rounded-2 bg-light border d-flex align-items-center justify-content-between gap-2">
                                                     <div class="d-flex align-items-center gap-2 overflow-hidden">
                                                         <i class="bi bi-paperclip text-primary fs-5"></i>
                                                         <span class="small text-truncate fw-semibold text-dark" style="max-width: 220px;" :title="log.attachment_name || log.attachment_path.split('/').pop()">

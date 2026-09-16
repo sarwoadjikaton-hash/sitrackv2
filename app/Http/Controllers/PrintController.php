@@ -38,9 +38,36 @@ class PrintController extends Controller
         $qrSvg = QrCode::size(200)->generate($trackingUrl);
         $qrCodeBase64 = 'data:image/svg+xml;base64,' . base64_encode($qrSvg);
 
+        // Find existing signature if available
+        $signaturePath = null;
+        $receiverName = null;
+
+        if ($letter->attachment_path && (str_contains($letter->attachment_path, 'signatures/') || str_contains($letter->attachment_path, 'sig_'))) {
+            $signaturePath = $letter->attachment_path;
+        }
+
+        if (!$signaturePath && $letter->statusLogs) {
+            $sigLog = $letter->statusLogs->sortByDesc('id')->first(function ($log) {
+                return $log->attachment_path && (str_contains($log->attachment_path, 'signatures/') || str_contains($log->attachment_path, 'sig_'));
+            });
+            if ($sigLog) {
+                $signaturePath = $sigLog->attachment_path;
+            }
+        }
+
+        $takenLog = $letter->statusLogs->sortByDesc('id')->first(fn($log) => $log->status === 'Dokumen Sudah diambil');
+        if ($takenLog && preg_match('/diambil oleh (.*?) dengan tanda tangan/i', $takenLog->note, $matches)) {
+            $receiverName = trim($matches[1]);
+        }
+        if (!$receiverName) {
+            $receiverName = $letter->sender_name;
+        }
+
         return Inertia::render('Print/Pendamping', [
             'letter' => $letter,
             'qrCodeBase64' => $qrCodeBase64,
+            'signaturePath' => $signaturePath,
+            'receiverName' => $receiverName,
         ]);
     }
 
