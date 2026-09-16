@@ -31,7 +31,7 @@ const currentSignaturePath = ref<string | null>(
     props.signaturePath ||
     (props.letter.attachment_path && (props.letter.attachment_path.includes('signatures/') || props.letter.attachment_path.includes('sig_')) ? props.letter.attachment_path : null)
 );
-const receiverName = ref(props.receiverName || '');
+const receiverName = ref('');
 const isEditingSignature = ref(!currentSignaturePath.value);
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);

@@ -55,13 +55,8 @@ class PrintController extends Controller
             }
         }
 
-        $takenLog = $letter->statusLogs->sortByDesc('id')->first(fn($log) => $log->status === 'Dokumen Sudah diambil');
-        if ($takenLog && preg_match('/diambil oleh (.*?) dengan tanda tangan/i', $takenLog->note, $matches)) {
-            $matchedName = trim($matches[1]);
-            if ($matchedName !== 'Sekretaris Jenderal' && $matchedName !== 'Penerima Berkas') {
-                $receiverName = $matchedName;
-            }
-        }
+        // Receiver name for signature is intentionally left empty so it displays dots ( .................................... )
+        $receiverName = null;
 
         return Inertia::render('Print/Pendamping', [
             'letter' => $letter,
@@ -99,7 +94,7 @@ class PrintController extends Controller
         $filename = 'signatures/sig_' . $letter->id . '_' . time() . '.' . $type;
         \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $data);
 
-        $receiverName = $request->input('receiver_name') ?: $letter->sender_name ?: 'Penerima Berkas';
+        $receiverName = $request->input('receiver_name') ?: 'Penerima Berkas';
 
         // Update letter attachment_path
         $updates = [
