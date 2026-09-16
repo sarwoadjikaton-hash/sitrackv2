@@ -244,8 +244,8 @@ const toggleAction = (actionName: string) => {
 
             <!-- UNIT DISPOSISI (2 KOLOM CHECKBOX) -->
             <div class="units-container d-flex border-top border-dark">
-                <!-- KOLOM KIRI (10 Unit + 1 Custom Line) -->
-                <div class="units-col left-col flex-fill p-2 border-end border-dark">
+                <!-- KOLOM KIRI (10 Unit) -->
+                <div class="units-col left-col flex-fill p-2">
                     <div
                         v-for="u in leftColumnUnits"
                         :key="u"
