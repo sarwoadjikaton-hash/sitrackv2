@@ -25,8 +25,6 @@ let resizeObserver: ResizeObserver | null = null;
 const floaters: { mesh: THREE.Object3D; speed: number; offset: number; baseY: number; rotSpeed: number }[] = [];
 let mailboxGroup: THREE.Group | null = null;
 let laserBeam: THREE.Mesh | null = null;
-let holoRing1: THREE.Mesh | null = null;
-let holoRing2: THREE.Mesh | null = null;
 let particles: THREE.Points | null = null;
 
 // Mouse tracking for subtle interactive parallax
@@ -174,21 +172,6 @@ function createMailbox(): THREE.Group {
     );
     hudBar.position.set(0, -0.35, 1.15);
     group.add(hudBar);
-
-    // 8. Floating Holographic Rings
-    const ringGeo1 = new THREE.TorusGeometry(1.9, 0.025, 16, 60);
-    holoRing1 = new THREE.Mesh(ringGeo1, glowingMaterial(0x3DA5F9, 0.9));
-    holoRing1.rotation.x = Math.PI / 3;
-    holoRing1.rotation.y = 0.2;
-    holoRing1.position.y = 0.2;
-    group.add(holoRing1);
-
-    const ringGeo2 = new THREE.TorusGeometry(2.1, 0.018, 16, 60);
-    holoRing2 = new THREE.Mesh(ringGeo2, glowingMaterial(0x4A9CF0, 0.7));
-    holoRing2.rotation.x = -Math.PI / 4;
-    holoRing2.rotation.y = -0.3;
-    holoRing2.position.y = 0.2;
-    group.add(holoRing2);
 
     return group;
 }
@@ -394,10 +377,6 @@ function initThree() {
             mailboxGroup.rotation.x = mouseY * 0.08;
         }
 
-        // Hologram rotation
-        if (holoRing1) holoRing1.rotation.z += 0.006;
-        if (holoRing2) holoRing2.rotation.z -= 0.004;
-
         // Laser scanner pulsation
         if (laserBeam) {
             laserBeam.position.y = 0.65 + Math.sin(t * 3.5) * 0.04;
@@ -462,8 +441,6 @@ function disposeThree() {
     camera = null;
     mailboxGroup = null;
     laserBeam = null;
-    holoRing1 = null;
-    holoRing2 = null;
     particles = null;
     floaters.length = 0;
 }
