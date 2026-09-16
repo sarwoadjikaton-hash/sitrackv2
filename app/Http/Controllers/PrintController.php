@@ -57,10 +57,10 @@ class PrintController extends Controller
 
         $takenLog = $letter->statusLogs->sortByDesc('id')->first(fn($log) => $log->status === 'Dokumen Sudah diambil');
         if ($takenLog && preg_match('/diambil oleh (.*?) dengan tanda tangan/i', $takenLog->note, $matches)) {
-            $receiverName = trim($matches[1]);
-        }
-        if (!$receiverName) {
-            $receiverName = $letter->sender_name;
+            $matchedName = trim($matches[1]);
+            if ($matchedName !== 'Sekretaris Jenderal' && $matchedName !== 'Penerima Berkas') {
+                $receiverName = $matchedName;
+            }
         }
 
         return Inertia::render('Print/Pendamping', [
