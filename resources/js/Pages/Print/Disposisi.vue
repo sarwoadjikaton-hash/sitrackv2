@@ -279,12 +279,12 @@ const toggleAction = (actionName: string) => {
             <div class="bottom-section d-flex border-top border-dark">
                 <!-- LAJUR DISPOSISI (KIRI: 2 SUB-KOLOM CHECKBOX) -->
                 <div class="lajur-box border-end border-dark p-2" style="width: 52%;">
-                    <div class="lajur-header text-center fw-bold border-bottom border-dark pb-1 mb-2">
+                    <div class="lajur-header text-center fw-bold pb-1 mb-2">
                         LAJUR DISPOSISI
                     </div>
                     <div class="d-flex">
                         <!-- Sub Kolom 1 -->
-                        <div class="lajur-subcol flex-fill pe-2 border-end border-dark">
+                        <div class="lajur-subcol flex-fill pe-2">
                             <div
                                 v-for="act in lajurActionsLeft"
                                 :key="act"
