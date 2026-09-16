@@ -175,29 +175,7 @@ function createMailbox(): THREE.Group {
     hudBar.position.set(0, -0.35, 1.15);
     group.add(hudBar);
 
-    // 8. Sleek Smart Antenna / High-Gain Flag
-    const antennaPole = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.035, 0.045, 1.2, 16),
-        metallicMaterial(0x4A9CF0, 0.2, 0.8)
-    );
-    antennaPole.position.set(1.25, 0.85, 0);
-    group.add(antennaPole);
-
-    const antennaFlag = new THREE.Mesh(
-        new RoundedBoxGeometry(0.48, 0.32, 0.04, 3, 0.05),
-        glowingMaterial(0x3DA5F9, 0.85)
-    );
-    antennaFlag.position.set(1.52, 1.25, 0);
-    group.add(antennaFlag);
-
-    const antennaBeacon = new THREE.Mesh(
-        new THREE.SphereGeometry(0.08, 16, 16),
-        glowingMaterial(0xffffff, 1.5)
-    );
-    antennaBeacon.position.set(1.25, 1.48, 0);
-    group.add(antennaBeacon);
-
-    // 9. Floating Holographic Rings
+    // 8. Floating Holographic Rings
     const ringGeo1 = new THREE.TorusGeometry(1.9, 0.025, 16, 60);
     holoRing1 = new THREE.Mesh(ringGeo1, glowingMaterial(0x3DA5F9, 0.9));
     holoRing1.rotation.x = Math.PI / 3;
@@ -315,11 +293,19 @@ function createParticles(): THREE.Points {
     return new THREE.Points(geometry, material);
 }
 
+let isVisible = true;
+let intersectionObserver: IntersectionObserver | null = null;
+
+const onVisibilityChange = () => {
+    isVisible = !document.hidden;
+};
+
 function initThree() {
     if (!threeContainer.value) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     window.addEventListener('mousemove', onMouseMove, { passive: true });
+    document.addEventListener('visibilitychange', onVisibilityChange, { passive: true });
 
     const el = threeContainer.value;
     const width = el.clientWidth || 1;
@@ -330,9 +316,9 @@ function initThree() {
     camera.position.set(2.2, 1.4, 9.2);
     camera.lookAt(2, 0, 0);
 
-    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'default' });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
     el.appendChild(renderer.domElement);
@@ -392,6 +378,7 @@ function initThree() {
 
     const animate = (now = 0) => {
         animationId = requestAnimationFrame(animate);
+        if (!isVisible) return;
         if (now - lastFrameTime < frameInterval) return;
         lastFrameTime = now;
         const t = clock.getElapsedTime();
@@ -433,6 +420,13 @@ function initThree() {
     };
     animate();
 
+    intersectionObserver = new IntersectionObserver((entries) => {
+        if (entries[0]) {
+            isVisible = entries[0].isIntersecting && !document.hidden;
+        }
+    }, { threshold: 0.05 });
+    intersectionObserver.observe(el);
+
     resizeObserver = new ResizeObserver(() => {
         if (!renderer || !camera || !el) return;
         const w = el.clientWidth || 1;
@@ -446,7 +440,9 @@ function initThree() {
 
 function disposeThree() {
     window.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
     if (animationId !== null) cancelAnimationFrame(animationId);
+    intersectionObserver?.disconnect();
     resizeObserver?.disconnect();
     if (scene) {
         scene.traverse((obj) => {
