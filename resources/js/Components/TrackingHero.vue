@@ -15,194 +15,419 @@ const handleSubmit = () => {
     emit('search');
 };
 
-// ===== 3D Hero: Mailbox + elemen melayang =====
+// ===== 3D Hero: Smart Futuristic Postal Hub & Floating Documents =====
 const threeContainer = ref<HTMLDivElement | null>(null);
 let renderer: THREE.WebGLRenderer | null = null;
 let scene: THREE.Scene | null = null;
 let camera: THREE.PerspectiveCamera | null = null;
 let animationId: number | null = null;
 let resizeObserver: ResizeObserver | null = null;
-const floaters: { mesh: THREE.Object3D; speed: number; offset: number; baseY: number }[] = [];
-let mailbox: THREE.Group | null = null;
+const floaters: { mesh: THREE.Object3D; speed: number; offset: number; baseY: number; rotSpeed: number }[] = [];
+let mailboxGroup: THREE.Group | null = null;
+let laserBeam: THREE.Mesh | null = null;
+let holoRing1: THREE.Mesh | null = null;
+let holoRing2: THREE.Mesh | null = null;
+let particles: THREE.Points | null = null;
 
-function softMaterial(color: number, _opts: Record<string, unknown> = {}) {
+// Mouse tracking for subtle interactive parallax
+let mouseX = 0;
+let mouseY = 0;
+let targetMouseX = 0;
+let targetMouseY = 0;
+
+const onMouseMove = (e: MouseEvent) => {
+    const { innerWidth, innerHeight } = window;
+    targetMouseX = (e.clientX / innerWidth - 0.5) * 2;
+    targetMouseY = (e.clientY / innerHeight - 0.5) * 2;
+};
+
+function metallicMaterial(color: number, roughness = 0.25, metalness = 0.6) {
     return new THREE.MeshStandardMaterial({
         color,
-        roughness: 0.55,
-        metalness: 0.05,
+        roughness,
+        metalness,
     });
 }
 
-// Objek hero besar: kotak pos membulat
+function glowingMaterial(color: number, intensity = 0.6) {
+    return new THREE.MeshStandardMaterial({
+        color,
+        emissive: color,
+        emissiveIntensity: intensity,
+        roughness: 0.2,
+        metalness: 0.1,
+    });
+}
+
+function glassMaterial(color: number, opacity = 0.85) {
+    return new THREE.MeshPhysicalMaterial({
+        color,
+        transparent: true,
+        opacity,
+        roughness: 0.15,
+        metalness: 0.1,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.1,
+        transmission: 0.3,
+        ior: 1.4,
+    });
+}
+
+// Objek hero utama: Smart Cyber Mailbox / Postal Vault
 function createMailbox(): THREE.Group {
     const group = new THREE.Group();
 
-    const body = new THREE.Mesh(
-        new RoundedBoxGeometry(2.4, 2.7, 2.2, 6, 0.5),
-        softMaterial(0xf7fafc, { clearcoat: 0.8, clearcoatRoughness: 0.15 })
+    // 1. Magnetic Floating Base Pedestal (Glowing Cyber Ring)
+    const baseRing = new THREE.Mesh(
+        new THREE.CylinderGeometry(1.6, 1.8, 0.18, 32),
+        metallicMaterial(0x182b78, 0.3, 0.8)
     );
-    body.position.y = 0.2;
-    group.add(body);
+    baseRing.position.y = -1.45;
+    group.add(baseRing);
 
-    // Slot surat (celah gelap di badan)
-    const slot = new THREE.Mesh(
-        new RoundedBoxGeometry(1.1, 0.16, 0.1, 3, 0.06),
-        new THREE.MeshStandardMaterial({ color: 0x0b1120, roughness: 0.6 })
+    const baseGlowRing = new THREE.Mesh(
+        new THREE.TorusGeometry(1.5, 0.05, 16, 40),
+        glowingMaterial(0x3DA5F9, 1.2)
     );
-    slot.position.set(0, 0.6, 1.11);
-    group.add(slot);
+    baseGlowRing.rotation.x = Math.PI / 2;
+    baseGlowRing.position.y = -1.35;
+    group.add(baseGlowRing);
 
-    // Bendera aksen oranye di sisi
-    const flagPole = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.04, 0.04, 0.9, 8),
-        softMaterial(0xeaf8ff)
+    // 2. Main Body Chassis - Deep Indigo Navy with Glossy Chamfers
+    const chassis = new THREE.Mesh(
+        new RoundedBoxGeometry(2.3, 2.7, 2.1, 8, 0.4),
+        metallicMaterial(0x2743AF, 0.2, 0.35)
     );
-    flagPole.position.set(1.35, 0.7, 0);
-    group.add(flagPole);
+    chassis.position.y = 0.15;
+    group.add(chassis);
 
-    const flag = new THREE.Mesh(
-        new RoundedBoxGeometry(0.5, 0.35, 0.04, 2, 0.05),
-        softMaterial(0xf59e71, { clearcoat: 0.7, emissive: 0xf59e71, emissiveIntensity: 0.08 })
+    // 3. Front Faceplate - Frosted High-Tech Glass Panel
+    const frontPanel = new THREE.Mesh(
+        new RoundedBoxGeometry(1.9, 2.3, 0.12, 6, 0.2),
+        glassMaterial(0xf8fafc, 0.92)
     );
-    flag.position.set(1.6, 1.05, 0);
-    group.add(flag);
+    frontPanel.position.set(0, 0.15, 1.05);
+    group.add(frontPanel);
 
-    // Jendela/lubang lengkung kecil bernuansa biru (aksen kaca)
-    const window_ = new THREE.Mesh(
-        new THREE.CircleGeometry(0.4, 24),
+    // 4. Inset Mail Intake Slot (Metallic Frame + Dark Chasm)
+    const slotFrame = new THREE.Mesh(
+        new RoundedBoxGeometry(1.35, 0.32, 0.08, 4, 0.08),
+        metallicMaterial(0x182b78, 0.2, 0.7)
+    );
+    slotFrame.position.set(0, 0.65, 1.12);
+    group.add(slotFrame);
+
+    const slotOpening = new THREE.Mesh(
+        new RoundedBoxGeometry(1.18, 0.14, 0.15, 3, 0.04),
+        new THREE.MeshStandardMaterial({ color: 0x070d1e, roughness: 0.9 })
+    );
+    slotOpening.position.set(0, 0.65, 1.13);
+    group.add(slotOpening);
+
+    // 5. Laser Scanning Light Beam
+    const beamGeo = new THREE.PlaneGeometry(1.15, 0.04);
+    const beamMat = new THREE.MeshBasicMaterial({
+        color: 0x3DA5F9,
+        transparent: true,
+        opacity: 0.9,
+        side: THREE.DoubleSide,
+    });
+    laserBeam = new THREE.Mesh(beamGeo, beamMat);
+    laserBeam.position.set(0, 0.65, 1.15);
+    group.add(laserBeam);
+
+    // 6. Letter entering the slot halfway (Glowing Paper with Seal)
+    const activeLetter = new THREE.Mesh(
+        new RoundedBoxGeometry(0.85, 0.55, 0.03, 3, 0.02),
+        glassMaterial(0xffffff, 0.95)
+    );
+    activeLetter.rotation.x = -0.35;
+    activeLetter.position.set(0, 0.72, 1.05);
+    group.add(activeLetter);
+
+    const activeLetterSeal = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.08, 0.08, 0.04, 16),
+        glowingMaterial(0x3DA5F9, 0.9)
+    );
+    activeLetterSeal.rotation.x = -0.35;
+    activeLetterSeal.position.set(0, 0.78, 1.18);
+    group.add(activeLetterSeal);
+
+    // 7. Interactive Digital LED Status Display on Lower Panel
+    const ledScreen = new THREE.Mesh(
+        new RoundedBoxGeometry(1.4, 0.65, 0.04, 4, 0.06),
         new THREE.MeshStandardMaterial({
-            color: 0x5b96b8,
-            roughness: 0.2,
-            metalness: 0.1,
-            transparent: true,
-            opacity: 0.75,
+            color: 0x091436,
+            emissive: 0x182b78,
+            emissiveIntensity: 0.4,
+            roughness: 0.1,
+            metalness: 0.8,
         })
     );
-    window_.position.set(-0.6, 0.3, 1.101);
-    group.add(window_);
+    ledScreen.position.set(0, -0.35, 1.12);
+    group.add(ledScreen);
+
+    // HUD Indicator Bar
+    const hudBar = new THREE.Mesh(
+        new RoundedBoxGeometry(0.9, 0.08, 0.03, 2, 0.02),
+        glowingMaterial(0x3DA5F9, 1.1)
+    );
+    hudBar.position.set(0, -0.35, 1.15);
+    group.add(hudBar);
+
+    // 8. Sleek Smart Antenna / High-Gain Flag
+    const antennaPole = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.035, 0.045, 1.2, 16),
+        metallicMaterial(0x4A9CF0, 0.2, 0.8)
+    );
+    antennaPole.position.set(1.25, 0.85, 0);
+    group.add(antennaPole);
+
+    const antennaFlag = new THREE.Mesh(
+        new RoundedBoxGeometry(0.48, 0.32, 0.04, 3, 0.05),
+        glowingMaterial(0x3DA5F9, 0.85)
+    );
+    antennaFlag.position.set(1.52, 1.25, 0);
+    group.add(antennaFlag);
+
+    const antennaBeacon = new THREE.Mesh(
+        new THREE.SphereGeometry(0.08, 16, 16),
+        glowingMaterial(0xffffff, 1.5)
+    );
+    antennaBeacon.position.set(1.25, 1.48, 0);
+    group.add(antennaBeacon);
+
+    // 9. Floating Holographic Rings
+    const ringGeo1 = new THREE.TorusGeometry(1.9, 0.025, 16, 60);
+    holoRing1 = new THREE.Mesh(ringGeo1, glowingMaterial(0x3DA5F9, 0.9));
+    holoRing1.rotation.x = Math.PI / 3;
+    holoRing1.rotation.y = 0.2;
+    holoRing1.position.y = 0.2;
+    group.add(holoRing1);
+
+    const ringGeo2 = new THREE.TorusGeometry(2.1, 0.018, 16, 60);
+    holoRing2 = new THREE.Mesh(ringGeo2, glowingMaterial(0x4A9CF0, 0.7));
+    holoRing2.rotation.x = -Math.PI / 4;
+    holoRing2.rotation.y = -0.3;
+    holoRing2.position.y = 0.2;
+    group.add(holoRing2);
 
     return group;
 }
 
-function createEnvelope(color: number): THREE.Group {
+// 3D Glass Floating Envelope with Seal
+function createEnvelope(bodyColor: number, sealColor: number): THREE.Group {
     const group = new THREE.Group();
     const body = new THREE.Mesh(
-        new RoundedBoxGeometry(0.9, 0.6, 0.06, 3, 0.06),
-        softMaterial(color)
+        new RoundedBoxGeometry(0.95, 0.65, 0.06, 4, 0.06),
+        glassMaterial(bodyColor, 0.92)
     );
     group.add(body);
 
     const flapShape = new THREE.Shape();
-    flapShape.moveTo(-0.45, 0.3);
-    flapShape.lineTo(0.45, 0.3);
-    flapShape.lineTo(0, -0.05);
-    flapShape.lineTo(-0.45, 0.3);
+    flapShape.moveTo(-0.47, 0.32);
+    flapShape.lineTo(0.47, 0.32);
+    flapShape.lineTo(0, -0.06);
+    flapShape.lineTo(-0.47, 0.32);
     const flap = new THREE.Mesh(
-        new THREE.ExtrudeGeometry(flapShape, { depth: 0.02, bevelEnabled: false }),
-        softMaterial(0xf59e71, { clearcoat: 0.7 })
+        new THREE.ExtrudeGeometry(flapShape, { depth: 0.025, bevelEnabled: false }),
+        metallicMaterial(bodyColor, 0.25, 0.4)
     );
     flap.position.z = 0.031;
     group.add(flap);
 
+    const seal = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.09, 0.09, 0.04, 20),
+        glowingMaterial(sealColor, 0.9)
+    );
+    seal.rotation.x = Math.PI / 2;
+    seal.position.set(0, -0.05, 0.055);
+    group.add(seal);
+
     return group;
 }
 
-function createDocumentStack(color: number): THREE.Group {
+// Floating Official Document Stack
+function createDocumentStack(): THREE.Group {
     const group = new THREE.Group();
+    const colors = [0x2743AF, 0x4A9CF0, 0xffffff];
     for (let i = 0; i < 3; i++) {
         const sheet = new THREE.Mesh(
-            new RoundedBoxGeometry(0.7, 0.9, 0.02, 2, 0.03),
-            softMaterial(i === 0 ? color : 0xffffff, { clearcoat: 0.3 })
+            new RoundedBoxGeometry(0.75, 0.95, 0.025, 3, 0.03),
+            glassMaterial(colors[i], 0.94)
         );
-        sheet.position.set(i * 0.03, -i * 0.02, i * 0.025);
+        sheet.position.set(i * 0.04, -i * 0.03, i * 0.035);
+        sheet.rotation.z = (i - 1) * 0.08;
         group.add(sheet);
     }
     return group;
 }
 
-function createStamp(): THREE.Group {
+// Security Shield / Verification Badge
+function createSecurityShield(): THREE.Group {
     const group = new THREE.Group();
-    const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(0.38, 0.07, 12, 28),
-        softMaterial(0xf59e71, { clearcoat: 0.8, emissive: 0xf59e71, emissiveIntensity: 0.12 })
+    const shieldShape = new THREE.Shape();
+    shieldShape.moveTo(0, 0.5);
+    shieldShape.lineTo(0.35, 0.35);
+    shieldShape.lineTo(0.35, -0.15);
+    shieldShape.quadraticCurveTo(0.2, -0.45, 0, -0.55);
+    shieldShape.quadraticCurveTo(-0.2, -0.45, -0.35, -0.15);
+    shieldShape.lineTo(-0.35, 0.35);
+    shieldShape.lineTo(0, 0.5);
+
+    const shield = new THREE.Mesh(
+        new THREE.ExtrudeGeometry(shieldShape, { depth: 0.08, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 0.03, bevelThickness: 0.03 }),
+        metallicMaterial(0x2743AF, 0.2, 0.7)
     );
-    group.add(ring);
+    group.add(shield);
+
     const core = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.28, 0.28, 0.06, 28),
-        softMaterial(0xffffff)
+        new THREE.SphereGeometry(0.16, 20, 20),
+        glowingMaterial(0x3DA5F9, 1.2)
     );
-    core.rotation.x = Math.PI / 2;
+    core.position.z = 0.08;
     group.add(core);
+
     return group;
+}
+
+// Particle Constellation Effect
+function createParticles(): THREE.Points {
+    const particleCount = 45;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+
+    for (let i = 0; i < particleCount * 3; i += 3) {
+        positions[i] = (Math.random() - 0.3) * 12;
+        positions[i + 1] = (Math.random() - 0.5) * 8;
+        positions[i + 2] = (Math.random() - 0.5) * 6;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+        color: 0x3DA5F9,
+        size: 0.08,
+        transparent: true,
+        opacity: 0.65,
+        blending: THREE.AdditiveBlending,
+    });
+
+    return new THREE.Points(geometry, material);
 }
 
 function initThree() {
     if (!threeContainer.value) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+
     const el = threeContainer.value;
     const width = el.clientWidth || 1;
     const height = el.clientHeight || 1;
 
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
-    camera.position.set(2.2, 1.6, 9);
+    camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 100);
+    camera.position.set(2.2, 1.4, 9.2);
     camera.lookAt(2, 0, 0);
 
-    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false, powerPreference: 'low-power' });
+    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
     el.appendChild(renderer.domElement);
 
-    const dirLight = new THREE.DirectionalLight(0xeaf8ff, 1.6);
-    dirLight.position.set(4, 6, 5);
-    scene.add(dirLight);
-    const rimLight = new THREE.DirectionalLight(0xf59e71, 0.5);
-    rimLight.position.set(-5, -2, 3);
-    scene.add(rimLight);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    // Studio Lighting Setup (Cyan, Azure, Deep Blue)
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
+    keyLight.position.set(5, 7, 6);
+    scene.add(keyLight);
 
-    // Hero object: mailbox, diposisikan di sisi kanan
-    mailbox = createMailbox();
-    mailbox.position.set(3, -0.3, 0);
-    mailbox.rotation.y = -0.35;
-    scene.add(mailbox);
+    const cyanRimLight = new THREE.DirectionalLight(0x3DA5F9, 1.8);
+    cyanRimLight.position.set(-6, 2, 4);
+    scene.add(cyanRimLight);
 
-    // Elemen kecil melayang di sekitar mailbox
+    const azureFillLight = new THREE.DirectionalLight(0x4A9CF0, 1.2);
+    azureFillLight.position.set(2, -4, 3);
+    scene.add(azureFillLight);
+
+    const ambientLight = new THREE.AmbientLight(0x182b78, 1.0);
+    scene.add(ambientLight);
+
+    // Hero Object: Mailbox Group
+    mailboxGroup = createMailbox();
+    mailboxGroup.position.set(3, -0.2, 0);
+    mailboxGroup.rotation.y = -0.38;
+    scene.add(mailboxGroup);
+
+    // Particle Cloud
+    particles = createParticles();
+    scene.add(particles);
+
+    // Satellite Floating Objects in Orbit
     const smallObjects: { build: () => THREE.Group; pos: [number, number, number]; scale: number }[] = [
-        { build: () => createEnvelope(0x5b96b8), pos: [0.2, 1.8, 1.5], scale: 1 },
-        { build: () => createEnvelope(0x003a63), pos: [-1.2, -1.5, 0.5], scale: 0.85 },
-        { build: () => createDocumentStack(0x5b96b8), pos: [4.8, 1.6, -0.5], scale: 0.9 },
-        { build: () => createStamp(), pos: [1.6, -1.8, 1.8], scale: 0.8 },
+        { build: () => createEnvelope(0xffffff, 0x3DA5F9), pos: [0.1, 1.9, 1.6], scale: 1.0 },
+        { build: () => createEnvelope(0x2743AF, 0x4A9CF0), pos: [-1.2, -1.3, 0.8], scale: 0.9 },
+        { build: () => createDocumentStack(), pos: [5.2, 1.7, -0.4], scale: 0.95 },
+        { build: () => createSecurityShield(), pos: [1.3, -1.7, 1.9], scale: 0.9 },
     ];
 
     smallObjects.forEach((item, i) => {
         const obj = item.build();
         obj.position.set(...item.pos);
         obj.scale.setScalar(item.scale);
-        obj.rotation.set(Math.random() * 0.4, Math.random() * 1, Math.random() * 0.3);
+        obj.rotation.set(Math.random() * 0.3, Math.random() * 0.8, Math.random() * 0.2);
         scene!.add(obj);
-        floaters.push({ mesh: obj, speed: 0.35 + i * 0.1, offset: i * 1.8, baseY: item.pos[1] });
+        floaters.push({
+            mesh: obj,
+            speed: 0.32 + i * 0.08,
+            offset: i * 1.6,
+            baseY: item.pos[1],
+            rotSpeed: 0.003 + i * 0.001,
+        });
     });
 
     const clock = new THREE.Clock();
     let lastFrameTime = 0;
-    const frameInterval = 1000 / 30;
+    const frameInterval = 1000 / 60;
+
     const animate = (now = 0) => {
         animationId = requestAnimationFrame(animate);
         if (now - lastFrameTime < frameInterval) return;
         lastFrameTime = now;
         const t = clock.getElapsedTime();
 
-        if (mailbox) {
-            mailbox.rotation.y = -0.35 + Math.sin(t * 0.15) * 0.06;
-            mailbox.position.y = -0.3 + Math.sin(t * 0.3) * 0.05;
+        // Smooth mouse parallax lerp
+        mouseX += (targetMouseX - mouseX) * 0.05;
+        mouseY += (targetMouseY - mouseY) * 0.05;
+
+        if (mailboxGroup) {
+            // Elegant floating & breathing motion with parallax tilt
+            mailboxGroup.position.y = -0.2 + Math.sin(t * 0.8) * 0.08;
+            mailboxGroup.rotation.y = -0.38 + Math.sin(t * 0.4) * 0.08 + mouseX * 0.15;
+            mailboxGroup.rotation.x = mouseY * 0.08;
         }
 
+        // Hologram rotation
+        if (holoRing1) holoRing1.rotation.z += 0.006;
+        if (holoRing2) holoRing2.rotation.z -= 0.004;
+
+        // Laser scanner pulsation
+        if (laserBeam) {
+            laserBeam.position.y = 0.65 + Math.sin(t * 3.5) * 0.04;
+            (laserBeam.material as THREE.MeshBasicMaterial).opacity = 0.6 + Math.sin(t * 6) * 0.35;
+        }
+
+        // Floating objects orbit
         floaters.forEach((f) => {
-            f.mesh.position.y = f.baseY + Math.sin(t * f.speed + f.offset) * 0.18;
-            f.mesh.rotation.y += 0.0025;
+            f.mesh.position.y = f.baseY + Math.sin(t * f.speed + f.offset) * 0.16;
+            f.mesh.rotation.y += f.rotSpeed;
+            f.mesh.rotation.x = Math.sin(t * 0.5 + f.offset) * 0.1;
         });
+
+        // Slow particle drift
+        if (particles) {
+            particles.rotation.y = t * 0.02;
+        }
 
         renderer!.render(scene!, camera!);
     };
@@ -220,6 +445,7 @@ function initThree() {
 }
 
 function disposeThree() {
+    window.removeEventListener('mousemove', onMouseMove);
     if (animationId !== null) cancelAnimationFrame(animationId);
     resizeObserver?.disconnect();
     if (scene) {
@@ -238,7 +464,11 @@ function disposeThree() {
     renderer = null;
     scene = null;
     camera = null;
-    mailbox = null;
+    mailboxGroup = null;
+    laserBeam = null;
+    holoRing1 = null;
+    holoRing2 = null;
+    particles = null;
     floaters.length = 0;
 }
 
