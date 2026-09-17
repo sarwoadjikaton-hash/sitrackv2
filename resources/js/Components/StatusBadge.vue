@@ -8,7 +8,9 @@ const props = defineProps<{
 const badgeClass = computed(() => {
     switch (props.status) {
         case 'Dokumen Sudah diambil':
+        case 'Selesai dan Siap Untuk diambil':
         case 'Selesai':
+        case 'Surat Selesai di Paraf/TTD dan bisa diambil':
             return 'badge-status-completed';
         case 'Proses Paraf/TTD Sekjen':
         case 'Diajukan ke Sekjen':

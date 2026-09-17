@@ -24,10 +24,10 @@ class DashboardController extends Controller
         // Signature Lane Stats
         $signatureTotal = Letter::where('process_lane', 'signature')->count();
         $signatureCompleted = Letter::where('process_lane', 'signature')
-            ->whereIn('status', ['Dokumen Sudah diambil', 'Surat Selesai di Paraf/TTD dan bisa diambil'])
+            ->whereIn('status', ['Dokumen Sudah diambil', 'Selesai dan Siap Untuk diambil', 'Selesai', 'Surat Selesai di Paraf/TTD dan bisa diambil'])
             ->count();
         $signatureInProgress = Letter::where('process_lane', 'signature')
-            ->whereNotIn('status', ['Dokumen Sudah diambil', 'Surat Selesai di Paraf/TTD dan bisa diambil', 'Ditolak'])
+            ->whereNotIn('status', ['Dokumen Sudah diambil', 'Selesai dan Siap Untuk diambil', 'Selesai', 'Surat Selesai di Paraf/TTD dan bisa diambil', 'Ditolak'])
             ->count();
 
         // Disposition Lane Stats

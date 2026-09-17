@@ -7,7 +7,7 @@ const signatureSteps = [
     { num: 2, title: 'Diperiksa Arsiparis', desc: 'Verifikasi kelengkapan berkas, format naskah dinas, dan arsip pendukung.', role: 'Arsiparis' },
     { num: 3, title: 'Paraf Pengendalian Administrasi', desc: 'Pemeriksaan keabsahan redaksional dan paraf oleh Ktus / Subkoordinator.', role: 'Kasubbag / Ktus' },
     { num: 4, title: 'Proses Paraf/TTD Sekjen', desc: 'Penyampaian berkas ke meja pimpinan untuk penandatanganan resmi.', role: 'Sekretaris Jenderal' },
-    { num: 5, title: 'Surat Selesai di Paraf/TTD', desc: 'Naskah telah ditandatangani dan siap diambil oleh unit pengolah.', role: 'Tata Usaha' },
+    { num: 5, title: 'Selesai dan Siap Untuk diambil', desc: 'Naskah telah selesai ditandatangani/diparaf dan siap diambil oleh unit pengolah.', role: 'Tata Usaha' },
     { num: 6, title: 'Dokumen Sudah Diambil', desc: 'Fisik surat diserahterimakan kepada staf unit dan proses tuntas.', role: 'Unit Pengolah' },
 ];
 

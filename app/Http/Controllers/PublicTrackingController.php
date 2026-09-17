@@ -63,7 +63,7 @@ class PublicTrackingController extends Controller
                     'Diperiksa Oleh TU Sekjen' => 40,
                     'Diperiksa Oleh Kasubag TU Sekjen' => 60,
                     'Diperiksa Oleh Sekjen' => 80,
-                    'Selesai' => 95,
+                    'Selesai dan Siap Untuk diambil', 'Selesai' => 95,
                     'Dokumen Sudah diambil' => 100,
 
                     'Surat Diterima TU' => 20,

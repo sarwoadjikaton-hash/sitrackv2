@@ -29,7 +29,7 @@ class SignatureLetterController extends Controller
             'Diperiksa Oleh TU Sekjen',
             'Diperiksa Oleh Kasubag TU Sekjen',
             'Diperiksa Oleh Sekjen',
-            'Selesai',
+            'Selesai dan Siap Untuk diambil',
             'Revisi',
             'Ditolak',
             'Dokumen Sudah diambil',

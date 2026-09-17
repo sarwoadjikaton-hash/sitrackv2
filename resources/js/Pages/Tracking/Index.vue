@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
 import TrackingHero from '@/Components/TrackingHero.vue';
-import { Letter, LetterStatusLog, Disposition } from '@/types';
+import { Letter, LetterStatusLog, Disposition, PageProps } from '@/types';
 
 const props = defineProps<{
     searchCode: string;
@@ -14,11 +14,33 @@ const props = defineProps<{
     progress: number;
 }>();
 
+const page = usePage<PageProps>();
+const user = computed(() => page.props.auth?.user);
+
 const inputCode = ref(props.searchCode || '');
 
 const handleSearch = () => {
     if (!inputCode.value) return;
     router.get('/tracking', { code: inputCode.value }, { preserveState: true });
+};
+
+const formatDate = (dateStr: string) => {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    });
+};
+
+const formatTime = (dateStr: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    }).replace('.', ':') + ' WIB';
 };
 </script>
 
@@ -45,7 +67,14 @@ const handleSearch = () => {
                                         Pelacakan</span>
                                     <h2 class="fw-bold text-dark mb-0">{{ letter.subject }}</h2>
                                 </div>
-                                <StatusBadge :status="letter.status" class="fs-5 px-4 py-2" />
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <Link v-if="user && (letter.process_lane === 'signature' || !letter.process_lane)"
+                                        :href="`/scan-status?tracking=${letter.tracking_code}`"
+                                        class="btn btn-sm btn-primary-blue shadow-sm d-inline-flex align-items-center gap-1 px-3 py-2 rounded-pill">
+                                        <i class="bi bi-pencil-square"></i> Update Status (Admin)
+                                    </Link>
+                                    <StatusBadge :status="letter.status" class="fs-5 px-4 py-2" />
+                                </div>
                             </div>
 
                             <div class="row g-5">
@@ -99,23 +128,16 @@ const handleSearch = () => {
                                                     <i class="bi bi-check2-circle me-1"></i>Sudah Bertanda Tangan
                                                 </span>
                                             </div>
-                                            <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2">
-                                                <div class="d-flex align-items-center gap-2 overflow-hidden">
-                                                    <i class="bi bi-file-earmark-pdf text-success fs-3"></i>
-                                                    <div>
-                                                        <div class="small fw-bold text-dark">Format Lembar Pendamping</div>
-                                                        <small class="text-muted">Agenda: {{ letter.agenda_number || letter.tracking_code }}</small>
-                                                    </div>
-                                                </div>
-                                                <a :href="`/cetak/pendamping/${letter.id}`" target="_blank"
-                                                    class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 px-3 py-1 text-nowrap fw-semibold">
-                                                    <i class="bi bi-file-earmark-check"></i> Buka Lembar Pendamping
-                                                </a>
-                                            </div>
+                                            <p class="small text-muted mb-3">
+                                                Lembar kontrol fisik persuratan resmi dengan barcode pelacakan dan riwayat paraf pimpinan.
+                                            </p>
+                                            <a :href="`/print/pendamping/${letter.id}`" target="_blank"
+                                                class="btn btn-sm btn-success w-100 fw-bold d-inline-flex align-items-center justify-content-center gap-1 shadow-sm py-2">
+                                                <i class="bi bi-printer-fill"></i> Buka / Cetak Lembar Pendamping
+                                            </a>
                                         </div>
 
-                                        <!-- Lampiran Berkas Naskah Digital (Bila ada dokumen asli yang diupload, BUKAN file tanda tangan) -->
-                                        <div v-if="letter.attachment_path && !letter.attachment_path.includes('signatures/') && !letter.attachment_path.includes('sig_')" class="meta-box mb-3 p-3 rounded-3 border" style="background: #f8fafc;">
+                                        <div v-if="letter.attachment_path" class="meta-box p-3 rounded-3 border bg-light">
                                             <label class="d-flex align-items-center gap-1 text-primary fw-bold mb-2">
                                                 <i class="bi bi-paperclip fs-6"></i> Lampiran Berkas Naskah
                                             </label>
@@ -142,10 +164,14 @@ const handleSearch = () => {
                                             <div class="timeline-marker"></div>
                                             <div class="timeline-content">
                                                 <div
-                                                    class="d-flex flex-column flex-sm-row justify-content-between gap-1">
+                                                    class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-1">
                                                     <h6 class="fw-bold mb-1 text-dark">{{ log.status }}</h6>
-                                                    <small class="text-muted">{{ new
-                                                         Date(log.changed_at).toLocaleDateString('id-ID') }}</small>
+                                                    <div class="text-sm-end mb-1">
+                                                        <div class="small fw-semibold text-dark">{{ formatDate(log.changed_at) }}</div>
+                                                        <small class="text-muted d-block" style="font-size: 0.78rem;">
+                                                            <i class="bi bi-clock me-1 text-primary"></i>{{ formatTime(log.changed_at) }}
+                                                        </small>
+                                                    </div>
                                                 </div>
                                                 <div class="small text-teal fw-semibold mb-1">{{ log.position }}</div>
                                                 <p class="small text-muted mb-0">{{ log.note }}</p>
