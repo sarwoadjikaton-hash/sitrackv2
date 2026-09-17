@@ -169,7 +169,8 @@ class SignatureLetterController extends Controller
             'letter_number_type_id' => ['nullable', 'exists:letter_number_types,id'],
             'sender_name' => ['required', 'string', 'max:150'],
             'sender_phone' => ['nullable', 'string', 'max:50'],
-            'recipient_unit_id' => ['nullable', 'exists:units,id'],
+            'destination' => ['nullable', 'string', 'max:255'],
+            'recipient_unit_id' => ['nullable'],
             'subject' => ['required', 'string', 'max:500'],
             'letter_date' => ['nullable', 'date'],
             'received_date' => ['nullable', 'date'],
@@ -220,7 +221,12 @@ class SignatureLetterController extends Controller
                 'letter_number_type_id' => $letterNumberType?->id,
                 'sender_name' => $validated['sender_name'],
                 'sender_phone' => $validated['sender_phone'] ?? null,
-                'recipient_unit_id' => $validated['recipient_unit_id'] ?: null,
+                'destination' => $validated['destination'] ?? null,
+                'recipient_unit_id' => $validated['recipient_unit_id'] ?: (
+                    !empty($validated['destination'])
+                        ? Unit::where('unit_name', 'ILIKE', trim($validated['destination']))->value('id')
+                        : null
+                ),
                 'subject' => $validated['subject'],
                 'letter_date' => $validated['letter_date'] ?? null,
                 'received_date' => $validated['received_date'] ?? date('Y-m-d'),
@@ -310,7 +316,8 @@ class SignatureLetterController extends Controller
             'letter_number_type_id' => ['nullable', 'exists:letter_number_types,id'],
             'sender_name' => ['required', 'string', 'max:150'],
             'sender_phone' => ['nullable', 'string', 'max:50'],
-            'recipient_unit_id' => ['nullable', 'exists:units,id'],
+            'destination' => ['nullable', 'string', 'max:255'],
+            'recipient_unit_id' => ['nullable'],
             'subject' => ['required', 'string', 'max:500'],
             'letter_date' => ['nullable', 'date'],
             'received_date' => ['nullable', 'date'],
@@ -346,7 +353,12 @@ class SignatureLetterController extends Controller
             'letter_number_type_id' => $validated['letter_number_type_id'] ?: null,
             'sender_name' => $validated['sender_name'],
             'sender_phone' => $validated['sender_phone'] ?? null,
-            'recipient_unit_id' => $validated['recipient_unit_id'] ?: null,
+            'destination' => $validated['destination'] ?? null,
+            'recipient_unit_id' => $validated['recipient_unit_id'] ?: (
+                !empty($validated['destination'])
+                    ? Unit::where('unit_name', 'ILIKE', trim($validated['destination']))->value('id')
+                    : null
+            ),
             'subject' => $validated['subject'],
             'letter_date' => $validated['letter_date'] ?? null,
             'received_date' => $validated['received_date'] ?? null,

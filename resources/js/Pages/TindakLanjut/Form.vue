@@ -45,6 +45,7 @@ const form = useForm({
     sender_unit: props.letter?.sender_unit || '',
     sender_name: props.letter?.sender_name || '',
     sender_phone: props.letter?.sender_phone || '',
+    destination: props.letter?.destination || props.letter?.recipient_unit?.unit_name || '',
     recipient_unit_id: props.letter?.recipient_unit_id || null,
     category_id: props.letter?.category_id || null,
     subject: props.letter?.subject || '',
@@ -365,8 +366,8 @@ const statusOptions = computed(() =>
 
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Unit Tujuan</label>
-                                <SearchableSelect v-model="form.recipient_unit_id" :options="unitOptions"
-                                    placeholder="Pilih Unit Tujuan" search-placeholder="Cari unit..." clearable />
+                                <input v-model="form.destination" type="text" class="form-control"
+                                    placeholder="Ketik unit tujuan / nama instansi / pihak yang dituju..." />
                             </div>
 
                             <div class="col-md-6">
