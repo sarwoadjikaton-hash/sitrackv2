@@ -4,24 +4,31 @@ import { ref, reactive, computed, watch, nextTick, onMounted, onUnmounted } from
 interface Option {
     value: number | string;
     label: string;
+    isCustom?: boolean;
 }
 
 const props = withDefaults(defineProps<{
     modelValue: number | string | null;
     options: Option[];
     placeholder?: string;
+    searchPlaceholder?: string;
     loading?: boolean;
     loadingText?: string;
     disabled?: boolean;
     searchable?: boolean;
     emptyText?: string;
+    allowCustom?: boolean;
+    customPlaceholder?: string;
 }>(), {
     placeholder: '-- Pilih --',
+    searchPlaceholder: 'Cari...',
     loading: false,
     loadingText: 'Memuat...',
     disabled: false,
     searchable: true,
     emptyText: 'Tidak ada hasil ditemukan',
+    allowCustom: false,
+    customPlaceholder: '✨ Gunakan: "{text}" (Input Manual Bebas)',
 });
 
 const emit = defineEmits<{
@@ -38,17 +45,41 @@ const highlightedIndex = ref(-1);
 // Posisi panel dihitung manual karena panel di-teleport ke <body>
 const panelStyle = reactive({ top: '0px', left: '0px', width: '0px' });
 
-const showSearch = computed(() => props.searchable && props.options.length > 5);
+const showSearch = computed(() => props.allowCustom || (props.searchable && (props.options.length > 5 || props.allowCustom)));
 
 const filteredOptions = computed(() => {
-    if (!search.value.trim()) return props.options;
-    const q = search.value.toLowerCase();
-    return props.options.filter((o) => o.label.toLowerCase().includes(q));
+    let list = props.options;
+    const q = search.value.trim();
+    if (q) {
+        const lowerQ = q.toLowerCase();
+        list = props.options.filter((o) => o.label.toLowerCase().includes(lowerQ));
+    }
+    if (props.allowCustom && q) {
+        const exactMatch = list.some((o) => o.label.toLowerCase() === q.toLowerCase() || String(o.value).toLowerCase() === q.toLowerCase());
+        if (!exactMatch) {
+            const customLabel = props.customPlaceholder
+                ? props.customPlaceholder.replace('{text}', q)
+                : `✨ Gunakan: "${q}" (Input Bebas)`;
+            return [
+                { value: q, label: customLabel, isCustom: true },
+                ...list,
+            ];
+        }
+    }
+    return list;
 });
 
-const selectedOption = computed(() =>
-    props.options.find((o) => o.value === props.modelValue) || null
-);
+const selectedOption = computed(() => {
+    if (props.modelValue === null || props.modelValue === undefined || props.modelValue === '') {
+        return null;
+    }
+    const found = props.options.find((o) => o.value === props.modelValue);
+    if (found) return found;
+    if (props.allowCustom) {
+        return { value: props.modelValue, label: String(props.modelValue) };
+    }
+    return null;
+});
 
 const updatePosition = () => {
     if (!wrapperEl.value) return;
@@ -167,16 +198,23 @@ onUnmounted(() => {
                     :style="{ top: panelStyle.top, left: panelStyle.left, width: panelStyle.width }">
                     <div v-if="showSearch" class="dd-search">
                         <i class="bi bi-search"></i>
-                        <input ref="searchInputEl" v-model="search" type="text" placeholder="Cari..."
+                        <input ref="searchInputEl" v-model="search" type="text" :placeholder="searchPlaceholder"
                             @keydown.stop="onKeydown" />
                     </div>
 
                     <div class="dd-list">
-                        <button v-for="(opt, idx) in filteredOptions" :key="opt.value" type="button" class="dd-option"
-                            :class="{ 'is-selected': opt.value === modelValue, 'is-highlighted': idx === highlightedIndex }"
+                        <button v-for="(opt, idx) in filteredOptions" :key="String(opt.value)" type="button" class="dd-option"
+                            :class="{ 
+                                'is-selected': opt.value === modelValue, 
+                                'is-highlighted': idx === highlightedIndex,
+                                'is-custom-option': opt.isCustom
+                            }"
                             @mouseenter="highlightedIndex = idx" @click="selectOption(opt)">
-                            <span>{{ opt.label }}</span>
-                            <i v-if="opt.value === modelValue" class="bi bi-check-lg"></i>
+                            <div class="d-flex align-items-center gap-2 text-truncate">
+                                <i v-if="opt.isCustom" class="bi bi-pencil-square text-primary flex-shrink-0"></i>
+                                <span class="text-truncate">{{ opt.label }}</span>
+                            </div>
+                            <i v-if="opt.value === modelValue && !opt.isCustom" class="bi bi-check-lg"></i>
                         </button>
 
                         <div v-if="filteredOptions.length === 0" class="dd-empty">
@@ -326,6 +364,20 @@ onUnmounted(() => {
     text-align: left;
     cursor: pointer;
     transition: background .12s ease, color .12s ease;
+}
+
+.dd-option.is-custom-option {
+    background: #f0f9ff;
+    border-bottom: 1px dashed #bae6fd;
+    color: #0284c7;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.dd-option.is-custom-option:hover,
+.dd-option.is-custom-option.is-highlighted {
+    background: #e0f2fe;
+    color: #0369a1;
 }
 
 .dd-option.is-highlighted {

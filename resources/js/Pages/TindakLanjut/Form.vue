@@ -233,6 +233,23 @@ const unitOptions = computed(() =>
     props.units.map((u) => ({ value: u.id, label: u.unit_name }))
 );
 
+const unitDestinationOptions = computed(() =>
+    props.units.map((u) => ({ value: u.unit_name, label: u.unit_name }))
+);
+
+const isManualDestination = ref(false);
+
+watch(() => form.destination, (newVal) => {
+    if (!newVal) {
+        form.recipient_unit_id = null;
+        return;
+    }
+    const matched = props.units.find(
+        (u) => u.unit_name.toLowerCase() === String(newVal).trim().toLowerCase()
+    );
+    form.recipient_unit_id = matched ? matched.id : null;
+});
+
 const statusOptions = computed(() =>
     props.allowedStatuses.map((s) => ({ value: s, label: s }))
 );
@@ -365,9 +382,45 @@ const statusOptions = computed(() =>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Unit Tujuan</label>
-                                <input v-model="form.destination" type="text" class="form-control"
-                                    placeholder="Ketik unit tujuan / nama instansi / pihak yang dituju..." />
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <label class="form-label small fw-bold mb-0">Unit Tujuan</label>
+                                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none small text-primary fw-semibold"
+                                        @click="isManualDestination = !isManualDestination">
+                                        <i class="bi" :class="isManualDestination ? 'bi-list-ul' : 'bi-pencil-square'"></i>
+                                        {{ isManualDestination ? 'Pilih dari Daftar' : 'Ketik Manual' }}
+                                    </button>
+                                </div>
+
+                                <!-- Mode 1: Searchable Dropdown + Ketik Bebas / Tambah Otomatis -->
+                                <div v-if="!isManualDestination">
+                                    <SearchableSelect
+                                        v-model="form.destination"
+                                        :options="unitDestinationOptions"
+                                        :allow-custom="true"
+                                        placeholder="-- Pilih atau cari unit tujuan --"
+                                        search-placeholder="Ketik untuk mencari atau ketik nama instansi baru..."
+                                        custom-placeholder="✨ Gunakan: &quot;{text}&quot; (Input Bebas)"
+                                        empty-text="Unit tidak terdaftar. Pilih opsi di atas untuk menggunakannya."
+                                    />
+                                    <small class="text-muted d-block mt-1">
+                                        Pilih unit terdaftar atau ketik nama baru lalu klik/pilih untuk menggunakan.
+                                    </small>
+                                </div>
+
+                                <!-- Mode 2: Input Teks Manual Langsung -->
+                                <div v-else>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light text-primary"><i class="bi bi-building"></i></span>
+                                        <input v-model="form.destination" type="text" class="form-control"
+                                            placeholder="Contoh: Kementerian Pertanian / Biro Hubungan Luar Negeri..." />
+                                        <button v-if="form.destination" type="button" class="btn btn-outline-secondary" @click="form.destination = ''" title="Hapus teks">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                        Mode ketik manual aktif. Bebas menulis nama instansi atau unit apapun.
+                                    </small>
+                                </div>
                             </div>
 
                             <div class="col-md-6">
