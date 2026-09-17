@@ -1,30 +1,65 @@
 <script setup lang="ts">
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
 import Pagination from '@/Components/Pagination.vue';
 import Modal from '@/Components/Modal.vue';
-import { Letter, PaginatedData } from '@/types';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { Letter, LetterNumberType, PaginatedData } from '@/types';
 
 const props = defineProps<{
     letters: PaginatedData<Letter>;
+    types: LetterNumberType[];
+    selectedWorkbookId: number;
     filters: {
+        workbook: number;
         search: string;
         status: string;
+        sort?: string;
+        periode?: string;
+        tanggal?: string;
+        bulan?: number;
+        year?: number;
     };
     allowedStatuses: string[];
 }>();
 
 const search = ref(props.filters.search || '');
+const currentWorkbookId = ref(props.selectedWorkbookId || 0);
+const filterSort = ref(props.filters.sort || 'date_desc');
+const filterPeriode = ref(props.filters.periode || 'all');
+const filterTanggal = ref(props.filters.tanggal || new Date().toISOString().substring(0, 10));
+const filterBulan = ref(props.filters.bulan || (new Date().getMonth() + 1));
 const statusFilter = ref(props.filters.status || '');
 
-const handleFilter = () => {
+const workbookOptions = computed(() => [
+    { value: 0, label: 'Semua Workbook' },
+    ...(props.types || []).map((t) => ({ value: t.id, label: t.workbook_name })),
+]);
+
+const sortOptions = [
+    { value: 'date_desc', label: 'Tanggal Terbaru' },
+    { value: 'date_asc', label: 'Tanggal Terlama' },
+    { value: 'number_desc', label: 'No. Agenda (Besar → Kecil)' },
+    { value: 'number_asc', label: 'No. Agenda (Kecil → Besar)' },
+];
+
+const applyFilter = () => {
     router.get('/tindak-lanjut', {
+        workbook: currentWorkbookId.value,
         search: search.value,
         status: statusFilter.value,
-    }, { preserveState: true });
+        sort: filterSort.value,
+        periode: filterPeriode.value,
+        tanggal: filterPeriode.value === 'hari' ? filterTanggal.value : undefined,
+        bulan: filterPeriode.value === 'bulan' ? filterBulan.value : undefined,
+    }, { preserveState: true, replace: true });
 };
+
+watch([currentWorkbookId, filterSort, filterPeriode], () => {
+    applyFilter();
+});
 
 // Quick Status Update Modal
 const showStatusModal = ref(false);
@@ -104,35 +139,69 @@ const deleteLetter = (id: number) => {
                 <Link href="/scan-status" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-qr-code-scan me-1"></i> Update via QR
                 </Link>
+                <Link href="/tindak-lanjut/create" class="btn btn-sm btn-primary-blue shadow-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Catat Naskah Baru
+                </Link>
             </div>
         </div>
 
-        <!-- Filter Panel -->
-        <div class="st-card p-3 mb-4">
-            <div class="row g-3 align-items-center">
-                <div class="col-md-7">
-                    <label class="form-label small fw-bold mb-1">Cari Dokumen</label>
-                    <input v-model="search" type="text" class="form-control"
-                        placeholder="Agenda, kode tracking, perihal, nomor surat, pengirim..."
-                        @keyup.enter="handleFilter" />
-                </div>
+        <!-- Filter Section (Matches Laporan Data layout) -->
+        <div class="st-card p-3 mb-4 shadow-sm">
+            <div class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label small fw-bold mb-1">Filter Status</label>
-                    <select v-model="statusFilter" class="form-select" @change="handleFilter">
-                        <option value="">Semua Status</option>
-                        <option v-for="s in allowedStatuses" :key="s" :value="s">{{ s }}</option>
+                    <label class="form-label small fw-bold">Filter Workbook</label>
+                    <SearchableSelect v-model="currentWorkbookId" :options="workbookOptions"
+                        placeholder="Pilih Workbook" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Urutkan</label>
+                    <SearchableSelect v-model="filterSort" :options="sortOptions" placeholder="Urutkan" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Periode</label>
+                    <select v-model="filterPeriode" class="form-select" @change="applyFilter">
+                        <option value="all">Semua Waktu</option>
+                        <option value="hari">Harian</option>
+                        <option value="bulan">Bulanan</option>
                     </select>
                 </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button class="btn btn-primary-blue w-100 py-2" type="button" @click="handleFilter">
-                        <i class="bi bi-search me-1"></i> Filter
-                    </button>
+                <div class="col-md-2" v-if="filterPeriode === 'hari'">
+                    <label class="form-label small fw-bold">Tanggal</label>
+                    <input type="date" v-model="filterTanggal" class="form-control" @change="applyFilter">
+                </div>
+                <div class="col-md-2" v-if="filterPeriode === 'bulan'">
+                    <label class="form-label small fw-bold">Bulan</label>
+                    <select v-model="filterBulan" class="form-select" @change="applyFilter">
+                        <option v-for="m in 12" :key="m" :value="m">Bulan {{ m }}</option>
+                    </select>
+                </div>
+                <div :class="filterPeriode === 'all' ? 'col-md-5' : 'col-md-3'">
+                    <label class="form-label small fw-bold">Pencarian</label>
+                    <div class="input-group">
+                        <input v-model="search" type="text" class="form-control"
+                            placeholder="Cari perihal, nomor, nama pengirim, dll..." @keyup.enter="applyFilter" />
+                        <button class="btn btn-primary-blue" @click="applyFilter">Cari</button>
+                    </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Quick Status Pills -->
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <button type="button" class="btn btn-xs rounded-pill px-3 py-1 fw-semibold transition"
+                :class="statusFilter === '' ? 'btn-primary shadow-xs' : 'btn-outline-secondary'"
+                @click="statusFilter = ''; applyFilter()">
+                Semua Status
+            </button>
+            <button v-for="s in allowedStatuses" :key="s" type="button" class="btn btn-xs rounded-pill px-3 py-1 fw-semibold transition"
+                :class="statusFilter === s ? 'btn-primary shadow-xs' : 'btn-outline-secondary'"
+                @click="statusFilter = s; applyFilter()">
+                {{ s }}
+            </button>
         </div>
 
         <!-- Table -->
-        <div class="st-card p-0 overflow-hidden">
+        <div class="st-card p-0 overflow-hidden shadow-sm">
             <div class="table-responsive">
                 <table class="table-modern">
                     <thead>
@@ -169,7 +238,7 @@ const deleteLetter = (id: number) => {
                             </td>
                             <td>
                                 <div class="fw-semibold text-dark">{{ letter.sender_unit || letter.sender_name }}</div>
-                                <small class="text-muted">&rarr; {{ letter.recipient_unit?.unit_name || 'Tata Usaha'
+                                <small class="text-muted">&rarr; {{ letter.recipient_unit?.unit_name || letter.destination || 'Tata Usaha'
                                     }}</small>
                             </td>
                             <td>
@@ -211,7 +280,7 @@ const deleteLetter = (id: number) => {
                         </tr>
                         <tr v-if="letters.data.length === 0">
                             <td colspan="6" class="text-center py-5 text-muted">
-                                Belum ada berkas pada lajur tindak lanjut / penandatanganan.
+                                Belum ada berkas pada lajur tindak lanjut / penandatanganan sesuai filter yang dipilih.
                             </td>
                         </tr>
                     </tbody>

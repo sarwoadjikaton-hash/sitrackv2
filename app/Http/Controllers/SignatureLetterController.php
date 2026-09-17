@@ -41,11 +41,25 @@ class SignatureLetterController extends Controller
      */
     public function index(Request $request): Response
     {
+        $types = LetterNumberType::where('is_active', true)
+            ->orderBy('display_order', 'asc')
+            ->get();
+
+        $selectedWorkbookId = (int) $request->input('workbook', 0);
         $search = trim((string) $request->input('search', ''));
         $status = trim((string) $request->input('status', ''));
+        $sort = $request->input('sort', 'date_desc');
+        $periode = $request->input('periode', 'all');
+        $tanggal = $request->input('tanggal', now()->toDateString());
+        $bulan = (int) $request->input('bulan', now()->month);
+        $year = (int) $request->input('year', date('Y'));
 
-        $query = Letter::with(['category', 'recipientUnit'])
+        $query = Letter::with(['category', 'recipientUnit', 'letterNumberType'])
             ->where('process_lane', 'signature');
+
+        if ($selectedWorkbookId > 0) {
+            $query->where('letter_number_type_id', $selectedWorkbookId);
+        }
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
@@ -55,6 +69,18 @@ class SignatureLetterController extends Controller
                     ->orWhere('subject', 'ILIKE', "%{$search}%")
                     ->orWhere('sender_name', 'ILIKE', "%{$search}%")
                     ->orWhere('sender_unit', 'ILIKE', "%{$search}%")
+                    ->orWhere('destination', 'ILIKE', "%{$search}%")
+                    ->orWhere('signatory_name', 'ILIKE', "%{$search}%")
+                    ->orWhere('technical_officer', 'ILIKE', "%{$search}%")
+                    ->orWhere('current_position', 'ILIKE', "%{$search}%")
+                    ->orWhere('notes', 'ILIKE', "%{$search}%")
+                    ->orWhereHas('recipientUnit', function ($uq) use ($search) {
+                        $uq->where('unit_name', 'ILIKE', "%{$search}%");
+                    })
+                    ->orWhereHas('letterNumberType', function ($tq) use ($search) {
+                        $tq->where('type_name', 'ILIKE', "%{$search}%")
+                            ->orWhere('workbook_name', 'ILIKE', "%{$search}%");
+                    })
                     ->orWhere('pdf_content', 'ILIKE', "%{$search}%");
             });
         }
@@ -63,13 +89,46 @@ class SignatureLetterController extends Controller
             $query->where('status', $status);
         }
 
-        $letters = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
+        if ($periode === 'hari') {
+            $query->where(function ($q) use ($tanggal) {
+                $q->whereDate('letter_date', $tanggal)
+                    ->orWhereDate('received_date', $tanggal)
+                    ->orWhereDate('created_at', $tanggal);
+            });
+        } elseif ($periode === 'bulan') {
+            $query->where(function ($q) use ($bulan, $year) {
+                $q->where(function ($sub) use ($bulan, $year) {
+                    $sub->whereMonth('letter_date', $bulan)->whereYear('letter_date', $year);
+                })->orWhere(function ($sub) use ($bulan, $year) {
+                    $sub->whereMonth('received_date', $bulan)->whereYear('received_date', $year);
+                })->orWhere(function ($sub) use ($bulan, $year) {
+                    $sub->whereMonth('created_at', $bulan)->whereYear('created_at', $year);
+                });
+            });
+        }
+
+        match ($sort) {
+            'number_asc' => $query->orderBy('agenda_number', 'asc')->orderBy('id', 'asc'),
+            'number_desc' => $query->orderBy('agenda_number', 'desc')->orderBy('id', 'desc'),
+            'date_asc' => $query->orderBy('letter_date', 'asc')->orderBy('id', 'asc'),
+            default => $query->orderBy('letter_date', 'desc')->orderBy('id', 'desc'),
+        };
+
+        $letters = $query->paginate(15)->withQueryString();
 
         return Inertia::render('TindakLanjut/Index', [
             'letters' => $letters,
+            'types' => $types,
+            'selectedWorkbookId' => $selectedWorkbookId,
             'filters' => [
+                'workbook' => $selectedWorkbookId,
                 'search' => $search,
                 'status' => $status,
+                'sort' => $sort,
+                'periode' => $periode,
+                'tanggal' => $tanggal,
+                'bulan' => $bulan,
+                'year' => $year,
             ],
             'allowedStatuses' => self::allowedStatuses(),
         ]);

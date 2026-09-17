@@ -62,6 +62,16 @@ class DataSuratController extends Controller
                     ->orWhere('number_text', 'ILIKE', '%' . $search . '%')
                     ->orWhere('processing_unit_text', 'ILIKE', '%' . $search . '%')
                     ->orWhere('destination', 'ILIKE', '%' . $search . '%')
+                    ->orWhere('signatory', 'ILIKE', '%' . $search . '%')
+                    ->orWhere('technical_officer', 'ILIKE', '%' . $search . '%')
+                    ->orWhere('reserved_for', 'ILIKE', '%' . $search . '%')
+                    ->orWhereHas('unit', function ($uq) use ($search) {
+                        $uq->where('unit_name', 'ILIKE', '%' . $search . '%');
+                    })
+                    ->orWhereHas('letter', function ($lq) use ($search) {
+                        $lq->where('sender_name', 'ILIKE', '%' . $search . '%')
+                            ->orWhere('sender_unit', 'ILIKE', '%' . $search . '%');
+                    })
                     ->orWhere('pdf_content', 'ILIKE', '%' . $search . '%');
             });
         }

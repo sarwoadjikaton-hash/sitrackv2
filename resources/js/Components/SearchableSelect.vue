@@ -216,8 +216,8 @@ onUnmounted(() => {
 }
 
 .dd-trigger.is-open {
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+    border-color: #3DA5F9;
+    box-shadow: 0 0 0 4px rgba(61, 165, 249, 0.15);
 }
 
 .dd-trigger.is-disabled {
@@ -247,14 +247,14 @@ onUnmounted(() => {
 
 .dd-trigger.is-open .dd-chevron {
     transform: rotate(180deg);
-    color: #14b8a6;
+    color: #2743AF;
 }
 
 .dd-spinner {
     flex: none;
     width: 14px;
     height: 14px;
-    border: 2px solid #14b8a6;
+    border: 2px solid #3DA5F9;
     border-top-color: transparent;
     border-radius: 50%;
     animation: dd-spin 0.8s linear infinite;
@@ -329,17 +329,17 @@ onUnmounted(() => {
 }
 
 .dd-option.is-highlighted {
-    background: rgba(20, 184, 166, 0.09);
+    background: rgba(61, 165, 249, 0.1);
     color: #0f172a;
 }
 
 .dd-option.is-selected {
-    color: #0d9488;
+    color: #2743AF;
     font-weight: 700;
 }
 
 .dd-option i {
-    color: #14b8a6;
+    color: #3DA5F9;
     font-size: .85rem;
     flex: none;
 }

@@ -395,11 +395,11 @@ const switchToEdit = () => {
                         <option v-for="m in 12" :key="m" :value="m">Bulan {{ m }}</option>
                     </select>
                 </div>
-                <div class="col-md-5">
+                <div :class="filterPeriode === 'all' ? 'col-md-5' : 'col-md-3'">
                     <label class="form-label small fw-bold">Pencarian</label>
                     <div class="input-group">
                         <input v-model="search" type="text" class="form-control"
-                            placeholder="Cari perihal, nomor, atau isi PDF..." @keyup.enter="applyFilter" />
+                            placeholder="Cari nama, perihal, nomor, atau isi PDF..." @keyup.enter="applyFilter" />
                         <button class="btn btn-primary-blue" @click="applyFilter">Cari</button>
                     </div>
                 </div>
