@@ -499,7 +499,7 @@ onUnmounted(disposeThree);
                 </div>
 
                 <h1 class="hero-heading">
-                    <span class="heading-kicker">SiTrack &mdash; Portal Resmi</span>
+                    <span class="heading-kicker">SiTrack</span>
                     <span class="heading-main">Lacak Naskah</span>
                     <span class="heading-sub">Dinas Anda</span>
                 </h1>

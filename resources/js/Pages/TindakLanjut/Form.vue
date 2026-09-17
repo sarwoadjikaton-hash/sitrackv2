@@ -364,21 +364,15 @@ const statusOptions = computed(() =>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Unit Tujuan / Penerima Internal</label>
+                                <label class="form-label small fw-bold">Unit Tujuan</label>
                                 <SearchableSelect v-model="form.recipient_unit_id" :options="unitOptions"
-                                    placeholder="Pilih Unit Penerima" search-placeholder="Cari unit..." clearable />
+                                    placeholder="Pilih Unit Tujuan" search-placeholder="Cari unit..." clearable />
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <label class="form-label small fw-bold">Tingkat Prioritas</label>
                                 <SearchableSelect v-model="form.priority" :options="priorityOptions"
                                     placeholder="Pilih Prioritas" search-placeholder="Cari..." />
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label small fw-bold">Derajat Keamanan</label>
-                                <SearchableSelect v-model="form.security_level" :options="securityOptions"
-                                    placeholder="Pilih Derajat Keamanan" search-placeholder="Cari..." />
                             </div>
                         </div>
 
@@ -387,13 +381,13 @@ const statusOptions = computed(() =>
 
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Status Awal</label>
+                                <label class="form-label small fw-bold">Status</label>
                                 <SearchableSelect v-model="form.status" :options="statusOptions"
                                     placeholder="Pilih Status" search-placeholder="Cari status..." />
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Posisi Berkas Awal</label>
+                                <label class="form-label small fw-bold">Posisi Berkas</label>
                                 <input v-model="form.current_position" type="text" class="form-control"
                                     placeholder="Contoh: Tata Usaha / Arsiparis" required />
                             </div>
