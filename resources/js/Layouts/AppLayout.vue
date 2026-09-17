@@ -102,9 +102,6 @@ const isActive = (path: string, exact = false) =>
         <!-- Sidebar Navigation -->
         <aside class="app-sidebar" ref="sidebarRef"
             :class="{ 'is-open': isMobileNavOpen, 'is-collapsed': isSidebarCollapsed }">
-            <div class="sidebar-blob sidebar-blob-a"></div>
-            <div class="sidebar-blob sidebar-blob-b"></div>
-
             <!-- Toggle Button (Floating on Edge) -->
             <button type="button" class="sidebar-toggle-btn d-none d-lg-flex" @click="toggleSidebarCollapse">
                 <i class="bi" :class="isSidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
@@ -348,7 +345,7 @@ const isActive = (path: string, exact = false) =>
     inset: 1rem auto 1rem 1rem;
     width: var(--sidebar-width);
     z-index: 1050;
-    background: linear-gradient(175deg, #182b78 0%, #2743AF 45%, #4A9CF0 110%);
+    background: #1E416A;
     color: #fff;
     border-radius: 2rem;
     transition: width var(--transition), transform var(--transition);
@@ -587,7 +584,7 @@ const isActive = (path: string, exact = false) =>
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #38bdf8, #2563eb);
+    background: #3DA5F9;
     display: grid;
     place-items: center;
     font-weight: 700;
@@ -861,29 +858,5 @@ const isActive = (path: string, exact = false) =>
     background: rgba(15, 23, 42, 0.5);
     backdrop-filter: blur(4px);
     z-index: 1040;
-}
-
-.sidebar-blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(50px);
-    opacity: .25;
-    pointer-events: none;
-}
-
-.sidebar-blob-a {
-    width: 150px;
-    height: 150px;
-    background: #38bdf8;
-    top: 0;
-    right: 0;
-}
-
-.sidebar-blob-b {
-    width: 120px;
-    height: 120px;
-    background: #2563eb;
-    bottom: 10%;
-    left: 0;
 }
 </style>
