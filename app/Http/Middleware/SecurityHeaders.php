@@ -43,10 +43,11 @@ class SecurityHeaders
             $response->headers->set(
                 'Content-Security-Policy',
                 "default-src 'self'; " .
-                "script-src 'self'; " .
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " .
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
                 "font-src 'self' https://fonts.gstatic.com; " .
-                "img-src 'self' data:; " .
+                "img-src 'self' data: blob:; " .
+                "connect-src 'self'; " .
                 "frame-ancestors 'self'; " .
                 "form-action 'self';"
             );

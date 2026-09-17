@@ -42,6 +42,12 @@ const formatTime = (dateStr: string) => {
         hour12: false,
     }).replace('.', ':') + ' WIB';
 };
+
+const isReadyForPickup = computed(() => {
+    if (!props.letter) return false;
+    const s = props.letter.status;
+    return s === 'Selesai dan Siap Untuk diambil' || s === 'Dokumen Sudah diambil' || s === 'Selesai' || s === 'Surat Selesai di Paraf/TTD dan bisa diambil';
+});
 </script>
 
 <template>
@@ -118,26 +124,26 @@ const formatTime = (dateStr: string) => {
                                             <label>Sifat Naskah</label>
                                             <p class="text-dark mb-0"><span class="badge bg-light text-dark border">{{ letter.priority }}</span></p>
                                         </div>
-                                        <!-- Lembar Pendamping Resmi (Lajur Tindak Lanjut / Semua Naskah Dinas) -->
-                                        <div v-if="letter.process_lane === 'signature' || !letter.process_lane" class="meta-box mb-3 p-3 rounded-3 border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
+                                        <!-- Lembar Pendamping (Hanya muncul jika status sudah Selesai dan Siap Untuk diambil / Dokumen Sudah diambil) -->
+                                        <div v-if="(letter.process_lane === 'signature' || !letter.process_lane) && isReadyForPickup" class="meta-box mb-3 p-3 rounded-3 border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
                                             <div class="d-flex align-items-center justify-content-between mb-2">
                                                 <label class="d-flex align-items-center gap-1 text-success fw-bold mb-0">
-                                                    <i class="bi bi-file-earmark-check fs-6"></i> Lembar Pendamping Resmi
+                                                    <i class="bi bi-file-earmark-check fs-6"></i> Lembar Pendamping
                                                 </label>
-                                                <span v-if="letter.status === 'Dokumen Sudah diambil' || (letter.attachment_path && letter.attachment_path.includes('sig_'))" class="badge bg-success text-white small" style="font-size: 10px;">
-                                                    <i class="bi bi-check2-circle me-1"></i>Sudah Bertanda Tangan
+                                                <span class="badge bg-success text-white small" style="font-size: 10px;">
+                                                    <i class="bi bi-check2-circle me-1"></i>Siap Diambil / Selesai
                                                 </span>
                                             </div>
                                             <p class="small text-muted mb-3">
-                                                Lembar kontrol fisik persuratan resmi dengan barcode pelacakan dan riwayat paraf pimpinan.
+                                                Lembar kontrol fisik persuratan dengan barcode pelacakan dan riwayat paraf pimpinan.
                                             </p>
-                                            <a :href="`/print/pendamping/${letter.id}`" target="_blank"
+                                            <a :href="`/cetak/pendamping/${letter.id}`" target="_blank"
                                                 class="btn btn-sm btn-success w-100 fw-bold d-inline-flex align-items-center justify-content-center gap-1 shadow-sm py-2">
                                                 <i class="bi bi-printer-fill"></i> Buka / Cetak Lembar Pendamping
                                             </a>
                                         </div>
 
-                                        <div v-if="letter.attachment_path" class="meta-box p-3 rounded-3 border bg-light">
+                                        <div v-if="letter.attachment_path && !letter.attachment_path.includes('signatures/') && !letter.attachment_path.includes('sig_')" class="meta-box p-3 rounded-3 border bg-light">
                                             <label class="d-flex align-items-center gap-1 text-primary fw-bold mb-2">
                                                 <i class="bi bi-paperclip fs-6"></i> Lampiran Berkas Naskah
                                             </label>

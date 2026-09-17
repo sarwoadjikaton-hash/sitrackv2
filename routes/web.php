@@ -33,6 +33,14 @@ Route::post('/ajukan-surat', [PublicTrackingController::class, 'store'])->name('
 Route::get('/surat-berhasil/{code}', [PublicTrackingController::class, 'success'])->name('tracking.success');
 Route::get('/data-surat/slots', [DataSuratController::class, 'getSlots'])->name('data-surat.slots.public');
 
+// Cetak Dokumen Publik (Lembar Pendamping & Disposisi)
+Route::get('/cetak/pendamping/{id}', [PrintController::class, 'pendamping'])->name('print.pendamping');
+Route::get('/print/pendamping/{id}', [PrintController::class, 'pendamping'])->name('print.pendamping.alias');
+Route::post('/cetak/pendamping/{id}/signature', [PrintController::class, 'saveSignature'])->name('print.pendamping.signature');
+Route::post('/print/pendamping/{id}/signature', [PrintController::class, 'saveSignature'])->name('print.pendamping.signature.alias');
+Route::get('/cetak/disposisi/{id}', [PrintController::class, 'disposisi'])->name('print.disposisi');
+Route::get('/print/disposisi/{id}', [PrintController::class, 'disposisi'])->name('print.disposisi.alias');
+
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
@@ -101,9 +109,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/scan-status', [ScanQrController::class, 'index'])->middleware('permission:update status qr')->name('scan-status.index');
     Route::post('/scan-status', [ScanQrController::class, 'update'])->middleware('permission:update status qr')->name('scan-status.update');
 
-    // Cetak Dokumen A4
-    Route::get('/cetak/disposisi/{id}', [PrintController::class, 'disposisi'])->middleware('permission:view disposition lane')->name('print.disposisi');
-    Route::get('/cetak/pendamping/{id}', [PrintController::class, 'pendamping'])->middleware('permission:view signature lane')->name('print.pendamping');
+    // Upload Paraf / Tanda Tangan Cetak
     Route::post('/cetak/pendamping/{id}/signature', [PrintController::class, 'saveSignature'])->middleware('permission:view signature lane')->name('print.pendamping.signature');
 
     // Panduan Alur Status

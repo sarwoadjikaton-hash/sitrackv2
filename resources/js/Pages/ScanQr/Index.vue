@@ -53,6 +53,24 @@ watch(() => props.letter, (newVal) => {
     }
 }, { immediate: true });
 
+const defaultPositionByStatus: Record<string, string> = {
+    'Diregistrasi': 'Unit Pengusul',
+    'Diterima': 'Tata Usaha Sekjen',
+    'Diperiksa Oleh TU Sekjen': 'TU Sekjen',
+    'Diperiksa Oleh Kasubag TU Sekjen': 'Kasubag TU Sekjen',
+    'Diperiksa Oleh Sekjen': 'Meja Sekjen',
+    'Selesai dan Siap Untuk diambil': 'Loket TU Sekjen',
+    'Dokumen Sudah diambil': 'Unit Pengolah',
+    'Revisi': 'Unit Pengusul (Perlu Revisi)',
+    'Ditolak': 'Unit Pengusul (Ditolak)',
+};
+
+watch(() => form.status, (newStatus) => {
+    if (newStatus && defaultPositionByStatus[newStatus]) {
+        form.current_position = defaultPositionByStatus[newStatus];
+    }
+});
+
 const actionOptions = [
     'Mohon Paraf', 'Mohon Tanda Tangan'
 ];
