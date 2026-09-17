@@ -15,10 +15,19 @@ Thumbs.db
 *.backup
 *.zip
 
-# Composer
+# Composer & Node
 /vendor/
 node_modules/
 
+# Storage & Uploads
 public/storage
-
 public/uploads
+
+storage/logs/*.log
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+!storage/logs/.gitkeep
+!storage/framework/cache/.gitkeep
+!storage/framework/sessions/.gitkeep
+!storage/framework/views/.gitkeep
