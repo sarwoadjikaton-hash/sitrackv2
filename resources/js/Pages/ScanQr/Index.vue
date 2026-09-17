@@ -3,10 +3,9 @@ import { Head, useForm, Link, router } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
-import { Html5QrcodeScanner } from "html5-qrcode"; // Garis merah di sini harusnya sudah hilang
+import { Html5Qrcode } from "html5-qrcode";
 import type { Letter } from '@/types';
 
-// TAMBAHKAN BARIS INI untuk menghilangkan error "Cannot find name 'route'"
 declare function route(name: string, params?: any): string;
 
 const props = defineProps<{
@@ -16,7 +15,20 @@ const props = defineProps<{
 }>();
 
 const manualId = ref(props.tracking || '');
-let scanner: any = null;
+let html5QrCode: Html5Qrcode | null = null;
+let fileQrCode: Html5Qrcode | null = null;
+
+const isCameraRunning = ref(false);
+const isCameraLoading = ref(false);
+const cameraError = ref<string | null>(null);
+const cameras = ref<{ id: string; label: string }[]>([]);
+const selectedCameraId = ref<string>('');
+const isSecureContext = ref(true);
+const currentOrigin = ref('');
+
+const isFileScanning = ref(false);
+const fileScanError = ref<string | null>(null);
+const fileInputRef = ref<HTMLInputElement | null>(null);
 
 // --- LOGIKA FORM UPDATE ---
 const form = useForm({
@@ -59,7 +71,7 @@ const handleManualSearch = () => {
 };
 
 const onScanSuccess = (decodedText: string) => {
-    if (scanner) scanner.clear(); // Hentikan kamera setelah berhasil scan
+    stopCamera();
     router.get(route('scan-status.index'), { tracking: extractCode(decodedText) });
 };
 
@@ -67,18 +79,134 @@ const submitUpdate = () => {
     form.post(route('scan-status.update'), {
         onSuccess: () => {
             form.reset('note');
-            // Jika ingin scanner terbuka lagi setelah simpan, bisa refresh di sini
         }
     });
 };
 
-onMounted(() => {
-    scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 }, false);
-    scanner.render(onScanSuccess, () => { });
+// --- LOGIKA KAMERA ---
+const startCamera = async (cameraId?: string) => {
+    if (!html5QrCode) return;
+    cameraError.value = null;
+    isCameraLoading.value = true;
+
+    try {
+        if (isCameraRunning.value) {
+            await html5QrCode.stop();
+            isCameraRunning.value = false;
+        }
+
+        const cameraConfig = cameraId
+            ? { deviceId: { exact: cameraId } }
+            : { facingMode: "environment" };
+
+        await html5QrCode.start(
+            cameraConfig,
+            {
+                fps: 15,
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0,
+            },
+            (decodedText) => onScanSuccess(decodedText),
+            () => { /* frame mismatch ignored */ }
+        );
+
+        isCameraRunning.value = true;
+    } catch (err: any) {
+        console.error("Camera start error:", err);
+        const errStr = String(err?.message || err || '');
+        if (errStr.includes('Permission') || errStr.includes('NotAllowedError')) {
+            cameraError.value = "Izin akses kamera ditolak oleh browser. Mohon izinkan kamera pada setelan situs.";
+        } else if (errStr.includes('NotFoundError') || errStr.includes('DevicesNotFoundError')) {
+            cameraError.value = "Tidak ditemukan perangkat kamera yang terpasang pada perangkat ini.";
+        } else if (!window.isSecureContext) {
+            cameraError.value = "Browser memblokir kamera karena koneksi HTTP (non-HTTPS). Gunakan fitur Upload Foto QR di bawah atau izinkan IP di setelan Chrome.";
+        } else {
+            cameraError.value = "Gagal mengakses kamera: " + (err?.message || "Pastikan kamera tidak digunakan aplikasi lain.");
+        }
+    } finally {
+        isCameraLoading.value = false;
+    }
+};
+
+const stopCamera = async () => {
+    if (html5QrCode && isCameraRunning.value) {
+        try {
+            await html5QrCode.stop();
+        } catch (e) {
+            console.error(e);
+        }
+        isCameraRunning.value = false;
+    }
+};
+
+const toggleCamera = () => {
+    if (isCameraRunning.value) {
+        stopCamera();
+    } else {
+        startCamera(selectedCameraId.value || undefined);
+    }
+};
+
+// --- SCAN DARI FILE GAMBAR ---
+const triggerFileInput = () => {
+    fileScanError.value = null;
+    fileInputRef.value?.click();
+};
+
+const handleFileUpload = async (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (!target.files || target.files.length === 0) return;
+    const file = target.files[0];
+    fileScanError.value = null;
+    isFileScanning.value = true;
+
+    try {
+        if (!fileQrCode) {
+            fileQrCode = new Html5Qrcode("reader-file-hidden");
+        }
+        const decodedText = await fileQrCode.scanFile(file, true);
+        onScanSuccess(decodedText);
+    } catch (err: any) {
+        console.error("File scan error:", err);
+        fileScanError.value = "QR Code tidak terdeteksi pada file gambar tersebut. Pastikan gambar QR jelas dan tidak buram.";
+    } finally {
+        isFileScanning.value = false;
+        target.value = '';
+    }
+};
+
+onMounted(async () => {
+    isSecureContext.value = window.isSecureContext;
+    currentOrigin.value = window.location.origin;
+
+    html5QrCode = new Html5Qrcode("reader");
+
+    try {
+        const devices = await Html5Qrcode.getCameras();
+        if (devices && devices.length > 0) {
+            cameras.value = devices.map(d => ({ id: d.id, label: d.label || `Kamera ${d.id}` }));
+            selectedCameraId.value = devices[0].id;
+        }
+    } catch (e) {
+        console.warn("Could not list cameras:", e);
+    }
+
+    // Auto-start camera
+    startCamera();
 });
 
 onUnmounted(() => {
-    if (scanner) scanner.clear();
+    stopCamera();
+    if (html5QrCode) {
+        try {
+            html5QrCode.clear();
+        } catch (e) { }
+    }
+    if (fileQrCode) {
+        try {
+            fileQrCode.clear();
+        } catch (e) { }
+    }
 });
 </script>
 
@@ -101,52 +229,114 @@ onUnmounted(() => {
             </Link>
         </div>
 
+        <!-- Hidden container untuk scan file -->
+        <div id="reader-file-hidden" style="display: none;"></div>
+        <input ref="fileInputRef" type="file" accept="image/*" class="d-none" @change="handleFileUpload" />
+
         <!-- Bagian Atas: SCANNER & MANUAL INPUT -->
         <div class="st-card p-0 overflow-hidden border-0 shadow-lg mb-4 animate-fade-in">
             <div
-                class="card-header-epic d-flex justify-content-between align-items-center px-4 py-3 border-bottom bg-white">
+                class="card-header-epic d-flex justify-content-between align-items-center px-4 py-3 border-bottom bg-white flex-wrap gap-2">
                 <div>
-                    <h5 class="fw-bold mb-0 fs-6">Status Surat</h5>
-                    <small class="text-muted" style="font-size: 11px;">Gunakan kamera atau input manual untuk memproses
-                        berkas.</small>
+                    <h5 class="fw-bold mb-0 fs-6">Pemindai QR Surat</h5>
+                    <small class="text-muted" style="font-size: 11px;">Gunakan kamera langsung, upload foto QR, atau ketik ID manual.</small>
                 </div>
-                <span class="badge bg-primary-subtle text-primary border px-2 py-1 small fw-bold">
-                    <i class="bi bi-camera-fill me-1"></i> Mode Pemindai Aktif
-                </span>
+                <div class="d-flex align-items-center gap-2">
+                    <span v-if="isCameraRunning" class="badge bg-success-subtle text-success border px-2 py-1 small fw-bold">
+                        <i class="bi bi-camera-video-fill me-1"></i> Kamera Aktif
+                    </span>
+                    <span v-else class="badge bg-secondary-subtle text-secondary border px-2 py-1 small fw-bold">
+                        <i class="bi bi-camera-video-off me-1"></i> Kamera Nonaktif
+                    </span>
+                </div>
             </div>
 
             <div class="p-4 p-lg-5">
-                <div class="row g-5 align-items-start">
-                    <!-- KIRI: Scanner -->
+                <div class="row g-4 align-items-start">
+                    <!-- KIRI: Scanner Box -->
                     <div class="col-lg-7">
-                        <div id="reader" class="rounded-4 overflow-hidden border-dashed bg-light"></div>
+                        <div class="scanner-card position-relative rounded-4 overflow-hidden border bg-dark p-2 text-center">
+                            <!-- Area Video HTML5 QR Code -->
+                            <div id="reader" class="rounded-3 overflow-hidden" style="min-height: 280px; width: 100%;"></div>
+
+                            <!-- Controls Bar -->
+                            <div class="d-flex align-items-center justify-content-center gap-2 mt-3 flex-wrap">
+                                <button type="button" class="btn btn-sm btn-light fw-bold px-3 shadow-sm" :disabled="isCameraLoading" @click="toggleCamera">
+                                    <span v-if="isCameraLoading" class="spinner-border spinner-border-sm me-1"></span>
+                                    <i v-else class="bi" :class="isCameraRunning ? 'bi-stop-fill text-danger' : 'bi-play-fill text-success'"></i>
+                                    {{ isCameraRunning ? 'Matikan Kamera' : 'Nyalakan Kamera' }}
+                                </button>
+
+                                <button type="button" class="btn btn-sm btn-outline-light fw-bold px-3" :disabled="isFileScanning" @click="triggerFileInput">
+                                    <span v-if="isFileScanning" class="spinner-border spinner-border-sm me-1"></span>
+                                    <i v-else class="bi bi-image me-1 text-info"></i>
+                                    Upload / Foto QR
+                                </button>
+
+                                <select v-if="cameras.length > 1" v-model="selectedCameraId" class="form-select form-select-sm w-auto bg-dark text-white border-secondary" @change="startCamera(selectedCameraId)">
+                                    <option v-for="cam in cameras" :key="cam.id" :value="cam.id">
+                                        📷 {{ cam.label }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Alert Error Kamera jika ada -->
+                        <div v-if="cameraError" class="alert alert-warning border-0 small mt-3 mb-0 py-2 d-flex align-items-start gap-2 rounded-3">
+                            <i class="bi bi-exclamation-triangle-fill text-warning flex-shrink-0 mt-1"></i>
+                            <div>
+                                <div class="fw-bold">Kendala Akses Kamera:</div>
+                                <div>{{ cameraError }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Alert Error File Scan jika ada -->
+                        <div v-if="fileScanError" class="alert alert-danger border-0 small mt-3 mb-0 py-2 d-flex align-items-start gap-2 rounded-3">
+                            <i class="bi bi-x-circle-fill text-danger flex-shrink-0 mt-1"></i>
+                            <div>{{ fileScanError }}</div>
+                        </div>
+
+                        <!-- Info Buka Akses Kamera di LAN IP HTTP -->
+                        <div v-if="!isSecureContext" class="alert alert-info border-0 small mt-3 mb-0 py-2 rounded-3">
+                            <div class="fw-bold mb-1"><i class="bi bi-shield-lock me-1"></i> Info Akses Kamera di Jaringan Lokal (IP):</div>
+                            <p class="mb-1" style="font-size: 11.5px;">
+                                Browser modern membatasi kamera pada koneksi IP tanpa SSL. Anda tetap bisa menggunakan tombol <strong>"Upload / Foto QR"</strong> atau input ID manual.
+                            </p>
+                            <details class="mt-1" style="font-size: 11px;">
+                                <summary class="text-primary fw-semibold cursor-pointer">Cara aktifkan kamera di Chrome/Edge</summary>
+                                <div class="mt-1 p-2 bg-white rounded border">
+                                    1. Buka tab baru di browser: <code class="user-select-all">chrome://flags/#unsafely-treat-insecure-origin-as-secure</code><br>
+                                    2. Masukkan alamat: <code class="user-select-all text-primary fw-bold">{{ currentOrigin }}</code><br>
+                                    3. Ubah dropdown menjadi <strong>Enabled</strong> lalu klik <strong>Relaunch</strong>.
+                                </div>
+                            </details>
+                        </div>
                     </div>
 
                     <!-- KANAN: Petunjuk & Input Manual -->
                     <div class="col-lg-5">
                         <div class="instruction-box p-4 rounded-4 bg-light shadow-sm">
                             <h6 class="fw-bold text-dark mb-3"><i
-                                    class="bi bi-info-circle-fill me-2 text-primary"></i>Petunjuk Scan</h6>
+                                    class="bi bi-info-circle-fill me-2 text-primary"></i>Petunjuk Cepat</h6>
                             <ol class="small text-muted ps-3 mb-4">
-                                <li class="mb-2">Arahkan kamera ke QR Code surat.</li>
-                                <li class="mb-2">Pastikan pencahayaan cukup agar terbaca.</li>
-                                <li>Setelah terbaca, form update akan muncul di bawah.</li>
+                                <li class="mb-2">Arahkan kamera ke QR Code surat, atau klik <strong>Upload / Foto QR</strong>.</li>
+                                <li class="mb-2">Pastikan kode QR tercetak tajam dan tidak tertutup.</li>
+                                <li>Setelah terbaca, formulir pembaruan status akan otomatis terbuka.</li>
                             </ol>
 
-                            <div class="alert alert-warning border-0 small mb-4 py-2"
-                                style="background-color: #fff9db; color: #856404;">
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                Kamera tidak muncul? Gunakan <strong>HTTPS</strong> atau <strong>localhost</strong>.
-                            </div>
-
                             <div class="manual-input-section pt-3 border-top">
-                                <label class="form-label small fw-bold text-dark">Input ID Pelacakan Manual</label>
+                                <label class="form-label small fw-bold text-dark">Input ID Pelacakan Manual / Barcode Scanner</label>
                                 <div class="input-group">
                                     <input v-model="manualId" type="text"
                                         class="form-control font-monospace border-primary-subtle"
-                                        placeholder="TUS-YYYYMMDD-XXX" @keyup.enter="handleManualSearch">
-                                    <button @click="handleManualSearch" class="btn btn-teal px-3 fw-bold">Buka</button>
+                                        placeholder="TUS-YYYYMMDD-XXX" autofocus @keyup.enter="handleManualSearch">
+                                    <button @click="handleManualSearch" class="btn btn-teal px-3 fw-bold">
+                                        <i class="bi bi-search me-1"></i> Buka
+                                    </button>
                                 </div>
+                                <small class="text-muted d-block mt-1" style="font-size: 11px;">
+                                    Mendukung scanner barcode USB/Bluetooth atau ketik manual ID surat.
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -244,11 +434,11 @@ onUnmounted(() => {
 }
 
 .btn-teal {
-    background-color: #38a89d;
+    background: linear-gradient(135deg, var(--st-teal, #42B8A8), var(--st-teal-dark, #2a8175));
     color: white;
 
     &:hover {
-        background-color: #2d8a81;
+        background: linear-gradient(135deg, var(--st-teal-light, #64cbbd), var(--st-teal, #42B8A8));
         color: white;
     }
 }
@@ -291,6 +481,17 @@ onUnmounted(() => {
 /* Override styling library html5-qrcode */
 :deep(#reader) {
     border: none !important;
+    background: #0f172a;
+}
+
+:deep(#reader video) {
+    border-radius: 12px;
+    max-height: 380px;
+    object-fit: cover;
+}
+
+:deep(#reader__scan_region) {
+    background: transparent !important;
 }
 
 :deep(#reader__dashboard_section_csr button) {

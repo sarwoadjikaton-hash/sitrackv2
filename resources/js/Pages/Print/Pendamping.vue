@@ -529,13 +529,18 @@ const goBack = () => window.history.back();
 }
 
 @media print {
+    @page {
+        size: A4 portrait;
+        margin: 8mm;
+    }
+
     .no-print {
         display: none !important;
     }
 
     .print-container {
         margin: 0 !important;
-        padding: 10mm !important;
+        padding: 8mm 10mm !important;
         width: 100% !important;
         box-shadow: none !important;
     }

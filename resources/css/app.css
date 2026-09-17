@@ -1795,28 +1795,6 @@ body {
   border-color: #2563eb !important;
 }
 
-@media print {
-  @page {
-    size: landscape;
-    margin: 10mm;
-  }
-
-  .ds-table {
-    border: 1px solid black !important;
-  }
-
-  .ds-table th,
-  .ds-table td {
-    border: 1px solid #ccc !important;
-    color: black !important;
-  }
-
-  .text-truncate {
-    overflow: visible !important;
-    white-space: normal !important;
-  }
-}
-
 /* ---- Pages/Letters/Import.vue ---- */
 .upload-btn-wrapper {
   position: relative;
