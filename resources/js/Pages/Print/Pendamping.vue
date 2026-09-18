@@ -250,15 +250,15 @@ const goBack = () => window.history.back();
             <div class="checkbox-area">
                 <div class="row">
                     <div class="col-6">
-                        <div class="check-item" @click="toggleAction('Mohon Paraf')">
-                            <i class="bi" :class="isChecked('Mohon Paraf') ? 'bi-check-square-fill text-primary' : 'bi-square'"></i>
-                            <span class="ms-1">Mohon Paraf</span>
-                        </div>
-                    </div>
-                    <div class="col-6">
                         <div class="check-item" @click="toggleAction('Mohon Tanda Tangan')">
                             <i class="bi" :class="isChecked('Mohon Tanda Tangan') ? 'bi-check-square-fill text-primary' : 'bi-square'"></i>
                             <span class="ms-1">Mohon Tanda Tangan</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="check-item" @click="toggleAction('Mohon Paraf')">
+                            <i class="bi" :class="isChecked('Mohon Paraf') ? 'bi-check-square-fill text-primary' : 'bi-square'"></i>
+                            <span class="ms-1">Mohon Paraf</span>
                         </div>
                     </div>
                 </div>

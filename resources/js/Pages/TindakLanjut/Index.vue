@@ -92,8 +92,8 @@ watch(() => statusForm.status, (newStatus) => {
 });
 
 const actionOptions = [
-    'Mohon Paraf',
     'Mohon Tanda Tangan',
+    'Mohon Paraf',
 ];
 
 const handleFileUpload = (e: Event) => {

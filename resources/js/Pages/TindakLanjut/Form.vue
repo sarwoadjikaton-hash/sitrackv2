@@ -184,8 +184,8 @@ watch(classificationCode, () => {
 });
 
 const actionOptions = [
-    'Mohon Paraf',
     'Mohon Tanda Tangan',
+    'Mohon Paraf',
 ];
 
 const handleFileUpload = (e: Event) => {

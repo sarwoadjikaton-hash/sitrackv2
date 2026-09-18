@@ -72,7 +72,7 @@ watch(() => form.status, (newStatus) => {
 });
 
 const actionOptions = [
-    'Mohon Paraf', 'Mohon Tanda Tangan'
+    'Mohon Tanda Tangan', 'Mohon Paraf'
 ];
 
 const extractCode = (str: string) => {
