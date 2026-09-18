@@ -31,12 +31,11 @@ const isLoggedIn = computed(() => !!page.props.auth.user);
                         </div>
 
                         <div class="d-none d-sm-block ms-1">
-                            <h5 class="fw-bold mb-0 text-primary-dark d-flex align-items-center gap-1">
-                                <span>SiTrack</span>
-                                <span class="text-muted fw-normal" style="font-size: 13px;">| Kemnaker</span>
+                            <h5 class="fw-bold mb-0 text-primary-dark">
+                                SiTrack
                             </h5>
-                            <p class="text-muted mb-0" style="font-size: 10px; letter-spacing: 0.5px;">
-                                Sistem Elektronik Administrasi & Tracking Persuratan
+                            <p class="text-muted mb-0 fw-medium" style="font-size: 10px; letter-spacing: 0.3px;">
+                                Sekretariat Jenderal Kementerian Ketenagakerjaan RI
                             </p>
                         </div>
                     </Link>

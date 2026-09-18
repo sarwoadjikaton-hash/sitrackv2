@@ -100,10 +100,9 @@ const overlayStyle = computed(() => ({
                         </div>
                     </div>
                     <h2 class="fw-bold mb-0 mt-2 text-dark">
-                        <span>SiTrack</span>
-                        <span class="text-muted fw-normal fs-5 ms-1">| Kemnaker</span>
+                        SiTrack
                     </h2>
-                    <p class="text-muted small mb-0 mt-1">Sistem Elektronik Administrasi Persuratan TU SEKJEN</p>
+                    <p class="text-muted small mb-0 mt-1 fw-medium">Sekretariat Jenderal Kementerian Ketenagakerjaan RI</p>
                 </div>
 
                 <span class="eyebrow d-block text-center mb-3">STAFF ACCESS ONLY</span>

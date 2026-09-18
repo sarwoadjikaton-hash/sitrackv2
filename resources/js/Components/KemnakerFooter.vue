@@ -28,7 +28,7 @@
                     </div>
                     <div class="kemnaker-desc text-white-50">
                         <p class="fw-semibold text-white mb-1">
-                            Kementerian Ketenagakerjaan Republik Indonesia
+                            Sekretariat Jenderal Kementerian Ketenagakerjaan RI
                         </p>
                         <p class="small mb-0" style="max-width: 460px; line-height: 1.5;">
                             Jl. Jendral Gatot Subroto Kav. 51, Daerah Khusus Ibukota Jakarta 12950
