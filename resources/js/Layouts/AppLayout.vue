@@ -289,11 +289,12 @@ const isActive = (path: string, exact = false) =>
 
             <footer class="app-page-footer no-print">
                 <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
-                    <img src="/images/sitrack_logo.svg" alt="SiTrack" width="16" height="16" />
-                    <span class="fw-semibold text-dark">SiTrack</span>
-                    <span class="opacity-40">|</span>
-                    <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="15" height="15" />
-                    <span>Kementerian Ketenagakerjaan RI &bull; TU SEKJEN &copy; 2026</span>
+                    <div class="d-inline-flex align-items-center gap-2">
+                        <img src="/images/sitrack_logo.svg" alt="SiTrack" width="16" height="16" />
+                        <span class="opacity-40">|</span>
+                        <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="16" height="16" />
+                    </div>
+                    <span>SiTrack &bull; Kementerian Ketenagakerjaan RI &bull; TU SEKJEN &copy; 2026</span>
                 </div>
             </footer>
         </div>

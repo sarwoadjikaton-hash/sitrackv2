@@ -43,13 +43,14 @@
                 </div>
             </div>
 
-            <!-- Bottom SiTrack Identity (Persis seperti Gambar 3) -->
+            <!-- Bottom SiTrack Identity -->
             <div class="pt-3 mt-4 border-top border-white border-opacity-10 d-flex flex-wrap align-items-center justify-content-center gap-2 text-white-50 small">
-                <img src="/images/sitrack_logo.svg" alt="SiTrack" width="16" height="16" />
-                <span class="fw-semibold text-white">SiTrack</span>
-                <span class="opacity-40">|</span>
-                <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="15" height="15" class="kemnaker-logo-white" />
-                <span>Kementerian Ketenagakerjaan RI &bull; TU SEKJEN &copy; 2026</span>
+                <div class="d-inline-flex align-items-center gap-2">
+                    <img src="/images/sitrack_logo.svg" alt="SiTrack" width="16" height="16" />
+                    <span class="opacity-40">|</span>
+                    <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="16" height="16" class="kemnaker-logo-white" />
+                </div>
+                <span>SiTrack &bull; Kementerian Ketenagakerjaan RI &bull; TU SEKJEN &copy; 2026</span>
             </div>
         </div>
     </footer>
