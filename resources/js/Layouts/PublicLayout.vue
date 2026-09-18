@@ -2,6 +2,7 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import ToastNotification from '@/Components/ToastNotification.vue';
+import KemnakerFooter from '@/Components/KemnakerFooter.vue';
 import { PageProps } from '@/types';
 
 const page = usePage<PageProps>();
@@ -17,16 +18,25 @@ const isLoggedIn = computed(() => !!page.props.auth.user);
             <nav class="container nav-glass rounded-4 shadow-sm border py-2 px-3 px-md-4 backdrop-blur">
                 <div class="d-flex align-items-center justify-content-between">
 
-                    <!-- Brand Section -->
+                    <!-- Brand Section: Logo SiTrack | Logo Kemnaker -->
                     <Link href="/tracking" class="brand-link d-flex align-items-center gap-2 text-decoration-none">
-                        <!-- Logo 38px -->
-                        <img src="/images/sitrack_logo.svg" alt="SiTrack" width="38" height="38"
-                            class="app-logo-header shadow-sm rounded-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Logo SiTrack -->
+                            <img src="/images/sitrack_logo.svg" alt="SiTrack" width="36" height="36"
+                                class="app-logo-header shadow-sm rounded-3">
+                            <span class="brand-pipe-divider text-muted opacity-50 fw-light">|</span>
+                            <!-- Logo Kemnaker -->
+                            <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="32" height="32"
+                                class="kemnaker-logo-header">
+                        </div>
 
-                        <div class="d-none d-sm-block">
-                            <h5 class="fw-bold mb-0 text-primary-dark">SiTrack</h5>
-                            <p class="text-muted mb-0" style="font-size: 10px; letter-spacing: 0.5px;">Sistem Elektronik
-                                Administrasi & Tracking Persuratan
+                        <div class="d-none d-sm-block ms-1">
+                            <h5 class="fw-bold mb-0 text-primary-dark d-flex align-items-center gap-1">
+                                <span>SiTrack</span>
+                                <span class="text-muted fw-normal" style="font-size: 13px;">| Kemnaker</span>
+                            </h5>
+                            <p class="text-muted mb-0" style="font-size: 10px; letter-spacing: 0.5px;">
+                                Sistem Elektronik Administrasi & Tracking Persuratan
                             </p>
                         </div>
                     </Link>
@@ -65,23 +75,8 @@ const isLoggedIn = computed(() => !!page.props.auth.user);
             <slot></slot>
         </main>
 
-        <!-- Minimalist Footer -->
-        <footer class="bg-white border-top py-5 mt-auto">
-            <div class="container text-center">
-                <!-- Logo Section di Footer -->
-                <div class="mb-3 d-flex align-items-center justify-content-center gap-2">
-                    <img src="/images/sitrack_logo.svg" alt="SiTrack" width="24" height="24" class="app-logo-footer opacity-75">
-
-                    <span class="fw-bold text-dark" style="letter-spacing: 2px; font-size: 0.9rem;">SITRACK</span>
-                </div>
-
-                <!-- Info Hak Cipta -->
-                <p class="text-muted small mb-1">Sistem Elektronik Administrasi & Tracking Persuratan</p>
-                <p class="text-secondary mb-0" style="font-size: 12px;">
-                    &copy; 2026 TU SEKJEN · SiTrack. All rights reserved.
-                </p>
-            </div>
-        </footer>
+        <!-- Official Kemnaker Footer -->
+        <KemnakerFooter />
     </div>
 </template>
 

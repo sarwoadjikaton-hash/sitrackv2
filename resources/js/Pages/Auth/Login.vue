@@ -90,11 +90,20 @@ const overlayStyle = computed(() => ({
             <div class="auth-card" :class="{ 'has-errors': form.errors.username || form.errors.password }">
                 <!-- Brand Header -->
                 <div class="text-center mb-4">
-                    <div class="brand-logo-ring mx-auto shadow-lg">
-                        <img src="/images/sitrack_logo.svg" alt="SiTrack Logo" width="56" height="56" />
+                    <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
+                        <div class="brand-logo-ring shadow-sm">
+                            <img src="/images/sitrack_logo.svg" alt="SiTrack Logo" width="46" height="46" />
+                        </div>
+                        <span class="fs-4 text-muted opacity-50 fw-light">|</span>
+                        <div class="brand-logo-ring brand-logo-kemnaker shadow-sm">
+                            <img src="/images/kemnaker_logo.png" alt="Kemnaker Logo" width="40" height="40" />
+                        </div>
                     </div>
-                    <h2 class="fw-bold mb-1 mt-3 text-dark">SiTrack</h2>
-                    <p class="text-muted small mb-0">Sistem Elektronik Administrasi Persuratan</p>
+                    <h2 class="fw-bold mb-0 mt-2 text-dark">
+                        <span>SiTrack</span>
+                        <span class="text-muted fw-normal fs-5 ms-1">| Kemnaker</span>
+                    </h2>
+                    <p class="text-muted small mb-0 mt-1">Sistem Elektronik Administrasi Persuratan TU SEKJEN</p>
                 </div>
 
                 <span class="eyebrow d-block text-center mb-3">STAFF ACCESS ONLY</span>
@@ -154,16 +163,23 @@ const overlayStyle = computed(() => ({
 
             <!-- Footer Statis 2026 -->
             <p class="auth-footer-note">
-                <i class="bi bi-c-circle"></i> 2026 SiTrack — TU SEKJEN
+                <i class="bi bi-c-circle"></i> 2026 SiTrack &bull; Kementerian Ketenagakerjaan Republik Indonesia
             </p>
         </div>
 
         <Transition name="ripple">
             <div v-if="transitioning" class="login-transition-overlay" :style="overlayStyle">
                 <div class="login-transition-content">
-                    <div class="login-transition-logo-badge">
-                        <img src="/images/sitrack_logo.svg" alt="" width="40" height="40"
-                            class="login-transition-logo" />
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+                        <div class="login-transition-logo-badge">
+                            <img src="/images/sitrack_logo.svg" alt="" width="36" height="36"
+                                class="login-transition-logo" />
+                        </div>
+                        <span class="text-white opacity-40">|</span>
+                        <div class="login-transition-logo-badge">
+                            <img src="/images/kemnaker_logo.png" alt="" width="32" height="32"
+                                class="login-transition-logo" style="filter: brightness(0) invert(1);" />
+                        </div>
                     </div>
                     <p class="login-transition-text">Memverifikasi kredensial...</p>
                 </div>
@@ -309,12 +325,12 @@ $teal-300: #7ec5fc;
 }
 
 .brand-logo-ring {
-    width: 76px;
-    height: 76px;
+    width: 64px;
+    height: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 20px;
+    border-radius: 18px;
     background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(45, 212, 191, 0.1));
     border: 1px solid rgba(37, 99, 235, 0.15);
 }

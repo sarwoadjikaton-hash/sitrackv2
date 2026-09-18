@@ -28,7 +28,13 @@ defineProps<{
             <div class="dsh-welcome-blob dsh-welcome-blob-b"></div>
             <div class="row align-items-center position-relative">
                 <div class="col-lg-8">
-                    <span class="dsh-welcome-badge">SiTrack</span>
+                    <span class="dsh-welcome-badge d-inline-flex align-items-center gap-2">
+                        <img src="/images/sitrack_logo.svg" alt="SiTrack" width="16" height="16" />
+                        <span>SiTrack</span>
+                        <span class="opacity-50">|</span>
+                        <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="14" height="14" style="filter: brightness(0) invert(1);" />
+                        <span>KEMNAKER RI</span>
+                    </span>
                     <h2 class="fw-bold mb-1 text-white">Selamat Datang di Sistem Tracking Persuratan</h2>
                     <p class="mb-0 text-white-50 small">
                         Kelola seluruh alur penomoran surat naskah dinas, lembar tindak lanjut tanda tangan, dan arahan

@@ -111,12 +111,18 @@ const isActive = (path: string, exact = false) =>
                 <!-- Brand Header -->
                 <div class="sidebar-header">
                     <Link href="/dashboard" class="brand-wrapper" @click="closeMobileNav">
-                        <span class="brand-logo-ring">
-                            <img src="/images/sitrack_logo.svg" alt="SiTrack" width="32" height="32" />
-                        </span>
+                        <div class="brand-logos-pair">
+                            <span class="brand-logo-ring" title="SiTrack">
+                                <img src="/images/sitrack_logo.svg" alt="SiTrack" width="28" height="28" />
+                            </span>
+                            <span class="brand-pipe-divider">|</span>
+                            <span class="brand-logo-ring brand-kemnaker-ring" title="Kementerian Ketenagakerjaan RI">
+                                <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="26" height="26" class="brand-kemnaker-img" />
+                            </span>
+                        </div>
                         <span class="brand-text">
-                            <span class="brand-title">SiTrack</span>
-                            <small>Sistem Persuratan</small>
+                            <span class="brand-title">SiTrack <span class="brand-sub-pipe">|</span> Kemnaker</span>
+                            <small>TU SEKRETARIAT JENDERAL</small>
                         </span>
                     </Link>
                     <button type="button" class="sidebar-close d-lg-none" @click="closeMobileNav">
@@ -256,7 +262,13 @@ const isActive = (path: string, exact = false) =>
                     </button>
                     <div class="topbar-heading">
                         <span class="topbar-heading-mark"></span>
-                        <h2 class="topbar-title">{{ title || 'Sistem Tracking Persuratan' }}</h2>
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <h2 class="topbar-title">{{ title || 'Sistem Tracking Persuratan' }}</h2>
+                            <div class="topbar-instansi-pill d-none d-md-inline-flex align-items-center gap-1 px-2 py-0.5 rounded-pill">
+                                <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="14" height="14" />
+                                <span>KEMNAKER RI</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-2">
@@ -276,8 +288,13 @@ const isActive = (path: string, exact = false) =>
             </main>
 
             <footer class="app-page-footer no-print">
-                <img src="/images/sitrack_logo.svg" alt="SiTrack" width="18" height="20" />
-                <span>SiTrack &copy; TU SEKJEN</span>
+                <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
+                    <img src="/images/sitrack_logo.svg" alt="SiTrack" width="16" height="16" />
+                    <span class="fw-semibold text-dark">SiTrack</span>
+                    <span class="opacity-40">|</span>
+                    <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="15" height="15" />
+                    <span>Kementerian Ketenagakerjaan RI &bull; TU SEKJEN &copy; 2026</span>
+                </div>
             </footer>
         </div>
 
@@ -427,14 +444,39 @@ const isActive = (path: string, exact = false) =>
     color: #fff;
 }
 
+.brand-logos-pair {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex: none;
+}
+
 .brand-logo-ring {
-    width: 38px;
-    height: 38px;
+    width: 34px;
+    height: 34px;
     display: grid;
     place-items: center;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    border-radius: 10px;
     flex: none;
+    transition: background 0.2s;
+}
+
+.brand-kemnaker-img {
+    filter: brightness(0) invert(1);
+}
+
+.brand-pipe-divider {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.95rem;
+    font-weight: 300;
+}
+
+.brand-sub-pipe {
+    opacity: 0.45;
+    font-weight: 300;
+    font-size: 0.85rem;
+    margin: 0 2px;
 }
 
 .brand-text {
@@ -445,12 +487,23 @@ const isActive = (path: string, exact = false) =>
 
 .brand-title {
     font-weight: 800;
-    font-size: 1rem;
+    font-size: 0.95rem;
+    letter-spacing: -0.01em;
 }
 
 .brand-text small {
-    font-size: 0.65rem;
-    opacity: 0.6;
+    font-size: 0.62rem;
+    letter-spacing: 0.4px;
+    opacity: 0.65;
+}
+
+.topbar-instansi-pill {
+    background: var(--st-primary-soft, #edf5fd);
+    color: var(--st-primary, #2743AF);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    border: 1px solid var(--st-border, #dce8ef);
 }
 
 .sidebar-scroll {
@@ -666,6 +719,8 @@ const isActive = (path: string, exact = false) =>
 @media (min-width: 992px) {
 
     .app-sidebar.is-collapsed .brand-text,
+    .app-sidebar.is-collapsed .brand-pipe-divider,
+    .app-sidebar.is-collapsed .brand-kemnaker-ring,
     .app-sidebar.is-collapsed .sidebar-caption,
     .app-sidebar.is-collapsed .nav-label,
     .app-sidebar.is-collapsed .user-info,
