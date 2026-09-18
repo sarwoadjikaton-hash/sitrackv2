@@ -11,7 +11,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class PrintController extends Controller
 {
     /**
-     * Print Lembar Disposisi (A4)
+     * Print Lembar Disposisi (A5)
      */
     public function disposisi($id): Response
     {
@@ -24,7 +24,7 @@ class PrintController extends Controller
     }
 
     /**
-     * Print Lembar Pendamping Penandatanganan / Tindak Lanjut (A4)
+     * Print Lembar Pendamping Penandatanganan / Tindak Lanjut (A5)
      */
     public function pendamping($id): Response
     {

@@ -170,15 +170,15 @@ const toggleAction = (actionName: string) => {
         </div>
     </div>
 
-    <!-- AREA KERTAS (A4 Standar Kemnaker) -->
+    <!-- AREA KERTAS (A5 Standar Kemnaker) -->
     <div class="print-container shadow-lg my-4">
         <!-- HEADER KOP SURAT KEMNAKER -->
-        <div class="kop-header d-flex align-items-center mb-2">
-            <div class="logo-box me-3 text-center" style="min-width: 70px;">
-                <img src="/images/kemnaker_logo.png" alt="KEMNAKER" width="56" height="56" class="d-block mx-auto" />
+        <div class="kop-header d-flex align-items-center mb-1">
+            <div class="logo-box me-3 text-center" style="min-width: 52px;">
+                <img src="/images/kemnaker_logo.png" alt="KEMNAKER" width="44" height="44" class="d-block mx-auto" />
                 <div class="logo-text text-center fw-bold mt-1">KEMNAKER</div>
             </div>
-            <div class="header-titles flex-grow-1 text-center pe-5">
+            <div class="header-titles flex-grow-1 text-center pe-4">
                 <div class="instansi-name fw-bold">KEMENTERIAN KETENAGAKERJAAN REPUBLIK INDONESIA</div>
                 <div class="sekjen-name fw-bold">SEKRETARIAT JENDERAL</div>
             </div>
@@ -195,14 +195,14 @@ const toggleAction = (actionName: string) => {
             <table class="meta-table w-100">
                 <tbody>
                     <tr>
-                        <td width="18%" class="meta-label">Tanggal Terima Surat</td>
+                        <td width="20%" class="meta-label">Tanggal Terima Surat</td>
                         <td width="2%" class="text-center">:</td>
                         <td width="30%" class="meta-val" contenteditable="true">
                             {{ formatDate(letter.received_date) }}
                         </td>
                         <td width="16%" class="meta-label border-start">Jenis Surat</td>
                         <td width="2%" class="text-center">:</td>
-                        <td width="32%" class="meta-val" contenteditable="true">
+                        <td width="30%" class="meta-val" contenteditable="true">
                             {{ letter.letter_number_type?.workbook_name || letter.category?.category_name || 'Biasa' }}
                         </td>
                     </tr>
@@ -235,7 +235,7 @@ const toggleAction = (actionName: string) => {
                     <tr>
                         <td class="meta-label" valign="top">Perihal</td>
                         <td class="text-center" valign="top">:</td>
-                        <td colspan="4" class="meta-val" contenteditable="true" style="line-height: 1.4;">
+                        <td colspan="4" class="meta-val" contenteditable="true" style="line-height: 1.3;">
                             {{ letter.subject }}
                         </td>
                     </tr>
@@ -245,14 +245,14 @@ const toggleAction = (actionName: string) => {
             <!-- UNIT DISPOSISI (2 KOLOM CHECKBOX) -->
             <div class="units-container d-flex border-top border-dark">
                 <!-- KOLOM KIRI (10 Unit) -->
-                <div class="units-col left-col flex-fill p-2">
+                <div class="units-col left-col flex-fill p-1">
                     <div
                         v-for="u in leftColumnUnits"
                         :key="u"
                         class="unit-row d-flex align-items-center"
                         @click="toggleUnit(u)"
                     >
-                        <div class="custom-checkbox me-2" :class="{ 'checked': isUnitChecked(u) }">
+                        <div class="custom-checkbox me-1" :class="{ 'checked': isUnitChecked(u) }">
                             <span v-if="isUnitChecked(u)">✓</span>
                         </div>
                         <span class="unit-name">{{ u }}</span>
@@ -260,14 +260,14 @@ const toggleAction = (actionName: string) => {
                 </div>
 
                 <!-- KOLOM KANAN (12 Unit) -->
-                <div class="units-col right-col flex-fill p-2">
+                <div class="units-col right-col flex-fill p-1">
                     <div
                         v-for="u in rightColumnUnits"
                         :key="u"
                         class="unit-row d-flex align-items-center"
                         @click="toggleUnit(u)"
                     >
-                        <div class="custom-checkbox me-2" :class="{ 'checked': isUnitChecked(u) }">
+                        <div class="custom-checkbox me-1" :class="{ 'checked': isUnitChecked(u) }">
                             <span v-if="isUnitChecked(u)">✓</span>
                         </div>
                         <span class="unit-name">{{ u }}</span>
@@ -278,20 +278,20 @@ const toggleAction = (actionName: string) => {
             <!-- LAJUR DISPOSISI & CATATAN + TTD (BOTTOM SECTION) -->
             <div class="bottom-section d-flex border-top border-dark">
                 <!-- LAJUR DISPOSISI (KIRI: 2 SUB-KOLOM CHECKBOX) -->
-                <div class="lajur-box border-end border-dark p-2" style="width: 52%;">
-                    <div class="lajur-header text-center fw-bold pb-1 mb-2">
+                <div class="lajur-box border-end border-dark p-1" style="width: 52%;">
+                    <div class="lajur-header text-center fw-bold pb-1 mb-1">
                         LAJUR DISPOSISI
                     </div>
                     <div class="d-flex">
                         <!-- Sub Kolom 1 -->
-                        <div class="lajur-subcol flex-fill pe-2">
+                        <div class="lajur-subcol flex-fill pe-1">
                             <div
                                 v-for="act in lajurActionsLeft"
                                 :key="act"
                                 class="lajur-row d-flex align-items-center"
                                 @click="toggleAction(act)"
                             >
-                                <div class="custom-checkbox me-2" :class="{ 'checked': isActionChecked(act) }">
+                                <div class="custom-checkbox me-1" :class="{ 'checked': isActionChecked(act) }">
                                     <span v-if="isActionChecked(act)">✓</span>
                                 </div>
                                 <span class="lajur-name">{{ act }}</span>
@@ -299,14 +299,14 @@ const toggleAction = (actionName: string) => {
                         </div>
 
                         <!-- Sub Kolom 2 -->
-                        <div class="lajur-subcol flex-fill ps-2">
+                        <div class="lajur-subcol flex-fill ps-1">
                             <div
                                 v-for="act in lajurActionsRight"
                                 :key="act"
                                 class="lajur-row d-flex align-items-center"
                                 @click="toggleAction(act)"
                             >
-                                <div class="custom-checkbox me-2" :class="{ 'checked': isActionChecked(act) }">
+                                <div class="custom-checkbox me-1" :class="{ 'checked': isActionChecked(act) }">
                                     <span v-if="isActionChecked(act)">✓</span>
                                 </div>
                                 <span class="lajur-name">{{ act }}</span>
@@ -318,25 +318,25 @@ const toggleAction = (actionName: string) => {
                 <!-- CATATAN & TANDA TANGAN (KANAN) -->
                 <div class="notes-and-signature-col flex-fill d-flex flex-column">
                     <!-- KOTAK CATATAN (ATAS) -->
-                    <div class="notes-box p-2 flex-grow-1">
+                    <div class="notes-box p-1 flex-grow-1">
                         <div class="notes-header text-center fw-bold mb-1">Catatan</div>
                         <div
                             class="notes-content"
                             contenteditable="true"
-                            style="min-height: 80px; font-size: 13px; line-height: 1.4;"
+                            style="min-height: 48px; font-size: 9px; line-height: 1.3;"
                         >
                             {{ letter.notes || letter.dispositions?.[0]?.instruction || '' }}
                         </div>
                     </div>
 
                     <!-- KOTAK PEJABAT PENANDATANGAN (BAWAH) -->
-                    <div class="signature-box border-top border-dark p-2 text-center">
-                        <div class="fw-bold mb-1" style="font-size: 13px;">Sekretaris Jenderal,</div>
-                        <div class="signature-space" style="height: 50px;"></div>
-                        <div class="pejabat-name fw-bold" style="font-size: 13px;">
+                    <div class="signature-box border-top border-dark p-1 text-center">
+                        <div class="fw-bold mb-0" style="font-size: 9.5px;">Sekretaris Jenderal,</div>
+                        <div class="signature-space" style="height: 32px;"></div>
+                        <div class="pejabat-name fw-bold" style="font-size: 9.5px;">
                             Dr. Cris Kuntadi, S.E., M.M.
                         </div>
-                        <div class="pejabat-nip fw-bold" style="font-size: 12px;">
+                        <div class="pejabat-nip fw-bold" style="font-size: 8.5px;">
                             NIP 19690624 199003 1 004
                         </div>
                     </div>
@@ -345,7 +345,7 @@ const toggleAction = (actionName: string) => {
         </div>
 
         <!-- FOOTER TEKS HALUS -->
-        <div class="print-footer-info d-flex justify-content-between align-items-center mt-2 no-print-bg">
+        <div class="print-footer-info d-flex justify-content-between align-items-center mt-1 no-print-bg">
             <span class="text-muted">
                 Kode Tracking: <strong>{{ letter.tracking_code }}</strong> · Agenda: <strong>{{ letter.agenda_number || '-' }}</strong>
             </span>
@@ -373,12 +373,12 @@ const toggleAction = (actionName: string) => {
     border: none;
 }
 
-/* --- AREA KERTAS A4 --- */
+/* --- AREA KERTAS A5 --- */
 .print-container {
-    width: 210mm;
-    min-height: 297mm;
+    width: 148mm;
+    min-height: 210mm;
     margin: 20px auto;
-    padding: 15mm 18mm;
+    padding: 6mm 8mm;
     background: white;
     font-family: 'Arial', 'Calibri', sans-serif;
     color: black;
@@ -387,40 +387,40 @@ const toggleAction = (actionName: string) => {
 
 /* --- KOP SURAT --- */
 .kop-header {
-    padding-bottom: 4px;
-    margin-bottom: 12px;
+    padding-bottom: 2px;
+    margin-bottom: 6px;
 }
 
 .logo-text {
-    font-size: 9px;
-    letter-spacing: 0.8px;
+    font-size: 7.5px;
+    letter-spacing: 0.5px;
     color: #0f172a;
-    margin-top: 2px;
+    margin-top: 1px;
 }
 
 .instansi-name {
-    font-size: 15px;
-    letter-spacing: 0.5px;
+    font-size: 10.5px;
+    letter-spacing: 0.3px;
     color: black;
 }
 
 .sekjen-name {
-    font-size: 17px;
-    letter-spacing: 0.8px;
+    font-size: 12px;
+    letter-spacing: 0.5px;
     color: black;
 }
 
 /* --- TABEL UTAMA --- */
 .disposisi-card-table {
-    border: 2px solid black;
+    border: 1.5px solid black;
     background: white;
 }
 
 .table-header-title {
-    font-size: 14px;
-    letter-spacing: 0.8px;
-    padding: 6px;
-    border-bottom: 1.5px solid black;
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    padding: 3px;
+    border-bottom: 1px solid black;
     background: #ffffff;
 }
 
@@ -430,18 +430,18 @@ const toggleAction = (actionName: string) => {
 }
 
 .meta-table td {
-    padding: 4px 6px;
-    font-size: 12.5px;
+    padding: 2px 3.5px;
+    font-size: 9px;
     vertical-align: middle;
 }
 
 .meta-label {
-    font-size: 12px;
+    font-size: 8.5px;
     white-space: nowrap;
 }
 
 .meta-val {
-    font-size: 12.5px;
+    font-size: 9px;
 }
 
 /* --- UNIT DISPOSISI --- */
@@ -450,26 +450,26 @@ const toggleAction = (actionName: string) => {
 }
 
 .unit-row {
-    margin-bottom: 3.5px;
+    margin-bottom: 1.5px;
     cursor: pointer;
     user-select: none;
 }
 
 .unit-name {
-    font-size: 11.5px;
-    line-height: 1.25;
+    font-size: 8px;
+    line-height: 1.15;
     color: black;
 }
 
 .custom-checkbox {
-    width: 15px;
-    height: 15px;
-    min-width: 15px;
-    border: 1.5px solid black;
+    width: 11px;
+    height: 11px;
+    min-width: 11px;
+    border: 1px solid black;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: 8.5px;
     font-weight: bold;
     line-height: 1;
     background: white;
@@ -481,7 +481,7 @@ const toggleAction = (actionName: string) => {
 
 .custom-unit-input {
     outline: none;
-    min-height: 16px;
+    min-height: 14px;
 }
 
 .custom-unit-input:empty::before {
@@ -491,24 +491,24 @@ const toggleAction = (actionName: string) => {
 
 /* --- LAJUR DISPOSISI --- */
 .lajur-header {
-    font-size: 12.5px;
-    letter-spacing: 0.5px;
+    font-size: 9px;
+    letter-spacing: 0.3px;
 }
 
 .lajur-row {
-    margin-bottom: 3px;
+    margin-bottom: 1.5px;
     cursor: pointer;
     user-select: none;
 }
 
 .lajur-name {
-    font-size: 11.5px;
-    line-height: 1.2;
+    font-size: 8px;
+    line-height: 1.15;
 }
 
 /* --- CATATAN & TTD --- */
 .notes-header {
-    font-size: 12.5px;
+    font-size: 9px;
 }
 
 .notes-content {
@@ -517,8 +517,8 @@ const toggleAction = (actionName: string) => {
 
 /* --- FOOTER INFO --- */
 .print-footer-info {
-    font-size: 10px;
-    padding-top: 5px;
+    font-size: 7.5px;
+    padding-top: 3px;
 }
 
 /* --- PRINT MEDIA RULES --- */
@@ -535,15 +535,15 @@ const toggleAction = (actionName: string) => {
 
     .print-container {
         margin: 0 !important;
-        padding: 10mm 12mm !important;
+        padding: 4mm 6mm !important;
         width: 100% !important;
         min-height: auto !important;
         box-shadow: none !important;
     }
 
     @page {
-        size: A4 portrait;
-        margin: 8mm;
+        size: A5 portrait;
+        margin: 4mm 5mm;
     }
 
     .custom-checkbox {

@@ -204,7 +204,7 @@ const goBack = () => window.history.back();
         </div>
     </div>
 
-    <!-- Area Kertas A4 -->
+    <!-- Area Kertas A5 -->
     <div class="print-container shadow-lg my-4">
         <div class="header-box">
             <h2 class="text-center fw-bold mb-0">KEMENTERIAN KETENAGAKERJAAN REPUBLIK INDONESIA</h2>
@@ -266,7 +266,7 @@ const goBack = () => window.history.back();
 
             <!-- Receiver Signature Area (With Existing TTD Image or Canvas) -->
             <div class="receiver-area">
-                <p class="mb-1 text-center small fw-bold">
+                <p class="mb-1 text-center small fw-bold" style="font-size: 9.5px;">
                     Yang Menerima Surat :
                 </p>
 
@@ -279,8 +279,8 @@ const goBack = () => window.history.back();
                 <div v-else class="signature-canvas-box position-relative">
                     <canvas
                         ref="canvasRef"
-                        width="200"
-                        height="85"
+                        width="150"
+                        height="60"
                         class="signature-canvas"
                         @mousedown="startDrawing"
                         @mousemove="draw"
@@ -295,8 +295,8 @@ const goBack = () => window.history.back();
                     </span>
                 </div>
 
-                <div class="text-center mt-2">
-                    <p class="mb-0 text-center small text-dark" contenteditable="true" @input="receiverName = ($event.target as HTMLElement).innerText">
+                <div class="text-center mt-1">
+                    <p class="mb-0 text-center small text-dark" style="font-size: 9px;" contenteditable="true" @input="receiverName = ($event.target as HTMLElement).innerText">
                         ( {{ receiverName ? receiverName : '....................................' }} )
                     </p>
                 </div>
@@ -304,15 +304,15 @@ const goBack = () => window.history.back();
         </div>
 
         <div class="notes-section">
-            <p class="fw-bold mb-1">Catatan / Tindak Lanjut Sekjen :</p>
+            <p class="fw-bold mb-1" style="font-size: 9.5px;">Catatan / Tindak Lanjut Sekjen :</p>
             <div class="notes-content" contenteditable="true">{{ letter.notes || '' }}</div>
         </div>
 
         <!-- Metadata Bawah -->
-        <div class="bottom-info mt-3">
+        <div class="bottom-info mt-2">
             <table class="border-0 w-100">
                 <tr>
-                    <td width="15%">Jenis Naskah</td>
+                    <td width="20%">Jenis Naskah</td>
                     <td width="2%">:</td>
                     <td contenteditable="true">{{ letter.letter_number_type?.workbook_name || letter.category?.category_name || 'ND/Memo' }}</td>
                 </tr>
@@ -339,12 +339,12 @@ const goBack = () => window.history.back();
             </table>
         </div>
 
-        <div class="qr-footer mt-4">
+        <div class="qr-footer mt-2">
             <div class="d-flex align-items-center border border-dark p-2">
                 <div class="qr-img me-3">
-                    <img :src="qrCodeBase64" width="80" height="80" alt="QR Code" />
+                    <img :src="qrCodeBase64" width="56" height="56" alt="QR Code" />
                 </div>
-                <div class="qr-text small" style="font-size: 11px; line-height: 1.3;">
+                <div class="qr-text small" style="font-size: 9.5px; line-height: 1.25;">
                     <p class="mb-0 fw-bold">Scan QR untuk Update Status & Tracking Surat</p>
                     <p class="mb-0">Kode Resi: <strong class="font-monospace">{{ letter.tracking_code }}</strong></p>
                     <p class="mb-0 text-muted">Aplikasi SiTrack - TU SEKJEN</p>
@@ -376,11 +376,12 @@ const goBack = () => window.history.back();
     color: white;
 }
 
-/* KERTAS A4 */
+/* KERTAS A5 */
 .print-container {
-    width: 210mm;
-    margin: 30px auto;
-    padding: 15mm;
+    width: 148mm;
+    min-height: 210mm;
+    margin: 20px auto;
+    padding: 6mm 8mm;
     background: white;
     font-family: Arial, sans-serif;
     color: black;
@@ -403,15 +404,15 @@ const goBack = () => window.history.back();
 /* AREA CHECKBOX */
 .checkbox-area {
     flex: 3;
-    padding: 15px;
-    border-right: 2px solid black;
+    padding: 10px;
+    border-right: 1.5px solid black;
     background-color: #fff;
     cursor: default;
 }
 
 .check-item {
-    font-size: 13px;
-    margin-bottom: 8px;
+    font-size: 9.5px;
+    margin-bottom: 4px;
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -423,42 +424,42 @@ const goBack = () => window.history.back();
 }
 
 .check-item i {
-    font-size: 18px;
+    font-size: 14px;
 }
 
 /* STYLE TABEL & GARIS */
 .header-box {
-    border: 2px solid black;
+    border: 1.5px solid black;
     border-bottom: none;
-    padding: 10px;
+    padding: 6px;
 }
 
 .header-box h2 {
-    font-size: 15px;
-    line-height: 1.4;
+    font-size: 10.5px;
+    line-height: 1.3;
 }
 
 .main-table {
     width: 100%;
-    border: 2px solid black;
+    border: 1.5px solid black;
     border-collapse: collapse;
 }
 
 .main-table td {
     border: 1px solid black;
-    padding: 8px;
-    font-size: 13px;
+    padding: 3.5px 5px;
+    font-size: 9px;
 }
 
 .middle-section {
     display: flex;
-    border: 2px solid black;
+    border: 1.5px solid black;
     border-top: none;
 }
 
 .receiver-area {
     flex: 1.4;
-    padding: 8px;
+    padding: 6px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -466,8 +467,8 @@ const goBack = () => window.history.back();
 }
 
 .signature-canvas-box {
-    width: 200px;
-    height: 85px;
+    width: 150px;
+    height: 60px;
     border: 1px dashed #94a3b8;
     background: #fafafa;
     display: flex;
@@ -477,8 +478,8 @@ const goBack = () => window.history.back();
 }
 
 .signature-display-box {
-    width: 200px;
-    height: 85px;
+    width: 150px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -486,27 +487,27 @@ const goBack = () => window.history.back();
 }
 
 .signature-img {
-    max-width: 195px;
-    max-height: 80px;
+    max-width: 145px;
+    max-height: 55px;
     object-fit: contain;
 }
 
 .signature-canvas {
-    width: 200px;
-    height: 85px;
+    width: 150px;
+    height: 60px;
     touch-action: none;
 }
 
 .signature-hint {
     position: absolute;
-    font-size: 10px;
+    font-size: 9px;
     color: #94a3b8;
     pointer-events: none;
     user-select: none;
 }
 
 .receiver-input {
-    width: 180px;
+    width: 140px;
     text-align: center;
     background: transparent;
     outline: none;
@@ -517,21 +518,27 @@ const goBack = () => window.history.back();
 }
 
 .notes-section {
-    border: 2px solid black;
+    border: 1.5px solid black;
     border-top: none;
-    padding: 10px;
-    min-height: 160px;
+    padding: 6px 8px;
+    min-height: 85px;
 }
 
 .notes-content {
-    min-height: 120px;
+    min-height: 65px;
+    font-size: 9px;
     outline: none;
+}
+
+.bottom-info td {
+    padding: 1.5px 4px;
+    font-size: 8.5px;
 }
 
 @media print {
     @page {
-        size: A4 portrait;
-        margin: 8mm;
+        size: A5 portrait;
+        margin: 4mm 5mm;
     }
 
     .no-print {
@@ -540,8 +547,9 @@ const goBack = () => window.history.back();
 
     .print-container {
         margin: 0 !important;
-        padding: 8mm 10mm !important;
+        padding: 4mm 6mm !important;
         width: 100% !important;
+        min-height: auto !important;
         box-shadow: none !important;
     }
 
