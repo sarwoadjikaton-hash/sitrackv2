@@ -9,14 +9,27 @@
             <div class="row align-items-center justify-content-between g-4">
                 <!-- Kolom Kiri: Logo Kemnaker & Nama Unit Kerja -->
                 <div class="col-lg-7 col-md-6">
+                    <!-- Logo SiTrack | Logo Kemnaker + Text Kemnaker -->
                     <div class="d-flex align-items-center gap-3 mb-3">
-                        <img
-                            src="/images/kemnaker_logo.png"
-                            alt="Logo Kemnaker"
-                            width="48"
-                            height="48"
-                            class="kemnaker-logo-white flex-shrink-0"
-                        />
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                            <!-- Logo SiTrack -->
+                            <img
+                                src="/images/sitrack_logo.svg"
+                                alt="Logo SiTrack"
+                                width="44"
+                                height="44"
+                                class="rounded-3 shadow-sm"
+                            />
+                            <span class="text-white-50 opacity-40 fs-4 fw-light">|</span>
+                            <!-- Logo Kemnaker -->
+                            <img
+                                src="/images/kemnaker_logo.png"
+                                alt="Logo Kemnaker"
+                                width="40"
+                                height="40"
+                                class="kemnaker-logo-white"
+                            />
+                        </div>
                         <div class="kemnaker-brand-text text-uppercase fw-bold">
                             <div class="lh-sm">KEMENTERIAN</div>
                             <div class="lh-sm">KETENAGAKERJAAN</div>
