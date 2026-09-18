@@ -58,10 +58,10 @@
 
             <!-- Bottom SiTrack Identity -->
             <div class="pt-3 mt-4 border-top border-white border-opacity-10 d-flex flex-wrap align-items-center justify-content-center gap-2 text-white-50 small">
-                <div class="footer-brand-pair d-inline-flex align-items-center gap-2 px-2 py-1 rounded-2">
-                    <img src="/images/sitrack_logo.svg" alt="SiTrack" width="20" height="20" class="footer-app-logo" />
-                    <span class="text-white-50 opacity-50 fw-light">|</span>
-                    <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="18" height="18" class="kemnaker-logo-white" />
+                <div class="d-inline-flex align-items-center gap-2">
+                    <img src="/images/sitrack_logo.svg" alt="SiTrack" width="18" height="18" class="footer-app-logo" />
+                    <span class="text-white-50 opacity-40 fw-light">|</span>
+                    <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="16" height="16" class="kemnaker-logo-white" />
                 </div>
                 <span>SiTrack &bull; Kementerian Ketenagakerjaan RI &bull; TU SEKJEN &copy; 2026</span>
             </div>
@@ -86,11 +86,6 @@
     display: inline-block;
     vertical-align: middle;
     border-radius: 4px;
-}
-
-.footer-brand-pair {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .kemnaker-brand-text {
