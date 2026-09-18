@@ -36,6 +36,12 @@
                 <span>Telp: <strong class="text-white">021-5255733</strong></span>
                 <span>Call Center: <strong class="text-white">1500630</strong></span>
             </div>
+
+            <!-- Bottom SiTrack Identity -->
+            <div class="pt-3 mt-4 border-top border-white border-opacity-10 d-flex align-items-center gap-2 text-white-50" style="font-size: 11.5px;">
+                <img src="/images/sitrack_logo.svg" alt="SiTrack" width="14" height="14" />
+                <span>SiTrack &bull; Sistem Tracking Persuratan TU SEKJEN</span>
+            </div>
         </div>
     </footer>
 </template>
