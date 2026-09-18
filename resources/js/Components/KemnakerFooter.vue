@@ -5,42 +5,51 @@
 <template>
     <footer class="kemnaker-footer text-white mt-auto no-print">
         <div class="container py-4 py-md-5">
-            <!-- Header Logo + Text Kemnaker -->
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <img
-                    src="/images/kemnaker_logo.png"
-                    alt="Logo Kemnaker"
-                    width="48"
-                    height="48"
-                    class="kemnaker-logo-white flex-shrink-0"
-                />
-                <div class="kemnaker-brand-text text-uppercase fw-bold">
-                    <div class="lh-sm">KEMENTERIAN</div>
-                    <div class="lh-sm">KETENAGAKERJAAN</div>
-                    <div class="lh-sm">REPUBLIK INDONESIA</div>
+            <!-- Row Atas: Informasi Instansi & Kontak yang Seimbang -->
+            <div class="row align-items-center justify-content-between g-4">
+                <!-- Kolom Kiri: Logo Kemnaker & Nama Unit Kerja -->
+                <div class="col-lg-7 col-md-6">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <img
+                            src="/images/kemnaker_logo.png"
+                            alt="Logo Kemnaker"
+                            width="48"
+                            height="48"
+                            class="kemnaker-logo-white flex-shrink-0"
+                        />
+                        <div class="kemnaker-brand-text text-uppercase fw-bold">
+                            <div class="lh-sm">KEMENTERIAN</div>
+                            <div class="lh-sm">KETENAGAKERJAAN</div>
+                            <div class="lh-sm">REPUBLIK INDONESIA</div>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-white mb-0 kemnaker-unit-title">
+                        Sekretariat Jenderal Kementerian Ketenagakerjaan Republik Indonesia
+                    </h5>
+                </div>
+
+                <!-- Kolom Kanan: Alamat & Kontak Kantor -->
+                <div class="col-lg-5 col-md-6 text-md-end">
+                    <p class="text-white-50 mb-2 kemnaker-address ms-md-auto">
+                        Jl. Jendral Gatot Subroto Kav. 51, Daerah Khusus Ibukota Jakarta 12950
+                    </p>
+
+                    <div class="d-flex flex-wrap align-items-center justify-content-md-end gap-3 text-white-50 kemnaker-contact small">
+                        <span>Telp: <strong class="text-white">021-5255733</strong></span>
+                        <span class="opacity-40">&bull;</span>
+                        <span>Call Center: <strong class="text-white">1500630</strong></span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Judul Unit Kerja -->
-            <h5 class="fw-bold text-white mb-2 kemnaker-unit-title">
-                Sekretariat Jenderal Kementerian Ketenagakerjaan Republik Indonesia
-            </h5>
-
-            <!-- Alamat Kantor -->
-            <p class="text-white-50 mb-3 kemnaker-address">
-                Jl. Jendral Gatot Subroto Kav. 51, Daerah Khusus Ibukota Jakarta 12950
-            </p>
-
-            <!-- Kontak Telp & Call Center -->
-            <div class="d-flex flex-wrap align-items-center gap-4 text-white-50 kemnaker-contact small">
-                <span>Telp: <strong class="text-white">021-5255733</strong></span>
-                <span>Call Center: <strong class="text-white">1500630</strong></span>
-            </div>
-
-            <!-- Bottom SiTrack Identity -->
-            <div class="pt-3 mt-4 border-top border-white border-opacity-10 d-flex align-items-center gap-2 text-white-50" style="font-size: 11.5px;">
-                <img src="/images/sitrack_logo.svg" alt="SiTrack" width="14" height="14" />
-                <span>SiTrack &bull; Sistem Tracking Persuratan TU SEKJEN</span>
+            <!-- Bottom SiTrack Identity (Persis seperti Gambar 3) -->
+            <div class="pt-3 mt-4 border-top border-white border-opacity-10 d-flex flex-wrap align-items-center justify-content-center gap-2 text-white-50 small">
+                <img src="/images/sitrack_logo.svg" alt="SiTrack" width="16" height="16" />
+                <span class="fw-semibold text-white">SiTrack</span>
+                <span class="opacity-40">|</span>
+                <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="15" height="15" class="kemnaker-logo-white" />
+                <span>Kementerian Ketenagakerjaan RI &bull; TU SEKJEN &copy; 2026</span>
             </div>
         </div>
     </footer>
@@ -71,13 +80,13 @@
 }
 
 .kemnaker-address {
-    font-size: 0.9rem;
-    max-width: 560px;
+    font-size: 0.875rem;
+    max-width: 460px;
     line-height: 1.5;
 }
 
 .kemnaker-contact {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     letter-spacing: 0.2px;
 }
 </style>

@@ -167,15 +167,15 @@ const overlayStyle = computed(() => ({
         <Transition name="ripple">
             <div v-if="transitioning" class="login-transition-overlay" :style="overlayStyle">
                 <div class="login-transition-content">
-                    <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+                    <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
                         <div class="login-transition-logo-badge">
-                            <img src="/images/sitrack_logo.svg" alt="" width="36" height="36"
+                            <img src="/images/sitrack_logo.svg" alt="SiTrack" width="40" height="40"
                                 class="login-transition-logo" />
                         </div>
-                        <span class="text-white opacity-40">|</span>
+                        <span class="text-white opacity-40 fs-5">|</span>
                         <div class="login-transition-logo-badge">
-                            <img src="/images/kemnaker_logo.png" alt="" width="32" height="32"
-                                class="login-transition-logo" style="filter: brightness(0) invert(1);" />
+                            <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="36" height="36"
+                                class="login-transition-logo" />
                         </div>
                     </div>
                     <p class="login-transition-text">Memverifikasi kredensial...</p>
