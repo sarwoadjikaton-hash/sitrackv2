@@ -122,7 +122,7 @@ const isActive = (path: string, exact = false) =>
                         </div>
                         <span class="brand-text">
                             <span class="brand-title">SiTrack</span>
-                            <small>SEKRETARIAT JENDERAL KEMNAKER RI</small>
+                            <small>TU SEKRETARIAT JENDERAL</small>
                         </span>
                     </Link>
                     <button type="button" class="sidebar-close d-lg-none" @click="closeMobileNav">
@@ -265,9 +265,9 @@ const isActive = (path: string, exact = false) =>
                         <div class="d-flex align-items-center flex-wrap gap-2">
                             <h2 class="topbar-title">{{ title || 'Sistem Tracking Persuratan' }}</h2>
                             <div class="topbar-instansi-pill d-none d-md-inline-flex align-items-center gap-1 px-2 py-0.5 rounded-pill">
-                                 <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="14" height="14" />
-                                 <span>Sekretariat Jenderal Kemnaker RI</span>
-                             </div>
+                                <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="14" height="14" />
+                                <span>KEMNAKER RI</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -293,7 +293,7 @@ const isActive = (path: string, exact = false) =>
                     <span class="fw-semibold text-dark">SiTrack</span>
                     <span class="opacity-40">|</span>
                     <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="15" height="15" />
-                    <span>Sekretariat Jenderal Kementerian Ketenagakerjaan RI &bull; &copy; 2026</span>
+                    <span>Kementerian Ketenagakerjaan RI &bull; TU SEKJEN &copy; 2026</span>
                 </div>
             </footer>
         </div>

@@ -99,10 +99,8 @@ const overlayStyle = computed(() => ({
                             <img src="/images/kemnaker_logo.png" alt="Kemnaker Logo" width="40" height="40" />
                         </div>
                     </div>
-                    <h2 class="fw-bold mb-0 mt-2 text-dark">
-                        SiTrack
-                    </h2>
-                    <p class="text-muted small mb-0 mt-1 fw-medium">Sekretariat Jenderal Kementerian Ketenagakerjaan RI</p>
+                    <h2 class="fw-bold mb-0 mt-2 text-dark">SiTrack</h2>
+                    <p class="text-muted small mb-0 mt-1">Sistem Elektronik Administrasi Persuratan TU SEKJEN</p>
                 </div>
 
                 <span class="eyebrow d-block text-center mb-3">STAFF ACCESS ONLY</span>

@@ -4,41 +4,46 @@
 
 <template>
     <footer class="kemnaker-footer text-white mt-auto no-print">
-        <div class="container py-5">
-            <!-- Row 1: Brand / Logo & Alamat + Social Media -->
-            <div class="row align-items-start justify-content-between g-4 mb-4">
-                <!-- Col Kiri: Logo & Info Instansi -->
-                <div class="col-lg-7">
+        <div class="container py-4 py-md-5">
+            <div class="row g-4 align-items-start justify-content-between">
+                <!-- Info Instansi & Alamat sesuai referensi gambar -->
+                <div class="col-lg-8">
+                    <!-- Header Logo + Text Kemnaker -->
                     <div class="d-flex align-items-center gap-3 mb-3">
                         <img
                             src="/images/kemnaker_logo.png"
                             alt="Logo Kemnaker"
                             width="48"
                             height="48"
-                            class="kemnaker-logo-invert flex-shrink-0"
+                            class="kemnaker-logo-white flex-shrink-0"
                         />
-                        <div class="d-flex flex-column">
-                            <span class="kemnaker-brand-title fw-bold text-uppercase">
-                                Kementerian Ketenagakerjaan
-                            </span>
-                            <span class="kemnaker-brand-subtitle text-white-50">
-                                Republik Indonesia
-                            </span>
+                        <div class="kemnaker-brand-text text-uppercase fw-bold">
+                            <div class="lh-sm">KEMENTERIAN</div>
+                            <div class="lh-sm">KETENAGAKERJAAN</div>
+                            <div class="lh-sm">REPUBLIK INDONESIA</div>
                         </div>
                     </div>
-                    <div class="kemnaker-desc text-white-50">
-                        <p class="fw-semibold text-white mb-1">
-                            Sekretariat Jenderal Kementerian Ketenagakerjaan RI
-                        </p>
-                        <p class="small mb-0" style="max-width: 460px; line-height: 1.5;">
-                            Jl. Jendral Gatot Subroto Kav. 51, Daerah Khusus Ibukota Jakarta 12950
-                        </p>
+
+                    <!-- Judul Unit Kerja -->
+                    <h5 class="fw-bold text-white mb-2 kemnaker-unit-title">
+                        Sekretariat Jenderal Kementerian Ketenagakerjaan Republik Indonesia
+                    </h5>
+
+                    <!-- Alamat Kantor -->
+                    <p class="text-white-50 mb-3 kemnaker-address">
+                        Jl. Jendral Gatot Subroto Kav. 51, Daerah Khusus Ibukota Jakarta 12950
+                    </p>
+
+                    <!-- Kontak Telp & Call Center -->
+                    <div class="d-flex flex-wrap align-items-center gap-4 text-white-50 kemnaker-contact small pt-1">
+                        <span>Telp: <strong class="text-white">021-5255733</strong></span>
+                        <span>Call Center: <strong class="text-white">1500630</strong></span>
                     </div>
                 </div>
 
-                <!-- Col Kanan: Social Media Circles -->
-                <div class="col-lg-5 text-lg-end">
-                    <div class="d-flex gap-2 justify-content-lg-end align-items-center">
+                <!-- Kolom Kanan: Media Sosial Resmi -->
+                <div class="col-lg-4 text-lg-end">
+                    <div class="d-flex gap-2 justify-content-lg-end align-items-center mb-3">
                         <a
                             href="https://www.facebook.com/KemnakerRI"
                             target="_blank"
@@ -83,34 +88,10 @@
                 </div>
             </div>
 
-            <!-- Row 2: Kontak & Navigasi Link -->
-            <div class="row align-items-center justify-content-between g-3 pt-4 border-top border-white border-opacity-15 small">
-                <!-- Kontak -->
-                <div class="col-lg-5 col-md-6">
-                    <div class="d-flex flex-wrap gap-3 text-white-50">
-                        <span><strong>Telp:</strong> 021-5255733</span>
-                        <span class="opacity-40">&bull;</span>
-                        <span><strong>Call Center:</strong> 1500630</span>
-                    </div>
-                </div>
-
-                <!-- Link Menu -->
-                <div class="col-lg-7 col-md-6">
-                    <div class="d-flex flex-wrap gap-3 justify-content-md-end text-white-50">
-                        <a href="https://kemnaker.go.id" target="_blank" rel="noopener" class="footer-nav-link">Tentang Kami</a>
-                        <a href="https://kemnaker.go.id" target="_blank" rel="noopener" class="footer-nav-link">Hubungi Kami</a>
-                        <a href="https://kemnaker.go.id" target="_blank" rel="noopener" class="footer-nav-link">Peta Situs</a>
-                        <a href="https://elhkpn.kpk.go.id" target="_blank" rel="noopener" class="footer-nav-link">ELHKPN</a>
-                        <a href="https://kemnaker.go.id" target="_blank" rel="noopener" class="footer-nav-link">Kebijakan Privasi</a>
-                        <a href="https://kemnaker.go.id" target="_blank" rel="noopener" class="footer-nav-link">Syarat &amp; Ketentuan</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Row 3: Copyright -->
-            <div class="pt-3 mt-3 border-top border-white border-opacity-10 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-white-50 small">
+            <!-- Bottom Copyright & SiTrack Credit -->
+            <div class="pt-3 mt-4 border-top border-white border-opacity-10 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-white-50 small">
                 <div style="font-size: 11.5px;">
-                    Kementerian Ketenagakerjaan Republik Indonesia &copy; 2018 - 2026 &bull; Hak Cipta Dilindungi Undang-Undang.
+                    &copy; 2026 Sekretariat Jenderal Kementerian Ketenagakerjaan Republik Indonesia &bull; Hak Cipta Dilindungi Undang-Undang.
                 </div>
                 <div class="d-flex align-items-center gap-2" style="font-size: 11.5px;">
                     <img src="/images/sitrack_logo.svg" alt="SiTrack" width="14" height="14" />
@@ -123,31 +104,44 @@
 
 <style scoped>
 .kemnaker-footer {
-    background: #133863;
+    background: #193e6b;
     color: #ffffff;
     font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-.kemnaker-logo-invert {
+.kemnaker-logo-white {
     filter: brightness(0) invert(1);
 }
 
-.kemnaker-brand-title {
-    font-size: 12.5px;
+.kemnaker-brand-text {
+    font-size: 11.5px;
     letter-spacing: 0.6px;
-    line-height: 1.2;
+    line-height: 1.25;
+    color: #ffffff;
 }
 
-.kemnaker-brand-subtitle {
-    font-size: 11px;
-    letter-spacing: 0.5px;
+.kemnaker-unit-title {
+    font-size: 1.05rem;
+    line-height: 1.4;
+    letter-spacing: -0.2px;
+}
+
+.kemnaker-address {
+    font-size: 0.9rem;
+    max-width: 520px;
+    line-height: 1.5;
+}
+
+.kemnaker-contact {
+    font-size: 0.9rem;
+    letter-spacing: 0.2px;
 }
 
 .social-circle-btn {
     width: 38px;
     height: 38px;
     background: #ffffff;
-    color: #133863;
+    color: #193e6b;
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
@@ -163,17 +157,5 @@
     color: #ffffff;
     transform: translateY(-3px);
     box-shadow: 0 6px 14px rgba(61, 165, 249, 0.35);
-}
-
-.footer-nav-link {
-    color: rgba(255, 255, 255, 0.7);
-    text-decoration: none;
-    font-size: 12px;
-    transition: color 0.2s ease;
-}
-
-.footer-nav-link:hover {
-    color: #ffffff;
-    text-decoration: underline;
 }
 </style>
