@@ -186,13 +186,16 @@ const overlayStyle = computed(() => ({
 </template>
 
 <style scoped lang="scss">
-$blue-900: #182b78;
-$blue-800: #2743AF;
-$blue-600: #2743AF;
-$blue-500: #4A9CF0;
-$teal-500: #3DA5F9;
-$teal-400: #3DA5F9;
-$teal-300: #7ec5fc;
+$blue-900: #03205A;
+$blue-800: #1C386F;
+$blue-600: #1C386F;
+$blue-500: #395ba0;
+$teal-500: #167992;
+$teal-400: #167992;
+$teal-300: #3a9cb5;
+$soft-blue: #B5CCE3;
+$powder-cyan: #E4F5F9;
+$ice-white: #EEF7FC;
 
 .auth-shell {
     position: relative;
@@ -201,8 +204,8 @@ $teal-300: #7ec5fc;
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Gradient blue royal -> sky */
-    background: linear-gradient(160deg, $blue-900 0%, $blue-800 35%, $blue-500 70%, $teal-500 100%);
+    /* Gradient Kemnaker: Deep Navy -> Trust Blue -> Teal Accent */
+    background: linear-gradient(160deg, $blue-900 0%, $blue-800 45%, $teal-500 100%);
     padding: 2rem 1rem;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
@@ -312,7 +315,7 @@ $teal-300: #7ec5fc;
     background: #fff;
     border-radius: 28px;
     padding: 3rem 2.5rem;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 32px 80px -20px rgba(2, 8, 30, 0.6);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 32px 80px -20px rgba(3, 32, 90, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.8);
     animation: fadeUp .6s ease-out both;
 
@@ -328,16 +331,16 @@ $teal-300: #7ec5fc;
     align-items: center;
     justify-content: center;
     border-radius: 18px;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(45, 212, 191, 0.1));
-    border: 1px solid rgba(37, 99, 235, 0.15);
+    background: linear-gradient(135deg, rgba(3, 32, 90, 0.08), rgba(22, 121, 146, 0.12));
+    border: 1px solid rgba(22, 121, 146, 0.2);
 }
 
 .eyebrow {
     font-size: .65rem;
     font-weight: 800;
     letter-spacing: .15em;
-    color: $blue-600;
-    background: #f0f7ff;
+    color: $teal-500;
+    background: $powder-cyan;
     padding: 4px 12px;
     border-radius: 50px;
     display: inline-block;
@@ -349,7 +352,7 @@ $teal-300: #7ec5fc;
     text-align: center;
     margin-top: 2rem;
     font-size: .75rem;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(238, 247, 252, 0.85);
     letter-spacing: 0.5px;
 }
 
@@ -360,18 +363,19 @@ $teal-300: #7ec5fc;
     input {
         width: 100%;
         height: 56px;
-        border: 2px solid #f1f5f9;
+        border: 1.5px solid $soft-blue;
         border-radius: 14px;
         padding: 0 1rem 0 3rem;
         font-size: .95rem;
-        background: #f8fafc;
+        background: $ice-white;
+        color: $blue-900;
         transition: all 0.25s ease;
 
         &:focus {
             outline: none;
             border-color: $teal-500;
             background: #fff;
-            box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.12);
+            box-shadow: 0 0 0 4px rgba(22, 121, 146, 0.15);
         }
     }
 
@@ -380,7 +384,7 @@ $teal-300: #7ec5fc;
         left: 3rem;
         top: 50%;
         transform: translateY(-50%);
-        color: #94a3b8;
+        color: #64748b;
         pointer-events: none;
         transition: all 0.2s ease;
     }
@@ -390,7 +394,7 @@ $teal-300: #7ec5fc;
         left: 1.2rem;
         top: 50%;
         transform: translateY(-50%);
-        color: #94a3b8;
+        color: #64748b;
         font-size: 1.1rem;
     }
 
@@ -399,7 +403,7 @@ $teal-300: #7ec5fc;
         top: 0;
         font-size: 0.75rem;
         font-weight: 700;
-        color: $blue-600;
+        color: $teal-500;
         background: #fff;
         padding: 0 5px;
     }
@@ -411,7 +415,7 @@ $teal-300: #7ec5fc;
         transform: translateY(-50%);
         border: none;
         background: transparent;
-        color: #94a3b8;
+        color: #64748b;
     }
 
     &.is-invalid input {
@@ -441,7 +445,7 @@ $teal-300: #7ec5fc;
         position: relative;
         width: 44px;
         height: 24px;
-        background-color: #e2e8f0;
+        background-color: $soft-blue;
         border-radius: 20px;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border: 1px solid rgba(0, 0, 0, 0.05);
@@ -461,7 +465,7 @@ $teal-300: #7ec5fc;
 
     .switch-input:checked+.switch-button {
         background-color: $teal-500;
-        box-shadow: 0 4px 10px rgba(20, 184, 166, 0.25);
+        box-shadow: 0 4px 10px rgba(22, 121, 146, 0.25);
     }
 
     .switch-input:checked+.switch-button .switch-circle {
@@ -474,20 +478,20 @@ $teal-300: #7ec5fc;
     }
 }
 
-/* Button with Gradient & Glow (blue -> teal) */
+/* Button with Gradient & Glow */
 .btn-glow {
     height: 56px;
     border: none;
     border-radius: 14px;
     color: #fff;
     font-weight: 700;
-    background: linear-gradient(135deg, $blue-600, $teal-400);
-    box-shadow: 0 10px 20px -5px rgba(20, 184, 166, 0.35);
+    background: linear-gradient(135deg, $blue-800, $teal-500);
+    box-shadow: 0 10px 20px -5px rgba(22, 121, 146, 0.35);
     transition: 0.3s ease;
 
     &:hover:not(:disabled) {
         transform: translateY(-2px);
-        box-shadow: 0 15px 30px -5px rgba(20, 184, 166, 0.45);
+        box-shadow: 0 15px 30px -5px rgba(22, 121, 146, 0.45);
         filter: brightness(1.05);
     }
 
@@ -528,11 +532,11 @@ $teal-300: #7ec5fc;
 
     0%,
     100% {
-        box-shadow: 0 10px 20px -5px rgba(20, 184, 166, 0.35);
+        box-shadow: 0 10px 20px -5px rgba(22, 121, 146, 0.35);
     }
 
     50% {
-        box-shadow: 0 14px 30px -5px rgba(20, 184, 166, 0.55);
+        box-shadow: 0 14px 30px -5px rgba(22, 121, 146, 0.55);
     }
 }
 

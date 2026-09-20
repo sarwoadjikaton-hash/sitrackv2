@@ -21,81 +21,87 @@
 
 :root {
   /* =========================================
-       SiTrack — Premium Dark Ocean + Ice + Orange
+       SiTrack — Kemnaker Institutional Style Guide
+       Deep Navy | Trust Blue | Teal Accent | Soft Blue | Powder Cyan | Ice White
        ========================================= */
 
-  /* Brand */
-  --st-primary: #2743AF;
-  --st-primary-rgb: 39, 67, 175;
+  /* Primary & Navy Tokens */
+  --st-navy: #03205A;
+  --st-navy-rgb: 3, 32, 90;
+  --st-navy-light: #1C386F;
 
-  --st-primary-hover: #1f3693;
-  --st-primary-dark: #182b78;
-  --st-primary-light: #4A9CF0;
-  --st-primary-soft: #edf5fd;
+  --st-primary: #1C386F;
+  --st-primary-rgb: 28, 56, 111;
+  --st-primary-hover: #142850;
+  --st-primary-dark: #03205A;
+  --st-primary-light: #395ba0;
+  --st-primary-soft: #EEF7FC;
 
-  /* Accent */
-  --st-accent: #3DA5F9;
-  --st-accent-rgb: 61, 165, 249;
+  /* Teal Accent Tokens */
+  --st-teal: #167992;
+  --st-teal-rgb: 22, 121, 146;
+  --st-teal-hover: #126277;
+  --st-teal-dark: #0e4d5d;
+  --st-teal-light: #3a9cb5;
+  --st-teal-soft: #E4F5F9;
 
-  /* Teal / Turquoise */
-  --st-teal: #42B8A8;
-  --st-teal-rgb: 66, 184, 168;
-  --st-teal-hover: #369b8d;
-  --st-teal-dark: #2a8175;
-  --st-teal-light: #64cbbd;
-  --st-teal-soft: #eaf8f6;
+  /* Accent (maps to Teal Accent for institutional focus) */
+  --st-accent: #167992;
+  --st-accent-rgb: 22, 121, 146;
 
-  /* Navy / Slate */
-  --st-navy: #2743AF;
-  --st-navy-light: #3654cb;
+  /* Supporting Kemnaker Palette */
+  --st-soft-blue: #B5CCE3;
+  --st-soft-blue-rgb: 181, 204, 227;
+  --st-powder-cyan: #E4F5F9;
+  --st-powder-cyan-rgb: 228, 245, 249;
+  --st-ice-white: #EEF7FC;
 
-  --st-slate: #1e293b;
-  --st-slate-muted: #5b6b8c;
+  --st-slate: #03205A;
+  --st-slate-muted: #536b88;
 
   /* =========================================
        Semantic Colors
        ========================================= */
 
-  --st-success: #42B8A8;
-  --st-success-rgb: 66, 184, 168;
+  --st-success: #16a34a;
+  --st-success-rgb: 22, 163, 74;
   --st-warning: #b45309;
   --st-danger: #dc2626;
-
-  /* Optional semantic blue */
-  --st-info: #3DA5F9;
+  --st-info: #1C386F;
 
   /* =========================================
-       Surfaces
+       Surfaces & Canvas
        ========================================= */
 
-  --st-bg: #f5f9fc;
+  --st-bg: #EEF7FC;
   --st-surface: #ffffff;
-  --st-surface-sunken: #f4faff;
+  --st-surface-sunken: #E4F5F9;
 
   /* Glass */
-  --st-glass-bg: rgba(255, 255, 255, 0.72);
-  --st-glass-border: rgba(255, 255, 255, 0.5);
+  --st-glass-bg: rgba(255, 255, 255, 0.85);
+  --st-glass-border: rgba(181, 204, 227, 0.6);
 
   /* =========================================
        Borders
        ========================================= */
 
-  --st-border: #dce8ef;
-  --st-border-soft: #e8f0f5;
+  --st-border: #B5CCE3;
+  --st-border-soft: #E4F5F9;
 
   /* =========================================
        Shadows
        ========================================= */
 
-  --st-shadow-low: 0 2px 4px rgba(0, 43, 76, 0.03);
+  --st-shadow-low: 0 2px 4px rgba(3, 32, 90, 0.04);
 
   --st-shadow-med:
-    0 2px 4px rgba(0, 43, 76, 0.03), 0 12px 22px -8px rgba(0, 43, 76, 0.1);
+    0 2px 4px rgba(3, 32, 90, 0.04), 0 12px 24px -8px rgba(3, 32, 90, 0.08);
 
   --st-shadow-high:
-    0 4px 10px rgba(0, 43, 76, 0.04), 0 28px 46px -14px rgba(0, 43, 76, 0.16);
+    0 4px 10px rgba(3, 32, 90, 0.06), 0 28px 46px -14px rgba(3, 32, 90, 0.14);
 
   --st-shadow-primary: 0 10px 22px -6px rgba(var(--st-primary-rgb), 0.32);
+  --st-shadow-teal: 0 10px 22px -6px rgba(var(--st-teal-rgb), 0.35);
 
   /* =========================================
        Radius
@@ -119,17 +125,17 @@
   --bs-primary: var(--st-primary);
   --bs-primary-rgb: var(--st-primary-rgb);
 
-  --bs-primary-bg-subtle: #e3f6ff;
-  --bs-primary-border-subtle: #a8ddf5;
-  --bs-primary-text-emphasis: #003552;
+  --bs-primary-bg-subtle: #E4F5F9;
+  --bs-primary-border-subtle: #B5CCE3;
+  --bs-primary-text-emphasis: #03205A;
 
-  --bs-link-color: var(--st-primary);
-  --bs-link-color-rgb: var(--st-primary-rgb);
+  --bs-link-color: var(--st-teal);
+  --bs-link-color-rgb: var(--st-teal-rgb);
 
-  --bs-link-hover-color: var(--st-primary-hover);
-  --bs-link-hover-color-rgb: 0, 58, 99;
+  --bs-link-hover-color: var(--st-teal-hover);
+  --bs-link-hover-color-rgb: 18, 98, 119;
 
-  --bs-focus-ring-color: rgba(var(--st-primary-rgb), 0.25);
+  --bs-focus-ring-color: rgba(var(--st-teal-rgb), 0.25);
 
   --bs-border-radius: var(--st-radius-sm);
   --bs-border-radius-sm: 8px;
@@ -210,9 +216,31 @@ body {
    modifier combinations (h-100, p-*, bg-*, shadow-*, border-0, text-center…)
    ========================================================================== */
 
+h1, h2, h3, h4, h5, h6,
+.headline-kemnaker {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  color: var(--st-navy);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.subjudul-kemnaker,
+.text-subjudul {
+  color: var(--st-teal) !important;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.body-kemnaker {
+  color: var(--st-slate-muted);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
 .st-card {
   background: var(--st-surface);
-  border: 1px solid rgba(11, 18, 32, 0.05);
+  border: 1px solid var(--st-border);
   border-radius: var(--st-radius);
   padding: 1.5rem;
   box-shadow: var(--st-shadow-med);
@@ -247,12 +275,12 @@ body {
 .st-card-interactive:hover {
   transform: translateY(-5px);
   box-shadow: var(--st-shadow-high);
-  border-color: rgba(var(--st-primary-rgb), 0.14);
+  border-color: var(--st-teal);
 }
 
 .stat-card-blue {
-  background: linear-gradient(160deg, #ffffff 0%, #eef3ff 120%);
-  border-color: #dbe6ff;
+  background: linear-gradient(160deg, #ffffff 0%, #EEF7FC 120%);
+  border-color: var(--st-soft-blue);
   overflow: hidden;
 }
 
@@ -260,8 +288,8 @@ body {
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: var(--st-primary-soft);
-  color: var(--st-primary);
+  background: var(--st-powder-cyan);
+  color: var(--st-teal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -271,7 +299,7 @@ body {
 }
 
 .st-card:hover .stat-icon {
-  background: var(--st-primary);
+  background: var(--st-teal);
   color: #fff;
   transform: rotate(-8deg) scale(1.08);
 }
@@ -290,7 +318,7 @@ body {
 }
 
 /* ==========================================================================
-   STAtus & LANE BADGES (Components/StatusBadge.vue, badge-lane-* on
+   STATUS & LANE BADGES (Components/StatusBadge.vue, badge-lane-* on
    AlurStatus / Disposisi / TindakLanjut pages)
    ========================================================================== */
 
@@ -312,40 +340,37 @@ body {
   border-radius: 50%;
   background-color: currentColor;
   flex-shrink: 0;
-  /* Motion for this dot comes from animate.css (animate__pulse) applied
-     alongside this class in StatusBadge.vue — no animation declared here
-     to avoid stacking two pulse effects. */
 }
 
 .badge-status-processing {
-  background-color: #eef2ff;
-  color: var(--st-primary);
-  border: 1px solid #c7d5ff;
+  background-color: #1C386F;
+  color: #ffffff;
+  border: 1px solid #03205A;
 }
 
 .badge-status-waiting {
-  background-color: #fffbeb;
-  color: var(--st-warning);
-  border: 1px solid #fde68a;
+  background-color: #d97706;
+  color: #ffffff;
+  border: 1px solid #b45309;
 }
 
 .badge-status-completed {
-  background-color: var(--st-teal-soft);
-  color: var(--st-teal-dark);
-  border: 1px solid rgba(66, 184, 168, 0.35);
+  background-color: #16a34a;
+  color: #ffffff;
+  border: 1px solid #15803d;
 }
 
 .badge-status-cancelled {
-  background-color: #fef2f2;
-  color: var(--st-danger);
-  border: 1px solid #fecaca;
+  background-color: #dc2626;
+  color: #ffffff;
+  border: 1px solid #b91c1c;
 }
 
 .badge-teal,
 .badge-st-teal {
   background-color: var(--st-teal-soft);
   color: var(--st-teal-dark);
-  border: 1px solid rgba(66, 184, 168, 0.35);
+  border: 1px solid rgba(22, 121, 146, 0.35);
   font-weight: 600;
   border-radius: 999px;
 }
@@ -381,7 +406,7 @@ body {
 .btn-st-teal:hover {
   background: linear-gradient(135deg, var(--st-teal-light), var(--st-teal));
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(66, 184, 168, 0.35);
+  box-shadow: 0 4px 12px rgba(22, 121, 146, 0.35);
 }
 
 .badge-lane-signature {
@@ -408,7 +433,7 @@ body {
   background: linear-gradient(
     135deg,
     var(--st-primary),
-    var(--st-primary-dark)
+    var(--st-navy)
   );
   color: #fff;
   border: none;
@@ -429,6 +454,11 @@ body {
 
 .btn-primary-blue:hover {
   color: #fff;
+  background: linear-gradient(
+    135deg,
+    var(--st-primary-light),
+    var(--st-primary)
+  );
   transform: translateY(-2px);
   box-shadow: 0 16px 30px -8px rgba(var(--st-primary-rgb), 0.4);
 }
@@ -456,32 +486,29 @@ body {
 
 .btn-outline-blue:hover {
   background: var(--st-primary-soft);
-  color: var(--st-primary-hover);
-  border-color: var(--st-primary-hover);
+  color: var(--st-navy);
+  border-color: var(--st-navy);
 }
 
 /* Retint plain-Bootstrap outline/alert components that hardcode Bootstrap
-   blue at the component-variable level (bg-primary-subtle/text-primary
-   already inherit the brand color for free via the --bs-primary-* root
-   override above; these two don't, so they get an explicit nudge). Used
-   on Master data pages (row edit buttons) and DataSurat. */
+   blue at the component-variable level */
 .btn-outline-primary {
   --bs-btn-color: var(--st-primary);
   --bs-btn-border-color: var(--st-primary);
   --bs-btn-hover-bg: var(--st-primary);
   --bs-btn-hover-border-color: var(--st-primary);
   --bs-btn-hover-color: #fff;
-  --bs-btn-active-bg: var(--st-primary-hover);
-  --bs-btn-active-border-color: var(--st-primary-hover);
+  --bs-btn-active-bg: var(--st-navy);
+  --bs-btn-active-border-color: var(--st-navy);
   --bs-btn-disabled-color: var(--st-primary);
   --bs-btn-disabled-border-color: var(--st-primary);
   --bs-btn-focus-shadow-rgb: var(--st-primary-rgb);
 }
 
 .alert-primary {
-  --bs-alert-color: #142f82;
-  --bs-alert-bg: #eef2ff;
-  --bs-alert-border-color: #c7d5ff;
+  --bs-alert-color: var(--st-navy);
+  --bs-alert-bg: var(--st-powder-cyan);
+  --bs-alert-border-color: var(--st-soft-blue);
 }
 
 /* ==========================================================================
@@ -490,8 +517,8 @@ body {
 
 .form-control,
 .form-select {
-  border: 1.5px solid #e2e8f0;
-  background: var(--st-surface-sunken);
+  border: 1.5px solid var(--st-border);
+  background: #ffffff;
   padding: 0.7rem 1rem;
   border-radius: 12px;
   font-weight: 500;
@@ -503,26 +530,26 @@ body {
 }
 
 .form-control::placeholder {
-  color: #9aa7c2;
+  color: #7b94ad;
 }
 
 .form-control:focus,
 .form-select:focus {
   background: #fff;
-  border-color: var(--st-primary);
-  box-shadow: 0 0 0 4px rgba(var(--st-primary-rgb), 0.1);
+  border-color: var(--st-teal);
+  box-shadow: 0 0 0 4px rgba(var(--st-teal-rgb), 0.15);
 }
 
 .form-control:disabled,
 .form-select:disabled {
-  background: #f1f5f9;
-  color: #94a3b8;
+  background: var(--st-ice-white);
+  color: var(--st-slate-muted);
 }
 
 .form-label {
   font-weight: 700;
   font-size: 0.84rem;
-  color: var(--st-slate);
+  color: var(--st-navy);
 }
 
 /* ==========================================================================
@@ -531,7 +558,7 @@ body {
 
 .table-responsive {
   border-radius: var(--st-radius);
-  border: 1px solid rgba(11, 18, 32, 0.06);
+  border: 1px solid var(--st-border);
 }
 
 .table-modern {
@@ -542,12 +569,12 @@ body {
 
 .table-modern thead th {
   background: var(--st-surface-sunken);
-  border-bottom: 1.5px solid #e2e8f0;
-  color: var(--st-slate-muted);
-  font-weight: 700;
+  border-bottom: 1.5px solid var(--st-border);
+  color: var(--st-navy);
+  font-weight: 800;
   text-transform: uppercase;
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
   padding: 0.9rem 1.1rem;
   white-space: nowrap;
 }
@@ -557,12 +584,12 @@ body {
 }
 
 .table-modern tbody tr:hover {
-  background: rgba(var(--st-primary-rgb), 0.025);
+  background: rgba(var(--st-teal-rgb), 0.04);
 }
 
 .table-modern tbody td {
   padding: 0.95rem 1.1rem;
-  border-bottom: 1px solid #eef1f6;
+  border-bottom: 1px solid var(--st-border-soft);
   vertical-align: middle;
 }
 
@@ -578,9 +605,9 @@ body {
 .public-hero {
   background: linear-gradient(
     150deg,
-    var(--st-primary-dark) 0%,
+    var(--st-navy) 0%,
     var(--st-primary) 55%,
-    #3f79ff 100%
+    var(--st-teal) 100%
   );
   color: #fff;
   position: relative;
@@ -595,10 +622,10 @@ body {
   background:
     radial-gradient(
       circle at 15% 20%,
-      rgba(255, 255, 255, 0.14),
+      rgba(255, 255, 255, 0.12),
       transparent 40%
     ),
-    radial-gradient(circle at 85% 75%, rgba(56, 189, 248, 0.2), transparent 45%);
+    radial-gradient(circle at 85% 75%, rgba(22, 121, 146, 0.25), transparent 45%);
   pointer-events: none;
 }
 
@@ -1822,9 +1849,9 @@ body {
   padding: 2rem 2.25rem;
   background: linear-gradient(
     135deg,
-    var(--st-primary-dark) 0%,
-    var(--st-primary) 60%,
-    var(--st-primary-light) 130%
+    var(--st-navy) 0%,
+    var(--st-primary) 55%,
+    var(--st-teal) 120%
   );
   box-shadow: var(--st-shadow-primary);
 }
@@ -1839,7 +1866,7 @@ body {
 .dsh-welcome-blob-a {
   width: 220px;
   height: 220px;
-  background: rgba(var(--st-accent-rgb), 0.35);
+  background: rgba(var(--st-teal-rgb), 0.35);
   top: -60px;
   right: -40px;
 }
@@ -1847,8 +1874,7 @@ body {
 .dsh-welcome-blob-b {
   width: 160px;
   height: 160px;
-  background: var(--st-primary-light);
-  opacity: 0.25;
+  background: rgba(var(--st-soft-blue-rgb), 0.25);
   bottom: -60px;
   left: 10%;
 }
@@ -1884,7 +1910,7 @@ body {
 
 .dsh-btn-pill-light {
   background: #fff;
-  color: var(--st-primary);
+  color: var(--st-navy);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
@@ -1899,7 +1925,7 @@ body {
   border-radius: var(--st-radius-lg);
   padding: 1.25rem 1.4rem;
   height: 100%;
-  border: 1px solid var(--st-border-soft);
+  border: 1px solid var(--st-border);
   box-shadow: var(--st-shadow-low);
   transition:
     transform 0.25s var(--st-ease),
@@ -1909,6 +1935,7 @@ body {
 .dsh-stat-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--st-shadow-med);
+  border-color: var(--st-teal);
 }
 
 .dsh-stat-icon {
@@ -1922,20 +1949,20 @@ body {
 }
 
 .dsh-icon-primary {
-  background: rgba(var(--st-primary-rgb), 0.1);
+  background: var(--st-powder-cyan);
   color: var(--st-primary);
 }
 .dsh-icon-accent {
-  background: rgba(var(--st-accent-rgb), 0.15);
-  color: var(--st-accent);
+  background: var(--st-powder-cyan);
+  color: var(--st-teal);
 }
 .dsh-icon-success {
-  background: rgba(5, 150, 105, 0.12);
-  color: var(--st-success);
+  background: rgba(22, 121, 146, 0.12);
+  color: var(--st-teal);
 }
 .dsh-icon-info {
-  background: rgba(2, 132, 199, 0.12);
-  color: var(--st-info);
+  background: rgba(28, 56, 111, 0.12);
+  color: var(--st-navy);
 }
 
 .dsh-stat-value {
@@ -1943,12 +1970,13 @@ body {
   font-weight: 800;
   color: var(--st-navy);
   line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
 .dsh-stat-title {
   font-weight: 700;
   font-size: 0.85rem;
-  color: var(--st-slate);
+  color: var(--st-navy);
   margin-top: 0.2rem;
 }
 
@@ -1962,7 +1990,7 @@ body {
   background: var(--st-surface);
   border-radius: var(--st-radius-lg);
   padding: 1.5rem;
-  border: 1px solid var(--st-border-soft);
+  border: 1px solid var(--st-border);
   box-shadow: var(--st-shadow-low);
 }
 
@@ -1976,16 +2004,17 @@ body {
 .dsh-link {
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--st-primary);
+  color: var(--st-teal);
   text-decoration: none;
   padding: 0.35rem 0.8rem;
   border-radius: 999px;
-  background: var(--st-primary-soft);
+  background: var(--st-powder-cyan);
   transition: background 0.2s ease;
 }
 
 .dsh-link:hover {
-  background: rgba(var(--st-primary-rgb), 0.15);
+  background: var(--st-soft-blue);
+  color: var(--st-navy);
 }
 
 .dsh-row-item {
@@ -2015,12 +2044,13 @@ body {
   font-weight: 700;
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  background: rgba(var(--st-primary-rgb), 0.08);
-  color: var(--st-slate-muted);
+  background: var(--st-powder-cyan);
+  color: var(--st-teal);
+  border: 1px solid var(--st-soft-blue);
 }
 
 .dsh-type-card {
-  border: 1px solid var(--st-border-soft);
+  border: 1px solid var(--st-border);
   border-radius: var(--st-radius);
   padding: 1rem;
   height: 100%;
@@ -2030,7 +2060,7 @@ body {
 .dsh-progress-track {
   height: 6px;
   border-radius: 999px;
-  background: var(--st-border);
+  background: var(--st-soft-blue);
   overflow: hidden;
 }
 
@@ -2040,7 +2070,7 @@ body {
   background: linear-gradient(
     90deg,
     var(--st-primary),
-    var(--st-primary-light)
+    var(--st-teal)
   );
 }
 

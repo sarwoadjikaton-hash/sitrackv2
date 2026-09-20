@@ -149,19 +149,23 @@ const dispositionExceptions = [
             <!-- Steps Grid -->
             <div class="row g-3 mb-4">
                 <div v-for="step in signatureSteps" :key="step.num" class="col-md-6 col-lg-4 col-xl-3">
-                    <div class="p-3 rounded-3 border bg-white h-100 position-relative shadow-xs d-flex flex-column justify-content-between hover-lift transition">
+                    <div class="p-3 rounded-3 border bg-white h-100 position-relative shadow-xs d-flex flex-column justify-content-between hover-lift transition"
+                        :class="{ 'border-success-subtle bg-success-subtle bg-opacity-10': step.num >= 6 }">
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="badge bg-primary text-white rounded-circle d-grid place-items-center fw-bold" style="width: 28px; height: 28px; font-size: 0.85rem;">
+                                <span class="badge rounded-circle d-grid place-items-center fw-bold"
+                                    :class="step.num >= 6 ? 'bg-success text-white' : 'bg-primary text-white'"
+                                    style="width: 28px; height: 28px; font-size: 0.85rem;">
                                     {{ step.num }}
                                 </span>
-                                <i :class="['bi', step.icon, 'text-primary fs-5']"></i>
+                                <i :class="['bi', step.icon, step.num >= 6 ? 'text-success' : 'text-primary', 'fs-5']"></i>
                             </div>
                             <h6 class="fw-bold text-dark mb-1">{{ step.title }}</h6>
                             <p class="small text-muted mb-3" style="font-size: 0.82rem; line-height: 1.45;">{{ step.desc }}</p>
                         </div>
                         <div class="pt-2 border-top">
-                            <span class="badge bg-light text-primary border small fw-medium">
+                            <span class="badge small fw-medium border"
+                                :class="step.num >= 6 ? 'bg-success-subtle text-success border-success-subtle' : 'bg-light text-primary'">
                                 <i class="bi bi-person me-1"></i>{{ step.role }}
                             </span>
                         </div>
@@ -202,19 +206,23 @@ const dispositionExceptions = [
             <!-- Steps Grid -->
             <div class="row g-3 mb-4">
                 <div v-for="step in dispositionSteps" :key="step.num" class="col-md-6 col-lg-4">
-                    <div class="p-3 rounded-3 border bg-white h-100 position-relative shadow-xs d-flex flex-column justify-content-between hover-lift transition">
+                    <div class="p-3 rounded-3 border bg-white h-100 position-relative shadow-xs d-flex flex-column justify-content-between hover-lift transition"
+                        :class="{ 'border-success-subtle bg-success-subtle bg-opacity-10': step.num === 6 }">
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="badge bg-info text-white rounded-circle d-grid place-items-center fw-bold" style="width: 28px; height: 28px; font-size: 0.85rem;">
+                                <span class="badge rounded-circle d-grid place-items-center fw-bold"
+                                    :class="step.num === 6 ? 'bg-success text-white' : 'bg-info text-white'"
+                                    style="width: 28px; height: 28px; font-size: 0.85rem;">
                                     {{ step.num }}
                                 </span>
-                                <i :class="['bi', step.icon, 'text-info fs-5']"></i>
+                                <i :class="['bi', step.icon, step.num === 6 ? 'text-success' : 'text-info', 'fs-5']"></i>
                             </div>
                             <h6 class="fw-bold text-dark mb-1">{{ step.title }}</h6>
                             <p class="small text-muted mb-3" style="font-size: 0.82rem; line-height: 1.45;">{{ step.desc }}</p>
                         </div>
                         <div class="pt-2 border-top">
-                            <span class="badge bg-light text-info border small fw-medium">
+                            <span class="badge small fw-medium border"
+                                :class="step.num === 6 ? 'bg-success-subtle text-success border-success-subtle' : 'bg-light text-info'">
                                 <i class="bi bi-person me-1"></i>{{ step.role }}
                             </span>
                         </div>

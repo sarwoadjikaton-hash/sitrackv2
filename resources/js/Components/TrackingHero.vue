@@ -78,23 +78,23 @@ function createMailbox(): THREE.Group {
     // 1. Magnetic Floating Base Pedestal (Glowing Cyber Ring)
     const baseRing = new THREE.Mesh(
         new THREE.CylinderGeometry(1.6, 1.8, 0.18, 32),
-        metallicMaterial(0x182b78, 0.3, 0.8)
+        metallicMaterial(0x03205A, 0.3, 0.8)
     );
     baseRing.position.y = -1.45;
     group.add(baseRing);
 
     const baseGlowRing = new THREE.Mesh(
         new THREE.TorusGeometry(1.5, 0.05, 16, 40),
-        glowingMaterial(0x3DA5F9, 1.2)
+        glowingMaterial(0x167992, 1.2)
     );
     baseGlowRing.rotation.x = Math.PI / 2;
     baseGlowRing.position.y = -1.35;
     group.add(baseGlowRing);
 
-    // 2. Main Body Chassis - Deep Indigo Navy with Glossy Chamfers
+    // 2. Main Body Chassis - Trust Blue with Glossy Chamfers
     const chassis = new THREE.Mesh(
         new RoundedBoxGeometry(2.3, 2.7, 2.1, 8, 0.4),
-        metallicMaterial(0x2743AF, 0.2, 0.35)
+        metallicMaterial(0x1C386F, 0.2, 0.35)
     );
     chassis.position.y = 0.15;
     group.add(chassis);
@@ -102,7 +102,7 @@ function createMailbox(): THREE.Group {
     // 3. Front Faceplate - Frosted High-Tech Glass Panel
     const frontPanel = new THREE.Mesh(
         new RoundedBoxGeometry(1.9, 2.3, 0.12, 6, 0.2),
-        glassMaterial(0xf8fafc, 0.92)
+        glassMaterial(0xEEF7FC, 0.92)
     );
     frontPanel.position.set(0, 0.15, 1.05);
     group.add(frontPanel);
@@ -110,14 +110,14 @@ function createMailbox(): THREE.Group {
     // 4. Inset Mail Intake Slot (Metallic Frame + Dark Chasm)
     const slotFrame = new THREE.Mesh(
         new RoundedBoxGeometry(1.35, 0.32, 0.08, 4, 0.08),
-        metallicMaterial(0x182b78, 0.2, 0.7)
+        metallicMaterial(0x03205A, 0.2, 0.7)
     );
     slotFrame.position.set(0, 0.65, 1.12);
     group.add(slotFrame);
 
     const slotOpening = new THREE.Mesh(
         new RoundedBoxGeometry(1.18, 0.14, 0.15, 3, 0.04),
-        new THREE.MeshStandardMaterial({ color: 0x070d1e, roughness: 0.9 })
+        new THREE.MeshStandardMaterial({ color: 0x03173d, roughness: 0.9 })
     );
     slotOpening.position.set(0, 0.65, 1.13);
     group.add(slotOpening);
@@ -125,7 +125,7 @@ function createMailbox(): THREE.Group {
     // 5. Laser Scanning Light Beam
     const beamGeo = new THREE.PlaneGeometry(1.15, 0.04);
     const beamMat = new THREE.MeshBasicMaterial({
-        color: 0x3DA5F9,
+        color: 0x167992,
         transparent: true,
         opacity: 0.9,
         side: THREE.DoubleSide,
@@ -145,7 +145,7 @@ function createMailbox(): THREE.Group {
 
     const activeLetterSeal = new THREE.Mesh(
         new THREE.CylinderGeometry(0.08, 0.08, 0.04, 16),
-        glowingMaterial(0x3DA5F9, 0.9)
+        glowingMaterial(0x167992, 1.1)
     );
     activeLetterSeal.rotation.x = -0.35;
     activeLetterSeal.position.set(0, 0.78, 1.18);
@@ -155,8 +155,8 @@ function createMailbox(): THREE.Group {
     const ledScreen = new THREE.Mesh(
         new RoundedBoxGeometry(1.4, 0.65, 0.04, 4, 0.06),
         new THREE.MeshStandardMaterial({
-            color: 0x091436,
-            emissive: 0x182b78,
+            color: 0x03205A,
+            emissive: 0x03205A,
             emissiveIntensity: 0.4,
             roughness: 0.1,
             metalness: 0.8,
@@ -168,7 +168,7 @@ function createMailbox(): THREE.Group {
     // HUD Indicator Bar
     const hudBar = new THREE.Mesh(
         new RoundedBoxGeometry(0.9, 0.08, 0.03, 2, 0.02),
-        glowingMaterial(0x3DA5F9, 1.1)
+        glowingMaterial(0x167992, 1.2)
     );
     hudBar.position.set(0, -0.35, 1.15);
     group.add(hudBar);
@@ -211,7 +211,7 @@ function createEnvelope(bodyColor: number, sealColor: number): THREE.Group {
 // Floating Official Document Stack
 function createDocumentStack(): THREE.Group {
     const group = new THREE.Group();
-    const colors = [0x2743AF, 0x4A9CF0, 0xffffff];
+    const colors = [0x03205A, 0x1C386F, 0xEEF7FC];
     for (let i = 0; i < 3; i++) {
         const sheet = new THREE.Mesh(
             new RoundedBoxGeometry(0.75, 0.95, 0.025, 3, 0.03),
@@ -238,13 +238,13 @@ function createSecurityShield(): THREE.Group {
 
     const shield = new THREE.Mesh(
         new THREE.ExtrudeGeometry(shieldShape, { depth: 0.08, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 0.03, bevelThickness: 0.03 }),
-        metallicMaterial(0x2743AF, 0.2, 0.7)
+        metallicMaterial(0x1C386F, 0.2, 0.7)
     );
     group.add(shield);
 
     const core = new THREE.Mesh(
         new THREE.SphereGeometry(0.16, 20, 20),
-        glowingMaterial(0x3DA5F9, 1.2)
+        glowingMaterial(0x167992, 1.2)
     );
     core.position.z = 0.08;
     group.add(core);
@@ -266,7 +266,7 @@ function createParticles(): THREE.Points {
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     const material = new THREE.PointsMaterial({
-        color: 0x3DA5F9,
+        color: 0x167992,
         size: 0.08,
         transparent: true,
         opacity: 0.65,
@@ -306,20 +306,20 @@ function initThree() {
     renderer.toneMappingExposure = 1.15;
     el.appendChild(renderer.domElement);
 
-    // Studio Lighting Setup (Cyan, Azure, Deep Blue)
+    // Studio Lighting Setup (Teal, Soft Blue, Deep Navy)
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
     keyLight.position.set(5, 7, 6);
     scene.add(keyLight);
 
-    const cyanRimLight = new THREE.DirectionalLight(0x3DA5F9, 1.8);
+    const cyanRimLight = new THREE.DirectionalLight(0x167992, 1.8);
     cyanRimLight.position.set(-6, 2, 4);
     scene.add(cyanRimLight);
 
-    const azureFillLight = new THREE.DirectionalLight(0x4A9CF0, 1.2);
+    const azureFillLight = new THREE.DirectionalLight(0xB5CCE3, 1.2);
     azureFillLight.position.set(2, -4, 3);
     scene.add(azureFillLight);
 
-    const ambientLight = new THREE.AmbientLight(0x182b78, 1.0);
+    const ambientLight = new THREE.AmbientLight(0x03205A, 1.0);
     scene.add(ambientLight);
 
     // Hero Object: Mailbox Group
@@ -334,8 +334,8 @@ function initThree() {
 
     // Satellite Floating Objects in Orbit
     const smallObjects: { build: () => THREE.Group; pos: [number, number, number]; scale: number }[] = [
-        { build: () => createEnvelope(0xffffff, 0x3DA5F9), pos: [0.1, 1.9, 1.6], scale: 1.0 },
-        { build: () => createEnvelope(0x2743AF, 0x4A9CF0), pos: [-1.2, -1.3, 0.8], scale: 0.9 },
+        { build: () => createEnvelope(0xEEF7FC, 0x167992), pos: [0.1, 1.9, 1.6], scale: 1.0 },
+        { build: () => createEnvelope(0x1C386F, 0x167992), pos: [-1.2, -1.3, 0.8], scale: 0.9 },
         { build: () => createDocumentStack(), pos: [5.2, 1.7, -0.4], scale: 0.95 },
         { build: () => createSecurityShield(), pos: [1.3, -1.7, 1.9], scale: 0.9 },
     ];
@@ -553,13 +553,12 @@ onUnmounted(disposeThree);
 </template>
 
 <style scoped>
-/* Palet lokal "Dark Ocean + Ice + Orange" — sengaja TIDAK pakai var(--st-*) global,
-   supaya halaman publik ini punya identitas sendiri, lepas dari tema hijau dashboard admin. */
+/* Palet Kemnaker Official: Deep Navy, Trust Blue, Teal Accent, Soft Blue, Powder Cyan, Ice White */
 .hero-section {
-    --ocean-primary: #2743AF;
-    --ocean-primary-dark: #182b78;
-    --ocean-primary-light: #4A9CF0;
-    --ocean-accent: #3DA5F9;
+    --ocean-primary: #1C386F;
+    --ocean-primary-dark: #03205A;
+    --ocean-primary-light: #395ba0;
+    --ocean-accent: #167992;
 }
 
 .sr-only-defs {
@@ -610,8 +609,8 @@ onUnmounted(disposeThree);
     max-height: 640px;
     top: -15%;
     left: -10%;
-    background: radial-gradient(circle, #4A9CF0 0%, transparent 70%);
-    opacity: .7;
+    background: radial-gradient(circle, #1C386F 0%, transparent 70%);
+    opacity: .75;
 }
 
 .mesh-blob-2 {
@@ -621,8 +620,8 @@ onUnmounted(disposeThree);
     max-height: 560px;
     top: 10%;
     right: -12%;
-    background: radial-gradient(circle, #3DA5F9 0%, transparent 70%);
-    opacity: .6;
+    background: radial-gradient(circle, #167992 0%, transparent 70%);
+    opacity: .65;
     animation-duration: 26s;
     animation-delay: -6s;
 }
@@ -634,8 +633,8 @@ onUnmounted(disposeThree);
     max-height: 480px;
     bottom: -18%;
     left: 20%;
-    background: radial-gradient(circle, #2743AF 0%, transparent 70%);
-    opacity: .7;
+    background: radial-gradient(circle, #03205A 0%, transparent 70%);
+    opacity: .75;
     animation-duration: 30s;
     animation-delay: -12s;
 }
@@ -647,8 +646,8 @@ onUnmounted(disposeThree);
     max-height: 380px;
     bottom: -5%;
     right: 10%;
-    background: radial-gradient(circle, #3DA5F9 0%, transparent 70%);
-    opacity: .55;
+    background: radial-gradient(circle, #B5CCE3 0%, transparent 70%);
+    opacity: .45;
     animation-duration: 19s;
     animation-delay: -3s;
 }
@@ -881,7 +880,7 @@ onUnmounted(disposeThree);
 
 .btn-track {
     background: #fff;
-    color: #0f172a;
+    color: #03205A;
     border: none;
     padding: 12px 28px;
     border-radius: 50px;
@@ -917,7 +916,7 @@ onUnmounted(disposeThree);
     justify-content: center;
     height: 44px;
     border-radius: 999px;
-    background: linear-gradient(135deg, var(--ocean-primary-light), var(--ocean-primary));
+    background: linear-gradient(135deg, var(--ocean-accent), var(--ocean-primary));
     color: #fff;
     font-weight: 700;
     font-size: .85rem;

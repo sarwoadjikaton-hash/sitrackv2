@@ -220,12 +220,12 @@ const isReadyForPickup = computed(() => {
 
 <style scoped>
 .tracking-viewport {
-    --ocean-primary: #2743AF;
-    --ocean-primary-dark: #182b78;
-    --ocean-primary-light: #4A9CF0;
-    --ocean-accent: #3DA5F9;
+    --ocean-primary: #1C386F;
+    --ocean-primary-dark: #03205A;
+    --ocean-primary-light: #395ba0;
+    --ocean-accent: #167992;
 
-    background: #f1f5f9;
+    background: #EEF7FC;
     min-height: 100%;
 }
 
@@ -236,7 +236,7 @@ const isReadyForPickup = computed(() => {
 }
 
 .text-teal {
-    color: var(--ocean-primary);
+    color: var(--ocean-accent);
 }
 
 .bg-teal {
@@ -244,7 +244,7 @@ const isReadyForPickup = computed(() => {
 }
 
 .bg-teal-subtle {
-    background-color: rgba(39, 67, 175, 0.08);
+    background-color: #E4F5F9;
 }
 
 .ls-2 {

@@ -351,7 +351,7 @@ const isActive = (path: string, exact = false) =>
 .app-shell {
     display: flex;
     min-height: 100vh;
-    background: #f1f5f9;
+    background: #EEF7FC;
     --sidebar-width: 260px;
     --sidebar-collapsed-width: 85px;
     --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -363,9 +363,10 @@ const isActive = (path: string, exact = false) =>
     inset: 1rem auto 1rem 1rem;
     width: var(--sidebar-width);
     z-index: 1050;
-    background: #1E416A;
+    background: linear-gradient(180deg, #03205A 0%, #1C386F 100%);
     color: #fff;
     border-radius: 2rem;
+    box-shadow: 0 12px 36px rgba(3, 32, 90, 0.28);
     transition: width var(--transition), transform var(--transition);
 }
 
@@ -407,16 +408,22 @@ const isActive = (path: string, exact = false) =>
     top: 50px;
     width: 28px;
     height: 28px;
-    background: #3DA5F9;
+    background: #167992;
     color: #fff;
-    border: 3px solid #f1f5f9;
+    border: 3px solid #EEF7FC;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 1100;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(3, 32, 90, 0.25);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar-toggle-btn:hover {
+    background: #126277;
+    transform: scale(1.08);
 }
 
 .sidebar-close {
@@ -457,7 +464,7 @@ const isActive = (path: string, exact = false) =>
     height: 34px;
     display: grid;
     place-items: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.12);
     border-radius: 10px;
     flex: none;
     transition: background 0.2s;
@@ -495,16 +502,16 @@ const isActive = (path: string, exact = false) =>
 .brand-text small {
     font-size: 0.62rem;
     letter-spacing: 0.4px;
-    opacity: 0.65;
+    color: #B5CCE3;
 }
 
 .topbar-instansi-pill {
-    background: var(--st-primary-soft, #edf5fd);
-    color: var(--st-primary, #2743AF);
+    background: var(--st-powder-cyan);
+    color: var(--st-navy);
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.3px;
-    border: 1px solid var(--st-border, #dce8ef);
+    border: 1px solid var(--st-border);
 }
 
 .sidebar-scroll {
@@ -516,9 +523,9 @@ const isActive = (path: string, exact = false) =>
 
 .sidebar-caption {
     font-size: 0.65rem;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.3);
+    color: #B5CCE3;
     padding: 1.2rem 1.5rem 0.5rem;
     letter-spacing: 0.5px;
 }
@@ -536,7 +543,7 @@ const isActive = (path: string, exact = false) =>
     align-items: center;
     gap: 1rem;
     padding: 0.75rem 1.25rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(238, 247, 252, 0.8);
     text-decoration: none;
     font-size: 0.85rem;
     border-radius: 1.5rem 0 0 1.5rem;
@@ -547,18 +554,29 @@ const isActive = (path: string, exact = false) =>
     font-size: 1.1rem;
     width: 24px;
     text-align: center;
+    color: #B5CCE3;
+    transition: color 0.2s ease;
 }
 
 .nav-link-item:hover:not(.active) {
     transform: translateX(4px);
     color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.nav-link-item:hover:not(.active) i {
+    color: #E4F5F9;
 }
 
 /* Active Notch Effect */
 .nav-link-item.active {
-    background: #f1f5f9;
-    color: #0f172a;
-    font-weight: 700;
+    background: #EEF7FC;
+    color: #03205A;
+    font-weight: 800;
+}
+
+.nav-link-item.active i {
+    color: #167992;
 }
 
 .nav-link-item.active::before,
@@ -575,13 +593,13 @@ const isActive = (path: string, exact = false) =>
 .nav-link-item.active::before {
     top: -20px;
     border-radius: 0 0 20px 0;
-    box-shadow: 10px 10px 0 10px #f1f5f9;
+    box-shadow: 10px 10px 0 10px #EEF7FC;
 }
 
 .nav-link-item.active::after {
     bottom: -20px;
     border-radius: 0 20px 0 0;
-    box-shadow: 10px -10px 0 10px #f1f5f9;
+    box-shadow: 10px -10px 0 10px #EEF7FC;
 }
 
 /* FOOTER AREA */
@@ -602,7 +620,7 @@ const isActive = (path: string, exact = false) =>
     align-items: center;
     gap: 0.8rem;
     padding: 0.65rem 1rem;
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.15);
     border: none;
     border-radius: 12px;
     color: #fca5a5;
@@ -613,14 +631,14 @@ const isActive = (path: string, exact = false) =>
 }
 
 .logout-btn:hover {
-    background: rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.25);
     color: #fff;
 }
 
 .sidebar-user {
     margin-bottom: 1rem;
     padding: 0.75rem;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 1.2rem;
     display: flex;
     align-items: center;
@@ -631,17 +649,18 @@ const isActive = (path: string, exact = false) =>
 }
 
 .sidebar-user:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
 }
 
 .user-avatar-circle {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #3DA5F9;
+    background: #167992;
     display: grid;
     place-items: center;
-    font-weight: 700;
+    font-weight: 800;
+    color: #fff;
     flex: none;
 }
 
@@ -661,7 +680,7 @@ const isActive = (path: string, exact = false) =>
 
 .user-role-badge {
     font-size: 0.65rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: #B5CCE3;
 }
 
 .sidebar-copyright {
@@ -669,13 +688,15 @@ const isActive = (path: string, exact = false) =>
     align-items: center;
     gap: 0.6rem;
     padding: 0 1rem;
-    opacity: 0.4;
+    opacity: 0.6;
     font-size: 0.7rem;
+    color: #B5CCE3;
 }
 
 .user-profile-hint {
     font-size: 0.75rem;
-    opacity: 0.4;
+    opacity: 0.6;
+    color: #B5CCE3;
     flex: none;
 }
 
@@ -685,23 +706,24 @@ const isActive = (path: string, exact = false) =>
     justify-content: center;
     gap: 0.6rem;
     padding: 1.5rem 0 1rem;
-    opacity: 0.5;
+    opacity: 0.75;
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--st-slate-muted);
 }
 
 /* ===== FLOATING TOOLTIP (Teleport ke body) ===== */
 .sidebar-tooltip-floating {
     position: fixed;
     transform: translateY(-50%);
-    background: #0f172a;
+    background: #03205A;
     color: #fff;
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 600;
     white-space: nowrap;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 14px rgba(3, 32, 90, 0.35);
+    border: 1px solid rgba(181, 204, 227, 0.3);
     pointer-events: none;
     z-index: 3000;
 }
@@ -781,19 +803,6 @@ const isActive = (path: string, exact = false) =>
 
 .app-topbar {
     position: sticky;
-    top: 0;
-    z-index: 1000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.1rem 1.5rem;
-    background: linear-gradient(180deg, #ffffff 0%, var(--st-surface-sunken) 100%);
-    border-bottom: 1px solid var(--st-border);
-    box-shadow: var(--st-shadow-low);
-}
-
-.app-topbar {
-    position: sticky;
     top: 1rem;
     z-index: 1000;
     display: flex;
@@ -802,7 +811,8 @@ const isActive = (path: string, exact = false) =>
     margin: 1rem 1.5rem 1.5rem;
     padding: 1.1rem 1.5rem;
     border-radius: var(--st-radius);
-    background: linear-gradient(180deg, #ffffff 0%, var(--st-surface-sunken) 100%);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
     border: 1px solid var(--st-border);
     box-shadow: var(--st-shadow-med);
 }
@@ -818,15 +828,15 @@ const isActive = (path: string, exact = false) =>
     height: 22px;
     border-radius: 999px;
     flex-shrink: 0;
-    background: linear-gradient(180deg, var(--st-primary) 0%, var(--st-accent) 100%);
+    background: linear-gradient(180deg, var(--st-navy) 0%, var(--st-teal) 100%);
 }
 
 .topbar-title {
     margin: 0;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 1.15rem;
-    letter-spacing: -0.01em;
-    color: var(--st-primary);
+    letter-spacing: -0.02em;
+    color: var(--st-navy);
 }
 
 .hamburger-btn {
@@ -837,13 +847,14 @@ const isActive = (path: string, exact = false) =>
     background: var(--st-surface);
     border: 1px solid var(--st-border);
     border-radius: var(--st-radius-sm);
-    color: var(--st-primary);
+    color: var(--st-navy);
     transition: background-color 0.2s var(--st-ease), border-color 0.2s var(--st-ease), transform 0.15s var(--st-ease);
 }
 
 .hamburger-btn:hover {
-    background: var(--st-primary-soft);
-    border-color: var(--st-primary-light);
+    background: var(--st-powder-cyan);
+    border-color: var(--st-teal);
+    color: var(--st-teal);
 }
 
 .hamburger-btn:active {
@@ -874,22 +885,22 @@ const isActive = (path: string, exact = false) =>
     place-items: center;
     flex-shrink: 0;
     font-size: 0.9rem;
-    background: var(--st-primary-soft);
-    color: var(--st-primary);
+    background: var(--st-powder-cyan);
+    color: var(--st-teal);
 }
 
 .btn-topbar:hover {
-    border-color: var(--st-primary-light);
-    color: var(--st-primary);
+    border-color: var(--st-teal);
+    color: var(--st-teal);
     transform: translateY(-1px);
     box-shadow: var(--st-shadow-low);
 }
 
 .btn-topbar-accent {
-    background: var(--st-accent);
-    border-color: var(--st-accent);
+    background: var(--st-teal);
+    border-color: var(--st-teal);
     color: #fff;
-    box-shadow: 0 10px 22px -8px rgba(var(--st-accent-rgb), 0.5);
+    box-shadow: var(--st-shadow-teal);
 }
 
 .btn-topbar-accent .btn-topbar-icon {
@@ -899,9 +910,10 @@ const isActive = (path: string, exact = false) =>
 
 .btn-topbar-accent:hover {
     color: #fff;
-    border-color: var(--st-accent);
+    background: var(--st-teal-hover);
+    border-color: var(--st-teal-hover);
     transform: translateY(-2px);
-    box-shadow: 0 14px 26px -8px rgba(var(--st-accent-rgb), 0.6);
+    box-shadow: 0 14px 26px -8px rgba(var(--st-teal-rgb), 0.6);
 }
 
 .app-main-body {
@@ -911,7 +923,7 @@ const isActive = (path: string, exact = false) =>
 .sidebar-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.5);
+    background: rgba(3, 32, 90, 0.5);
     backdrop-filter: blur(4px);
     z-index: 1040;
 }

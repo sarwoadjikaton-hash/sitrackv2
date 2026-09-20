@@ -71,9 +71,10 @@
 
 <style scoped>
 .kemnaker-footer {
-    background: #193e6b;
+    background: #03205A;
     color: #ffffff;
     font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    border-top: 1px solid rgba(181, 204, 227, 0.2);
 }
 
 .kemnaker-logo-white {
@@ -105,10 +106,12 @@
     font-size: 0.875rem;
     max-width: 460px;
     line-height: 1.5;
+    color: #B5CCE3 !important;
 }
 
 .kemnaker-contact {
     font-size: 0.875rem;
     letter-spacing: 0.2px;
+    color: #B5CCE3 !important;
 }
 </style>

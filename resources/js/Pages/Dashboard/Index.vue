@@ -111,7 +111,7 @@ defineProps<{
                     <div class="d-flex flex-column gap-2">
                         <div v-for="letter in recentLetters" :key="letter.id" class="dsh-row-item">
                             <div class="flex-grow-1" style="min-width: 0;">
-                                <div class="fw-bold text-primary small">{{ letter.agenda_number || '-' }}</div>
+                                <div class="fw-bold text-teal small">{{ letter.agenda_number || '-' }}</div>
                                 <div class="fw-semibold text-dark text-truncate small">{{ letter.subject }}</div>
                                 <small class="text-muted text-truncate d-block">{{ letter.sender_unit ||
                                     letter.sender_name }} &bull; <span class="font-monospace">{{ letter.tracking_code
@@ -141,7 +141,7 @@ defineProps<{
                     <div class="d-flex flex-column gap-2">
                         <div v-for="disp in recentDispositions" :key="disp.id" class="dsh-disp-item">
                             <div class="d-flex align-items-center justify-content-between mb-1">
-                                <span class="fw-bold text-primary small">
+                                <span class="fw-bold text-teal small">
                                     <i class="bi bi-person-fill me-1"></i>{{ disp.from_name }} &rarr; {{
                                         disp.to_unit?.unit_name || disp.to_name || 'Unit' }}
                                 </span>
@@ -179,7 +179,7 @@ defineProps<{
                         <div class="d-flex justify-content-between small text-muted mb-2">
                             <span>Tersedia: <strong style="color: var(--st-success);">{{ type.available_slots || 0
                                     }}</strong></span>
-                            <span>Terpakai: <strong style="color: var(--st-primary);">{{ type.used_slots || 0
+                            <span>Terpakai: <strong style="color: var(--st-danger);">{{ type.used_slots || 0
                                     }}</strong></span>
                         </div>
                         <div class="dsh-progress-track">

@@ -80,82 +80,86 @@ const isLoggedIn = computed(() => !!page.props.auth.user);
 <style scoped>
 /* Background halus untuk seluruh halaman */
 .public-page {
-    background: var(--st-primary-dark);
+    background: var(--st-navy);
 }
 
 .public-page main {
-    background: var(--st-primary-dark);
+    background: var(--st-navy);
 }
 
 /* Glassmorphism Effect */
 .nav-glass {
-    background: rgba(248, 252, 255, 0.88);
+    background: rgba(238, 247, 252, 0.94);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.55) !important;
-    box-shadow: 0 8px 30px rgba(0, 43, 76, 0.12);
+    border: 1px solid rgba(181, 204, 227, 0.8) !important;
+    box-shadow: 0 8px 30px rgba(3, 32, 90, 0.16);
 }
 
 .nav-glass:hover {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 10px 34px rgba(3, 32, 90, 0.22) !important;
 }
 
 /* Logo Styling */
 .brand-logo-container {
-    background: linear-gradient(135deg, #2743AF, #3DA5F9);
+    background: linear-gradient(135deg, #03205A, #167992);
     width: 38px;
     height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(39, 67, 175, 0.25);
+    box-shadow: 0 4px 12px rgba(3, 32, 90, 0.25);
 }
 
 .text-primary-dark {
-    color: #2743AF;
+    color: #03205A;
+    font-weight: 800;
     font-size: 1.2rem;
+    letter-spacing: -0.02em;
 }
 
 /* Nav Pill Buttons */
 .nav-pill-btn {
     text-decoration: none;
-    color: #475569;
+    color: #03205A;
     padding: 8px 16px;
     border-radius: 50px;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
     transition: all 0.2s ease;
 }
 
 .nav-pill-btn:hover {
-    background: #edf5fd;
-    color: #2743AF;
+    background: #E4F5F9;
+    color: #167992;
 }
 
 .nav-pill-btn.active {
-    background: #dbeafe;
-    color: #2743AF;
+    background: #E4F5F9;
+    color: #167992;
+    font-weight: 700;
 }
 
 /* Login Button Epic */
 .btn-login-epic {
-    background: linear-gradient(135deg, #2743AF, #4A9CF0);
+    background: linear-gradient(135deg, #167992, #03205A);
     color: #fff;
     border: none;
     padding: 8px 20px;
     font-size: 14px;
+    font-weight: 700;
     transition: all 0.3s ease;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    box-shadow: 0 4px 14px rgba(39, 67, 175, 0.3);
+    box-shadow: 0 4px 14px rgba(22, 121, 146, 0.35);
 }
 
 .btn-login-epic:hover {
-    background: linear-gradient(135deg, #1f3693, #3DA5F9);
+    background: linear-gradient(135deg, #126277, #1C386F);
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(39, 67, 175, 0.4);
+    box-shadow: 0 6px 18px rgba(22, 121, 146, 0.45);
     color: white;
 }
 

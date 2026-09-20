@@ -285,14 +285,14 @@ onUnmounted(() => {
 
 .dd-trigger.is-open .dd-chevron {
     transform: rotate(180deg);
-    color: #2743AF;
+    color: #167992;
 }
 
 .dd-spinner {
     flex: none;
     width: 14px;
     height: 14px;
-    border: 2px solid #3DA5F9;
+    border: 2px solid #167992;
     border-top-color: transparent;
     border-radius: 50%;
     animation: dd-spin 0.8s linear infinite;
@@ -311,9 +311,9 @@ onUnmounted(() => {
     position: fixed;
     z-index: 9999;
     background: #fff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #B5CCE3;
     border-radius: 14px;
-    box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.18);
+    box-shadow: 0 20px 40px -12px rgba(3, 32, 90, 0.18);
     overflow: hidden;
 }
 
@@ -322,8 +322,8 @@ onUnmounted(() => {
     align-items: center;
     gap: .5rem;
     padding: .65rem .9rem;
-    border-bottom: 1px solid #f1f5f9;
-    color: #94a3b8;
+    border-bottom: 1px solid #E4F5F9;
+    color: #536b88;
 }
 
 .dd-search input {
@@ -331,7 +331,7 @@ onUnmounted(() => {
     border: none;
     outline: none;
     font-size: .9rem;
-    color: #0f172a;
+    color: #03205A;
 }
 
 .dd-list {
@@ -345,7 +345,7 @@ onUnmounted(() => {
 }
 
 .dd-list::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
+    background: #B5CCE3;
     border-radius: 4px;
 }
 
@@ -360,38 +360,38 @@ onUnmounted(() => {
     border-radius: 9px;
     padding: .6rem .75rem;
     font-size: .9rem;
-    color: #334155;
+    color: #03205A;
     text-align: left;
     cursor: pointer;
     transition: background .12s ease, color .12s ease;
 }
 
 .dd-option.is-custom-option {
-    background: #f0f9ff;
-    border-bottom: 1px dashed #bae6fd;
-    color: #0284c7;
+    background: #E4F5F9;
+    border-bottom: 1px dashed #B5CCE3;
+    color: #167992;
     font-weight: 600;
     margin-bottom: 4px;
 }
 
 .dd-option.is-custom-option:hover,
 .dd-option.is-custom-option.is-highlighted {
-    background: #e0f2fe;
-    color: #0369a1;
+    background: #EEF7FC;
+    color: #03205A;
 }
 
 .dd-option.is-highlighted {
-    background: rgba(61, 165, 249, 0.1);
-    color: #0f172a;
+    background: #E4F5F9;
+    color: #03205A;
 }
 
 .dd-option.is-selected {
-    color: #2743AF;
+    color: #167992;
     font-weight: 700;
 }
 
 .dd-option i {
-    color: #3DA5F9;
+    color: #167992;
     font-size: .85rem;
     flex: none;
 }

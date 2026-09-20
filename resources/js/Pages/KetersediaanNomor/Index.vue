@@ -571,9 +571,9 @@ const formatDateIndo = (dateStr?: string | null) => {
                         </div>
                     </div>
                     <div class="col-6 col-sm-3">
-                        <div class="st-card p-3 h-100 bg-white border-start border-4 border-info shadow-sm text-center">
+                        <div class="st-card p-3 h-100 bg-white border-start border-4 border-danger shadow-sm text-center">
                             <span class="text-muted small fw-bold d-block">TERPAKAI</span>
-                            <h4 class="fw-bold text-info mb-0">{{ stats.used }}</h4>
+                            <h4 class="fw-bold text-danger mb-0">{{ stats.used }}</h4>
                         </div>
                     </div>
                     <div class="col-6 col-sm-3">
@@ -611,7 +611,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                     <button
                         type="button"
                         class="btn btn-sm"
-                        :class="statusFilter === 'used' ? 'btn-primary fw-bold' : 'btn-outline-primary'"
+                        :class="statusFilter === 'used' ? 'btn-danger fw-bold' : 'btn-outline-danger'"
                         @click="statusFilter = 'used'"
                     >
                         Terpakai ({{ stats.used }})
@@ -808,12 +808,12 @@ const formatDateIndo = (dateStr?: string | null) => {
                             <!-- STATUS BADGE -->
                             <td>
                                 <span
-                                    class="badge px-3 py-2 fw-bold rounded-pill"
+                                    class="badge px-3 py-2 fw-bold rounded-pill text-nowrap"
                                     :class="{
-                                        'bg-success-subtle text-success border border-success-subtle': num.status === 'available',
-                                        'bg-primary-subtle text-primary border border-primary-subtle': num.status === 'used',
-                                        'bg-info-subtle text-info border border-info-subtle': num.status === 'preorder',
-                                        'bg-warning-subtle text-warning border border-warning-subtle': num.status === 'reserved',
+                                        'bg-success text-white': num.status === 'available',
+                                        'bg-danger text-white': num.status === 'used',
+                                        'bg-info text-white': num.status === 'preorder',
+                                        'bg-warning text-dark': num.status === 'reserved',
                                     }"
                                 >
                                     {{ statusLabel(num.status) }}
@@ -857,11 +857,11 @@ const formatDateIndo = (dateStr?: string | null) => {
                         type="button"
                         class="badge px-2 py-2 font-monospace border-0 position-relative"
                         :class="{
-                            'bg-white text-dark border': num.status === 'available' && !isSelected(num.id),
+                            'bg-success text-white': num.status === 'available' && !isSelected(num.id),
                             'bg-warning text-dark': num.status === 'reserved' && !isSelected(num.id),
                             'bg-info text-white': num.status === 'preorder' && !isSelected(num.id),
-                            'bg-primary text-white': num.status === 'used' && !isSelected(num.id),
-                            'bg-success text-white selected-badge': isSelected(num.id),
+                            'bg-danger text-white': num.status === 'used' && !isSelected(num.id),
+                            'bg-primary text-white selected-badge': isSelected(num.id),
                         }"
                         @click="openNumberDetail(num)"
                     >
@@ -944,11 +944,11 @@ const formatDateIndo = (dateStr?: string | null) => {
                     <div class="col-6">
                         <label class="form-label text-muted small fw-bold">STATUS</label>
                         <div>
-                            <span class="badge px-2 py-1 fw-bold" :class="{
-                                'bg-success-subtle text-success': selectedNumber.status === 'available',
-                                'bg-primary-subtle text-primary': selectedNumber.status === 'used',
-                                'bg-info-subtle text-info': selectedNumber.status === 'preorder',
-                                'bg-warning-subtle text-warning': selectedNumber.status === 'reserved',
+                            <span class="badge px-3 py-1.5 fw-bold rounded-pill text-nowrap" :class="{
+                                'bg-success text-white': selectedNumber.status === 'available',
+                                'bg-danger text-white': selectedNumber.status === 'used',
+                                'bg-info text-white': selectedNumber.status === 'preorder',
+                                'bg-warning text-dark': selectedNumber.status === 'reserved',
                             }">
                                 {{ statusLabel(selectedNumber.status) }}
                             </span>
