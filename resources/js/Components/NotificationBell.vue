@@ -94,7 +94,20 @@ const fetchNotifications = async (isPolling = false) => {
     }
 };
 
+const getNotifData = (item: NotificationItem) => {
+    if (!item?.data) return {};
+    if (typeof item.data === 'string') {
+        try {
+            return JSON.parse(item.data);
+        } catch (e) {
+            return {};
+        }
+    }
+    return item.data || {};
+};
+
 const markAsRead = async (item: NotificationItem) => {
+    const data = getNotifData(item);
     try {
         if (!item.is_read) {
             item.is_read = true;
@@ -108,8 +121,8 @@ const markAsRead = async (item: NotificationItem) => {
     isOpen.value = false;
 
     // Navigate to letter in Tindak Lanjut
-    if (item.data?.tracking_code) {
-        router.get('/tindak-lanjut', { search: item.data.tracking_code });
+    if (data?.tracking_code) {
+        router.get('/tindak-lanjut', { search: data.tracking_code });
     } else {
         router.get('/tindak-lanjut');
     }
@@ -206,28 +219,28 @@ onUnmounted(() => {
                             @click="markAsRead(item)"
                         >
                             <div class="notif-icon-col">
-                                <span class="notif-icon-circle" :class="item.data?.priority === 'Segera' ? 'is-urgent' : 'is-normal'">
+                                <span class="notif-icon-circle" :class="getNotifData(item).priority === 'Segera' ? 'is-urgent' : 'is-normal'">
                                     <i class="bi bi-file-earmark-arrow-down-fill"></i>
                                 </span>
                             </div>
                             <div class="notif-content-col">
                                 <div class="d-flex align-items-center justify-content-between gap-1 mb-0.5">
-                                    <span class="notif-unit text-truncate" :title="item.data?.sender_unit || 'Unit Pengusul'">
-                                        {{ item.data?.sender_unit || 'Unit Pengusul' }}
+                                    <span class="notif-unit text-truncate" :title="getNotifData(item).sender_unit || 'Unit Pengusul'">
+                                        {{ getNotifData(item).sender_unit || 'Unit Pengusul' }}
                                     </span>
                                     <span class="notif-time">{{ formatTimeAgo(item.created_at) }}</span>
                                 </div>
-                                <div class="notif-subject text-truncate" :title="item.data?.subject || item.message">
-                                    {{ item.data?.subject || item.message }}
+                                <div class="notif-subject text-truncate" :title="getNotifData(item).subject || item.message">
+                                    {{ getNotifData(item).subject || item.message }}
                                 </div>
                                 <div class="d-flex align-items-center gap-1.5 mt-1 flex-wrap">
-                                    <span v-if="item.data?.tracking_code" class="notif-chip font-monospace">
-                                        {{ item.data.tracking_code }}
+                                    <span v-if="getNotifData(item).tracking_code" class="notif-chip font-monospace">
+                                        {{ getNotifData(item).tracking_code }}
                                     </span>
-                                    <span v-if="item.data?.sender_name" class="notif-sender text-truncate">
-                                        <i class="bi bi-person me-0.5"></i>{{ item.data.sender_name }}
+                                    <span v-if="getNotifData(item).sender_name" class="notif-sender text-truncate">
+                                        <i class="bi bi-person me-0.5"></i>{{ getNotifData(item).sender_name }}
                                     </span>
-                                    <span v-if="item.data?.priority === 'Segera'" class="badge bg-danger-subtle text-danger px-1.5 py-0.5" style="font-size: 0.65rem;">
+                                    <span v-if="getNotifData(item).priority === 'Segera'" class="badge bg-danger-subtle text-danger px-1.5 py-0.5" style="font-size: 0.65rem;">
                                         Segera
                                     </span>
                                 </div>
