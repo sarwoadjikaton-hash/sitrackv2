@@ -360,13 +360,16 @@ const isActive = (path: string, exact = false) =>
 /* ===== SIDEBAR ===== */
 .app-sidebar {
     position: fixed;
-    inset: 1rem auto 1rem 1rem;
+    top: 0;
+    left: 0;
+    bottom: 0;
     width: var(--sidebar-width);
     z-index: 1050;
     background: #03205A;
     color: #fff;
-    border-radius: 2rem;
-    box-shadow: 0 12px 36px rgba(3, 32, 90, 0.28);
+    border-radius: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 2px 0 16px rgba(3, 32, 90, 0.12);
     transition: width var(--transition), transform var(--transition);
 }
 
@@ -383,7 +386,9 @@ const isActive = (path: string, exact = false) =>
 
 @media (max-width: 991px) {
     .app-sidebar {
-        inset: 0.75rem auto 0.75rem 0.75rem;
+        top: 0;
+        left: 0;
+        bottom: 0;
         transform: translateX(-110%);
         width: 280px;
     }
@@ -401,7 +406,7 @@ const isActive = (path: string, exact = false) =>
     z-index: 2;
 }
 
-/* FLOATING TOGGLE BUTTON */
+/* TOGGLE BUTTON */
 .sidebar-toggle-btn {
     position: absolute;
     right: -14px;
@@ -530,24 +535,26 @@ const isActive = (path: string, exact = false) =>
     letter-spacing: 0.5px;
 }
 
-/* NAV ITEMS & NOTCH EFFECT */
+/* NAV ITEMS */
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    padding-left: 0.75rem;
+    gap: 0.3rem;
+    padding: 0 0.75rem;
 }
 
 .nav-link-item {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.75rem 1.25rem;
-    color: rgba(238, 247, 252, 0.8);
+    gap: 0.9rem;
+    padding: 0.7rem 1rem;
+    color: rgba(238, 247, 252, 0.78);
     text-decoration: none;
     font-size: 0.85rem;
-    border-radius: 1.5rem 0 0 1.5rem;
-    transition: all 0.2s;
+    font-weight: 500;
+    border-radius: 12px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-link-item i {
@@ -555,11 +562,11 @@ const isActive = (path: string, exact = false) =>
     width: 24px;
     text-align: center;
     color: #B5CCE3;
-    transition: color 0.2s ease;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .nav-link-item:hover:not(.active) {
-    transform: translateX(4px);
+    transform: translateX(3px);
     color: #fff;
     background: rgba(255, 255, 255, 0.08);
 }
@@ -568,38 +575,17 @@ const isActive = (path: string, exact = false) =>
     color: #E4F5F9;
 }
 
-/* Active Notch Effect */
+/* Active State */
 .nav-link-item.active {
-    background: #EEF7FC;
-    color: #03205A;
-    font-weight: 800;
+    background: linear-gradient(135deg, #167992 0%, #0e5b6f 100%);
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(22, 121, 146, 0.4);
 }
 
 .nav-link-item.active i {
-    color: #167992;
-}
-
-.nav-link-item.active::before,
-.nav-link-item.active::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    width: 20px;
-    height: 20px;
-    background: transparent;
-    pointer-events: none;
-}
-
-.nav-link-item.active::before {
-    top: -20px;
-    border-radius: 0 0 20px 0;
-    box-shadow: 10px 10px 0 10px #EEF7FC;
-}
-
-.nav-link-item.active::after {
-    bottom: -20px;
-    border-radius: 0 20px 0 0;
-    box-shadow: 10px -10px 0 10px #EEF7FC;
+    color: #ffffff;
+    transform: scale(1.05);
 }
 
 /* FOOTER AREA */
@@ -741,6 +727,15 @@ const isActive = (path: string, exact = false) =>
 /* COLLAPSED STATE ADJUSTMENTS */
 @media (min-width: 992px) {
 
+    .app-sidebar.is-collapsed .sidebar-header {
+        justify-content: center;
+        padding: 1.5rem 0.5rem;
+    }
+
+    .app-sidebar.is-collapsed .brand-wrapper {
+        justify-content: center;
+    }
+
     .app-sidebar.is-collapsed .brand-text,
     .app-sidebar.is-collapsed .brand-pipe-divider,
     .app-sidebar.is-collapsed .brand-kemnaker-ring,
@@ -749,6 +744,23 @@ const isActive = (path: string, exact = false) =>
     .app-sidebar.is-collapsed .user-info,
     .app-sidebar.is-collapsed .user-profile-hint {
         display: none;
+    }
+
+    .app-sidebar.is-collapsed .sidebar-nav {
+        padding: 0 0.5rem;
+        align-items: center;
+    }
+
+    .app-sidebar.is-collapsed .nav-link-item {
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        margin: 0 auto;
+    }
+
+    .app-sidebar.is-collapsed .nav-link-item:hover:not(.active) {
+        transform: none;
     }
 
     /* Logout button above user on collapsed */
@@ -787,12 +799,12 @@ const isActive = (path: string, exact = false) =>
 .app-content {
     flex: 1;
     min-width: 0;
-    margin-left: calc(var(--sidebar-width) + 1.5rem);
+    margin-left: var(--sidebar-width);
     transition: margin-left var(--transition);
 }
 
 .app-content.content-expanded {
-    margin-left: calc(var(--sidebar-collapsed-width) + 1.5rem);
+    margin-left: var(--sidebar-collapsed-width);
 }
 
 @media (max-width: 991px) {
