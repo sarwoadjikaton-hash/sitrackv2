@@ -13,6 +13,7 @@ use App\Services\LetterNumberService;
 use App\Services\PdfTextExtractor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -179,23 +180,29 @@ class PublicTrackingController extends Controller
                 'changed_at' => now(),
             ]);
 
-            AppNotification::create([
-                'letter_id' => $letter->id,
-                'type' => 'new_letter_submission',
-                'title' => 'Pengajuan Surat Masuk Baru',
-                'message' => "{$unitPengusulName} ({$validated['sender_name']}) mengajukan permohonan naskah: \"{$validated['subject']}\"",
-                'data' => [
-                    'tracking_code' => $trackingCode,
-                    'agenda_number' => $agendaNumber,
-                    'sender_unit' => $unitPengusulName,
-                    'sender_name' => $validated['sender_name'],
-                    'destination' => $validated['destination'],
-                    'subject' => $validated['subject'],
-                    'priority' => $validated['priority'],
-                    'created_at' => now()->toIso8601String(),
-                ],
-                'is_read' => false,
-            ]);
+            if (Schema::hasTable('app_notifications')) {
+                try {
+                    AppNotification::create([
+                        'letter_id' => $letter->id,
+                        'type' => 'new_letter_submission',
+                        'title' => 'Pengajuan Surat Masuk Baru',
+                        'message' => "{$unitPengusulName} ({$validated['sender_name']}) mengajukan permohonan naskah: \"{$validated['subject']}\"",
+                        'data' => [
+                            'tracking_code' => $trackingCode,
+                            'agenda_number' => $agendaNumber,
+                            'sender_unit' => $unitPengusulName,
+                            'sender_name' => $validated['sender_name'],
+                            'destination' => $validated['destination'],
+                            'subject' => $validated['subject'],
+                            'priority' => $validated['priority'],
+                            'created_at' => now()->toIso8601String(),
+                        ],
+                        'is_read' => false,
+                    ]);
+                } catch (\Throwable $ne) {
+                    // Fail silently so letter submission is never blocked
+                }
+            }
 
             DB::commit();
 
