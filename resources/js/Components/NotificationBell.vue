@@ -28,7 +28,61 @@ const unreadCount = ref(0);
 const notifications = ref<NotificationItem[]>([]);
 const isLoading = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
+const desktopPermission = ref<NotificationPermission>('default');
 let pollInterval: any = null;
+
+const checkNotificationPermission = () => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+        desktopPermission.value = Notification.permission;
+    }
+};
+
+const requestNotificationPermission = async () => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+        try {
+            const perm = await Notification.requestPermission();
+            desktopPermission.value = perm;
+            if (perm === 'granted') {
+                playChimeSound();
+                new Notification('SiTrack - Notifikasi Aktif', {
+                    body: 'Notifikasi desktop pengajuan surat masuk telah aktif!',
+                    icon: '/favicon.ico',
+                });
+            }
+        } catch (e) {
+            // ignore
+        }
+    }
+};
+
+const showDesktopNotification = (letterData: any, message: string) => {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+        try {
+            const title = 'Pengajuan Surat Masuk Baru!';
+            const body = letterData?.sender_unit 
+                ? `${letterData.sender_unit}: ${letterData.subject || message}`
+                : message;
+            
+            const notif = new Notification(title, {
+                body: body,
+                icon: '/favicon.ico',
+                badge: '/favicon.ico',
+                tag: letterData?.tracking_code || 'new-letter',
+            });
+
+            notif.onclick = () => {
+                window.focus();
+                if (letterData?.tracking_code) {
+                    router.get('/tindak-lanjut', { search: letterData.tracking_code });
+                } else {
+                    router.get('/tindak-lanjut');
+                }
+            };
+        } catch (e) {
+            // ignore
+        }
+    }
+};
 
 const toggleDropdown = () => {
     isOpen.value = !isOpen.value;
@@ -57,17 +111,34 @@ const formatTimeAgo = (dateString: string) => {
 const playChimeSound = () => {
     try {
         const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
-        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.35);
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        const now = audioCtx.currentTime;
+
+        // Tone 1 (High bell)
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(659.25, now); // E5
+        gain1.gain.setValueAtTime(0.2, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.35);
+
+        // Tone 2 (Harmonic bell chime)
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(987.77, now + 0.12); // B5
+        gain2.gain.setValueAtTime(0.25, now + 0.12);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now + 0.12);
+        osc2.stop(now + 0.6);
     } catch (e) {
         // AudioContext might be blocked before first user gesture
     }
@@ -79,12 +150,22 @@ const fetchNotifications = async (isPolling = false) => {
         const res = await axios.get('/notifications');
         if (res.data?.ok) {
             const previousCount = unreadCount.value;
-            unreadCount.value = res.data.unread_count || 0;
-            notifications.value = res.data.notifications || [];
+            const newCount = res.data.unread_count || 0;
+            const newNotifs: NotificationItem[] = res.data.notifications || [];
 
-            // Trigger chime if new unread notification arrived during active session
-            if (isPolling && unreadCount.value > previousCount && previousCount >= 0) {
+            unreadCount.value = newCount;
+            notifications.value = newNotifs;
+
+            // Trigger chime & desktop toast if new unread notification arrived
+            if (isPolling && newCount > previousCount && previousCount >= 0) {
                 playChimeSound();
+
+                // Trigger Desktop Notification for newest item
+                if (newNotifs.length > 0) {
+                    const latest = newNotifs[0];
+                    const data = getNotifData(latest);
+                    showDesktopNotification(data, latest.message);
+                }
             }
         }
     } catch (err) {
@@ -145,12 +226,13 @@ const handleClickOutside = (e: MouseEvent) => {
 };
 
 onMounted(() => {
+    checkNotificationPermission();
     fetchNotifications();
     document.addEventListener('click', handleClickOutside);
-    // Poll every 25 seconds
+    // Poll every 20 seconds
     pollInterval = setInterval(() => {
         fetchNotifications(true);
-    }, 25000);
+    }, 20000);
 });
 
 onUnmounted(() => {
@@ -187,15 +269,42 @@ onUnmounted(() => {
                             {{ unreadCount }} Baru
                         </span>
                     </div>
-                    <button
-                        v-if="unreadCount > 0"
-                        type="button"
-                        class="btn-mark-all"
-                        @click="markAllAsRead"
-                        title="Tandai semua telah dibaca"
-                    >
-                        <i class="bi bi-check2-all me-1"></i>Tandai Dibaca
-                    </button>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <button
+                            type="button"
+                            class="btn-icon-action"
+                            @click="playChimeSound"
+                            title="Tes Bunyi Notifikasi"
+                        >
+                            <i class="bi bi-volume-up"></i>
+                        </button>
+                        <button
+                            v-if="unreadCount > 0"
+                            type="button"
+                            class="btn-mark-all"
+                            @click="markAllAsRead"
+                            title="Tandai semua telah dibaca"
+                        >
+                            <i class="bi bi-check2-all me-1"></i>Tandai Dibaca
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Desktop Permission Banner -->
+                <div v-if="desktopPermission !== 'granted'" class="notif-desktop-banner">
+                    <div class="d-flex align-items-center justify-content-between gap-2">
+                        <div class="d-flex align-items-center gap-1.5 small text-primary fw-medium" style="font-size: 0.74rem;">
+                            <i class="bi bi-display"></i>
+                            <span>Munculkan notif di layar/desktop</span>
+                        </div>
+                        <button
+                            type="button"
+                            class="btn-enable-desktop"
+                            @click="requestNotificationPermission"
+                        >
+                            Aktifkan
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Notification Body / List -->
@@ -375,6 +484,27 @@ onUnmounted(() => {
     color: #03205A;
 }
 
+.btn-icon-action {
+    background: transparent;
+    border: 1px solid #E2E8F0;
+    color: #64748B;
+    font-size: 0.85rem;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.btn-icon-action:hover {
+    background: #EEF7FC;
+    color: #167992;
+    border-color: #167992;
+}
+
 .btn-mark-all {
     background: transparent;
     border: none;
@@ -390,6 +520,29 @@ onUnmounted(() => {
 .btn-mark-all:hover {
     background: rgba(22, 121, 146, 0.1);
     color: #0e5b6f;
+}
+
+/* Desktop Banner */
+.notif-desktop-banner {
+    background: #EEF7FC;
+    border-bottom: 1px solid #E0F0F8;
+    padding: 0.5rem 1.1rem;
+}
+
+.btn-enable-desktop {
+    background: #167992;
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-enable-desktop:hover {
+    background: #0e5b6f;
 }
 
 /* Body & List */
