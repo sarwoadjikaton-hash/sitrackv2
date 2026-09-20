@@ -28,7 +28,7 @@ onUnmounted(() => {
     <div class="d-flex flex-column min-vh-100 public-page">
         <ToastNotification />
 
-        <!-- Scroll-Detached Floating Navbar -->
+        <!-- Scroll-Detached Transparent & Glass Floating Navbar -->
         <header
             class="sticky-top header-wrapper"
             :class="isScrolled ? 'is-scrolled' : 'is-top'"
@@ -45,15 +45,15 @@ onUnmounted(() => {
                             <!-- Logo SiTrack -->
                             <img src="/images/sitrack_logo.svg" alt="SiTrack" width="36" height="36"
                                 class="app-logo-header shadow-sm rounded-3">
-                            <span class="brand-pipe-divider text-muted opacity-50 fw-light">|</span>
+                            <span class="brand-pipe-divider text-white-50 opacity-50 fw-light">|</span>
                             <!-- Logo Kemnaker -->
                             <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="32" height="32"
-                                class="kemnaker-logo-header">
+                                class="kemnaker-logo-header kemnaker-logo-light">
                         </div>
 
                         <div class="d-none d-sm-block ms-1">
-                            <h5 class="fw-bold mb-0 text-primary-dark">SiTrack</h5>
-                            <p class="text-muted mb-0" style="font-size: 10px; letter-spacing: 0.5px;">
+                            <h5 class="fw-bold mb-0 text-white brand-title">SiTrack</h5>
+                            <p class="text-white-50 mb-0 brand-sub" style="font-size: 10px; letter-spacing: 0.5px;">
                                 Sistem Elektronik Administrasi & Tracking Persuratan
                             </p>
                         </div>
@@ -72,7 +72,7 @@ onUnmounted(() => {
                             <span class="d-none d-md-inline ms-1">Ajukan</span>
                         </Link>
 
-                        <div class="vr mx-1 opacity-25"></div>
+                        <div class="vr mx-1 opacity-25 text-white"></div>
 
                         <Link v-if="isLoggedIn" href="/dashboard"
                             class="btn btn-primary-blue rounded-pill px-3 px-md-4 shadow-sm fw-semibold">
@@ -109,7 +109,7 @@ onUnmounted(() => {
 }
 
 /* ==========================================================================
-   SCROLL-DETACHED FLOATING NAVBAR
+   SCROLL-DETACHED TRANSPARENT GLASS NAVBAR
    ========================================================= */
 
 .header-wrapper {
@@ -127,35 +127,35 @@ onUnmounted(() => {
 
 .navbar-island {
     transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
 }
 
-/* 1. Kondisi Atas / Menempel (Attached State saat scrollY <= 15) */
+/* 1. Kondisi Atas / Menempel (Transparan Alami menyatu dengan Hero) */
 .nav-attached {
-    background: rgba(238, 247, 252, 0.96);
-    border-bottom: 1px solid rgba(181, 204, 227, 0.7) !important;
+    background: rgba(3, 32, 90, 0.45);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-top: none !important;
     border-left: none !important;
     border-right: none !important;
     border-radius: 0 !important;
-    padding: 0.85rem 1.5rem;
-    box-shadow: 0 4px 16px rgba(3, 32, 90, 0.08);
+    padding: 0.9rem 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 @media (min-width: 992px) {
     .nav-attached {
-        padding: 0.85rem 3rem;
+        padding: 0.9rem 3rem;
     }
 }
 
-/* 2. Kondisi Mengambang (Floating State saat scrollY > 15) */
+/* 2. Kondisi Mengambang (Deep Navy Glass Capsule yang Melayang Elegan) */
 .nav-floating {
-    background: rgba(238, 247, 252, 0.94);
-    border: 1px solid rgba(181, 204, 227, 0.85) !important;
+    background: rgba(3, 32, 90, 0.82);
+    border: 1px solid rgba(181, 204, 227, 0.35) !important;
     border-radius: 1.25rem !important;
     padding: 0.65rem 1.25rem;
-    box-shadow: 0 14px 38px rgba(3, 32, 90, 0.22), 0 2px 6px rgba(3, 32, 90, 0.08) !important;
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.38), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
 @media (min-width: 768px) {
@@ -164,66 +164,71 @@ onUnmounted(() => {
     }
 }
 
-/* Logo Styling */
-.brand-logo-container {
-    background: linear-gradient(135deg, #03205A, #167992);
-    width: 38px;
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(3, 32, 90, 0.25);
+/* Logo Kemnaker */
+.kemnaker-logo-light {
+    filter: brightness(0) invert(1);
+    opacity: 0.95;
 }
 
-.text-primary-dark {
-    color: #03205A;
+/* Brand Typography */
+.brand-title {
+    color: #ffffff !important;
     font-weight: 800;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     letter-spacing: -0.02em;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.brand-sub {
+    color: rgba(255, 255, 255, 0.75) !important;
 }
 
 /* Nav Pill Buttons */
 .nav-pill-btn {
     text-decoration: none;
-    color: #03205A;
-    padding: 8px 16px;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 8px 18px;
     border-radius: 50px;
     font-weight: 600;
     font-size: 14px;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid transparent;
 }
 
 .nav-pill-btn:hover {
-    background: #E4F5F9;
-    color: #167992;
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .nav-pill-btn.active {
-    background: #E4F5F9;
-    color: #167992;
+    background: rgba(22, 121, 146, 0.5);
+    border: 1px solid rgba(45, 212, 191, 0.4);
+    color: #ffffff;
     font-weight: 700;
+    box-shadow: 0 0 14px rgba(22, 121, 146, 0.4);
 }
 
 /* Login Button Epic */
 .btn-login-epic {
-    background: linear-gradient(135deg, #167992, #03205A);
+    background: linear-gradient(135deg, #167992, #0e4d5d);
     color: #fff;
-    border: none;
-    padding: 8px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 8px 22px;
     font-size: 14px;
     font-weight: 700;
     transition: all 0.3s ease;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    box-shadow: 0 4px 14px rgba(22, 121, 146, 0.35);
+    box-shadow: 0 4px 16px rgba(22, 121, 146, 0.4);
 }
 
 .btn-login-epic:hover {
-    background: linear-gradient(135deg, #126277, #1C386F);
+    background: linear-gradient(135deg, #1fa3c5, #167992);
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(22, 121, 146, 0.45);
+    box-shadow: 0 6px 20px rgba(22, 121, 146, 0.6);
     color: white;
 }
 </style>
