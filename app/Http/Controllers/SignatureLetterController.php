@@ -271,6 +271,14 @@ class SignatureLetterController extends Controller
 
             DB::commit();
 
+            if (!empty($letter->sender_phone)) {
+                try {
+                    \App\Services\WhatsAppService::sendSubmissionSuccess($letter);
+                } catch (\Throwable $we) {
+                    \Illuminate\Support\Facades\Log::warning('[WhatsApp] Failed to dispatch signature store notification: ' . $we->getMessage());
+                }
+            }
+
             return redirect()->route('tindak-lanjut.index')
                 ->with('success', "Surat berhasil dicatat dengan nomor agenda: {$agendaNumber}");
         } catch (\Throwable $e) {
@@ -401,6 +409,14 @@ class SignatureLetterController extends Controller
                 'changed_by' => Auth::user()->name ?: Auth::user()->username,
                 'changed_at' => now(),
             ]);
+
+            if ($statusChanged && !empty($letter->sender_phone)) {
+                try {
+                    \App\Services\WhatsAppService::sendStatusUpdate($letter, $letter->notes);
+                } catch (\Throwable $we) {
+                    \Illuminate\Support\Facades\Log::warning('[WhatsApp] Failed to dispatch status update notification: ' . $we->getMessage());
+                }
+            }
         }
 
         return redirect()->route('tindak-lanjut.index')
@@ -453,6 +469,14 @@ class SignatureLetterController extends Controller
             'changed_by' => Auth::user()->name ?: Auth::user()->username,
             'changed_at' => now(),
         ]);
+
+        if (!empty($letter->sender_phone)) {
+            try {
+                \App\Services\WhatsAppService::sendStatusUpdate($letter, $validated['note'] ?? null);
+            } catch (\Throwable $we) {
+                \Illuminate\Support\Facades\Log::warning('[WhatsApp] Failed to dispatch quick status update: ' . $we->getMessage());
+            }
+        }
 
         return back()->with('success', 'Status surat berhasil diperbarui.');
     }

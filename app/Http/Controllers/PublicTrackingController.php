@@ -208,6 +208,13 @@ class PublicTrackingController extends Controller
 
             DB::commit();
 
+            // Push WhatsApp Notification to sender
+            try {
+                \App\Services\WhatsAppService::sendSubmissionSuccess($letter);
+            } catch (\Throwable $we) {
+                \Illuminate\Support\Facades\Log::warning('[WhatsApp] Failed to dispatch submission notification: ' . $we->getMessage());
+            }
+
             return redirect()->route('tracking.success', ['code' => $trackingCode]);
         } catch (\Throwable $e) {
             DB::rollBack();

@@ -119,6 +119,17 @@ class PrintController extends Controller
 
         $letter->update($updates);
 
+        if ($shouldUpdateStatus && !empty($letter->sender_phone)) {
+            try {
+                \App\Services\WhatsAppService::sendStatusUpdate(
+                    $letter->fresh(),
+                    "Dokumen fisik telah diserahkan & diambil oleh {$receiverName} dengan tanda tangan digital lembar pendamping."
+                );
+            } catch (\Throwable $we) {
+                \Illuminate\Support\Facades\Log::warning('[WhatsApp] Failed to dispatch pickup status update: ' . $we->getMessage());
+            }
+        }
+
         return response()->json([
             'ok' => true,
             'message' => 'Tanda tangan digital berhasil disimpan dan berkas otomatis terlampir!',

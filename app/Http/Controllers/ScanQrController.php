@@ -103,6 +103,14 @@ class ScanQrController extends Controller
             'changed_at' => now(),
         ]);
 
+        if (!empty($letter->sender_phone)) {
+            try {
+                \App\Services\WhatsAppService::sendStatusUpdate($letter, $validated['note'] ?? null);
+            } catch (\Throwable $we) {
+                \Illuminate\Support\Facades\Log::warning('[WhatsApp] Failed to dispatch QR scan status update: ' . $we->getMessage());
+            }
+        }
+
         return redirect()->route('scan-status.index', ['tracking' => $letter->tracking_code])
             ->with('success', 'Status surat berhasil diperbarui via scan QR.');
     }

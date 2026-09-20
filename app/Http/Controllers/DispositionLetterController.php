@@ -239,6 +239,14 @@ class DispositionLetterController extends Controller
 
             DB::commit();
 
+            if (!empty($letter->sender_phone)) {
+                try {
+                    \App\Services\WhatsAppService::sendSubmissionSuccess($letter);
+                } catch (\Throwable $we) {
+                    \Illuminate\Support\Facades\Log::warning('[WhatsApp] Failed to dispatch disposition store notification: ' . $we->getMessage());
+                }
+            }
+
             return redirect()->route('disposisi.show', $letter->id)
                 ->with('success', $agendaNumber
                     ? "Surat berhasil dicatat ke Lajur Disposisi dengan agenda: {$agendaNumber}"
@@ -382,6 +390,17 @@ class DispositionLetterController extends Controller
 
             DB::commit();
 
+            if (!empty($letter->sender_phone)) {
+                try {
+                    \App\Services\WhatsAppService::sendStatusUpdate(
+                        $letter->fresh(),
+                        "Disposisi oleh {$validated['from_name']} ke " . $unitNamesList->count() . " unit."
+                    );
+                } catch (\Throwable $we) {
+                    \Illuminate\Support\Facades\Log::warning('[WhatsApp] Failed to dispatch disposition update notification: ' . $we->getMessage());
+                }
+            }
+
             return back()->with('success', 'Instruksi disposisi berhasil ditambahkan ke ' . count($toUnitIds) . ' unit.');
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -445,6 +464,14 @@ class DispositionLetterController extends Controller
 
             DB::commit();
 
+            if (!empty($letter->sender_phone)) {
+                try {
+                    \App\Services\WhatsAppService::sendStatusUpdate($letter->fresh(), $validated['follow_up_note'] ?? null);
+                } catch (\Throwable $we) {
+                    \Illuminate\Support\Facades\Log::warning('[WhatsApp] Failed to dispatch disposition item update notification: ' . $we->getMessage());
+                }
+            }
+
             return back()->with('success', 'Status tindak lanjut disposisi diperbarui.');
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -482,6 +509,14 @@ class DispositionLetterController extends Controller
             'changed_by' => Auth::user()->name ?: Auth::user()->username,
             'changed_at' => now(),
         ]);
+
+        if (!empty($letter->sender_phone)) {
+            try {
+                \App\Services\WhatsAppService::sendStatusUpdate($letter, $validated['note'] ?? null);
+            } catch (\Throwable $we) {
+                \Illuminate\Support\Facades\Log::warning('[WhatsApp] Failed to dispatch letter status update notification: ' . $we->getMessage());
+            }
+        }
 
         return back()->with('success', 'Status lajur disposisi diperbarui.');
     }

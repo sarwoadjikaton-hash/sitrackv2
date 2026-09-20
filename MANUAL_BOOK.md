@@ -399,6 +399,12 @@ Ada dua cara:
 ### ❓ Scan QR tidak bisa di HP saya?
 Scan QR membutuhkan **HTTPS** (koneksi aman). Jika akses via HTTP biasa, kamera tidak bisa diaktifkan karena kebijakan keamanan browser. Hubungi Admin untuk memastikan SiTrack diakses via HTTPS. Alternatif: gunakan fitur **Upload Foto QR** dari galeri.
 
+### ❓ Bagaimana cara kerja Notifikasi WhatsApp otomatis?
+SiTrack terhubung langsung dengan **WhatsApp Gateway (Meta WhatsApp Cloud API)**:
+1. **Saat Pengajuan Berhasil**: Pemohon akan langsung menerima pesan WA berisi **Nomor Resi / Kode Tracking** dan link pelacakan langsung.
+2. **Saat Status Diperbarui**: Setiap kali admin/petugas mengubah status dokumen (misal: "Diperiksa Oleh Sekjen", "Selesai dan Siap Untuk diambil", "Dokumen Sudah diambil", dll), sistem otomatis mengirim pesan pembaruan status terkini ke nomor WA pemohon.
+3. **Konfigurasi Administrator**: Admin dapat mengatur token dan nomor pengirim di file `.env` melalui variabel `WHATSAPP_PHONE_NUMBER_ID` dan `WHATSAPP_API_TOKEN`, serta melakukan uji coba menggunakan perintah `php artisan wa:test <nomor_hp>`.
+
 ### ❓ Bagaimana deploy update ke server?
 Untuk tim teknis, jalankan perintah berikut:
 ```bash
@@ -410,3 +416,4 @@ docker compose exec app php artisan optimize:clear
 ---
 
 > **Butuh bantuan lebih lanjut?** Hubungi tim IT atau Super Admin di unit kerja kamu. Selamat menggunakan SiTrack! 🚀
+

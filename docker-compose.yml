@@ -39,6 +39,9 @@ services:
     image: sitrack-app:latest
     container_name: sitrack_app
     env_file: .env
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     depends_on:
       postgres:
         condition: service_healthy
@@ -59,6 +62,9 @@ services:
     container_name: sitrack_queue
     command: [ "php", "artisan", "queue:work", "redis", "--sleep=2", "--tries=3", "--timeout=90" ]
     env_file: .env
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     depends_on:
       postgres:
         condition: service_healthy
