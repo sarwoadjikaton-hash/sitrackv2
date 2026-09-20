@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link, usePage, router, useForm } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
+import NotificationBell from '@/Components/NotificationBell.vue';
 import { computed, ref } from 'vue';
 import ToastNotification from '@/Components/ToastNotification.vue';
 import type { PageProps } from '@/types';
@@ -272,6 +273,7 @@ const isActive = (path: string, exact = false) =>
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-2">
+                    <NotificationBell />
                     <Link v-if="!isSekjen" href="/scan-status" class="btn-topbar btn-topbar-accent">
                         <span class="btn-topbar-icon"><i class="bi bi-qr-code-scan"></i></span>
                         <span class="d-none d-sm-inline">Scan QR</span>

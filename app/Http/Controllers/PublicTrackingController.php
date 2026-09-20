@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppNotification;
 use App\Models\Letter;
 use App\Models\LetterCategory;
 use App\Models\LetterNumber;
@@ -176,6 +177,24 @@ class PublicTrackingController extends Controller
                 'attachment_name' => $uploadedAttachmentName,
                 'changed_by' => 'Pemohon (Publik)',
                 'changed_at' => now(),
+            ]);
+
+            AppNotification::create([
+                'letter_id' => $letter->id,
+                'type' => 'new_letter_submission',
+                'title' => 'Pengajuan Surat Masuk Baru',
+                'message' => "{$unitPengusulName} ({$validated['sender_name']}) mengajukan permohonan naskah: \"{$validated['subject']}\"",
+                'data' => [
+                    'tracking_code' => $trackingCode,
+                    'agenda_number' => $agendaNumber,
+                    'sender_unit' => $unitPengusulName,
+                    'sender_name' => $validated['sender_name'],
+                    'destination' => $validated['destination'],
+                    'subject' => $validated['subject'],
+                    'priority' => $validated['priority'],
+                    'created_at' => now()->toIso8601String(),
+                ],
+                'is_read' => false,
             ]);
 
             DB::commit();

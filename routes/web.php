@@ -9,6 +9,7 @@ use App\Http\Controllers\LetterAvailabilityController;
 use App\Http\Controllers\LetterCategoryController;
 use App\Http\Controllers\LetterNumberTypeController;
 use App\Http\Controllers\LetterRelationController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PrintController;
 use App\Http\Controllers\PublicTrackingController;
 use App\Http\Controllers\RekapMasterController;
@@ -53,6 +54,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 */
 Route::middleware(['auth'])->group(function () {
     Route::put('/password', [AuthController::class, 'updatePassword'])->name('password.update');
+
+    // In-App Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('permission:view dashboard')->name('dashboard');
