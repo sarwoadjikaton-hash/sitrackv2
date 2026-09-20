@@ -463,33 +463,17 @@ onUnmounted(disposeThree);
             </defs>
         </svg>
 
-        <!-- Mesh gradient background -->
+        <!-- Mesh background -->
         <div class="hero-mesh">
             <div class="mesh-blob mesh-blob-1"></div>
             <div class="mesh-blob mesh-blob-2"></div>
             <div class="mesh-blob mesh-blob-3"></div>
             <div class="mesh-blob mesh-blob-4"></div>
             <div class="mesh-sheen"></div>
-            <div class="mesh-grid-overlay"></div>
         </div>
 
         <!-- Layer 3D ringan: amplop melayang -->
         <div ref="threeContainer" class="hero-three-layer" aria-hidden="true"></div>
-
-        <!-- Dekorasi tema dokumen & tracking -->
-        <div class="hero-bg-icons">
-            <svg class="hero-icon icon-pin" viewBox="0 0 40 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 2C10.6 2 3 9.6 3 19C3 32 20 54 20 54C20 54 37 32 37 19C37 9.6 29.4 2 20 2Z" stroke="white"
-                    stroke-width="2" stroke-linejoin="round" />
-                <circle cx="20" cy="19" r="7" stroke="white" stroke-width="2" />
-            </svg>
-            <svg class="hero-icon icon-route" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2 30C25 30 25 6 48 6C71 6 71 34 94 34C105 34 110 30 118 22" stroke="white" stroke-width="2"
-                    stroke-dasharray="5 6" stroke-linecap="round" />
-                <circle cx="2" cy="30" r="3.5" fill="white" />
-                <circle cx="118" cy="22" r="3.5" fill="white" />
-            </svg>
-        </div>
 
         <div class="container hero-container">
             <div class="hero-text-block">
@@ -681,21 +665,10 @@ onUnmounted(disposeThree);
     }
 }
 
-.mesh-grid-overlay {
-    position: absolute;
-    inset: 0;
-    background-image:
-        linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px);
-    background-size: 46px 46px;
-    mask-image: radial-gradient(circle at 30% 50%, #000 0%, transparent 75%);
-}
-
 @media (prefers-reduced-motion: reduce) {
 
     .mesh-blob,
     .mesh-sheen,
-    .hero-icon,
     .hero-badge,
     .orb-ring,
     .orb-text {
@@ -704,45 +677,6 @@ onUnmounted(disposeThree);
 
     .hero-three-layer {
         display: none;
-    }
-}
-
-.hero-bg-icons {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.hero-icon {
-    position: absolute;
-    opacity: .08;
-    animation: heroIconFloat 18s ease-in-out infinite;
-}
-
-.icon-pin {
-    width: 60px;
-    bottom: 12%;
-    left: 6%;
-}
-
-.icon-route {
-    width: 200px;
-    top: 14%;
-    right: 6%;
-    animation-delay: -8s;
-}
-
-@keyframes heroIconFloat {
-
-    0%,
-    100% {
-        transform: translate(0, 0);
-    }
-
-    50% {
-        transform: translate(10px, -12px);
     }
 }
 

@@ -813,52 +813,6 @@ h1, h2, h3, h4, h5, h6,
   }
 }
 
-.mesh-grid-overlay {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 46px 46px;
-  mask-image: radial-gradient(circle at 30% 50%, #000 0%, transparent 75%);
-}
-
-.hero-bg-icons {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.hero-icon {
-  position: absolute;
-  opacity: 0.08;
-  animation: heroIconFloat 18s ease-in-out infinite;
-}
-
-.icon-pin {
-  width: 60px;
-  bottom: 12%;
-  left: 6%;
-}
-
-.icon-route {
-  width: 200px;
-  top: 14%;
-  right: 6%;
-  animation-delay: -8s;
-}
-
-@keyframes heroIconFloat {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(10px, -12px);
-  }
-}
 
 .hero-container {
   position: relative;
