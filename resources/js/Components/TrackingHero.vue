@@ -332,13 +332,10 @@ function initThree() {
     particles = createParticles();
     scene.add(particles);
 
-    // Satellite Floating Objects in Orbit (Distributed nicely across the right area)
+    // Satellite Floating Objects in Orbit (Spaced cleanly with no overlapping)
     const smallObjects: { build: () => THREE.Group; pos: [number, number, number]; scale: number }[] = [
-        { build: () => createEnvelope(0xEEF7FC, 0x167992), pos: [1.2, 1.9, 1.2], scale: 0.95 },
-        { build: () => createDocumentStack(), pos: [4.6, 1.7, -0.3], scale: 1.0 },
-        { build: () => createEnvelope(0xEEF7FC, 0x167992), pos: [4.9, -0.5, 0.6], scale: 0.85 },
-        { build: () => createEnvelope(0x1C386F, 0x167992), pos: [1.3, -1.3, 1.1], scale: 0.85 },
-        { build: () => createSecurityShield(), pos: [3.2, -1.6, 1.6], scale: 0.95 },
+        { build: () => createEnvelope(0xEEF7FC, 0x167992), pos: [0.6, 2.1, 0.6], scale: 0.9 },
+        { build: () => createDocumentStack(), pos: [5.2, 1.6, -0.4], scale: 0.95 },
     ];
 
     smallObjects.forEach((item, i) => {
