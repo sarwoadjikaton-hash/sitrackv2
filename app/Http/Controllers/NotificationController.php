@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\AppNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class NotificationController extends Controller
 {
@@ -13,18 +15,35 @@ class NotificationController extends Controller
      */
     public function index(): JsonResponse
     {
-        $unreadCount = AppNotification::where('is_read', false)->count();
-        
-        $notifications = AppNotification::with(['letter:id,tracking_code,agenda_number,subject,sender_unit,sender_name,created_at'])
-            ->orderBy('created_at', 'desc')
-            ->limit(15)
-            ->get();
+        try {
+            if (!Schema::hasTable('app_notifications')) {
+                return response()->json([
+                    'ok' => true,
+                    'unread_count' => 0,
+                    'notifications' => [],
+                ]);
+            }
 
-        return response()->json([
-            'ok' => true,
-            'unread_count' => $unreadCount,
-            'notifications' => $notifications,
-        ]);
+            $unreadCount = AppNotification::where('is_read', false)->count();
+            
+            $notifications = AppNotification::with(['letter:id,tracking_code,agenda_number,subject,sender_unit,sender_name,created_at'])
+                ->orderBy('created_at', 'desc')
+                ->limit(15)
+                ->get();
+
+            return response()->json([
+                'ok' => true,
+                'unread_count' => $unreadCount,
+                'notifications' => $notifications,
+            ]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'ok' => true,
+                'unread_count' => 0,
+                'notifications' => [],
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -32,21 +51,29 @@ class NotificationController extends Controller
      */
     public function markAsRead(int $id): JsonResponse
     {
-        $notification = AppNotification::find($id);
+        try {
+            if (!Schema::hasTable('app_notifications')) {
+                return response()->json(['ok' => true, 'unread_count' => 0]);
+            }
 
-        if ($notification) {
-            $notification->update([
-                'is_read' => true,
-                'read_at' => now(),
+            $notification = AppNotification::find($id);
+
+            if ($notification) {
+                $notification->update([
+                    'is_read' => true,
+                    'read_at' => now(),
+                ]);
+            }
+
+            $unreadCount = AppNotification::where('is_read', false)->count();
+
+            return response()->json([
+                'ok' => true,
+                'unread_count' => $unreadCount,
             ]);
+        } catch (Throwable $e) {
+            return response()->json(['ok' => true, 'unread_count' => 0]);
         }
-
-        $unreadCount = AppNotification::where('is_read', false)->count();
-
-        return response()->json([
-            'ok' => true,
-            'unread_count' => $unreadCount,
-        ]);
     }
 
     /**
@@ -54,14 +81,22 @@ class NotificationController extends Controller
      */
     public function markAllAsRead(): JsonResponse
     {
-        AppNotification::where('is_read', false)->update([
-            'is_read' => true,
-            'read_at' => now(),
-        ]);
+        try {
+            if (!Schema::hasTable('app_notifications')) {
+                return response()->json(['ok' => true, 'unread_count' => 0]);
+            }
 
-        return response()->json([
-            'ok' => true,
-            'unread_count' => 0,
-        ]);
+            AppNotification::where('is_read', false)->update([
+                'is_read' => true,
+                'read_at' => now(),
+            ]);
+
+            return response()->json([
+                'ok' => true,
+                'unread_count' => 0,
+            ]);
+        } catch (Throwable $e) {
+            return response()->json(['ok' => true, 'unread_count' => 0]);
+        }
     }
 }
