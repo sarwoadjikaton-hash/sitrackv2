@@ -1,41 +1,83 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="240" y2="240" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#0B1F3A"/>
-      <stop offset="1" stop-color="#0A3348"/>
-    </linearGradient>
-    <linearGradient id="teal" x1="140" y1="140" x2="212" y2="212" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#2DD4BF"/>
-      <stop offset="1" stop-color="#0D9488"/>
-    </linearGradient>
-    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
-      <feGaussianBlur stdDeviation="16"/>
-    </filter>
-    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#02101F" flood-opacity="0.45"/>
-    </filter>
+    <clipPath id="bg-clip">
+      <rect width="240" height="240" rx="52"/>
+    </clipPath>
   </defs>
 
-  <rect width="240" height="240" rx="54" fill="url(#bg)"/>
+  <!-- Background: Deep Navy rounded square -->
+  <rect width="240" height="240" rx="52" fill="#0a1e42"/>
 
-  <!-- diagonal teal accent sweep -->
-  <path d="M-20,178 C60,138 140,222 260,138 L260,260 L-20,260 Z" fill="#0D9488" opacity="0.16"/>
+  <g clip-path="url(#bg-clip)">
 
-  <!-- soft glow behind the status badge -->
-  <circle cx="178" cy="176" r="55" fill="#2DD4BF" opacity="0.35" filter="url(#glow)"/>
+    <!-- ===== LOCATION PIN (behind envelope) ===== -->
+    <!-- Large curved teal pin shape -->
+    <path d="
+      M 138,48
+      C 168,48 192,72 192,102
+      C 192,118 184,132 172,142
+      L 138,178
+      L 122,158
+      C 112,146 104,132 104,116
+      C 104,114 104,112 105,110
+      " fill="#1a7a94" />
 
-  <!-- envelope, gently tilted, lifted with shadow -->
-  <g transform="rotate(-4 120 132)" filter="url(#shadow)">
-    <rect x="46" y="84" width="148" height="100" rx="14" fill="#FFFFFF"/>
-    <path d="M48,90 L120,148 L192,90"
-          fill="none" stroke="#0B1F3A" stroke-width="7"
-          stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+    <!-- Pin right side continuing down behind envelope -->
+    <path d="
+      M 192,102
+      C 192,72 168,48 138,48
+      C 162,48 182,68 182,94
+      C 182,108 176,122 166,132
+      L 138,162
+      " fill="#14667d" />
+
+    <!-- Pin inner circle (navy) -->
+    <circle cx="142" cy="94" r="22" fill="#0a1e42"/>
+    <!-- Pin inner ring (lighter teal arc) -->
+    <path d="M 142,72 A 22,22 0 1,1 141.99,72" fill="none" stroke="#1a7a94" stroke-width="8"/>
+    <circle cx="142" cy="94" r="14" fill="none" stroke="#0a1e42" stroke-width="2"/>
+
+
+    <!-- ===== ENVELOPE ===== -->
+    <!-- Envelope back flap (open, teal-tinted) -->
+    <path d="M 46,108 L 120,62 L 168,92 L 168,108 L 46,108 Z" fill="#1a7a94" opacity="0.7"/>
+
+    <!-- Envelope main body (white) -->
+    <rect x="46" y="108" width="148" height="96" rx="4" fill="#FFFFFF"/>
+
+    <!-- Envelope right side shadow -->
+    <path d="M 160,108 L 194,108 L 194,204 L 160,204 Z" fill="#d8dfe8" opacity="0.6"/>
+
+    <!-- ===== DOCUMENT inside envelope ===== -->
+    <!-- Paper/document sticking out of envelope -->
+    <rect x="62" y="72" width="90" height="54" rx="6" fill="#FFFFFF"/>
+    <!-- Document text lines -->
+    <line x1="76" y1="92" x2="120" y2="92" stroke="#0a1e42" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+    <line x1="76" y1="104" x2="108" y2="104" stroke="#0a1e42" stroke-width="4" stroke-linecap="round" opacity="0.35"/>
+
+    <!-- ===== ENVELOPE FRONT FOLDS ===== -->
+    <!-- Bottom V-fold / flap lines -->
+    <path d="M 46,108 L 120,164 L 194,108"
+          fill="none" stroke="#0a1e42" stroke-width="4"
+          stroke-linecap="round" stroke-linejoin="round" opacity="0.15"/>
+
+    <!-- Left diagonal fold -->
+    <path d="M 46,204 L 110,148" fill="none" stroke="#0a1e42" stroke-width="3" stroke-linecap="round" opacity="0.08"/>
+    <!-- Right diagonal fold -->
+    <path d="M 194,204 L 130,148" fill="none" stroke="#0a1e42" stroke-width="3" stroke-linecap="round" opacity="0.08"/>
+
+    <!-- Top border of envelope body -->
+    <line x1="46" y1="108" x2="194" y2="108" stroke="#0a1e42" stroke-width="2" opacity="0.08"/>
+
+    <!-- ===== CHECKMARK BADGE ===== -->
+    <!-- Badge outer circle -->
+    <circle cx="186" cy="196" r="26" fill="#1a7a94"/>
+    <!-- Badge inner border -->
+    <circle cx="186" cy="196" r="22" fill="#1a7a94" stroke="#0a1e42" stroke-width="3"/>
+    <!-- Checkmark -->
+    <path d="M 173,196 L 181,205 L 200,186"
+          fill="none" stroke="#FFFFFF" stroke-width="5.5"
+          stroke-linecap="round" stroke-linejoin="round"/>
+
   </g>
-
-  <!-- tracked / delivered badge -->
-  <circle cx="178" cy="176" r="36" fill="#0B1F3A"/>
-  <circle cx="178" cy="176" r="31" fill="url(#teal)"/>
-  <path d="M162,177 l11,11 l23,-25"
-        fill="none" stroke="#FFFFFF" stroke-width="7.5"
-        stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
