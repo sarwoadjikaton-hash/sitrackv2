@@ -1,22 +1,43 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import ToastNotification from '@/Components/ToastNotification.vue';
 import KemnakerFooter from '@/Components/KemnakerFooter.vue';
 import { PageProps } from '@/types';
 
 const page = usePage<PageProps>();
 const isLoggedIn = computed(() => !!page.props.auth.user);
+
+const isScrolled = ref(false);
+
+const handleScroll = () => {
+    isScrolled.value = window.scrollY > 15;
+};
+
+onMounted(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+});
+
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
+});
 </script>
 
 <template>
     <div class="d-flex flex-column min-vh-100 public-page">
         <ToastNotification />
 
-        <!-- Epic Floating Navbar -->
-        <header class="sticky-top pt-3 px-3">
-            <nav class="container nav-glass rounded-4 shadow-sm border py-2 px-3 px-md-4 backdrop-blur">
-                <div class="d-flex align-items-center justify-content-between">
+        <!-- Scroll-Detached Floating Navbar -->
+        <header
+            class="sticky-top header-wrapper"
+            :class="isScrolled ? 'is-scrolled' : 'is-top'"
+        >
+            <nav
+                class="navbar-island"
+                :class="isScrolled ? 'container nav-floating' : 'w-100 nav-attached'"
+            >
+                <div class="d-flex align-items-center justify-content-between w-100">
 
                     <!-- Brand Section: Logo SiTrack | Logo Kemnaker -->
                     <Link href="/tracking" class="brand-link d-flex align-items-center gap-2 text-decoration-none">
@@ -87,17 +108,60 @@ const isLoggedIn = computed(() => !!page.props.auth.user);
     background: var(--st-navy);
 }
 
-/* Glassmorphism Effect */
-.nav-glass {
-    background: rgba(238, 247, 252, 0.94);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(181, 204, 227, 0.8) !important;
-    box-shadow: 0 8px 30px rgba(3, 32, 90, 0.16);
+/* ==========================================================================
+   SCROLL-DETACHED FLOATING NAVBAR
+   ========================================================= */
+
+.header-wrapper {
+    z-index: 1030;
+    transition: padding 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.nav-glass:hover {
-    box-shadow: 0 10px 34px rgba(3, 32, 90, 0.22) !important;
+.header-wrapper.is-top {
+    padding: 0;
+}
+
+.header-wrapper.is-scrolled {
+    padding: 0.75rem 1rem 0;
+}
+
+.navbar-island {
+    transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+/* 1. Kondisi Atas / Menempel (Attached State saat scrollY <= 15) */
+.nav-attached {
+    background: rgba(238, 247, 252, 0.96);
+    border-bottom: 1px solid rgba(181, 204, 227, 0.7) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-radius: 0 !important;
+    padding: 0.85rem 1.5rem;
+    box-shadow: 0 4px 16px rgba(3, 32, 90, 0.08);
+}
+
+@media (min-width: 992px) {
+    .nav-attached {
+        padding: 0.85rem 3rem;
+    }
+}
+
+/* 2. Kondisi Mengambang (Floating State saat scrollY > 15) */
+.nav-floating {
+    background: rgba(238, 247, 252, 0.94);
+    border: 1px solid rgba(181, 204, 227, 0.85) !important;
+    border-radius: 1.25rem !important;
+    padding: 0.65rem 1.25rem;
+    box-shadow: 0 14px 38px rgba(3, 32, 90, 0.22), 0 2px 6px rgba(3, 32, 90, 0.08) !important;
+}
+
+@media (min-width: 768px) {
+    .nav-floating {
+        padding: 0.65rem 1.75rem;
+    }
 }
 
 /* Logo Styling */
@@ -161,10 +225,5 @@ const isLoggedIn = computed(() => !!page.props.auth.user);
     transform: translateY(-1px);
     box-shadow: 0 6px 18px rgba(22, 121, 146, 0.45);
     color: white;
-}
-
-/* Utilitas tambahan */
-.backdrop-blur {
-    backdrop-filter: blur(8px);
 }
 </style>
