@@ -296,8 +296,8 @@ function initThree() {
 
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 100);
-    camera.position.set(3.2, 1.2, 9.6);
-    camera.lookAt(3.0, 0, 0);
+    camera.position.set(0, 1.1, 9.6);
+    camera.lookAt(0, 0, 0);
 
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'default' });
     renderer.setSize(width, height);
@@ -308,23 +308,23 @@ function initThree() {
 
     // Studio Lighting Setup (Teal, Soft Blue, Deep Navy)
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
-    keyLight.position.set(5, 7, 6);
+    keyLight.position.set(6, 7, 6);
     scene.add(keyLight);
 
     const cyanRimLight = new THREE.DirectionalLight(0x167992, 1.8);
-    cyanRimLight.position.set(-6, 2, 4);
+    cyanRimLight.position.set(-4, 2, 4);
     scene.add(cyanRimLight);
 
     const azureFillLight = new THREE.DirectionalLight(0xB5CCE3, 1.2);
-    azureFillLight.position.set(2, -4, 3);
+    azureFillLight.position.set(3, -4, 3);
     scene.add(azureFillLight);
 
     const ambientLight = new THREE.AmbientLight(0x03205A, 1.0);
     scene.add(ambientLight);
 
-    // Hero Object: Mailbox Group (Shifted to right half)
+    // Hero Object: Mailbox Group (Positioned on the right side)
     mailboxGroup = createMailbox();
-    mailboxGroup.position.set(4.6, -0.15, 0);
+    mailboxGroup.position.set(2.8, -0.15, 0);
     mailboxGroup.rotation.y = -0.38;
     scene.add(mailboxGroup);
 
@@ -332,13 +332,13 @@ function initThree() {
     particles = createParticles();
     scene.add(particles);
 
-    // Satellite Floating Objects in Orbit (Spaced nicely across the right area)
+    // Satellite Floating Objects in Orbit (Distributed nicely across the right area)
     const smallObjects: { build: () => THREE.Group; pos: [number, number, number]; scale: number }[] = [
-        { build: () => createEnvelope(0xEEF7FC, 0x167992), pos: [1.8, 2.1, 1.5], scale: 1.0 },
-        { build: () => createEnvelope(0x1C386F, 0x167992), pos: [1.4, -1.2, 1.0], scale: 0.9 },
-        { build: () => createDocumentStack(), pos: [7.0, 1.8, -0.2], scale: 1.0 },
-        { build: () => createEnvelope(0xEEF7FC, 0x167992), pos: [7.4, -0.5, 0.7], scale: 0.85 },
-        { build: () => createSecurityShield(), pos: [3.1, -1.6, 1.8], scale: 0.95 },
+        { build: () => createEnvelope(0xEEF7FC, 0x167992), pos: [1.2, 1.9, 1.2], scale: 0.95 },
+        { build: () => createDocumentStack(), pos: [4.6, 1.7, -0.3], scale: 1.0 },
+        { build: () => createEnvelope(0xEEF7FC, 0x167992), pos: [4.9, -0.5, 0.6], scale: 0.85 },
+        { build: () => createEnvelope(0x1C386F, 0x167992), pos: [1.3, -1.3, 1.1], scale: 0.85 },
+        { build: () => createSecurityShield(), pos: [3.2, -1.6, 1.6], scale: 0.95 },
     ];
 
     smallObjects.forEach((item, i) => {
