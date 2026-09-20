@@ -167,23 +167,6 @@ html {
 
 body {
   background: var(--st-bg);
-  background-image:
-    radial-gradient(
-      at 0% 0%,
-      rgba(var(--st-primary-rgb), 0.05) 0px,
-      transparent 50%
-    ),
-    radial-gradient(
-      at 100% 0%,
-      rgba(var(--st-accent-rgb), 0.03) 0px,
-      transparent 50%
-    ),
-    radial-gradient(
-      at 50% 100%,
-      rgba(var(--st-primary-rgb), 0.02) 0px,
-      transparent 50%
-    );
-  background-attachment: fixed;
   color: var(--st-navy);
   font-family: "Plus Jakarta Sans", sans-serif;
   overflow-x: hidden;
@@ -259,12 +242,7 @@ h1, h2, h3, h4, h5, h6,
   inset: 0 0 auto 0;
   height: 1px;
   border-radius: var(--st-radius) var(--st-radius) 0 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.9),
-    transparent
-  );
+  background: rgba(255, 255, 255, 0.6);
   pointer-events: none;
 }
 
@@ -279,7 +257,7 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .stat-card-blue {
-  background: linear-gradient(160deg, #ffffff 0%, #EEF7FC 120%);
+  background: #ffffff;
   border-color: var(--st-soft-blue);
   overflow: hidden;
 }
@@ -393,7 +371,7 @@ h1, h2, h3, h4, h5, h6,
 
 .btn-teal,
 .btn-st-teal {
-  background: linear-gradient(135deg, var(--st-teal), var(--st-teal-dark));
+  background: var(--st-teal);
   color: #ffffff;
   border: none;
   font-weight: 600;
@@ -404,7 +382,7 @@ h1, h2, h3, h4, h5, h6,
 
 .btn-teal:hover,
 .btn-st-teal:hover {
-  background: linear-gradient(135deg, var(--st-teal-light), var(--st-teal));
+  background: var(--st-teal-hover);
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(22, 121, 146, 0.35);
 }
@@ -430,11 +408,7 @@ h1, h2, h3, h4, h5, h6,
    ========================================================================== */
 
 .btn-primary-blue {
-  background: linear-gradient(
-    135deg,
-    var(--st-primary),
-    var(--st-navy)
-  );
+  background: var(--st-primary);
   color: #fff;
   border: none;
   padding: 0.65rem 1.35rem;
@@ -454,11 +428,7 @@ h1, h2, h3, h4, h5, h6,
 
 .btn-primary-blue:hover {
   color: #fff;
-  background: linear-gradient(
-    135deg,
-    var(--st-primary-light),
-    var(--st-primary)
-  );
+  background: var(--st-primary-hover);
   transform: translateY(-2px);
   box-shadow: 0 16px 30px -8px rgba(var(--st-primary-rgb), 0.4);
 }
@@ -603,12 +573,7 @@ h1, h2, h3, h4, h5, h6,
    ========================================================================== */
 
 .public-hero {
-  background: linear-gradient(
-    150deg,
-    var(--st-navy) 0%,
-    var(--st-primary) 55%,
-    var(--st-teal) 100%
-  );
+  background: var(--st-navy);
   color: #fff;
   position: relative;
   padding: 3.5rem 0 5rem;
@@ -619,13 +584,7 @@ h1, h2, h3, h4, h5, h6,
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(
-      circle at 15% 20%,
-      rgba(255, 255, 255, 0.12),
-      transparent 40%
-    ),
-    radial-gradient(circle at 85% 75%, rgba(22, 121, 146, 0.25), transparent 45%);
+  background: transparent;
   pointer-events: none;
 }
 
@@ -975,24 +934,7 @@ h1, h2, h3, h4, h5, h6,
   font-size: clamp(1.8rem, 4vw, 3rem);
   font-weight: 300;
   font-style: italic;
-  background: linear-gradient(
-    135deg,
-    #ffffff 0%,
-    #eaf8ff 40%,
-    #5b96b8 70%,
-    #ffffff 100%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: sheenText 6s linear infinite;
-}
-
-@keyframes sheenText {
-  to {
-    background-position: 200% center;
-  }
+  color: #ffffff;
 }
 
 .hero-desc {
@@ -1070,7 +1012,7 @@ h1, h2, h3, h4, h5, h6,
   justify-content: center;
   height: 44px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #2743AF, #4A9CF0, #3DA5F9);
+  background: var(--st-teal);
   color: #fff;
   font-weight: 700;
   font-size: 0.85rem;
@@ -1125,14 +1067,8 @@ h1, h2, h3, h4, h5, h6,
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    #4A9CF0,
-    #2743AF,
-    #182b78,
-    #3DA5F9,
-    #4A9CF0
-  );
+  border: 2px solid var(--st-teal);
+  background: transparent;
   animation: orbSpin 6s linear infinite;
   filter: blur(1px);
 }
@@ -1445,7 +1381,7 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .pdp-btn-print {
-  background: linear-gradient(135deg, #2563eb, #1e40af);
+  background: #1C386F;
   color: white;
   border: none;
 }
@@ -1743,7 +1679,7 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .btn-submit-track {
-  background: linear-gradient(135deg, #0f172a 0%, #0d9488 100%);
+  background: #167992;
   color: white;
   border: none;
   border-radius: 12px;
@@ -1847,12 +1783,7 @@ h1, h2, h3, h4, h5, h6,
   overflow: hidden;
   border-radius: var(--st-radius-lg);
   padding: 2rem 2.25rem;
-  background: linear-gradient(
-    135deg,
-    var(--st-navy) 0%,
-    var(--st-primary) 55%,
-    var(--st-teal) 120%
-  );
+  background: var(--st-navy);
   box-shadow: var(--st-shadow-primary);
 }
 
@@ -2067,11 +1998,7 @@ h1, h2, h3, h4, h5, h6,
 .dsh-progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    var(--st-primary),
-    var(--st-teal)
-  );
+  background: var(--st-teal);
 }
 
 /* ---- Expandable Toast ---- */

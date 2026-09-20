@@ -363,7 +363,7 @@ const isActive = (path: string, exact = false) =>
     inset: 1rem auto 1rem 1rem;
     width: var(--sidebar-width);
     z-index: 1050;
-    background: linear-gradient(180deg, #03205A 0%, #1C386F 100%);
+    background: #03205A;
     color: #fff;
     border-radius: 2rem;
     box-shadow: 0 12px 36px rgba(3, 32, 90, 0.28);
@@ -828,7 +828,7 @@ const isActive = (path: string, exact = false) =>
     height: 22px;
     border-radius: 999px;
     flex-shrink: 0;
-    background: linear-gradient(180deg, var(--st-navy) 0%, var(--st-teal) 100%);
+    background: var(--st-teal);
 }
 
 .topbar-title {

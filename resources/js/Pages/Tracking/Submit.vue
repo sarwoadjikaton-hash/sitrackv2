@@ -216,7 +216,7 @@ const submit = () => {
 }
 
 .btn-submit-track {
-    background: linear-gradient(135deg, #0f172a 0%, #0d9488 100%);
+    background: #167992;
     color: white;
     border: none;
     border-radius: 12px;
@@ -227,9 +227,9 @@ const submit = () => {
 }
 
 .btn-submit-track:hover:not(:disabled) {
-    filter: brightness(1.1);
+    background: #126277;
     transform: scale(1.02);
-    box-shadow: 0 10px 20px -10px rgba(13, 148, 136, 0.5);
+    box-shadow: 0 8px 16px -6px rgba(22, 121, 146, 0.4);
 }
 
 .btn-submit-track:active {

@@ -452,11 +452,11 @@ onUnmounted(() => {
 }
 
 .btn-teal {
-    background: linear-gradient(135deg, var(--st-teal, #42B8A8), var(--st-teal-dark, #2a8175));
+    background: var(--st-teal, #167992);
     color: white;
 
     &:hover {
-        background: linear-gradient(135deg, var(--st-teal-light, #64cbbd), var(--st-teal, #42B8A8));
+        background: var(--st-teal-hover, #126277);
         color: white;
     }
 }

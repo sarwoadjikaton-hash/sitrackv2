@@ -844,9 +844,8 @@ const switchToEdit = () => {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: conic-gradient(from 0deg, rgba(29, 78, 216, 0) 0%, #1d4ed8 60%, #14b8a6 100%);
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 5px));
-    mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 5px));
+    border: 4px solid #e2e8f0;
+    border-top-color: #167992;
     animation: importRingSpin 1s linear infinite;
 }
 
@@ -872,7 +871,7 @@ const switchToEdit = () => {
     width: 40%;
     height: 100%;
     border-radius: 999px;
-    background: linear-gradient(90deg, #1d4ed8, #14b8a6);
+    background: #167992;
     animation: importBarSlide 1.4s ease-in-out infinite;
 }
 

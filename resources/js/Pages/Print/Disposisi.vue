@@ -368,7 +368,7 @@ const toggleAction = (actionName: string) => {
 }
 
 .btn-primary-blue {
-    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    background: #1C386F;
     color: white;
     border: none;
 }

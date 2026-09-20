@@ -190,6 +190,7 @@ $blue-900: #03205A;
 $blue-800: #1C386F;
 $blue-600: #1C386F;
 $blue-500: #395ba0;
+$teal-600: #126277;
 $teal-500: #167992;
 $teal-400: #167992;
 $teal-300: #3a9cb5;
@@ -204,8 +205,7 @@ $ice-white: #EEF7FC;
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Gradient Kemnaker: Deep Navy -> Trust Blue -> Teal Accent */
-    background: linear-gradient(160deg, $blue-900 0%, $blue-800 45%, $teal-500 100%);
+    background: $blue-900;
     padding: 2rem 1rem;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
@@ -331,7 +331,7 @@ $ice-white: #EEF7FC;
     align-items: center;
     justify-content: center;
     border-radius: 18px;
-    background: linear-gradient(135deg, rgba(3, 32, 90, 0.08), rgba(22, 121, 146, 0.12));
+    background: rgba(22, 121, 146, 0.08);
     border: 1px solid rgba(22, 121, 146, 0.2);
 }
 
@@ -485,14 +485,14 @@ $ice-white: #EEF7FC;
     border-radius: 14px;
     color: #fff;
     font-weight: 700;
-    background: linear-gradient(135deg, $blue-800, $teal-500);
-    box-shadow: 0 10px 20px -5px rgba(22, 121, 146, 0.35);
-    transition: 0.3s ease;
+    background: $teal-500;
+    box-shadow: 0 4px 14px rgba(22, 121, 146, 0.35);
+    transition: 0.2s ease;
 
     &:hover:not(:disabled) {
         transform: translateY(-2px);
-        box-shadow: 0 15px 30px -5px rgba(22, 121, 146, 0.45);
-        filter: brightness(1.05);
+        background: $teal-600;
+        box-shadow: 0 6px 18px rgba(22, 121, 146, 0.45);
     }
 
     &:active {
@@ -511,9 +511,8 @@ $ice-white: #EEF7FC;
     height: 18px;
     border-radius: 50%;
     flex-shrink: 0;
-    background: conic-gradient(from 0deg, rgba(255, 255, 255, 0) 0%, #fff 100%);
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
-    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
     animation: btnRingSpin 0.8s linear infinite;
 }
 
@@ -586,7 +585,7 @@ $ice-white: #EEF7FC;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at var(--origin-x) var(--origin-y), $teal-400 0%, $blue-600 45%, $blue-900 100%);
+    background: $blue-900;
     clip-path: circle(150% at var(--origin-x) var(--origin-y));
 }
 

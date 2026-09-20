@@ -127,20 +127,20 @@ onUnmounted(() => {
 
 .navbar-island {
     transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
-/* 1. Kondisi Atas / Menempel (Transparan Alami menyatu dengan Hero) */
+/* 1. Kondisi Atas / Menempel (Transparan Tipis Menyatu Alami) */
 .nav-attached {
-    background: rgba(3, 32, 90, 0.45);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(3, 32, 90, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-top: none !important;
     border-left: none !important;
     border-right: none !important;
     border-radius: 0 !important;
     padding: 0.9rem 1.5rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
 }
 
 @media (min-width: 992px) {
@@ -149,13 +149,13 @@ onUnmounted(() => {
     }
 }
 
-/* 2. Kondisi Mengambang (Deep Navy Glass Capsule yang Melayang Elegan) */
+/* 2. Kondisi Mengambang (Solid Navy Melayang Elegan saat Scroll) */
 .nav-floating {
-    background: rgba(3, 32, 90, 0.82);
-    border: 1px solid rgba(181, 204, 227, 0.35) !important;
+    background: #03205A;
+    border: 1px solid #1C386F !important;
     border-radius: 1.25rem !important;
     padding: 0.65rem 1.25rem;
-    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.38), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35) !important;
 }
 
 @media (min-width: 768px) {
@@ -176,7 +176,6 @@ onUnmounted(() => {
     font-weight: 800;
     font-size: 1.25rem;
     letter-spacing: -0.02em;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .brand-sub {
@@ -191,7 +190,7 @@ onUnmounted(() => {
     border-radius: 50px;
     font-weight: 600;
     font-size: 14px;
-    transition: all 0.25s ease;
+    transition: all 0.2s ease;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid transparent;
 }
@@ -203,32 +202,29 @@ onUnmounted(() => {
 }
 
 .nav-pill-btn.active {
-    background: rgba(22, 121, 146, 0.5);
-    border: 1px solid rgba(45, 212, 191, 0.4);
+    background: #167992;
+    border: 1px solid #167992;
     color: #ffffff;
     font-weight: 700;
-    box-shadow: 0 0 14px rgba(22, 121, 146, 0.4);
 }
 
-/* Login Button Epic */
+/* Login Button Solid */
 .btn-login-epic {
-    background: linear-gradient(135deg, #167992, #0e4d5d);
+    background: #167992;
     color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid #167992;
     padding: 8px 22px;
     font-size: 14px;
     font-weight: 700;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    box-shadow: 0 4px 16px rgba(22, 121, 146, 0.4);
 }
 
 .btn-login-epic:hover {
-    background: linear-gradient(135deg, #1fa3c5, #167992);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(22, 121, 146, 0.6);
+    background: #126277;
+    border-color: #126277;
     color: white;
 }
 </style>

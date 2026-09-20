@@ -822,18 +822,7 @@ onUnmounted(disposeThree);
     font-size: clamp(1.8rem, 4vw, 3rem);
     font-weight: 300;
     font-style: italic;
-    background: linear-gradient(135deg, #ffffff 0%, #eaf8ff 40%, #5b96b8 70%, #ffffff 100%);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: sheenText 6s linear infinite;
-}
-
-@keyframes sheenText {
-    to {
-        background-position: 200% center;
-    }
+    color: #ffffff;
 }
 
 .hero-desc {
@@ -916,7 +905,7 @@ onUnmounted(disposeThree);
     justify-content: center;
     height: 44px;
     border-radius: 999px;
-    background: linear-gradient(135deg, var(--ocean-accent), var(--ocean-primary));
+    background: var(--ocean-accent);
     color: #fff;
     font-weight: 700;
     font-size: .85rem;
@@ -971,7 +960,8 @@ onUnmounted(disposeThree);
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: conic-gradient(from 0deg, var(--ocean-primary-light), #003a63, var(--ocean-primary-dark), var(--ocean-accent), var(--ocean-primary-light));
+    border: 2px solid var(--ocean-accent);
+    background: transparent;
     animation: orbSpin 6s linear infinite;
     filter: blur(1px);
 }
