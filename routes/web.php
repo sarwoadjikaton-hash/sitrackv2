@@ -109,8 +109,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/scan-status', [ScanQrController::class, 'index'])->middleware('permission:update status qr')->name('scan-status.index');
     Route::post('/scan-status', [ScanQrController::class, 'update'])->middleware('permission:update status qr')->name('scan-status.update');
 
-    // Upload Paraf / Tanda Tangan Cetak
-    Route::post('/cetak/pendamping/{id}/signature', [PrintController::class, 'saveSignature'])->middleware('permission:view signature lane')->name('print.pendamping.signature');
+
 
     // Panduan Alur Status
     Route::get('/alur-status', [AlurStatusController::class, 'index'])->middleware('permission:view dashboard')->name('alur-status.index');
