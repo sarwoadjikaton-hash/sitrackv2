@@ -127,31 +127,30 @@ onUnmounted(() => {
 
 .navbar-island {
     transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
 }
 
-/* 1. Kondisi Atas / Menempel (Transparan Tipis Menyatu Alami) */
+/* 1. Kondisi Atas / Menempel (100% Transparan / Tanpa Background & Tanpa Garis Bawah) */
 .nav-attached {
-    background: rgba(3, 32, 90, 0.08);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-top: none !important;
-    border-left: none !important;
-    border-right: none !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
     border-radius: 0 !important;
-    padding: 0.9rem 1.5rem;
-    box-shadow: none;
+    padding: 1.1rem 1.5rem;
+    box-shadow: none !important;
 }
 
 @media (min-width: 992px) {
     .nav-attached {
-        padding: 0.9rem 3rem;
+        padding: 1.1rem 3rem;
     }
 }
 
 /* 2. Kondisi Mengambang (Solid Navy Melayang Elegan saat Scroll) */
 .nav-floating {
     background: #03205A;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid #1C386F !important;
     border-radius: 1.25rem !important;
     padding: 0.65rem 1.25rem;
