@@ -35,7 +35,7 @@ const signatureSteps = [
     { 
         num: 5, 
         title: 'Diperiksa Oleh Sekjen', 
-        desc: 'Penyampaian berkas ke meja pimpinan untuk proses penandatanganan / paraf resmi Sekretaris Jenderal.', 
+        desc: 'Penyampaian berkas kepada Sekretaris Jenderal untuk proses penandatanganan / paraf resmi.', 
         role: 'Sekretaris Jenderal',
         icon: 'bi-pen'
     },

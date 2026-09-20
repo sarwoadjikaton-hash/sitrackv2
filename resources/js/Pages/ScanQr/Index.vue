@@ -58,7 +58,7 @@ const defaultPositionByStatus: Record<string, string> = {
     'Diterima': 'Tata Usaha Sekjen',
     'Diperiksa Oleh TU Sekjen': 'TU Sekjen',
     'Diperiksa Oleh Kasubag TU Sekjen': 'Kasubag TU Sekjen',
-    'Diperiksa Oleh Sekjen': 'Meja Sekjen',
+    'Diperiksa Oleh Sekjen': 'Sekretaris Jenderal',
     'Selesai dan Siap Untuk diambil': 'Loket TU Sekjen',
     'Dokumen Sudah diambil': 'Unit Pengolah',
     'Revisi': 'Unit Pengusul (Perlu Revisi)',
