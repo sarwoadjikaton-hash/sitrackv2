@@ -55,28 +55,37 @@ const requestNotificationPermission = async () => {
     }
 };
 
-const showDesktopNotification = (letterData: any, message: string) => {
+const navigateToDetail = (item: NotificationItem) => {
+    const data = getNotifData(item);
+    const letterId = item.letter_id || data?.letter_id || data?.id;
+    if (letterId) {
+        router.get(`/tindak-lanjut/${letterId}/edit`);
+    } else if (data?.tracking_code) {
+        router.get('/tindak-lanjut', { search: data.tracking_code });
+    } else {
+        router.get('/tindak-lanjut');
+    }
+};
+
+const showDesktopNotification = (item: NotificationItem) => {
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
         try {
+            const letterData = getNotifData(item);
             const title = 'Pengajuan Surat Masuk Baru!';
             const body = letterData?.sender_unit 
-                ? `${letterData.sender_unit}: ${letterData.subject || message}`
-                : message;
+                ? `${letterData.sender_unit}: ${letterData.subject || item.message}`
+                : item.message;
             
             const notif = new Notification(title, {
                 body: body,
                 icon: '/favicon.ico',
                 badge: '/favicon.ico',
-                tag: letterData?.tracking_code || 'new-letter',
+                tag: letterData?.tracking_code || `letter-${item.id}`,
             });
 
             notif.onclick = () => {
                 window.focus();
-                if (letterData?.tracking_code) {
-                    router.get('/tindak-lanjut', { search: letterData.tracking_code });
-                } else {
-                    router.get('/tindak-lanjut');
-                }
+                navigateToDetail(item);
             };
         } catch (e) {
             // ignore
@@ -162,9 +171,7 @@ const fetchNotifications = async (isPolling = false) => {
 
                 // Trigger Desktop Notification for newest item
                 if (newNotifs.length > 0) {
-                    const latest = newNotifs[0];
-                    const data = getNotifData(latest);
-                    showDesktopNotification(data, latest.message);
+                    showDesktopNotification(newNotifs[0]);
                 }
             }
         }
@@ -188,7 +195,6 @@ const getNotifData = (item: NotificationItem) => {
 };
 
 const markAsRead = async (item: NotificationItem) => {
-    const data = getNotifData(item);
     try {
         if (!item.is_read) {
             item.is_read = true;
@@ -200,13 +206,7 @@ const markAsRead = async (item: NotificationItem) => {
     }
 
     isOpen.value = false;
-
-    // Navigate to letter in Tindak Lanjut
-    if (data?.tracking_code) {
-        router.get('/tindak-lanjut', { search: data.tracking_code });
-    } else {
-        router.get('/tindak-lanjut');
-    }
+    navigateToDetail(item);
 };
 
 const markAllAsRead = async () => {

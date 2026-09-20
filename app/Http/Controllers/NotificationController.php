@@ -73,6 +73,8 @@ class NotificationController extends Controller
                     'title' => 'Pengajuan Surat Masuk Baru',
                     'message' => "{$senderUnit} ({$senderName}) mengajukan permohonan naskah: \"{$subject}\"",
                     'data' => [
+                        'id' => $letter->id,
+                        'letter_id' => $letter->id,
                         'tracking_code' => $letter->tracking_code,
                         'agenda_number' => $letter->agenda_number,
                         'sender_unit' => $senderUnit,
@@ -139,6 +141,8 @@ class NotificationController extends Controller
                     'title' => 'Pengajuan Surat Masuk Baru',
                     'message' => "{$senderUnit} ({$senderName}) mengajukan permohonan naskah: \"{$subject}\"",
                     'data' => [
+                        'id' => $letter->id,
+                        'letter_id' => $letter->id,
                         'tracking_code' => $letter->tracking_code,
                         'agenda_number' => $letter->agenda_number,
                         'sender_unit' => $senderUnit,

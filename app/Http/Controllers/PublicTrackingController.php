@@ -188,6 +188,8 @@ class PublicTrackingController extends Controller
                         'title' => 'Pengajuan Surat Masuk Baru',
                         'message' => "{$unitPengusulName} ({$validated['sender_name']}) mengajukan permohonan naskah: \"{$validated['subject']}\"",
                         'data' => [
+                            'id' => $letter->id,
+                            'letter_id' => $letter->id,
                             'tracking_code' => $trackingCode,
                             'agenda_number' => $agendaNumber,
                             'sender_unit' => $unitPengusulName,
