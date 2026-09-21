@@ -76,8 +76,8 @@ class LetterNumber extends Model
         'number_year' => 'integer',
         'sequence_number' => 'integer',
         'month_number' => 'integer',
-        'incoming_date' => 'date',
-        'letter_date' => 'date',
+        'incoming_date' => 'date:Y-m-d',
+        'letter_date' => 'date:Y-m-d',
         'reserved_at' => 'datetime',
         'used_at' => 'datetime',
     ];

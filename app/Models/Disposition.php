@@ -26,7 +26,7 @@ class Disposition extends Model
     ];
 
     protected $casts = [
-        'due_date' => 'date',
+        'due_date' => 'date:Y-m-d',
         'disposition_date' => 'datetime',
         'is_koordinator' => 'boolean',
     ];

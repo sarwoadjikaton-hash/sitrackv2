@@ -36,6 +36,28 @@ const getInitialActions = (action?: string | string[] | null): string[] => {
     return action.split(',').map((s) => s.trim()).filter(Boolean);
 };
 
+const formatDateToInput = (val?: string | null): string => {
+    if (!val) {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+    const match = val.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+        return `${match[1]}-${match[2]}-${match[3]}`;
+    }
+    const d = new Date(val);
+    if (!isNaN(d.getTime())) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+    return val.substring(0, 10);
+};
+
 const form = useForm({
     letter_number: props.letter?.letter_number || '',
     letter_number_type_id: props.letter?.letter_number_type_id || props.letterNumberTypes[0]?.id || null,
@@ -49,8 +71,8 @@ const form = useForm({
     recipient_unit_id: props.letter?.recipient_unit_id || null,
     category_id: props.letter?.category_id || null,
     subject: props.letter?.subject || '',
-    letter_date: props.letter?.letter_date ? props.letter.letter_date.substring(0, 10) : new Date().toISOString().substring(0, 10),
-    received_date: props.letter?.received_date ? props.letter.received_date.substring(0, 10) : new Date().toISOString().substring(0, 10),
+    letter_date: formatDateToInput(props.letter?.letter_date),
+    received_date: formatDateToInput(props.letter?.received_date),
     priority: props.letter?.priority || 'Biasa',
     security_level: props.letter?.security_level || 'Biasa',
     status: props.letter?.status || 'Diregistrasi',

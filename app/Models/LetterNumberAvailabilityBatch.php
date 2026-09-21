@@ -30,8 +30,8 @@ class LetterNumberAvailabilityBatch extends Model
         'number_year' => 'integer',
         'start_sequence' => 'integer',
         'end_sequence' => 'integer',
-        'period_month' => 'date',
-        'letter_date' => 'date',
+        'period_month' => 'date:Y-m-d',
+        'letter_date' => 'date:Y-m-d',
     ];
 
     public function type()

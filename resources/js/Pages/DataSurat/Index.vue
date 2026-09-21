@@ -219,14 +219,30 @@ const openCreateModal = () => {
     showEditModal.value = true;
 };
 
+const formatDateToInput = (val?: string | null): string => {
+    if (!val) return '';
+    const match = val.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+        return `${match[1]}-${match[2]}-${match[3]}`;
+    }
+    const d = new Date(val);
+    if (!isNaN(d.getTime())) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+    return val.substring(0, 10);
+};
+
 const openEditModal = (record: LetterNumber) => {
     isEditing.value = true;
     editingId.value = record.id;
 
     form.letter_number_id = record.id;
     form.type_id = record.type_id ?? record.type?.id ?? props.types[0]?.id ?? 1;
-    form.incoming_date = record.incoming_date?.substring(0, 10) || '';
-    form.letter_date = record.letter_date?.substring(0, 10) || '';
+    form.incoming_date = formatDateToInput(record.incoming_date);
+    form.letter_date = formatDateToInput(record.letter_date);
     form.unit_id = record.unit_id ?? null;
     form.processing_unit_text = record.processing_unit_text || '';
     form.signatory = record.signatory || '';

@@ -42,8 +42,8 @@ class Letter extends Model
     ];
 
     protected $casts = [
-        'letter_date' => 'date',
-        'received_date' => 'date',
+        'letter_date' => 'date:Y-m-d',
+        'received_date' => 'date:Y-m-d',
     ];
 
     public function category()
