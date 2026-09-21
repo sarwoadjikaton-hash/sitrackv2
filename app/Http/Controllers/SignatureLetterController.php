@@ -397,6 +397,20 @@ class SignatureLetterController extends Controller
                     'unit_id' => $letter->recipient_unit_id,
                 ]);
             }
+        } else {
+            // Also sync any already linked slot
+            $linkedSlot = LetterNumber::where('linked_letter_id', $letter->id)->first();
+            if ($linkedSlot) {
+                $linkedSlot->update([
+                    'number_text' => $letter->letter_number,
+                    'subject' => $letter->subject,
+                    'letter_date' => $letter->letter_date,
+                    'incoming_date' => $letter->received_date,
+                    'processing_unit_text' => $letter->sender_unit,
+                    'destination' => $letter->destination ?? null,
+                    'unit_id' => $letter->recipient_unit_id,
+                ]);
+            }
         }
 
         if ($statusChanged || $request->hasFile('attachment')) {
