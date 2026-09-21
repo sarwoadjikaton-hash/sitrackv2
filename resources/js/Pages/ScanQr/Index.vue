@@ -249,7 +249,7 @@ onUnmounted(() => {
 
         <!-- Hidden container untuk scan file -->
         <div id="reader-file-hidden" style="display: none;"></div>
-        <input ref="fileInputRef" type="file" accept="image/*" class="d-none" @change="handleFileUpload" />
+        <input ref="fileInputRef" type="file" accept="image/*" capture="environment" class="d-none" @change="handleFileUpload" />
 
         <!-- Bagian Atas: SCANNER & MANUAL INPUT -->
         <div class="st-card p-0 overflow-hidden border-0 shadow-lg mb-4 animate-fade-in">
@@ -275,7 +275,25 @@ onUnmounted(() => {
                     <div class="col-lg-7">
                         <div class="scanner-card position-relative rounded-4 overflow-hidden border bg-dark p-2 text-center">
                             <!-- Area Video HTML5 QR Code -->
-                            <div id="reader" class="rounded-3 overflow-hidden" style="min-height: 280px; width: 100%;"></div>
+                            <div id="reader" class="rounded-3 overflow-hidden position-relative" style="min-height: 280px; width: 100%;">
+                                <!-- Overlay Cepat untuk HTTP / Device Kamera File Fallback -->
+                                <div v-if="!isCameraRunning && !isCameraLoading" class="camera-fallback-overlay d-flex flex-column align-items-center justify-content-center p-4" style="min-height: 280px; background: rgba(15, 23, 42, 0.9);">
+                                    <i class="bi bi-camera fs-1 text-primary-light mb-2"></i>
+                                    <h6 class="text-white fw-bold mb-1">Pindai QR Code Surat</h6>
+                                    <p class="text-white-50 small mb-3" style="max-width: 320px;">
+                                        Gunakan kamera live stream (HTTPS / Localhost) atau gunakan kamera jepret instan (HTTP LAN).
+                                    </p>
+                                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                                        <button type="button" class="btn btn-primary-blue btn-sm fw-bold px-3 py-2 shadow-sm" @click="toggleCamera">
+                                            <i class="bi bi-camera-video me-1"></i> Nyalakan Live Kamera
+                                        </button>
+                                        <button type="button" class="btn btn-teal btn-sm fw-bold px-3 py-2 shadow-sm" :disabled="isFileScanning" @click="triggerFileInput">
+                                            <span v-if="isFileScanning" class="spinner-border spinner-border-sm me-1"></span>
+                                            <i v-else class="bi bi-camera-fill me-1"></i> Jepret / Upload Foto QR
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
 
                             <!-- Controls Bar -->
                             <div class="d-flex align-items-center justify-content-center gap-2 mt-3 flex-wrap">
@@ -287,8 +305,8 @@ onUnmounted(() => {
 
                                 <button type="button" class="btn btn-sm btn-outline-light fw-bold px-3" :disabled="isFileScanning" @click="triggerFileInput">
                                     <span v-if="isFileScanning" class="spinner-border spinner-border-sm me-1"></span>
-                                    <i v-else class="bi bi-image me-1 text-info"></i>
-                                    Upload / Foto QR
+                                    <i v-else class="bi bi-camera-fill me-1 text-info"></i>
+                                    Jepret / Upload Foto QR
                                 </button>
 
                                 <select v-if="cameras.length > 1" v-model="selectedCameraId" class="form-select form-select-sm w-auto bg-dark text-white border-secondary" @change="startCamera(selectedCameraId)">

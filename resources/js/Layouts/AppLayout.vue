@@ -156,8 +156,14 @@ const isActive = (path: string, exact = false) =>
                     <template v-if="!isSekjen">
                         <div class="sidebar-caption">Tindak Lanjut / TTD</div>
                         <nav class="sidebar-nav">
+                            <Link href="/tindak-lanjut/create" class="nav-link-item"
+                                :class="{ active: isActive('/tindak-lanjut/create', true) }" @click="closeMobileNav"
+                                data-tooltip="Input Naskah Baru">
+                                <i class="bi bi-file-earmark-plus-fill"></i>
+                                <span class="nav-label">Input Naskah Baru</span>
+                            </Link>
                             <Link href="/tindak-lanjut" class="nav-link-item"
-                                :class="{ active: isActive('/tindak-lanjut', true) }" @click="closeMobileNav"
+                                :class="{ active: isActive('/tindak-lanjut') && !isActive('/tindak-lanjut/create', true) }" @click="closeMobileNav"
                                 data-tooltip="Data Tindak Lanjut">
                                 <i class="bi bi-pen-fill"></i>
                                 <span class="nav-label">Data Tindak Lanjut</span>
@@ -274,6 +280,10 @@ const isActive = (path: string, exact = false) =>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <NotificationBell />
+                    <Link v-if="!isSekjen" href="/tindak-lanjut/create" class="btn-topbar btn-topbar-primary shadow-sm" title="Input Naskah Masuk Baru">
+                        <span class="btn-topbar-icon"><i class="bi bi-file-earmark-plus-fill"></i></span>
+                        <span class="d-none d-sm-inline">+ Naskah Baru</span>
+                    </Link>
                     <Link v-if="!isSekjen" href="/scan-status" class="btn-topbar btn-topbar-accent">
                         <span class="btn-topbar-icon"><i class="bi bi-qr-code-scan"></i></span>
                         <span class="d-none d-sm-inline">Scan QR</span>
@@ -908,6 +918,26 @@ const isActive = (path: string, exact = false) =>
     color: var(--st-teal);
     transform: translateY(-1px);
     box-shadow: var(--st-shadow-low);
+}
+
+.btn-topbar-primary {
+    background: #03205A;
+    border-color: #03205A;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(3, 32, 90, 0.2);
+}
+
+.btn-topbar-primary .btn-topbar-icon {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.btn-topbar-primary:hover {
+    color: #fff;
+    background: #1C386F;
+    border-color: #1C386F;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(3, 32, 90, 0.35);
 }
 
 .btn-topbar-accent {

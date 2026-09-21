@@ -34,6 +34,11 @@ Route::post('/ajukan-surat', [PublicTrackingController::class, 'store'])->name('
 Route::get('/surat-berhasil/{code}', [PublicTrackingController::class, 'success'])->name('tracking.success');
 Route::get('/data-surat/slots', [DataSuratController::class, 'getSlots'])->name('data-surat.slots.public');
 
+// Akses Berkas Lampiran Publik / Tracking
+Route::get('/lampiran/view/{path}', [PublicTrackingController::class, 'viewAttachment'])
+    ->where('path', '.*')
+    ->name('tracking.attachment');
+
 // Cetak Dokumen Publik (Lembar Pendamping & Disposisi)
 Route::get('/cetak/pendamping/{id}', [PrintController::class, 'pendamping'])->name('print.pendamping');
 Route::get('/print/pendamping/{id}', [PrintController::class, 'pendamping'])->name('print.pendamping.alias');

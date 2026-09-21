@@ -296,7 +296,7 @@ const deleteRelation = (id: number) => {
 
                         <dt class="col-5 text-muted">Dokumen PDF</dt>
                         <dd class="col-7">
-                            <a v-if="letter.attachment_path" :href="`/storage/${letter.attachment_path}`"
+                            <a v-if="letter.attachment_path" :href="`/lampiran/view/${letter.attachment_path}`"
                                 target="_blank"
                                 class="btn btn-xs btn-outline-danger d-inline-flex align-items-center gap-1 py-1 px-2">
                                 <i class="bi bi-file-earmark-pdf"></i> Lihat File
@@ -413,7 +413,7 @@ const deleteRelation = (id: number) => {
                             </div>
 
                             <div v-if="disp.attachment_path" class="mt-2">
-                                <a :href="`/storage/${disp.attachment_path}`" target="_blank"
+                                <a :href="`/lampiran/view/${disp.attachment_path}`" target="_blank"
                                     class="btn btn-xs btn-outline-danger py-1 px-2">
                                     <i class="bi bi-file-earmark-pdf me-1"></i> Lihat Lampiran
                                 </a>
@@ -445,7 +445,7 @@ const deleteRelation = (id: number) => {
                                         </button>
                                     </div>
                                     <div v-if="sub.attachment_path" class="mt-1">
-                                        <a :href="`/storage/${sub.attachment_path}`" target="_blank"
+                                        <a :href="`/lampiran/view/${sub.attachment_path}`" target="_blank"
                                             class="btn btn-xs btn-outline-danger py-0 px-2">
                                             <i class="bi bi-file-earmark-pdf me-1"></i>Lihat Lampiran
                                         </a>
@@ -616,7 +616,7 @@ const deleteRelation = (id: number) => {
                     <input type="file" class="form-control" @change="handleItemFile" />
                     <small class="text-muted">PDF/DOCX/gambar, maksimal 20 MB</small>
                     <div v-if="activeItem?.attachment_path" class="mt-1">
-                        <a :href="`/storage/${activeItem.attachment_path}`" target="_blank" class="small text-danger">
+                        <a :href="`/lampiran/view/${activeItem.attachment_path}`" target="_blank" class="small text-danger">
                             <i class="bi bi-file-earmark-pdf me-1"></i>Lampiran saat ini
                         </a>
                     </div>

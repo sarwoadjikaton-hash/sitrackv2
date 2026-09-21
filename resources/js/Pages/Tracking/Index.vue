@@ -154,7 +154,7 @@ const isReadyForPickup = computed(() => {
                                                         {{ letter.attachment_path.split('/').pop() }}
                                                     </span>
                                                 </div>
-                                                <a :href="`/storage/${letter.attachment_path}`" target="_blank"
+                                                <a :href="`/lampiran/view/${letter.attachment_path}`" target="_blank"
                                                     class="btn btn-sm btn-primary-blue d-inline-flex align-items-center gap-1 px-3 py-1 text-nowrap">
                                                     <i class="bi bi-eye"></i> Lihat / Unduh
                                                 </a>
@@ -189,7 +189,7 @@ const isReadyForPickup = computed(() => {
                                                             {{ log.attachment_name || log.attachment_path.split('/').pop() }}
                                                         </span>
                                                     </div>
-                                                    <a :href="`/storage/${log.attachment_path}`" target="_blank"
+                                                    <a :href="`/lampiran/view/${log.attachment_path}`" target="_blank"
                                                         class="btn btn-sm btn-outline-primary py-1 px-2 text-nowrap d-inline-flex align-items-center gap-1 small">
                                                         <i class="bi bi-eye"></i> Buka Lampiran
                                                     </a>

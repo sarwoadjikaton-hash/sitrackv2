@@ -242,4 +242,44 @@ class PublicTrackingController extends Controller
         $request->merge(['code' => $code]);
         return $this->index($request);
     }
+
+    /**
+     * Safely stream attachment file in browser tab
+     */
+    public function viewAttachment(string $path)
+    {
+        $cleanPath = ltrim($path, '/');
+        if (str_starts_with($cleanPath, 'storage/')) {
+            $cleanPath = substr($cleanPath, 8);
+        }
+
+        // 1. Check in storage public disk
+        if (Storage::disk('public')->exists($cleanPath)) {
+            $mime = Storage::disk('public')->mimeType($cleanPath) ?: 'application/octet-stream';
+            return Storage::disk('public')->response($cleanPath, null, [
+                'Content-Type' => $mime,
+                'Content-Disposition' => 'inline; filename="' . basename($cleanPath) . '"',
+            ]);
+        }
+
+        // 2. Check in storage default disk
+        if (Storage::exists($cleanPath)) {
+            $mime = Storage::mimeType($cleanPath) ?: 'application/octet-stream';
+            return Storage::response($cleanPath, null, [
+                'Content-Type' => $mime,
+                'Content-Disposition' => 'inline; filename="' . basename($cleanPath) . '"',
+            ]);
+        }
+
+        // 3. Check direct public storage path
+        $publicPath = public_path('storage/' . $cleanPath);
+        if (file_exists($publicPath)) {
+            return response()->file($publicPath, [
+                'Content-Disposition' => 'inline; filename="' . basename($cleanPath) . '"',
+            ]);
+        }
+
+        abort(404, 'Berkas lampiran tidak ditemukan.');
+    }
 }
+

@@ -567,7 +567,7 @@ const switchToEdit = () => {
                     <div class="col-12" v-if="viewingRecord.attachment_path">
                         <div class="detail-item">
                             <label>Lampiran PDF</label>
-                            <a :href="`/storage/${viewingRecord.attachment_path}`" target="_blank"
+                            <a :href="`/lampiran/view/${viewingRecord.attachment_path}`" target="_blank"
                                 class="btn btn-sm btn-outline-primary mt-1">
                                 <i class="bi bi-file-earmark-pdf me-1"></i> Buka File PDF
                             </a>
