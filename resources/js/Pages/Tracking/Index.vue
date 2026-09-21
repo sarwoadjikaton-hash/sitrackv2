@@ -48,6 +48,14 @@ const isReadyForPickup = computed(() => {
     const s = props.letter.status;
     return s === 'Selesai dan Siap Untuk diambil' || s === 'Dokumen Sudah diambil' || s === 'Selesai' || s === 'Surat Selesai di Paraf/TTD dan bisa diambil';
 });
+
+const isValidAttachment = (path: any) => {
+    if (!path || typeof path !== 'string') return false;
+    const p = path.trim().toLowerCase();
+    if (p === '0' || p === 'null' || p === 'undefined' || p === '') return false;
+    if (p.includes('signatures/') || p.includes('sig_')) return false;
+    return p.includes('.') && p.length >= 4;
+};
 </script>
 
 <template>
@@ -143,15 +151,15 @@ const isReadyForPickup = computed(() => {
                                             </a>
                                         </div>
 
-                                        <div v-if="letter.attachment_path && !letter.attachment_path.includes('signatures/') && !letter.attachment_path.includes('sig_')" class="meta-box p-3 rounded-3 border bg-light">
+                                        <div v-if="letter && isValidAttachment(letter.attachment_path)" class="meta-box p-3 rounded-3 border bg-light">
                                             <label class="d-flex align-items-center gap-1 text-primary fw-bold mb-2">
                                                 <i class="bi bi-paperclip fs-6"></i> Lampiran Berkas Naskah
                                             </label>
                                             <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2">
                                                 <div class="d-flex align-items-center gap-2 overflow-hidden">
                                                     <i class="bi bi-file-earmark-text text-primary fs-4"></i>
-                                                    <span class="small text-truncate fw-semibold text-dark" style="max-width: 170px;" :title="letter.attachment_path.split('/').pop()">
-                                                        {{ letter.attachment_path.split('/').pop() }}
+                                                    <span class="small text-truncate fw-semibold text-dark" style="max-width: 170px;" :title="letter.attachment_path?.split('/').pop() || 'Lampiran'">
+                                                        {{ letter.attachment_path?.split('/').pop() || 'Lampiran' }}
                                                     </span>
                                                 </div>
                                                 <a :href="`/lampiran/view/${letter.attachment_path}`" target="_blank"
@@ -175,18 +183,18 @@ const isReadyForPickup = computed(() => {
                                                     <div class="text-sm-end mb-1">
                                                         <div class="small fw-semibold text-dark">{{ formatDate(log.changed_at) }}</div>
                                                         <small class="text-muted d-block" style="font-size: 0.78rem;">
-                                                            <i class="bi bi-clock me-1 text-primary"></i>{{ formatTime(log.changed_at) }}
+                                                             <i class="bi bi-clock me-1 text-primary"></i>{{ formatTime(log.changed_at) }}
                                                         </small>
                                                     </div>
                                                 </div>
                                                 <div class="small text-teal fw-semibold mb-1">{{ log.position }}</div>
                                                 <p class="small text-muted mb-0">{{ log.note }}</p>
-                                                <!-- Lampiran Dokumen Asli (Hanya jika BUKAN file raw tanda tangan) -->
-                                                <div v-if="log.attachment_path && !log.attachment_path.includes('signatures/') && !log.attachment_path.includes('sig_')" class="mt-2 p-2 rounded-2 bg-light border d-flex align-items-center justify-content-between gap-2">
+                                                <!-- Lampiran Dokumen Asli (Hanya jika ada file lampiran valid) -->
+                                                <div v-if="isValidAttachment(log.attachment_path)" class="mt-2 p-2 rounded-2 bg-light border d-flex align-items-center justify-content-between gap-2">
                                                     <div class="d-flex align-items-center gap-2 overflow-hidden">
                                                         <i class="bi bi-paperclip text-primary fs-5"></i>
-                                                        <span class="small text-truncate fw-semibold text-dark" style="max-width: 220px;" :title="log.attachment_name || log.attachment_path.split('/').pop()">
-                                                            {{ log.attachment_name || log.attachment_path.split('/').pop() }}
+                                                        <span class="small text-truncate fw-semibold text-dark" style="max-width: 220px;" :title="log.attachment_name || log.attachment_path?.split('/').pop() || 'Lampiran'">
+                                                            {{ log.attachment_name || log.attachment_path?.split('/').pop() || 'Lampiran' }}
                                                         </span>
                                                     </div>
                                                     <a :href="`/lampiran/view/${log.attachment_path}`" target="_blank"

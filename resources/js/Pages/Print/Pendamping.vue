@@ -272,7 +272,12 @@ const goBack = () => window.history.back();
 
                 <!-- If already signed and not currently drawing new one -->
                 <div v-if="currentSignaturePath && !isEditingSignature" class="signature-display-box position-relative">
-                    <img :src="`/lampiran/view/${currentSignaturePath}`" alt="Tanda Tangan Penerima" class="signature-img" />
+                    <img
+                        :src="currentSignaturePath.startsWith('data:') ? currentSignaturePath : `/lampiran/view/${currentSignaturePath}`"
+                        alt="Tanda Tangan Penerima"
+                        class="signature-img"
+                        @error="isEditingSignature = true"
+                    />
                 </div>
 
                 <!-- Interactive Signature Canvas (When signing / re-signing) -->
