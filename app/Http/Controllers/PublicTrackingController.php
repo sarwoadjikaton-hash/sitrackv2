@@ -248,10 +248,22 @@ class PublicTrackingController extends Controller
      */
     public function viewAttachment(string $path)
     {
+        if (empty($path) || $path === '0' || $path === 'null') {
+            abort(404, 'Berkas lampiran tidak ditemukan.');
+        }
+
         $cleanPath = ltrim($path, '/');
         if (str_starts_with($cleanPath, 'storage/')) {
             $cleanPath = substr($cleanPath, 8);
         }
+
+        // List of possible file locations to check
+        $possiblePaths = [
+            storage_path('app/public/' . $cleanPath),
+            storage_path('app/' . $cleanPath),
+            public_path('storage/' . $cleanPath),
+            public_path($cleanPath),
+        ];
 
         // 1. Check in storage public disk
         if (Storage::disk('public')->exists($cleanPath)) {
@@ -262,21 +274,24 @@ class PublicTrackingController extends Controller
             ]);
         }
 
-        // 2. Check in storage default disk
-        if (Storage::exists($cleanPath)) {
-            $mime = Storage::mimeType($cleanPath) ?: 'application/octet-stream';
-            return Storage::response($cleanPath, null, [
+        // 2. Check in storage local/default disk
+        if (Storage::disk('local')->exists($cleanPath)) {
+            $mime = Storage::disk('local')->mimeType($cleanPath) ?: 'application/octet-stream';
+            return Storage::disk('local')->response($cleanPath, null, [
                 'Content-Type' => $mime,
                 'Content-Disposition' => 'inline; filename="' . basename($cleanPath) . '"',
             ]);
         }
 
-        // 3. Check direct public storage path
-        $publicPath = public_path('storage/' . $cleanPath);
-        if (file_exists($publicPath)) {
-            return response()->file($publicPath, [
-                'Content-Disposition' => 'inline; filename="' . basename($cleanPath) . '"',
-            ]);
+        // 3. Direct filesystem check
+        foreach ($possiblePaths as $filePath) {
+            if (file_exists($filePath) && is_file($filePath)) {
+                $mime = mime_content_type($filePath) ?: 'application/octet-stream';
+                return response()->file($filePath, [
+                    'Content-Type' => $mime,
+                    'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"',
+                ]);
+            }
         }
 
         abort(404, 'Berkas lampiran tidak ditemukan.');
