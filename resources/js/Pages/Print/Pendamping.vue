@@ -138,6 +138,30 @@ onMounted(() => {
     }
 });
 
+const formatDate = (dateStr?: string | null) => {
+    if (!dateStr) return '-';
+    if (typeof dateStr === 'string' && dateStr.includes('-')) {
+        const parts = dateStr.split('T')[0].split('-');
+        if (parts.length === 3) {
+            const dateObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            return dateObj.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+            });
+        }
+    }
+    try {
+        return new Date(dateStr).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        });
+    } catch {
+        return dateStr;
+    }
+};
+
 const printPage = () => window.print();
 const goBack = () => window.history.back();
 </script>
@@ -219,16 +243,8 @@ const goBack = () => window.history.back();
                 <td width="20%">Asal Surat</td>
                 <td width="2%">:</td>
                 <td width="53%" contenteditable="true">{{ letter.sender_unit || letter.sender_name }}</td>
-                <td width="25%" class="border-left text-center">
-                    {{
-                        letter.received_date
-                            ? new Date(letter.received_date).toLocaleDateString('id-ID', {
-                                  day: '2-digit',
-                                  month: 'long',
-                                  year: 'numeric',
-                              })
-                            : '-'
-                    }}
+                <td width="25%" class="border-left text-center" contenteditable="true">
+                    {{ formatDate(letter.letter_date || letter.received_date) }}
                 </td>
             </tr>
             <tr>
@@ -332,16 +348,8 @@ const goBack = () => window.history.back();
                 <tr>
                     <td>Tanggal</td>
                     <td>:</td>
-                    <td>
-                        {{
-                            letter.received_date
-                                ? new Date(letter.received_date).toLocaleDateString('id-ID', {
-                                      day: '2-digit',
-                                      month: 'long',
-                                      year: 'numeric',
-                                  })
-                                : '-'
-                        }}
+                    <td contenteditable="true">
+                        {{ formatDate(letter.letter_date || letter.received_date) }}
                     </td>
                 </tr>
             </table>
