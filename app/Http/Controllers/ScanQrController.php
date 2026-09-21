@@ -50,14 +50,17 @@ class ScanQrController extends Controller
                         ->orWhere('letter_number', $cleanCode)
                         ->orWhere('letter_number', $rawTracking);
                 })
-                ->where('process_lane', 'signature')
                 ->first();
         }
+
+        $allowedStatuses = ($letter && $letter->process_lane === 'disposition')
+            ? DispositionLetterController::allowedStatuses()
+            : SignatureLetterController::allowedStatuses();
 
         return Inertia::render('ScanQr/Index', [
             'tracking' => $cleanCode ?: $rawTracking,
             'letter' => $letter,
-            'allowedStatuses' => SignatureLetterController::allowedStatuses(),
+            'allowedStatuses' => $allowedStatuses,
         ]);
     }
 
@@ -81,7 +84,6 @@ class ScanQrController extends Controller
                 ->orWhere('tracking_code', $validated['tracking_code'])
                 ->orWhere('agenda_number', $code);
         })
-        ->where('process_lane', 'signature')
         ->firstOrFail();
 
         $actions = !empty($validated['requested_actions'])
