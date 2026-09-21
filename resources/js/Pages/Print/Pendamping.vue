@@ -8,6 +8,7 @@ const props = defineProps<{
     letter: Letter;
     qrCodeBase64: string;
     signaturePath?: string | null;
+    signatureBase64?: string | null;
     receiverName?: string | null;
 }>();
 
@@ -27,12 +28,12 @@ const toggleAction = (action: string) => {
 const isChecked = (action: string) => tempActions.value.includes(action);
 
 // --- Digital Signature State ---
-const currentSignaturePath = ref<string | null>(
-    props.signaturePath ||
-    (props.letter.attachment_path && (props.letter.attachment_path.includes('signatures/') || props.letter.attachment_path.includes('sig_')) ? props.letter.attachment_path : null)
+const currentSignatureSrc = ref<string | null>(
+    props.signatureBase64 ||
+    (props.signaturePath ? (props.signaturePath.startsWith('data:') ? props.signaturePath : `/lampiran/view/${props.signaturePath}`) : null)
 );
 const receiverName = ref('');
-const isEditingSignature = ref(!currentSignaturePath.value);
+const isEditingSignature = ref(!currentSignatureSrc.value);
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const isDrawing = ref(false);
@@ -63,7 +64,9 @@ const openSignatureCanvas = () => {
 };
 
 const cancelEditSignature = () => {
-    isEditingSignature.value = false;
+    if (currentSignatureSrc.value) {
+        isEditingSignature.value = false;
+    }
 };
 
 const startDrawing = (e: MouseEvent | TouchEvent) => {
@@ -115,7 +118,7 @@ const saveDigitalSignature = async () => {
         });
 
         if (res.data.ok) {
-            currentSignaturePath.value = res.data.attachment_path;
+            currentSignatureSrc.value = dataUrl;
             isEditingSignature.value = false;
             saveSuccessMessage.value = '✓ Tanda tangan berhasil disimpan & status diubah menjadi "Dokumen Sudah diambil"!';
             setTimeout(() => {
@@ -148,7 +151,7 @@ const goBack = () => window.history.back();
             <div class="toolbar-info">
                 <h6 class="mb-0 fw-bold text-dark">Format Pendamping: {{ letter.agenda_number || letter.tracking_code }}</h6>
                 <small class="text-muted">
-                    <span v-if="currentSignaturePath" class="text-success fw-semibold">✓ Lembar Pendamping sudah bertanda tangan / diparaf. </span>
+                    <span v-if="currentSignatureSrc && !isEditingSignature" class="text-success fw-semibold">✓ Lembar Pendamping sudah bertanda tangan / diparaf. </span>
                     <span v-else>Tanda tangani langsung di layar, lalu klik Simpan atau Cetak.</span>
                 </small>
             </div>
@@ -163,7 +166,7 @@ const goBack = () => window.history.back();
                         <i class="bi bi-eraser me-1"></i> Hapus Coretan
                     </button>
                     <button
-                        v-if="currentSignaturePath"
+                        v-if="currentSignatureSrc"
                         type="button"
                         class="btn btn-outline-secondary btn-sm"
                         @click="cancelEditSignature"
@@ -271,9 +274,9 @@ const goBack = () => window.history.back();
                 </p>
 
                 <!-- If already signed and not currently drawing new one -->
-                <div v-if="currentSignaturePath && !isEditingSignature" class="signature-display-box position-relative">
+                <div v-if="currentSignatureSrc && !isEditingSignature" class="signature-display-box position-relative">
                     <img
-                        :src="currentSignaturePath.startsWith('data:') ? currentSignaturePath : `/lampiran/view/${currentSignaturePath}`"
+                        :src="currentSignatureSrc"
                         alt="Tanda Tangan Penerima"
                         class="signature-img"
                         @error="isEditingSignature = true"

@@ -55,6 +55,36 @@ class PrintController extends Controller
             }
         }
 
+        // Convert signature image to base64 inline data URI if file exists locally
+        $signatureBase64 = null;
+        if ($signaturePath) {
+            $cleanPath = ltrim($signaturePath, '/');
+            if (str_starts_with($cleanPath, 'storage/')) {
+                $cleanPath = substr($cleanPath, 8);
+            }
+
+            $possiblePaths = [
+                storage_path('app/public/' . $cleanPath),
+                storage_path('app/' . $cleanPath),
+                public_path('storage/' . $cleanPath),
+                public_path($cleanPath),
+                storage_path('app/public/signatures/' . basename($cleanPath)),
+                storage_path('app/signatures/' . basename($cleanPath)),
+                public_path('signatures/' . basename($cleanPath)),
+            ];
+
+            foreach ($possiblePaths as $p) {
+                if (file_exists($p) && is_file($p)) {
+                    $raw = @file_get_contents($p);
+                    if ($raw !== false && strlen($raw) > 0) {
+                        $mime = @mime_content_type($p) ?: 'image/png';
+                        $signatureBase64 = 'data:' . $mime . ';base64,' . base64_encode($raw);
+                        break;
+                    }
+                }
+            }
+        }
+
         // Receiver name for signature is intentionally left empty so it displays dots ( .................................... )
         $receiverName = null;
 
@@ -62,6 +92,7 @@ class PrintController extends Controller
             'letter' => $letter,
             'qrCodeBase64' => $qrCodeBase64,
             'signaturePath' => $signaturePath,
+            'signatureBase64' => $signatureBase64,
             'receiverName' => $receiverName,
         ]);
     }
@@ -93,6 +124,17 @@ class PrintController extends Controller
 
         $filename = 'signatures/sig_' . $letter->id . '_' . time() . '.' . $type;
         \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $data);
+
+        // Also write directly to public/storage for fallback if directory exists
+        try {
+            $publicDir = public_path('storage/signatures');
+            if (!file_exists($publicDir)) {
+                @mkdir($publicDir, 0777, true);
+            }
+            @file_put_contents(public_path('storage/' . $filename), $data);
+        } catch (\Throwable $fe) {
+            // Ignore failure
+        }
 
         $receiverName = $request->input('receiver_name') ?: 'Penerima Berkas';
 
@@ -134,6 +176,7 @@ class PrintController extends Controller
             'ok' => true,
             'message' => 'Tanda tangan digital berhasil disimpan dan berkas otomatis terlampir!',
             'attachment_path' => $filename,
+            'signature_base64' => $base64,
         ]);
     }
 }
