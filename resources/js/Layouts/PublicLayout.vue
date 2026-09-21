@@ -46,12 +46,12 @@ onUnmounted(() => {
                             <img src="/images/sitrack_logo.svg" alt="SiTrack" width="36" height="36"
                                 class="app-logo-header shadow-sm rounded-3">
                             <span class="brand-pipe-divider text-white-50 opacity-50 fw-light">|</span>
-                            <!-- Logo Kemnaker Lengkap dengan Tulisan -->
-                            <img src="/images/kemnaker_logo_white.png" alt="Kementerian Ketenagakerjaan RI" height="34"
+                            <!-- Logo Kemnaker -->
+                            <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="32" height="32"
                                 class="kemnaker-logo-header kemnaker-logo-light">
                         </div>
 
-                        <div class="d-none d-xl-block ms-1">
+                        <div class="d-none d-sm-block ms-1">
                             <h5 class="fw-bold mb-0 text-white brand-title">SiTrack</h5>
                             <p class="text-white-50 mb-0 brand-sub" style="font-size: 10px; letter-spacing: 0.5px;">
                                 Sistem Elektronik Administrasi & Tracking Persuratan
@@ -164,16 +164,9 @@ onUnmounted(() => {
 }
 
 /* Logo Kemnaker */
-.kemnaker-logo-header {
-    height: 34px;
-    width: auto;
-    object-fit: contain;
+.kemnaker-logo-light {
+    filter: brightness(0) invert(1);
     opacity: 0.95;
-    transition: opacity 0.2s ease;
-}
-
-.kemnaker-logo-header:hover {
-    opacity: 1;
 }
 
 /* Brand Typography */

@@ -118,7 +118,7 @@ const isActive = (path: string, exact = false) =>
                             </span>
                             <span class="brand-pipe-divider">|</span>
                             <span class="brand-logo-ring brand-kemnaker-ring" title="Kementerian Ketenagakerjaan RI">
-                                <img src="/images/kemnaker_emblem.png" alt="Kemnaker" width="26" height="26" class="brand-kemnaker-img" />
+                                <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="26" height="26" class="brand-kemnaker-img" />
                             </span>
                         </div>
                         <span class="brand-text">

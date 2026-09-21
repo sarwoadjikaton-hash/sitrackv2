@@ -9,7 +9,7 @@
             <div class="row align-items-center justify-content-between g-4">
                 <!-- Kolom Kiri: Logo Kemnaker & Nama Unit Kerja -->
                 <div class="col-lg-7 col-md-6">
-                    <!-- Logo SiTrack | Logo Kemnaker -->
+                    <!-- Logo SiTrack | Logo Kemnaker + Text Kemnaker -->
                     <div class="d-flex align-items-center gap-3 mb-3">
                         <div class="d-flex align-items-center gap-2 flex-shrink-0">
                             <!-- Logo SiTrack -->
@@ -21,13 +21,19 @@
                                 class="rounded-3 shadow-sm"
                             />
                             <span class="text-white-50 opacity-40 fs-4 fw-light">|</span>
-                            <!-- Logo Kemnaker Resmi dengan Tulisan -->
+                            <!-- Logo Kemnaker -->
                             <img
-                                src="/images/kemnaker_logo_white.png"
-                                alt="Kementerian Ketenagakerjaan Republik Indonesia"
-                                height="42"
-                                class="kemnaker-footer-logo"
+                                src="/images/kemnaker_logo.png"
+                                alt="Logo Kemnaker"
+                                width="40"
+                                height="40"
+                                class="kemnaker-logo-white"
                             />
+                        </div>
+                        <div class="kemnaker-brand-text text-uppercase fw-bold">
+                            <div class="lh-sm">KEMENTERIAN</div>
+                            <div class="lh-sm">KETENAGAKERJAAN</div>
+                            <div class="lh-sm">REPUBLIK INDONESIA</div>
                         </div>
                     </div>
 
@@ -55,7 +61,7 @@
                 <div class="d-inline-flex align-items-center gap-2">
                     <img src="/images/sitrack_logo.svg" alt="SiTrack" width="18" height="18" class="footer-app-logo" />
                     <span class="text-white-50 opacity-40 fw-light">|</span>
-                    <img src="/images/kemnaker_logo_white.png" alt="Kemnaker" height="16" />
+                    <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="16" height="16" class="kemnaker-logo-white" />
                 </div>
                 <span>SiTrack &bull; Kementerian Ketenagakerjaan RI &bull; TU SEKJEN &copy; 2026</span>
             </div>
