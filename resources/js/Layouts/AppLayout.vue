@@ -280,10 +280,6 @@ const isActive = (path: string, exact = false) =>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <NotificationBell />
-                    <Link v-if="!isSekjen" href="/tindak-lanjut/create" class="btn-topbar btn-topbar-primary shadow-sm" title="Input Naskah Masuk Baru">
-                        <span class="btn-topbar-icon"><i class="bi bi-file-earmark-plus-fill"></i></span>
-                        <span class="d-none d-sm-inline">+ Naskah Baru</span>
-                    </Link>
                     <Link v-if="!isSekjen" href="/scan-status" class="btn-topbar btn-topbar-accent">
                         <span class="btn-topbar-icon"><i class="bi bi-qr-code-scan"></i></span>
                         <span class="d-none d-sm-inline">Scan QR</span>
