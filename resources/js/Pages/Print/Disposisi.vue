@@ -203,7 +203,7 @@ const toggleAction = (actionName: string) => {
                         <td width="16%" class="meta-label border-start">Jenis Surat</td>
                         <td width="2%" class="text-center">:</td>
                         <td width="30%" class="meta-val" contenteditable="true">
-                            {{ letter.letter_number_type?.workbook_name || letter.category?.category_name || 'Biasa' }}
+                            {{ letter.letter_number_type?.type_name || letter.letter_number_type?.workbook_name || letter.category?.category_name || 'Biasa' }}
                         </td>
                     </tr>
                     <tr>

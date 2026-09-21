@@ -234,7 +234,7 @@ const goBack = () => window.history.back();
             <tr>
                 <td>Jenis Naskah Dinas</td>
                 <td>:</td>
-                <td colspan="2" contenteditable="true">{{ letter.letter_number_type?.workbook_name || letter.category?.category_name || 'ND/Memo' }}</td>
+                <td colspan="2" contenteditable="true">{{ letter.letter_number_type?.type_name || letter.letter_number_type?.workbook_name || letter.category?.category_name || '-' }}</td>
             </tr>
             <tr>
                 <td>Agenda Nomor</td>
@@ -322,7 +322,7 @@ const goBack = () => window.history.back();
                 <tr>
                     <td width="20%">Jenis Naskah</td>
                     <td width="2%">:</td>
-                    <td contenteditable="true">{{ letter.letter_number_type?.workbook_name || letter.category?.category_name || 'ND/Memo' }}</td>
+                    <td contenteditable="true">{{ letter.letter_number_type?.type_name || letter.letter_number_type?.workbook_name || letter.category?.category_name || '-' }}</td>
                 </tr>
                 <tr>
                     <td>Nomor Surat</td>

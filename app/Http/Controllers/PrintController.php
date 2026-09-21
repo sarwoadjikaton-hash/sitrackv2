@@ -15,7 +15,7 @@ class PrintController extends Controller
      */
     public function disposisi($id): Response
     {
-        $letter = Letter::with(['category', 'recipientUnit', 'dispositions.toUnit'])
+        $letter = Letter::with(['category', 'recipientUnit', 'dispositions.toUnit', 'letterNumberType'])
             ->findOrFail($id);
 
         return Inertia::render('Print/Disposisi', [
@@ -28,7 +28,7 @@ class PrintController extends Controller
      */
     public function pendamping($id): Response
     {
-        $letter = Letter::with(['category', 'recipientUnit', 'statusLogs'])
+        $letter = Letter::with(['category', 'recipientUnit', 'statusLogs', 'letterNumberType'])
             ->findOrFail($id);
 
         // TAMBAHAN: generate QR sebagai SVG lokal (server-side), lalu embed jadi data URI.
