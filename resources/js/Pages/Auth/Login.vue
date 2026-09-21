@@ -96,7 +96,7 @@ const overlayStyle = computed(() => ({
                         </div>
                         <span class="fs-4 text-muted opacity-50 fw-light">|</span>
                         <div class="brand-logo-ring brand-logo-kemnaker shadow-sm">
-                            <img src="/images/kemnaker_logo.png" alt="Kemnaker Logo" width="40" height="40" />
+                            <img src="/images/kemnaker_emblem.png" alt="Kemnaker Logo" width="40" height="40" />
                         </div>
                     </div>
                     <h2 class="fw-bold mb-0 mt-2 text-dark">SiTrack</h2>
@@ -174,7 +174,7 @@ const overlayStyle = computed(() => ({
                         </div>
                         <span class="text-white opacity-40 fs-5">|</span>
                         <div class="login-transition-logo-badge">
-                            <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="36" height="36"
+                            <img src="/images/kemnaker_emblem_white.png" alt="Kemnaker" width="36" height="36"
                                 class="login-transition-logo" />
                         </div>
                     </div>

@@ -32,7 +32,7 @@ defineProps<{
                         <img src="/images/sitrack_logo.svg" alt="SiTrack" width="16" height="16" />
                         <span>SiTrack</span>
                         <span class="opacity-50">|</span>
-                        <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="14" height="14" style="filter: brightness(0) invert(1);" />
+                        <img src="/images/kemnaker_emblem_white.png" alt="Kemnaker" width="14" height="14" />
                         <span>KEMNAKER RI</span>
                     </span>
                     <h2 class="fw-bold mb-1 text-white">Selamat Datang di Sistem Tracking Persuratan</h2>
