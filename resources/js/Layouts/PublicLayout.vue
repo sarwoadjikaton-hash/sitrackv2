@@ -39,23 +39,23 @@ onUnmounted(() => {
             >
                 <div class="d-flex align-items-center justify-content-between w-100">
 
-                    <!-- Brand Section: Logo SiTrack | Logo Kemnaker -->
+                    <!-- Brand Section: Logo SiTrack | Logo Kemnaker + Text Kemnaker (Sama seperti Footer) -->
                     <Link href="/tracking" class="brand-link d-flex align-items-center gap-2 text-decoration-none">
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
                             <!-- Logo SiTrack -->
                             <img src="/images/sitrack_logo.svg" alt="SiTrack" width="36" height="36"
                                 class="app-logo-header shadow-sm rounded-3">
-                            <span class="brand-pipe-divider text-white-50 opacity-50 fw-light">|</span>
+                            <span class="brand-pipe-divider text-white-50 opacity-40 fs-5 fw-light">|</span>
                             <!-- Logo Kemnaker -->
                             <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="32" height="32"
                                 class="kemnaker-logo-header kemnaker-logo-light">
                         </div>
 
-                        <div class="d-none d-sm-block ms-1">
-                            <h5 class="fw-bold mb-0 text-white brand-title">SiTrack</h5>
-                            <p class="text-white-50 mb-0 brand-sub" style="font-size: 10px; letter-spacing: 0.5px;">
-                                Sistem Elektronik Administrasi & Tracking Persuratan
-                            </p>
+                        <!-- Text Kemnaker (Identik dengan Footer) -->
+                        <div class="kemnaker-brand-text text-uppercase fw-bold d-none d-sm-block">
+                            <div class="lh-sm">KEMENTERIAN</div>
+                            <div class="lh-sm">KETENAGAKERJAAN</div>
+                            <div class="lh-sm">REPUBLIK INDONESIA</div>
                         </div>
                     </Link>
 
@@ -167,18 +167,22 @@ onUnmounted(() => {
 .kemnaker-logo-light {
     filter: brightness(0) invert(1);
     opacity: 0.95;
+    vertical-align: middle;
 }
 
-/* Brand Typography */
-.brand-title {
-    color: #ffffff !important;
-    font-weight: 800;
-    font-size: 1.25rem;
-    letter-spacing: -0.02em;
+/* Kemnaker Brand Text (Identik dengan Footer) */
+.kemnaker-brand-text {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    line-height: 1.25;
+    color: #ffffff;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-.brand-sub {
-    color: rgba(255, 255, 255, 0.75) !important;
+@media (min-width: 992px) {
+    .kemnaker-brand-text {
+        font-size: 11px;
+    }
 }
 
 /* Nav Pill Buttons */
