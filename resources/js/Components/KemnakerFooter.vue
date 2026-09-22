@@ -10,23 +10,23 @@
                 <!-- Kolom Kiri: Logo Kemnaker & Nama Unit Kerja -->
                 <div class="col-lg-7 col-md-6">
                     <!-- Logo SiTrack | Logo Kemnaker + Text Kemnaker -->
-                    <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="d-flex align-items-center gap-2 gap-sm-3 mb-2 mb-sm-3">
                         <div class="d-flex align-items-center gap-2 flex-shrink-0">
                             <!-- Logo SiTrack -->
                             <img
                                 src="/images/sitrack_logo.svg"
                                 alt="Logo SiTrack"
-                                width="44"
-                                height="44"
+                                width="36"
+                                height="36"
                                 class="rounded-3 shadow-sm"
                             />
-                            <span class="text-white-50 opacity-40 fs-4 fw-light">|</span>
+                            <span class="text-white-50 opacity-40 fs-5 fw-light">|</span>
                             <!-- Logo Kemnaker -->
                             <img
                                 src="/images/kemnaker_logo.png"
                                 alt="Logo Kemnaker"
-                                width="40"
-                                height="40"
+                                width="32"
+                                height="32"
                                 class="kemnaker-logo-white"
                             />
                         </div>
@@ -44,26 +44,33 @@
 
                 <!-- Kolom Kanan: Alamat & Kontak Kantor -->
                 <div class="col-lg-5 col-md-6 text-md-end">
-                    <p class="text-white-50 mb-2 kemnaker-address ms-md-auto">
-                        Jl. Jendral Gatot Subroto Kav. 51, Daerah Khusus Ibukota Jakarta 12950
+                    <p class="text-white-50 mb-3 kemnaker-address ms-md-auto d-flex align-items-start align-items-md-center justify-content-md-end gap-1">
+                        <i class="bi bi-geo-alt-fill text-teal-accent flex-shrink-0 mt-1 mt-md-0"></i>
+                        <span>Jl. Jendral Gatot Subroto Kav. 51, Jakarta Selatan 12950</span>
                     </p>
 
-                    <div class="d-flex flex-wrap align-items-center justify-content-md-end gap-3 text-white-50 kemnaker-contact small">
-                        <span>Telp: <strong class="text-white">021-5255733</strong></span>
-                        <span class="opacity-40">&bull;</span>
-                        <span>Call Center: <strong class="text-white">1500630</strong></span>
+                    <div class="d-flex flex-wrap align-items-center justify-content-start justify-content-md-end gap-2 text-white-50 kemnaker-contact small">
+                        <a href="tel:0215255733" class="contact-chip">
+                            <i class="bi bi-telephone-fill"></i>
+                            <span>Telp: <strong>021-5255733</strong></span>
+                        </a>
+                        <a href="tel:1500630" class="contact-chip">
+                            <i class="bi bi-headset"></i>
+                            <span>Call Center: <strong>1500630</strong></span>
+                        </a>
                     </div>
                 </div>
             </div>
 
             <!-- Bottom SiTrack Identity -->
-            <div class="pt-3 mt-4 border-top border-white border-opacity-10 d-flex flex-wrap align-items-center justify-content-center gap-2 text-white-50 small">
+            <div class="pt-3 mt-4 border-top border-white border-opacity-10 d-flex flex-wrap align-items-center justify-content-between gap-2 text-white-50 small">
                 <div class="d-inline-flex align-items-center gap-2">
-                    <img src="/images/sitrack_logo.svg" alt="SiTrack" width="18" height="18" class="footer-app-logo" />
+                    <img src="/images/sitrack_logo.svg" alt="SiTrack" width="16" height="16" class="footer-app-logo" />
                     <span class="text-white-50 opacity-40 fw-light">|</span>
-                    <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="16" height="16" class="kemnaker-logo-white" />
+                    <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="14" height="14" class="kemnaker-logo-white" />
+                    <span class="fw-semibold text-white">SiTrack Kemnaker RI</span>
                 </div>
-                <span>SiTrack &bull; Kementerian Ketenagakerjaan RI &bull; TU SEKJEN &copy; 2026</span>
+                <span>Biro Umum &amp; Pengelolaan Persuratan TU Sekjen &copy; 2026</span>
             </div>
         </div>
     </footer>
@@ -74,7 +81,7 @@
     background: #03205A;
     color: #ffffff;
     font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    border-top: 1px solid rgba(181, 204, 227, 0.2);
+    border-top: 1px solid rgba(181, 204, 227, 0.15);
 }
 
 .kemnaker-logo-white {
@@ -90,28 +97,70 @@
 }
 
 .kemnaker-brand-text {
-    font-size: 11.5px;
-    letter-spacing: 0.6px;
+    font-size: 10px;
+    letter-spacing: 0.5px;
     line-height: 1.25;
     color: #ffffff;
 }
 
+@media (min-width: 576px) {
+    .kemnaker-brand-text {
+        font-size: 11px;
+    }
+}
+
 .kemnaker-unit-title {
-    font-size: 1.05rem;
-    line-height: 1.4;
+    font-size: 0.95rem;
+    line-height: 1.35;
     letter-spacing: -0.2px;
+    color: #EEF7FC;
+}
+
+@media (min-width: 576px) {
+    .kemnaker-unit-title {
+        font-size: 1.05rem;
+        line-height: 1.4;
+    }
 }
 
 .kemnaker-address {
-    font-size: 0.875rem;
+    font-size: 0.82rem;
     max-width: 460px;
-    line-height: 1.5;
+    line-height: 1.45;
     color: #B5CCE3 !important;
 }
 
-.kemnaker-contact {
-    font-size: 0.875rem;
-    letter-spacing: 0.2px;
-    color: #B5CCE3 !important;
+@media (min-width: 576px) {
+    .kemnaker-address {
+        font-size: 0.875rem;
+    }
+}
+
+.text-teal-accent {
+    color: #2dd4bf;
+}
+
+.contact-chip {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 4px 10px;
+    border-radius: 50px;
+    color: #B5CCE3;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    transition: all 0.2s ease;
+}
+
+.contact-chip strong {
+    color: #ffffff;
+}
+
+.contact-chip:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    border-color: rgba(45, 212, 191, 0.4);
 }
 </style>

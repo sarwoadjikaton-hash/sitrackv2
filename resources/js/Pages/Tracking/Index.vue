@@ -233,14 +233,19 @@ const isValidAttachment = (path: any) => {
     --ocean-primary-light: #395ba0;
     --ocean-accent: #167992;
 
-    background: #EEF7FC;
+    background: #03205A;
     min-height: 100%;
+}
+
+.tracking-viewport.has-results {
+    background: #03205A;
 }
 
 /* ============ Layout Cards ============ */
 
 .glass-result-card {
-    border-radius: 2.5rem;
+    border-radius: 2rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25) !important;
 }
 
 .text-teal {
@@ -256,7 +261,14 @@ const isValidAttachment = (path: any) => {
 }
 
 .ls-2 {
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
+}
+
+.meta-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.85rem 1rem;
+    border-radius: 0.75rem;
 }
 
 .meta-box label {
@@ -265,48 +277,52 @@ const isValidAttachment = (path: any) => {
     font-weight: 800;
     text-transform: uppercase;
     color: #64748b;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
 }
 
 .meta-box p {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     color: #1e293b;
     margin-bottom: 0;
 }
 
 .custom-timeline {
     border-left: 2px solid #e2e8f0;
-    padding-left: 30px;
+    padding-left: 28px;
     position: relative;
 }
 
 .timeline-marker {
     position: absolute;
-    left: -39px;
-    top: 5px;
+    left: -37px;
+    top: 4px;
     width: 16px;
     height: 16px;
     background: var(--ocean-accent);
     border: 4px solid #fff;
     border-radius: 50%;
-    box-shadow: 0 0 0 4px rgba(245, 158, 113, 0.2);
+    box-shadow: 0 0 0 4px rgba(22, 121, 146, 0.25);
 }
 
 .timeline-item-v2 {
     position: relative;
-    padding-bottom: 40px;
+    padding-bottom: 32px;
+}
+
+.timeline-item-v2:last-child {
+    padding-bottom: 0;
 }
 
 .animate-fade-up {
-    animation: fadeUp 0.6s ease-out forwards;
+    animation: fadeUp 0.5s ease-out forwards;
 }
 
 @keyframes fadeUp {
     from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(24px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -318,17 +334,10 @@ const isValidAttachment = (path: any) => {
    ========================================================= */
 
 @media (max-width: 767.98px) {
-
-    .tracking-viewport {
-        background: var(--ocean-primary-dark);
-    }
-
-    /* Result tidak terlalu menabrak Hero */
     #results {
-        margin-top: -1.5rem !important;
-        padding-top: 2rem !important;
-        padding-bottom: 2rem !important;
-        background: #f1f5f9;
+        margin-top: -1rem !important;
+        padding-top: 1.5rem !important;
+        padding-bottom: 2.5rem !important;
     }
 
     /* Card hasil */
@@ -344,27 +353,28 @@ const isValidAttachment = (path: any) => {
     }
 
     .glass-result-card h5 {
-        font-size: 1rem;
+        font-size: 1.05rem;
     }
 
     /* Header hasil */
-    .glass-result-card>.d-flex {
-        margin-bottom: 2rem !important;
+    .glass-result-card > .d-flex {
+        margin-bottom: 1.5rem !important;
     }
 
     /* Kolom hasil */
     .glass-result-card .row.g-5 {
-        --bs-gutter-y: 2rem;
+        --bs-gutter-y: 1.75rem;
     }
 
     /* Progress */
     .progress-section {
-        margin-bottom: 2rem !important;
+        margin-bottom: 1.5rem !important;
     }
 
     /* Metadata */
     .meta-box {
-        margin-bottom: 1.25rem !important;
+        margin-bottom: 0.75rem !important;
+        padding: 0.75rem;
     }
 
     .meta-box p {
@@ -373,34 +383,34 @@ const isValidAttachment = (path: any) => {
 
     /* Timeline */
     .custom-timeline {
-        padding-left: 22px;
+        padding-left: 20px;
     }
 
     .timeline-marker {
-        left: -31px;
+        left: -29px;
         width: 14px;
         height: 14px;
         border-width: 3px;
     }
 
     .timeline-item-v2 {
-        padding-bottom: 28px;
+        padding-bottom: 24px;
     }
 
     .timeline-content h6 {
-        font-size: 0.9rem;
+        font-size: 0.92rem;
     }
 
     .timeline-content small,
     .timeline-content p,
     .timeline-content .small {
-        font-size: 0.78rem !important;
+        font-size: 0.8rem !important;
     }
 
     /* Not found card */
     .glass-result-card.p-5 {
         padding: 2rem 1.25rem !important;
-        width: calc(100vw - 2rem);
+        width: 100%;
         max-width: none !important;
     }
 }
