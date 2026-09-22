@@ -344,13 +344,11 @@ function initThree() {
     particles = createParticles();
     scene.add(particles);
 
-    // Satellite Floating Objects in Orbit
+    // Satellite Floating Objects in Orbit - Spaced cleanly around the mailbox
     const smallObjects: { build: () => THREE.Group; pos: [number, number, number]; scale: number }[] = [
-        { build: () => createEnvelope(0xEEF7FC, 0x167992), pos: [1.8, 2.1, 1.5], scale: 1.0 },
-        { build: () => createEnvelope(0x1C386F, 0x167992), pos: [1.4, -1.2, 1.0], scale: 0.9 },
-        { build: () => createDocumentStack(), pos: [7.0, 1.8, -0.2], scale: 1.0 },
-        { build: () => createEnvelope(0xEEF7FC, 0x167992), pos: [7.4, -0.5, 0.7], scale: 0.85 },
-        { build: () => createSecurityShield(), pos: [3.1, -1.6, 1.8], scale: 0.95 },
+        { build: () => createEnvelope(0xEEF7FC, 0x167992), pos: [1.1, 0.9, 0.8], scale: 0.85 },
+        { build: () => createDocumentStack(), pos: [4.8, 0.5, -0.2], scale: 0.9 },
+        { build: () => createSecurityShield(), pos: [4.4, -1.1, 0.6], scale: 0.85 },
     ];
 
     smallObjects.forEach((item, i) => {
@@ -556,22 +554,6 @@ onUnmounted(disposeThree);
                     </Link>
                 </div>
             </div>
-        </div>
-
-        <!-- Floating Spinning Orb Animation -->
-        <div class="hero-orb">
-            <div class="orb-ring"></div>
-            <div class="orb-core"><i class="bi bi-shield-check"></i></div>
-            <svg class="orb-text" viewBox="0 0 100 100">
-                <defs>
-                    <path id="orbCirclePath" d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
-                </defs>
-                <text>
-                    <textPath href="#orbCirclePath" startOffset="0%">
-                        SITRACK &bull; REALTIME TRACKING &bull; SITRACK &bull;
-                    </textPath>
-                </text>
-            </svg>
         </div>
     </section>
 </template>
@@ -1040,87 +1022,6 @@ onUnmounted(disposeThree);
 .gooey-cta-wrapper:active .gooey-label,
 .gooey-cta-wrapper:active .gooey-arrow {
     filter: brightness(.95);
-}
-
-/* Floating Orb Animation */
-.hero-orb {
-    position: absolute;
-    z-index: 10;
-    bottom: 6%;
-    right: 6%;
-    width: 92px;
-    height: 92px;
-    display: none;
-}
-
-@media (min-width: 992px) {
-    .hero-orb {
-        display: block;
-    }
-}
-
-.orb-ring {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    border: 2px solid var(--ocean-accent);
-    background: transparent;
-    animation: orbSpin 6s linear infinite;
-    filter: blur(1px);
-}
-
-.orb-ring::after {
-    content: '';
-    position: absolute;
-    inset: 5px;
-    border-radius: 50%;
-    background: #03205A;
-}
-
-@keyframes orbSpin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.orb-core {
-    position: absolute;
-    inset: 18px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, .06);
-    display: grid;
-    place-items: center;
-    color: var(--ocean-accent);
-    font-size: 1.15rem;
-    box-shadow: 0 0 16px 2px rgba(45, 212, 191, .35);
-    animation: orbPulse 2.4s ease-in-out infinite;
-}
-
-@keyframes orbPulse {
-    0%, 100% {
-        box-shadow: 0 0 12px 1px rgba(45, 212, 191, .3);
-    }
-    50% {
-        box-shadow: 0 0 20px 4px rgba(45, 212, 191, .55);
-    }
-}
-
-.orb-text {
-    position: absolute;
-    inset: -14px;
-    animation: orbTextSpin 18s linear infinite;
-}
-
-.orb-text text {
-    font-size: 7.5px;
-    fill: rgba(255, 255, 255, .55);
-    letter-spacing: .5px;
-}
-
-@keyframes orbTextSpin {
-    to {
-        transform: rotate(360deg);
-    }
 }
 
 .text-cyan-accent {
