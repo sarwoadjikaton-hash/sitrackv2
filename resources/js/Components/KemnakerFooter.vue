@@ -61,17 +61,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Bottom SiTrack Identity -->
-            <div class="pt-3 mt-4 border-top border-white border-opacity-10 d-flex flex-wrap align-items-center justify-content-between gap-2 text-white-50 small">
-                <div class="d-inline-flex align-items-center gap-2">
-                    <img src="/images/sitrack_logo.svg" alt="SiTrack" width="16" height="16" class="footer-app-logo" />
-                    <span class="text-white-50 opacity-40 fw-light">|</span>
-                    <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="14" height="14" class="kemnaker-logo-white" />
-                    <span class="fw-semibold text-white">SiTrack Kemnaker RI</span>
-                </div>
-                <span>Biro Umum &amp; Pengelolaan Persuratan TU Sekjen &copy; 2026</span>
-            </div>
         </div>
     </footer>
 </template>
@@ -88,12 +77,6 @@
     filter: brightness(0) invert(1);
     display: inline-block;
     vertical-align: middle;
-}
-
-.footer-app-logo {
-    display: inline-block;
-    vertical-align: middle;
-    border-radius: 4px;
 }
 
 .kemnaker-brand-text {
