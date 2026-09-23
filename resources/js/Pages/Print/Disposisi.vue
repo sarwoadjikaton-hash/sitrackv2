@@ -534,15 +534,16 @@ const toggleAction = (actionName: string) => {
     }
 
     .print-container {
-        margin: 0 !important;
+        margin: 0 auto !important;
         padding: 4mm 6mm !important;
-        width: 100% !important;
+        width: 148mm !important;
+        max-width: 148mm !important;
         min-height: auto !important;
         box-shadow: none !important;
     }
 
     @page {
-        size: A5 portrait;
+        size: portrait;
         margin: 4mm 5mm;
     }
 

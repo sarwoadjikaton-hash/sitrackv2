@@ -553,7 +553,7 @@ const goBack = () => window.history.back();
 
 @media print {
     @page {
-        size: A5 portrait;
+        size: portrait;
         margin: 4mm 5mm;
     }
 
@@ -561,10 +561,17 @@ const goBack = () => window.history.back();
         display: none !important;
     }
 
-    .print-container {
+    body {
+        background: white !important;
         margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .print-container {
+        margin: 0 auto !important;
         padding: 4mm 6mm !important;
-        width: 100% !important;
+        width: 148mm !important;
+        max-width: 148mm !important;
         min-height: auto !important;
         box-shadow: none !important;
     }
