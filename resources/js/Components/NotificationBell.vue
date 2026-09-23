@@ -328,8 +328,8 @@ onUnmounted(() => {
                             @click="markAsRead(item)"
                         >
                             <div class="notif-icon-col">
-                                <span class="notif-icon-circle" :class="getNotifData(item).priority === 'Segera' ? 'is-urgent' : 'is-normal'">
-                                    <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                                <span class="notif-icon-circle" :class="getNotifData(item).priority === 'Segera' ? 'is-urgent' : (['Selesai dan Siap Untuk diambil', 'Selesai dan Siap Untuk Diambil', 'Dokumen selesai dan sudah bisa diambil', 'Surat Selesai di Paraf/TTD dan bisa diambil'].includes(getNotifData(item).status) ? 'is-ready' : 'is-normal')">
+                                    <i :class="['Selesai dan Siap Untuk diambil', 'Selesai dan Siap Untuk Diambil', 'Dokumen selesai dan sudah bisa diambil', 'Surat Selesai di Paraf/TTD dan bisa diambil'].includes(getNotifData(item).status) ? 'bi bi-box-seam-fill' : 'bi bi-file-earmark-arrow-down-fill'"></i>
                                 </span>
                             </div>
                             <div class="notif-content-col">
@@ -590,6 +590,11 @@ onUnmounted(() => {
 .notif-icon-circle.is-normal {
     background: rgba(22, 121, 146, 0.12);
     color: #167992;
+}
+
+.notif-icon-circle.is-ready {
+    background: rgba(234, 179, 8, 0.2);
+    color: #b45309;
 }
 
 .notif-icon-circle.is-urgent {

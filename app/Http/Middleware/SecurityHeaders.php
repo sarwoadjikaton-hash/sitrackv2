@@ -31,11 +31,11 @@ class SecurityHeaders
             $response->headers->set(
                 'Content-Security-Policy',
                 "default-src 'self'; " .
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173; " .
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173 https://static.cloudflareinsights.com; " .
                 "style-src 'self' 'unsafe-inline' http://localhost:5173 https://fonts.googleapis.com; " .
                 "font-src 'self' https://fonts.gstatic.com http://localhost:5173; " .
-                "img-src 'self' data: blob:; " .
-                "connect-src 'self' http://localhost:5173 ws://localhost:5173; " .
+                "img-src 'self' data: blob: https:; " .
+                "connect-src 'self' http://localhost:5173 ws://localhost:5173 https://cloudflareinsights.com https://static.cloudflareinsights.com; " .
                 "frame-ancestors 'self'; " .
                 "form-action 'self';"
             );
@@ -43,11 +43,11 @@ class SecurityHeaders
             $response->headers->set(
                 'Content-Security-Policy',
                 "default-src 'self'; " .
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " .
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; " .
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
                 "font-src 'self' https://fonts.gstatic.com; " .
-                "img-src 'self' data: blob:; " .
-                "connect-src 'self'; " .
+                "img-src 'self' data: blob: https:; " .
+                "connect-src 'self' https://cloudflareinsights.com https://static.cloudflareinsights.com; " .
                 "frame-ancestors 'self'; " .
                 "form-action 'self';"
             );

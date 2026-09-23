@@ -193,11 +193,28 @@ const handleFileUpload = async (e: Event) => {
     }
 };
 
+// --- NAVIGASI KEMBALI AMAN ---
+const isNavigating = ref(false);
+const goBack = async () => {
+    if (isNavigating.value) return;
+    isNavigating.value = true;
+    await stopCamera();
+    if (window.history.length > 1) {
+        window.history.back();
+    } else {
+        router.visit('/data-surat');
+    }
+};
+
 onMounted(async () => {
     isSecureContext.value = window.isSecureContext;
     currentOrigin.value = window.location.origin;
 
-    html5QrCode = new Html5Qrcode("reader");
+    try {
+        html5QrCode = new Html5Qrcode("reader");
+    } catch (e) {
+        console.warn("Could not init Html5Qrcode reader:", e);
+    }
 
     try {
         const devices = await Html5Qrcode.getCameras();
@@ -213,8 +230,8 @@ onMounted(async () => {
     startCamera();
 });
 
-onUnmounted(() => {
-    stopCamera();
+onUnmounted(async () => {
+    await stopCamera();
     if (html5QrCode) {
         try {
             html5QrCode.clear();
@@ -242,9 +259,9 @@ onUnmounted(() => {
                 <p class="text-muted small mb-0">Scan QR Code pada lembar cetak pendamping untuk membaca ID Pelacakan
                     surat.</p>
             </div>
-            <Link href="/tindak-lanjut" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border">
+            <button type="button" @click="goBack" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border">
                 <i class="bi bi-arrow-left me-1"></i> Kembali
-            </Link>
+            </button>
         </div>
 
         <!-- Hidden container untuk scan file -->

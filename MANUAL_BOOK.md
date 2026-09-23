@@ -1,419 +1,305 @@
-# 📘 Buku Panduan Pengguna SiTrack
-### Sistem Elektronik Administrasi Persuratan — TU Sekretariat Jenderal Kemnaker RI
+# 📘 MANUAL BOOK — PANDUAN PENGGUNAAN APLIKASI
+# SITRACK (Sistem Informasi & Tracking Persuratan)
+### Tata Usaha Sekretariat Jenderal — Kementerian Ketenagakerjaan Republik Indonesia
+**Versi Sistem:** SiTrack v13 (Enterprise Edition) | **Dokumen:** Panduan Operasional Resmi
 
 ---
 
-> **Selamat datang di SiTrack!** 👋
->
-> Panduan ini ditulis untuk membantu kamu memahami dan menggunakan SiTrack dengan mudah. Tidak perlu bingung — kami jelaskan langkah demi langkah, dengan bahasa yang sederhana dan to the point.
+## 📑 Informasi Dokumen
+
+| Parameter | Keterangan |
+| :--- | :--- |
+| **Nama Aplikasi** | **SiTrack** *(Sistem Informasi & Tracking Persuratan)* |
+| **Instansi / Unit** | TU Sekretariat Jenderal — Kementerian Ketenagakerjaan Republik Indonesia |
+| **Fokus Panduan** | Panduan operasional dua lajur persuratan, penomoran 16 jenis naskah dinas, barcode tracking, notifikasi WhatsApp otomatis, dan serah terima digital (*Digital Handover*) |
+| **Sasaran Pengguna** | Super Admin, Admin Operator TU, Kasubbag TU Sekjen, Sekretaris Jenderal, dan Pemohon / Unit Kerja Pengolah |
+| **Domain Resmi** | `https://sitrack.my.id` |
 
 ---
 
-## Daftar Isi
+## 📋 Daftar Isi
 
-1. [Apa itu SiTrack?](#1-apa-itu-sitrack)
-2. [Memulai: Login ke Sistem](#2-memulai-login-ke-sistem)
-3. [Mengenal Dashboard](#3-mengenal-dashboard)
-4. [Tracking Surat (Untuk Publik)](#4-tracking-surat-untuk-publik)
-5. [Penomoran Surat](#5-penomoran-surat)
-   - [Ketersediaan Nomor Surat](#51-ketersediaan-nomor-surat)
-   - [Laporan Data Surat](#52-laporan-data-surat)
-6. [Tindak Lanjut / Penandatanganan](#6-tindak-lanjut--penandatanganan)
-7. [Lajur Disposisi](#7-lajur-disposisi)
-8. [Scan QR & Update Status](#8-scan-qr--update-status)
-9. [Cetak Dokumen](#9-cetak-dokumen)
-10. [Master Data (Super Admin)](#10-master-data-super-admin)
-11. [Tips & Trik](#11-tips--trik)
-12. [FAQ — Pertanyaan yang Sering Ditanyakan](#12-faq--pertanyaan-yang-sering-ditanyakan)
-
----
-
-## 1. Apa itu SiTrack?
-
-SiTrack adalah **sistem tracking persuratan digital** yang dibuat khusus untuk unit Tata Usaha Sekretariat Jenderal Kementerian Ketenagakerjaan RI.
-
-Dengan SiTrack, kamu bisa:
-- 📬 **Melacak surat** — cukup masukkan kode tracking, langsung tahu posisi surat ada di mana.
-- 🔢 **Mengelola penomoran surat** — stok nomor surat tersedia, terpakai, atau sudah dipesan? Semua terlihat jelas.
-- ✍️ **Mengelola tindak lanjut tanda tangan** — surat yang perlu paraf dan TTD pimpinan, alurnya tercatat rapi.
-- 📋 **Mengatur disposisi** — arahan pimpinan untuk surat masuk, lengkap dan terstruktur.
-- 📱 **Scan barcode** — update status surat cukup scan QR dari HP atau komputer.
-
-**Sederhananya:** SiTrack memastikan tidak ada surat yang tercecer atau statusnya tidak jelas. Semuanya tercatat, bisa dilacak, dan transparan.
+1. [Gambaran Umum & Keunggulan Sistem](#1-gambaran-umum--keunggulan-sistem)
+2. [Hak Akses & Peran Pengguna (User Roles)](#2-hak-akses--peran-pengguna-user-roles)
+3. [Alur Kerja Utama Persuratan (End-to-End Workflow)](#3-alur-kerja-utama-persuratan-end-to-end-workflow)
+4. [Akses & Keamanan Akun (Login & Profil)](#4-akses--keamanan-akun-login--profil)
+5. [Dashboard Pusat Komando Persuratan](#5-dashboard-pusat-komando-persuratan)
+6. [Portal Publik: Pelacakan & Pengajuan Mandiri](#6-portal-publik-pelacakan--pengajuan-mandiri)
+7. [Integrasi Notifikasi WhatsApp Otomatis](#7-integrasi-notifikasi-whatsapp-otomatis)
+8. [Manajemen Penomoran Surat (16 Jenis Naskah - Rekap 2026)](#8-manajemen-penomoran-surat-16-jenis-naskah---rekap-2026)
+   - 8.1 [Ketersediaan Nomor (Tersedia, Pre-Order, Reservasi)](#81-ketersediaan-nomor-surat)
+   - 8.2 [Buku Register Laporan Data Surat](#82-buku-register-laporan-data-surat)
+9. [Lajur Pertama: Tindak Lanjut / Penandatanganan Pimpinan](#9-lajur-pertama-tindak-lanjut--penandatanganan-pimpinan)
+10. [Lajur Kedua: Pengelolaan Disposisi Surat Masuk](#10-lajur-kedua-pengelolaan-disposisi-surat-masuk)
+11. [Pemindai QR Code & Pembaruan Status Berkas](#11-pemindai-qr-code--pembaruan-status-berkas)
+12. [Format Cetak Resmi & Tanda Tangan Digital Pengambilan](#12-format-cetak-resmi--tanda-tangan-digital-pengambilan)
+13. [Pengelolaan Master Data (Khusus Super Admin)](#13-pengelolaan-master-data-khusus-super-admin)
+14. [Panduan Pemecahan Masalah (Troubleshooting & FAQ)](#14-panduan-pemecahan-masalah-troubleshooting--faq)
 
 ---
 
-## 2. Memulai: Login ke Sistem
+## 1. Gambaran Umum & Keunggulan Sistem
 
-### Cara Login
+**SiTrack** adalah aplikasi berbasis web modern yang dirancang khusus untuk memodernisasi, mempercepat, dan mengamankan tata kelola persuratan pada Bagian Tata Usaha Sekretariat Jenderal Kementerian Ketenagakerjaan RI.
 
-1. Buka browser, akses alamat SiTrack yang diberikan oleh administrator.
-2. Kamu akan melihat halaman login dengan logo SiTrack dan Kemnaker.
-3. Masukkan **Username** dan **Password** yang sudah diberikan.
-4. Klik tombol **Masuk**.
-
-> **💡 Tips:** Kalau kamu lupa password, hubungi Super Admin untuk di-reset. Jangan coba-coba tebak ya, nanti terkunci!
-
-### Peran Pengguna
-
-Setiap akun punya peran (role) yang menentukan menu apa saja yang bisa diakses:
-
-| Peran | Bisa Apa Saja? |
-|-------|---------------|
-| 🛡️ **Super Admin** | Segalanya — termasuk kelola user, unit kerja, dan konfigurasi sistem |
-| 👨‍💼 **Admin Operator** | Penomoran surat, tindak lanjut, disposisi, data surat |
-| 📝 **Kasubbag TU** | Sama seperti Admin Operator |
-| 👔 **Sekretaris Jenderal** | Hanya melihat Lajur Disposisi |
-
-### Mengubah Password
-
-Ingin ganti password? Mudah:
-1. Lihat bagian bawah sidebar (sebelah kiri layar).
-2. Klik nama/profil kamu.
-3. Muncul modal **Ubah Password** — isi password lama dan password baru.
-4. Klik **Simpan**.
+### ✨ Fitur Unggulan SiTrack:
+- **Dua Lajur Persuratan Terintegrasi:** Memisahkan secara tegas antara alur penandatanganan/paraf nota dinas dengan alur disposisi arahan pimpinan.
+- **Standar 16 Jenis Naskah Dinas (Workbook Rekap 2026):** Format penomoran otomatis yang presisi sesuai kode klasifikasi arsip dan kode jabatan Kemnaker.
+- **Pelacakan Berbasis QR Code:** Setiap naskah memiliki kode unik dan QR Code yang dapat dipindai secara instan menggunakan kamera smartphone/laptop.
+- **Notifikasi WhatsApp Otomatis (Meta Cloud API):** Pemohon menerima konfirmasi resi pengajuan dan pembaruan posisi surat secara *real-time* ke nomor WhatsApp.
+- **Serah Terima Berkas Digital (*Digital Handover*):** Dilengkapi *Signature Pad* digital pada lembar pendamping saat dokumen fisik diambil di loket TU.
+- **Pencarian Mendalam (*Deep PDF Search*):** Mampu mencari dokumen berdasarkan metadata maupun teks di dalam file lampiran PDF.
 
 ---
 
-## 3. Mengenal Dashboard
+## 2. Hak Akses & Peran Pengguna (User Roles)
 
-Begitu login berhasil, kamu langsung masuk ke **Dashboard** — halaman utama yang menampilkan ringkasan semua aktivitas persuratan.
+Sistem membagi wewenang pengguna ke dalam 4 tingkatan peran (*Role-Based Access Control*):
 
-### Yang Terlihat di Dashboard:
-
-| Kartu | Isinya |
-|-------|--------|
-| **Tindak Lanjut / TTD** | Berapa surat yang dalam proses paraf/TTD dan sudah selesai |
-| **Lajur Disposisi** | Berapa surat disposisi yang sedang diproses dan tuntas |
-| **Nomor Tersedia** | Stok nomor surat yang masih bisa dipakai tahun ini |
-| **Nomor Terpakai** | Nomor yang sudah digunakan untuk surat final |
-
-Di bawahnya ada:
-- **Daftar surat terbaru** — surat-surat yang baru masuk atau di-update.
-- **Tombol shortcut** — klik *Surat Baru* untuk langsung input surat baru ke Tindak Lanjut, atau *Disposisi* untuk input disposisi baru.
-
-> **💡 Tips:** Dashboard ini ibarat "pusat komando" kamu. Biasakan cek dashboard setiap pagi untuk tahu apa yang perlu ditindaklanjuti hari ini.
+| Peran (Role) | Hak Akses & Wewenang |
+| :--- | :--- |
+| 🛡️ **Super Administrator** | Akses penuh ke seluruh menu sistem, manajemen pengguna (*user*), master unit kerja, master kategori naskah, alur status, dan ekspor laporan master. |
+| 👨‍💼 **Admin Operator TU** | Melakukan registrasi naskah baru, mengelola stok & registrasi penomoran surat, memproses disposisi, memperbarui status via QR, mencetak dokumen, dan melayani pengambilan berkas. |
+| 📋 **Kasubbag TU Sekjen** | Memeriksa berkas masuk, melakukan verifikasi tata naskah, memantau pergerakan fisik dokumen, dan mengawasi lajur disposisi pimpinan. |
+| 👔 **Sekretaris Jenderal** | Melihat ringkasan eksekutif persuratan masuk, memberikan lembar disposisi instruksi kepada unit kerja terkait/koordinator. |
+| 🌐 **Pemohon / Publik** | Mengajukan permohonan naskah secara mandiri melalui portal publik, melacak posisi berkas, dan menerima update WhatsApp. |
 
 ---
 
-## 4. Tracking Surat (Untuk Publik)
-
-Halaman ini bisa diakses siapa saja, **tanpa perlu login**. Biasanya digunakan oleh pemohon surat yang ingin tahu sudah sampai mana prosesnya.
-
-### Cara Melacak Surat:
-
-1. Buka halaman tracking (biasanya halaman utama SiTrack).
-2. Masukkan **kode tracking** di kolom pencarian. Contoh: `TRK-240901-001`
-3. Klik **Lacak** atau tekan Enter.
-
-### Informasi yang Ditampilkan:
-
-Kalau kode tracking valid, kamu akan melihat:
-
-- ✅ **Status surat** saat ini (misalnya "Dalam Proses Penandatanganan")
-- 📍 **Posisi berkas sekarang** — surat sedang di meja siapa
-- 📊 **Progres penanganan** — bar persentase, misalnya 60%
-- 🔢 **Nomor surat** (jika sudah ada)
-- 🏢 **Unit pengirim** dan **Unit tujuan**
-- 📎 **Lampiran** — kalau ada dokumen terlampir, bisa langsung dilihat/diunduh
-- 📜 **Timeline riwayat** — perjalanan lengkap surat dari awal sampai sekarang
-
-### Lembar Pendamping
-
-Kalau status surat sudah **"Selesai dan Siap Diambil"**, akan muncul tombol hijau untuk mencetak **Lembar Pendamping** — dokumen fisik yang berisi barcode tracking dan riwayat paraf pimpinan. Ini yang dibawa saat mengambil surat.
-
-> **💡 Tips:** Simpan kode tracking yang diberikan saat mengajukan surat. Kode ini adalah "tiket" kamu untuk memantau progres.
-
----
-
-## 5. Penomoran Surat
-
-### 5.1 Ketersediaan Nomor Surat
-
-**Lokasi:** Sidebar → Penomoran Surat → **Ketersediaan Nomor**
-
-Ini adalah "gudang" nomor surat. Di sini kamu bisa melihat dan mengelola stok nomor untuk setiap jenis naskah (workbook).
-
-#### Navigasi Workbook
-
-Di bagian atas halaman ada **dropdown workbook** — klik untuk berpindah antar jenis naskah. Ada 16 jenis naskah bawaan (NODIN, Biasa/Undangan, Keputusan, dll.).
-
-#### Tiga Jenis Keperluan
-
-| Keperluan | Penjelasan |
-|-----------|-----------|
-| **Tersedia** | Membuat slot nomor baru yang siap digunakan siapa saja |
-| **Pre-Order** | Memesan rentang nomor berurutan dari stok yang tersedia (misal nomor 10-15) |
-| **Reservasi** | Memesan satu nomor spesifik dari stok tersedia untuk keperluan tertentu |
-
-#### Cara Membuat Nomor Baru (Tersedia):
-
-1. Pilih workbook/jenis naskah yang diinginkan.
-2. Klik tombol **Tambah Nomor**.
-3. Pilih keperluan **Tersedia**.
-4. Isi jumlah nomor yang mau dibuat.
-5. Klik **Simpan**.
-
-Nomor-nomor baru akan langsung muncul di daftar dengan status **hijau (Available)**.
-
-#### Cara Pre-Order:
-
-1. Klik **Tambah Nomor** → pilih **Pre-Order**.
-2. Tentukan rentang nomor yang mau dipesan (harus berurutan dan dari stok yang masih tersedia).
-3. Isi informasi pemesanan.
-4. Klik **Simpan** — nomor berubah status menjadi **Reserved** (kuning).
-
-#### Cara Reservasi:
-
-1. Klik **Tambah Nomor** → pilih **Reservasi**.
-2. Pilih satu nomor dari daftar yang masih tersedia.
-3. Isi keterangan reservasi.
-4. Klik **Simpan** — nomor tersebut di-lock untuk reservasi.
-
-> **⚠️ Penting:** Alokasi (Pre-Order/Reservasi) yang belum terpakai bisa dibatalkan — nomornya akan kembali jadi Available. Tapi kalau sudah jadi Data Surat, tidak bisa dikembalikan.
-
-#### Menambah Jenis Naskah Baru
-
-Perlu jenis naskah yang belum ada? Klik tombol **Tambah Jenis Naskah** di halaman ini — tidak perlu masuk ke Master Data.
-
----
-
-### 5.2 Laporan Data Surat
-
-**Lokasi:** Sidebar → Tindak Lanjut / TTD → **Laporan Data Surat**
-
-Halaman ini untuk mencatat surat final yang sudah menggunakan nomor dari stok.
-
-#### Cara Input Data Surat:
-
-1. Klik tombol **Tambah Data Surat**.
-2. Isi form sesuai struktur workbook REKAP NOMOR:
-   - Tanggal Masuk
-   - Unit Pengolah Arsip
-   - Penandatangan Surat
-   - Permohonan
-   - Tujuan Surat
-   - Tanggal Surat
-   - Nomor Urut (pilih dari dropdown — bukan ketik bebas!)
-   - Kode Klasifikasi Arsip
-   - Perihal Surat
-   - Petugas Unit Teknis
-   - ND Pengantar atau Hasil Pindai (tergantung workbook)
-3. Klik **Simpan**.
-
-> **⚠️ Penting:** Nomor Urut harus dipilih dari daftar nomor yang Available atau Reserved. Sistem akan otomatis mengunci nomor saat kamu menyimpan, jadi tidak mungkin dua orang memakai nomor yang sama secara bersamaan.
-
-#### Filter Workbook
-
-Gunakan **dropdown Filter Workbook** di atas statistik untuk menyaring tampilan berdasarkan jenis naskah tertentu. Statistik dan tabel akan berubah sesuai filter.
-
-#### Import & Export
-
-- **Import:** Klik tombol Import untuk upload data dari template Excel.
-- **Export:** Klik tombol Export untuk mengunduh data ke spreadsheet.
-
----
-
-## 6. Tindak Lanjut / Penandatanganan
-
-**Lokasi:** Sidebar → Tindak Lanjut / TTD → **Data Tindak Lanjut**
-
-Ini untuk surat-surat yang membutuhkan proses **paraf dan tanda tangan pimpinan**.
-
-### Alur Kerja:
-
-```
-Surat Masuk → Input ke Tindak Lanjut → Dapat Kode Tracking
-→ Proses Paraf → Proses TTD → Selesai / Siap Diambil
-```
-
-### Cara Input Surat Baru:
-
-1. Klik tombol **Tambah Surat** atau gunakan shortcut dari Dashboard.
-2. Isi form: perihal, unit pengirim, unit tujuan, sifat naskah, lampiran, dll.
-3. Klik **Simpan**.
-4. Sistem otomatis memberikan **kode tracking unik** — catat atau berikan ke pemohon.
-
-### Mengelola Surat:
-
-- **Lihat daftar** — semua surat tindak lanjut tampil dalam tabel dengan status terkini.
-- **Edit** — klik surat untuk mengubah informasi.
-- **Update status** — bisa via halaman Scan QR atau langsung dari halaman tracking.
-
-> **💡 Tips:** Setelah menginput surat baru, langsung berikan kode tracking ke pemohon. Mereka bisa memantau sendiri di halaman tracking publik.
-
----
-
-## 7. Lajur Disposisi
-
-**Lokasi:** Sidebar → Lajur Disposisi
-
-Ini untuk surat masuk yang memerlukan **arahan/perintah dari pimpinan** (disposisi).
-
-### Cara Input Disposisi Baru:
-
-1. Klik **Input Disposisi** di sidebar atau dari Dashboard.
-2. Isi form: asal surat, perihal, tanggal, nomor surat masuk, dll.
-3. Klik **Simpan**.
-
-### Halaman Detail Disposisi:
-
-Klik surat di daftar disposisi untuk melihat detail lengkap:
-- Informasi surat masuk
-- **Instruksi disposisi** dari pimpinan — mendukung disposisi bertingkat
-- Status tindak lanjut
-- Tombol **Tambah Instruksi** untuk menambahkan arahan baru
-- Update status per instruksi
-
-### Cetak Disposisi:
-
-Klik tombol **Cetak** untuk mencetak lembar disposisi format resmi Kemnaker.
-
-> **💡 Tips:** Disposisi bertingkat artinya satu surat bisa punya beberapa instruksi dari pimpinan yang berbeda. Misalnya: Sekjen → Biro Umum → Sub Bagian TU. Semuanya tercatat rapi di SiTrack.
-
----
-
-## 8. Scan QR & Update Status
-
-**Lokasi:** Bisa diakses dari halaman tracking (tombol "Update Status (Admin)") atau URL `/scan-status`
-
-Fitur ini untuk **update status surat secara cepat**, terutama saat surat berpindah posisi.
-
-### Cara Menggunakan:
-
-#### Opsi 1: Input Manual
-1. Ketik kode tracking di kolom pencarian.
-2. Klik **Cari**.
-
-#### Opsi 2: Scan QR via Kamera
-1. Klik tombol **Buka Kamera**.
-2. Arahkan kamera ke barcode/QR yang tercetak di Lembar Pendamping.
-3. Otomatis terbaca dan surat langsung muncul.
-
-#### Opsi 3: Upload Foto QR
-1. Klik ikon **Upload Foto**.
-2. Pilih foto yang berisi QR code dari galeri.
-3. Sistem membaca QR dari gambar.
-
-### Setelah Surat Ditemukan:
-
-1. Ubah **Status** ke status berikutnya sesuai alur.
-2. Ubah **Posisi Berkas** (misal: "Meja Kasubbag TU" → "Meja Sekjen").
-3. Tambahkan **Catatan** jika perlu.
-4. Klik **Simpan** — perubahan langsung tercatat di timeline riwayat.
-
-> **💡 Tips:** Fitur scan QR sangat berguna saat surat berpindah tangan. Cukup scan → pilih status baru → simpan. Dalam hitungan detik, status terbaru sudah bisa dilihat oleh pemohon di halaman tracking.
-
----
-
-## 9. Cetak Dokumen
-
-SiTrack menyediakan dua jenis dokumen cetak:
-
-### Lembar Disposisi
-- Akses: Klik **Cetak** dari halaman Detail Disposisi.
-- Berisi: Kop Kemnaker, informasi surat masuk, instruksi disposisi, tanda tangan.
-- Format: A4, siap cetak.
-
-### Lembar Pendamping
-- Akses: Klik **Cetak Lembar Pendamping** dari halaman Tracking (muncul saat surat sudah selesai).
-- Berisi: Barcode tracking, informasi surat, riwayat paraf pimpinan.
-- Fungsi: Kontrol fisik persuratan — dibawa saat mengambil surat.
-
-> **💡 Tips:** Pastikan printer sudah terhubung dan kertas A4 tersedia sebelum mencetak. Kalau mau preview dulu, browser akan membuka halaman cetak di tab baru.
-
----
-
-## 10. Master Data (Super Admin)
-
-> **⚠️ Bagian ini hanya untuk Super Admin**
-
-### Unit Kerja
-Kelola daftar unit kerja/organisasi di lingkungan Kemnaker. Tambah, edit, atau hapus unit.
-
-### Jenis Naskah
-Kelola jenis naskah penomoran (workbook). 16 jenis naskah sudah ter-seed secara default.
-
-### Kategori Surat
-Kelola kategori untuk mengklasifikasikan surat.
-
-### User & Akses
-Kelola akun pengguna — tambah user baru, atur peran (role), atau nonaktifkan akun.
-
-### Alur Status
-Konfigurasi urutan status yang bisa dipilih saat update status surat. Misalnya:
-```
-Diterima → Proses Paraf → Proses TTD → Selesai → Siap Diambil → Sudah Diambil
-```
-
-### Rekap Master
-Lihat ringkasan seluruh data master dan export ke Excel untuk pelaporan.
-
----
-
-## 11. Tips & Trik
-
-### 🔹 Sidebar Bisa Diciutkan
-Klik tanda panah di tepi sidebar untuk menciutkannya. Layar kerja jadi lebih luas! Klik lagi untuk mengembalikan.
-
-### 🔹 Keyboard Shortcut
-Di halaman tracking, tekan **Enter** setelah mengetik kode tracking untuk langsung mencari.
-
-### 🔹 Responsive / Mobile Friendly
-SiTrack bisa diakses dari HP. Di layar kecil, sidebar berubah jadi menu hamburger yang bisa dibuka/tutup.
-
-### 🔹 Warna Status
-Perhatikan warna badge status:
-- 🟢 **Hijau** — Selesai / Tersedia
-- 🟡 **Kuning** — Dalam Proses / Reserved
-- 🔵 **Biru** — Informasi / Baru
-- 🔴 **Merah** — Urgent / Ditolak
-
-### 🔹 Nomor Surat Aman
-Sistem menggunakan **row locking** saat menyimpan Data Surat. Artinya, mustahil dua orang menggunakan nomor yang sama secara bersamaan — bahkan kalau klik Simpan di detik yang sama.
-
----
-
-## 12. FAQ — Pertanyaan yang Sering Ditanyakan
-
-### ❓ Saya lupa password, bagaimana?
-Hubungi Super Admin untuk di-reset. Saat ini belum ada fitur "Lupa Password" otomatis.
-
-### ❓ Kode tracking tidak ditemukan?
-Pastikan kode tracking yang dimasukkan benar (perhatikan huruf besar/kecil dan tanda hubung). Kalau masih tidak ditemukan, kemungkinan surat belum diinput ke sistem.
-
-### ❓ Nomor surat yang saya mau sudah terpakai?
-Nomor bersifat first-come-first-served. Kalau nomor yang kamu incar sudah menjadi `used`, pilih nomor lain yang masih `available`. Atau minta Admin membuat stok nomor baru.
-
-### ❓ Bisa tidak mengembalikan nomor yang sudah terpakai?
-Tidak bisa. Nomor yang statusnya sudah `used` (sudah jadi Data Surat) bersifat final. Yang bisa dikembalikan hanya nomor yang statusnya `reserved` dan belum digunakan.
-
-### ❓ Siapa yang bisa akses halaman tracking?
-Semua orang — halaman tracking bersifat publik, tidak perlu login. Cukup punya kode tracking.
-
-### ❓ Bagaimana cara menambah jenis naskah baru?
-Ada dua cara:
-1. **Cara cepat:** Klik tombol **Tambah Jenis Naskah** di halaman Ketersediaan Nomor.
-2. **Via Master Data:** Buka Master Data → Jenis Naskah → Tambah.
-
-### ❓ Scan QR tidak bisa di HP saya?
-Scan QR membutuhkan **HTTPS** (koneksi aman). Jika akses via HTTP biasa, kamera tidak bisa diaktifkan karena kebijakan keamanan browser. Hubungi Admin untuk memastikan SiTrack diakses via HTTPS. Alternatif: gunakan fitur **Upload Foto QR** dari galeri.
-
-### ❓ Bagaimana cara kerja Notifikasi WhatsApp otomatis?
-SiTrack terhubung langsung dengan **WhatsApp Gateway (Meta WhatsApp Cloud API)**:
-1. **Saat Pengajuan Berhasil**: Pemohon akan langsung menerima pesan WA berisi **Nomor Resi / Kode Tracking** dan link pelacakan langsung.
-2. **Saat Status Diperbarui**: Setiap kali admin/petugas mengubah status dokumen (misal: "Diperiksa Oleh Sekjen", "Selesai dan Siap Untuk diambil", "Dokumen Sudah diambil", dll), sistem otomatis mengirim pesan pembaruan status terkini ke nomor WA pemohon.
-3. **Konfigurasi Administrator**: Admin dapat mengatur token dan nomor pengirim di file `.env` melalui variabel `WHATSAPP_PHONE_NUMBER_ID` dan `WHATSAPP_API_TOKEN`, serta melakukan uji coba menggunakan perintah `php artisan wa:test <nomor_hp>`.
-
-### ❓ Bagaimana deploy update ke server?
-Untuk tim teknis, jalankan perintah berikut:
-```bash
-cd /opt/sitrack
-git pull origin main
-docker compose exec app php artisan optimize:clear
+## 3. Alur Kerja Utama Persuratan (End-to-End Workflow)
+
+```mermaid
+graph TD
+    A[Surat / Naskah Masuk] --> B{Pilih Lajur Persuratan}
+    
+    B -->|Lajur 1: Penandatanganan| C[Input Tindak Lanjut / TTD]
+    B -->|Lajur 2: Disposisi| D[Input Disposisi Surat Masuk]
+    
+    C --> E[Sistem Terbitkan Kode Resi & QR Code]
+    D --> E
+    
+    E --> F[WhatsApp Bot Kirim Notifikasi ke Pemohon]
+    E --> G[Cetak Lembar Pendamping / Disposisi]
+    
+    G --> H[Berkas Fisik Bergerak: Verifikasi & TTD]
+    H --> I[Petugas Scan QR untuk Update Posisi & Status]
+    
+    I --> J{Status Selesai?}
+    J -->|Belum| H
+    J -->|Selesai| K[Alokasikan Nomor Resmi di Buku Register]
+    
+    K --> L[Pengambilan Berkas di Loket TU]
+    L --> M[Penerima Tanda Tangan Digital pada Signature Pad]
+    M --> N[Status Berubah: Dokumen Sudah Diambil]
 ```
 
 ---
 
-> **Butuh bantuan lebih lanjut?** Hubungi tim IT atau Super Admin di unit kerja kamu. Selamat menggunakan SiTrack! 🚀
+## 4. Akses & Keamanan Akun (Login & Profil)
 
+### 4.1 Cara Masuk ke Aplikasi
+1. Buka browser dan akses alamat resmi: **`https://sitrack.my.id/login`**.
+2. Masukkan **Username** dan **Password** yang telah didaftarkan.
+3. Klik tombol **Masuk ke Sistem**.
+4. Jika kredensial valid, Anda akan langsung diarahkan ke Dashboard utama.
+
+### 4.2 Mengubah Kata Sandi (Password)
+1. Pada bagian pojok kiri bawah *sidebar*, klik nama/profil akun Anda.
+2. Pilih menu **Ubah Password**.
+3. Masukkan kata sandi lama, lalu masukkan kata sandi baru (minimal 8 karakter kombinasi huruf dan angka).
+4. Klik **Simpan Perubahan**.
+
+---
+
+## 5. Dashboard Pusat Komando Persuratan
+
+Dashboard dirancang sebagai pusat kendali untuk memantau seluruh aktivitas persuratan harian dalam satu layar.
+
+### Komponen Utama Dashboard:
+- **Kartu Metrik Utama:**
+  - *Total Surat*: Keseluruhan dokumen yang tercatat dalam tahun berjalan.
+  - *Lajur Tindak Lanjut / TTD*: Dokumen yang sedang dalam proses paraf atau tanda tangan.
+  - *Lajur Disposisi*: Surat masuk yang memerlukan atau sedang dalam instruksi pimpinan.
+  - *Nomor Tersedia*: Sisa kuota slot nomor surat yang siap digunakan.
+- **Pintasan Cepat (*Quick Action*):** Tombol cepat untuk `+ Catat Naskah Baru` dan `+ Input Disposisi`.
+- **Tabel Monitoring Surat Terbaru:** Menampilkan 10 transaksi persuratan terakhir lengkap dengan status dan posisinya.
+
+---
+
+## 6. Portal Publik: Pelacakan & Pengajuan Mandiri
+
+SiTrack menyediakan antarmuka publik yang dapat diakses oleh seluruh pegawai atau unit kerja tanpa perlu login.
+
+### 6.1 Melacak Status Surat
+1. Buka menu **Portal Publik** atau akses `https://sitrack.my.id/tracking`.
+2. Masukkan **Kode Tracking** (contoh: `ND_MEMO-20260921-001`) atau **Nomor Agenda**.
+3. Klik tombol **Lacak Surat**.
+4. Sistem menampilkan:
+   - *Status & Posisi Terkini* berkas (misal: "Diperiksa Oleh Kasubbag TU Sekjen").
+   - *Progress Bar* persentase tahapan administrasi.
+   - *Timeline Riwayat*: Kronologi lengkap pergerakan surat beserta tanggal, jam, dan catatan petugas.
+
+### 6.2 Pengajuan Permohonan Mandiri (`/ajukan-surat`)
+Unit kerja pengolah dapat mendaftarkan konsep naskah secara mandiri:
+1. Klik tombol **Ajukan Surat** pada navigasi atas portal publik.
+2. Isi formulir pengajuan:
+   - Jenis naskah yang dimohonkan.
+   - Perihal surat dan unit kerja pengirim.
+   - Nama pemohon dan **Nomor WhatsApp aktif** (wajib diisi untuk menerima notifikasi).
+   - Unggah berkas dokumen (PDF/Word).
+3. Klik **Kirim Pengajuan**. Sistem otomatis menerbitkan resi pelacakan.
+
+---
+
+## 7. Integrasi Notifikasi WhatsApp Otomatis
+
+SiTrack terhubung langsung ke **WhatsApp Cloud Gateway**:
+
+1. **Notifikasi Registrasi Sukses:** Begitu surat tercatat, pemohon langsung menerima pesan WhatsApp berisi nomor agenda, kode tracking, dan tautan langsung untuk memantau surat.
+2. **Notifikasi Pembaruan Alur:** Setiap kali petugas melakukan scan QR atau memperbarui status naskah, sistem mengirimkan pesan status terbaru.
+3. **Notifikasi Dokumen Siap Diambil:** Saat pimpinan telah menandatangani naskah, pemohon menerima pesan pemberitahuan untuk mengambil dokumen fisik di loket TU Sekjen.
+
+---
+
+## 8. Manajemen Penomoran Surat (16 Jenis Naskah - Rekap 2026)
+
+### 8.1 Ketersediaan Nomor Surat
+**Lokasi Menu:** *Sidebar → Penomoran Surat → Ketersediaan Nomor*
+
+Menu ini berfungsi mengelola stok nomor urut naskah dinas per tahun anggaran untuk 16 jenis workbook (seperti *Nota Dinas, Undangan, SK, Surat Tugas, Edaran, dll.*).
+
+#### 3 Model Alokasi Nomor:
+1. **Tersedia (*Available*):** Membuat *batch* kuota nomor urut baru yang siap dipakai.
+   - *Cara*: Klik `+ Tambah Nomor` ➔ Pilih Keperluan **Tersedia** ➔ Tentukan rentang nomor (contoh: 1 s/d 50) ➔ Klik **Simpan**.
+2. **Pre-Order:** Mengalokasikan rentang nomor berurutan untuk unit tertentu sebelum naskah final selesai.
+   - *Cara*: Klik `+ Tambah Nomor` ➔ Pilih **Pre-Order** ➔ Pilih rentang nomor dari stok yang tersedia ➔ Masukkan nama unit dan peruntukan ➔ Klik **Simpan**.
+3. **Reservasi (*Booking*):** Mengunci satu nomor urut khusus untuk naskah tertentu.
+   - *Cara*: Klik `+ Tambah Nomor` ➔ Pilih **Reservasi** ➔ Tentukan 1 nomor spesifik ➔ Masukkan nama PIC / keterangan reservasi ➔ Klik **Simpan**.
+
+---
+
+### 8.2 Buku Register Laporan Data Surat
+**Lokasi Menu:** *Sidebar → Tindak Lanjut / TTD → Laporan Data Surat*
+
+Menampilkan buku register penomoran resmi yang sudah terbit (*Used* / *Reserved*).
+
+#### Tata Cara Registrasi Nomor Surat:
+1. Klik tombol **`+ Tambah Data`** di kanan atas.
+2. Lengkapi formulir registrasi:
+   - **Jenis Naskah / Workbook**: Pilih salah satu dari 16 jenis naskah.
+   - **Nomor Urut**: Pilih nomor urut dari stok nomor yang berstatus *Available* atau *Reserved*.
+   - **Kode Klasifikasi Arsip**: Masukkan kode klasifikasi (contoh: `KP.08.01`, `HK.02`, `UM.01`).
+   - **Unit Pengolah & Penandatangan**: Pilih unit pembuat dan pejabat penandatangan.
+   - **Perihal & Tujuan**: Masukkan perihal surat dan pihak tujuan.
+   - **Unggah Dokumen Final (PDF)**: Lampirkan file hasil scan naskah final yang sudah bertanda tangan.
+3. Klik **Simpan**. Sistem secara otomatis mengunci nomor tersebut menjadi **Terpakai (`used`)** dan membentuk nomor surat lengkap:
+   $$\text{Format: } \text{B-1/0908/HM.08/IX/2026}$$
+
+#### Fitur Ekspor:
+- Klik tombol **Cetak Laporan** ➔ Pilih **Export Excel (Multi-Sheet)** untuk mengunduh rekapitulasi seluruh 16 workbook dalam satu file Excel.
+
+---
+
+## 9. Lajur Pertama: Tindak Lanjut / Penandatanganan Pimpinan
+
+**Lokasi Menu:** *Sidebar → Tindak Lanjut / TTD → Data Tindak Lanjut*
+
+Khusus melayani alur naskah dinas internal yang memerlukan proses paraf Kasubbag TU, penelaahan, hingga penandatanganan Sekretaris Jenderal atau Menteri.
+
+### Langkah Operasional:
+1. **Penerimaan Berkas:** Klik `+ Catat Naskah Baru` saat berkas fisik masuk ke loket TU.
+2. **Pengisian Metadata:** Isi unit pengirim, perihal, nama konseptor/pengantar, nomor HP, dan tindakan yang dimohonkan (Mohon Paraf / Mohon Tanda Tangan).
+3. **Pemberian Resi:** Cetak Lembar Pendamping dan tempelkan pada map berkas.
+4. **Pembaruan Tahapan Alur:**
+   - `Diregistrasi` ➔ `Diperiksa Oleh TU Sekjen` ➔ `Diperiksa Oleh Kasubag TU Sekjen` ➔ `Diperiksa Oleh Sekjen` ➔ `Selesai dan Siap Untuk Diambil`.
+
+---
+
+## 10. Lajur Kedua: Pengelolaan Disposisi Surat Masuk
+
+**Lokasi Menu:** *Sidebar → Lajur Disposisi*
+
+Digunakan untuk menatausahakan surat masuk dari pihak eksternal/kementerian lain yang ditujukan kepada Sekretaris Jenderal.
+
+### Langkah Operasional:
+1. **Registrasi Surat Masuk:** Klik `+ Input Surat Disposisi` ➔ masukkan instansi asal, nomor surat masuk, perihal, dan tanggal surat.
+2. **Pencatatan Instruksi Pimpinan:**
+   - Buka menu **Lajur Disposisi** ➔ klik pada baris surat.
+   - Pada panel lembar disposisi, pilih unit tujuan (dapat memilih lebih dari satu unit kerja).
+   - Tentukan **Unit Koordinator Utama** dan unit pendamping.
+   - Tuliskan instruksi pimpinan (contoh: *"Tindaklanjuti sesuai ketentuan"*, *"Hadiri/Wakili"*, *"Koordinasikan"*).
+   - Tentukan batas waktu tindak lanjut (*Due Date*).
+3. **Cetak Lembar Disposisi:** Klik tombol **Cetak Disposisi** untuk mencetak lembar disposisi format standar Kemnaker RI.
+
+---
+
+## 11. Pemindai QR Code & Pembaruan Status Berkas
+
+**Lokasi Akses:** Tombol **Scan QR** di bilah atas (*topbar*) atau tombol **Update via QR**.
+
+Fitur ini memungkinkan petugas memperbarui posisi dan status berkas dalam waktu kurang dari 5 detik tanpa perlu mengetik manual.
+
+### 3 Pilihan Metode Pemindaian:
+1. **Pemindai Kamera Langsung:** Arahkan kamera smartphone atau webcam laptop ke QR Code pada lembar pendamping naskah.
+2. **Unggah Foto Berkas:** Jika menggunakan foto/dokumen digital, klik `Jepret / Upload Foto QR` dan pilih gambar dari galeri/folder.
+3. **Input ID Pelacakan Manual:** Masukkan kode tracking pada kolom pencarian jika kamera tidak tersedia.
+
+### Menyimpan Perubahan Status:
+- Begitu QR Code terdeteksi, detail surat akan langsung terbuka.
+- Pilih **Status Dokumen** baru dan **Posisi Berkas Saat Ini** (contoh: *Meja Kasubbag TU Sekjen*, *Loket Pengambilan*).
+- Tambahkan catatan jika terdapat koreksi/revisi.
+- Klik **Simpan Perubahan Status**.
+
+---
+
+## 12. Format Cetak Resmi & Tanda Tangan Digital Pengambilan
+
+### 12.1 Lembar Pendamping Naskah Dinas
+Dokumen kendali yang memuat:
+- Kop Resmi Sub Bagian TU Sekjen, SAM, dan SKM.
+- QR Code pelacakan dan kode resi surat.
+- Kotak centang tindakan yang dimohonkan.
+- Tabel riwayat alur paraf dan penomoran resmi.
+
+### 12.2 Serah Terima Berkas Digital (*Digital Handover*)
+Saat perwakilan unit pengolah mengambil berkas fisik yang sudah selesai di loket TU:
+1. Petugas membuka menu surat terkait di loket TU.
+2. Pada layar pengambilan, sistem menampilkan **Digital Signature Pad**.
+3. Pengambil berkas membubuhkan tanda tangan digital langsung di layar monitor sentuh atau HP petugas.
+4. Tanda tangan digital otomatis tersimpan permanen ke dalam sistem sebagai bukti otentik serah terima berkas.
+
+---
+
+## 13. Pengelolaan Master Data (Khusus Super Admin)
+
+Super Administrator memiliki akses khusus untuk mengelola parameter sistem:
+
+1. **Master Unit / Instansi:** Mengatur 24 unit kerja resmi di lingkungan Kemnaker RI (Biro, Ditjen, Badan, Pusat, Staf Ahli).
+2. **Master Jenis Naskah Penomoran:** Mengatur pola nomor (*pattern*), format digit urut, dan buku register.
+3. **Master Kategori Surat:** Mengelompokkan jenis persuratan dinas.
+4. **Master Pengguna (*User Management*):** Menambah akun staf, menentukan *role* kewenangan, dan me-reset kata sandi.
+
+---
+
+## 14. Panduan Pemecahan Masalah (Troubleshooting & FAQ)
+
+### ❓ Mengapa kamera scanner QR tidak terbuka di browser HP?
+> **Solusi:** Browser modern (Chrome/Safari) mewajibkan koneksi **HTTPS** untuk memberikan izin kamera. Pastikan Anda mengakses alamat **`https://sitrack.my.id`** (dengan protokol HTTPS). Jika muncul pop-up izin browser, pilih **Allow / Izinkan Kamera**.
+
+### ❓ Bagaimana jika WhatsApp notifikasi tidak terkirim?
+> **Solusi:** 
+> 1. Pastikan nomor handphone pemohon yang diinput aktif di WhatsApp.
+> 2. Administrator dapat memverifikasi status token WhatsApp Meta melalui terminal server dengan perintah: `docker compose exec app php artisan wa:test 08xxxxxxxxxx`.
+
+### ❓ Apakah nomor surat yang sudah dialokasikan bisa dibatalkan?
+> **Solusi:**
+> - Nomor berstatus **Pre-Order** atau **Reservasi** yang belum digunakan dapat dibatalkan melalui menu *Ketersediaan Nomor* (status kembali menjadi *Available*).
+> - Nomor yang sudah tersimpan di *Laporan Data Surat* (berstatus *Used*) bersifat final dan tidak dapat dihapus untuk menjaga keutuhan audit nomor arsip negara.
+
+### ❓ Mengapa surat yang baru dicatat di Tindak Lanjut belum muncul di Laporan Data Surat?
+> **Solusi:** Surat di Tindak Lanjut yang berstatus `No: (Belum ada nomor)` adalah konsep naskah yang sedang dalam proses paraf/tanda tangan. Surat akan otomatis masuk ke buku register *Laporan Data Surat* begitu nomor resmi dialokasikan/diterbitkan.
+
+---
+
+**SiTrack — Sistem Informasi & Tracking Persuratan**  
+*Bagian Tata Usaha Sekretariat Jenderal Kementerian Ketenagakerjaan Republik Indonesia © 2026*

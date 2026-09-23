@@ -7,15 +7,21 @@ const props = defineProps<{
 
 const badgeClass = computed(() => {
     switch (props.status) {
+        case 'Selesai dan Siap Untuk diambil':
+        case 'Selesai dan Siap Untuk Diambil':
+        case 'Dokumen selesai dan sudah bisa diambil':
+        case 'Dokumen Selesai dan Sudah Bisa Diambil':
+        case 'Surat Selesai di Paraf/TTD dan bisa diambil':
+        case 'Siap Diambil':
+        case 'Siap diambil':
+        case 'ready_for_pickup':
+            return 'badge-status-ready';
         case 'Dokumen Sudah diambil':
         case 'Dokumen Sudah Diambil':
         case 'Sudah Diambil':
         case 'Sudah diambil':
-        case 'Selesai dan Siap Untuk diambil':
-        case 'Selesai dan Siap Untuk Diambil':
         case 'Selesai':
         case 'Tuntas':
-        case 'Surat Selesai di Paraf/TTD dan bisa diambil':
         case 'completed':
             return 'badge-status-completed';
         case 'Proses Paraf/TTD Sekjen':
