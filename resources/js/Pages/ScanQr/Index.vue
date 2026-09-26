@@ -387,7 +387,7 @@ watch(mode, (newMode) => {
                     <input
                         v-model="scanInput"
                         type="text"
-                        placeholder="Contoh: AG-M-2026-0008 atau ND_MEMO-20260920-001"
+                        placeholder="Masukkan kode tracking atau nomor agenda..."
                         class="form-control rounded-3 py-2.5 px-3 font-mono text-sm border-slate-200 focus:border-primary"
                         @keydown.enter.prevent="handleSearch"
                         autofocus
@@ -400,19 +400,6 @@ watch(mode, (newMode) => {
                     >
                         <i class="bi bi-search"></i>
                         <span>Cari</span>
-                    </button>
-                </div>
-                <div class="d-flex align-items-center gap-2 mt-3 flex-wrap">
-                    <span class="text-muted" style="font-size: 11px;">Contoh:</span>
-                    <button
-                        type="button"
-                        v-for="demoCode in ['AG-M-2026-0008', 'AG-M-2026-0007', 'AG-M-2026-0006']"
-                        :key="demoCode"
-                        @click="scanInput = demoCode; handleSearch()"
-                        class="btn btn-sm btn-light py-0.5 px-2 rounded font-mono text-xs border"
-                        style="color: #2743AF;"
-                    >
-                        {{ demoCode }}
                     </button>
                 </div>
             </div>
