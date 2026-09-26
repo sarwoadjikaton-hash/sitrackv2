@@ -71,7 +71,7 @@ const previewWorkbooks = computed(() => {
     <AppLayout title="Dashboard">
         <Head title="Dashboard" />
 
-        <div class="max-w-7xl mx-auto space-y-6">
+        <div class="w-full space-y-6">
             <!-- Greeting & Actions -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
