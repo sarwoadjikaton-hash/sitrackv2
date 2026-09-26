@@ -58,37 +58,76 @@ defineProps<{
         <div class="row g-3 mb-4">
             <div class="col-md-6 col-xl-3">
                 <div class="dsh-stat-card">
-                    <span class="dsh-stat-icon dsh-icon-primary"><i class="bi bi-pen-fill"></i></span>
-                    <div class="dsh-stat-value">{{ stats.signature.total }}</div>
-                    <div class="dsh-stat-title">Tindak Lanjut / TTD</div>
-                    <div class="dsh-stat-sub">{{ stats.signature.in_progress }} Dalam Proses &bull; {{
-                        stats.signature.completed }} Selesai</div>
-                </div>
-            </div>
-            <div class="col-md-6 col-xl-3">
-                <div class="dsh-stat-card">
-                    <span class="dsh-stat-icon dsh-icon-accent"><i class="bi bi-diagram-3-fill"></i></span>
-                    <div class="dsh-stat-value">{{ stats.disposition.total }}</div>
-                    <div class="dsh-stat-title">Lajur Disposisi</div>
-                    <div class="dsh-stat-sub">{{ stats.disposition.in_progress }} Proses &bull; {{
-                        stats.disposition.completed }} Tuntas</div>
-                </div>
-            </div>
-            <div class="col-md-6 col-xl-3">
-                <div class="dsh-stat-card">
-                    <span class="dsh-stat-icon dsh-icon-success"><i class="bi bi-check2-circle"></i></span>
-                    <div class="dsh-stat-value">{{ stats.stock.available }}</div>
-                    <div class="dsh-stat-title">Nomor Tersedia</div>
-                    <div class="dsh-stat-sub">Tahun {{ stats.stock.year }} &bull; {{ stats.stock.reserved }} Direservasi
+                    <div class="dsh-stat-card-top">
+                        <span class="dsh-stat-icon dsh-icon-primary"><i class="bi bi-pen-fill"></i></span>
+                        <span class="dsh-stat-tag">Lajur 1</span>
+                    </div>
+                    <div>
+                        <div class="dsh-stat-value">{{ stats.signature.total }}</div>
+                        <div class="dsh-stat-title">Tindak Lanjut / TTD</div>
+                    </div>
+                    <div>
+                        <span class="dsh-stat-sub">
+                            <i class="bi bi-clock-history text-warning"></i>
+                            <strong>{{ stats.signature.in_progress }}</strong> Proses &bull;
+                            <strong class="text-success">{{ stats.signature.completed }}</strong> Selesai
+                        </span>
                     </div>
                 </div>
             </div>
             <div class="col-md-6 col-xl-3">
                 <div class="dsh-stat-card">
-                    <span class="dsh-stat-icon dsh-icon-info"><i class="bi bi-file-earmark-check"></i></span>
-                    <div class="dsh-stat-value">{{ stats.stock.used }}</div>
-                    <div class="dsh-stat-title">Nomor Digunakan</div>
-                    <div class="dsh-stat-sub">Total slot terdaftar: {{ stats.stock.total }}</div>
+                    <div class="dsh-stat-card-top">
+                        <span class="dsh-stat-icon dsh-icon-accent"><i class="bi bi-diagram-3-fill"></i></span>
+                        <span class="dsh-stat-tag">Lajur 2</span>
+                    </div>
+                    <div>
+                        <div class="dsh-stat-value">{{ stats.disposition.total }}</div>
+                        <div class="dsh-stat-title">Lajur Disposisi</div>
+                    </div>
+                    <div>
+                        <span class="dsh-stat-sub">
+                            <i class="bi bi-arrow-repeat text-info"></i>
+                            <strong>{{ stats.disposition.in_progress }}</strong> Proses &bull;
+                            <strong class="text-success">{{ stats.disposition.completed }}</strong> Tuntas
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="dsh-stat-card">
+                    <div class="dsh-stat-card-top">
+                        <span class="dsh-stat-icon dsh-icon-success"><i class="bi bi-check2-circle"></i></span>
+                        <span class="dsh-stat-tag">{{ stats.stock.year }}</span>
+                    </div>
+                    <div>
+                        <div class="dsh-stat-value">{{ stats.stock.available }}</div>
+                        <div class="dsh-stat-title">Nomor Tersedia</div>
+                    </div>
+                    <div>
+                        <span class="dsh-stat-sub">
+                            <i class="bi bi-bookmark-check text-primary"></i>
+                            <strong>{{ stats.stock.reserved }}</strong> Direservasi
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="dsh-stat-card">
+                    <div class="dsh-stat-card-top">
+                        <span class="dsh-stat-icon dsh-icon-info"><i class="bi bi-file-earmark-check"></i></span>
+                        <span class="dsh-stat-tag">Register</span>
+                    </div>
+                    <div>
+                        <div class="dsh-stat-value">{{ stats.stock.used }}</div>
+                        <div class="dsh-stat-title">Nomor Digunakan</div>
+                    </div>
+                    <div>
+                        <span class="dsh-stat-sub">
+                            <i class="bi bi-layers text-secondary"></i>
+                            Dari <strong>{{ stats.stock.total }}</strong> Total Slot
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -110,17 +149,22 @@ defineProps<{
 
                     <div class="d-flex flex-column gap-2">
                         <div v-for="letter in recentLetters" :key="letter.id" class="dsh-row-item">
+                            <div class="dsh-row-icon">
+                                <i class="bi bi-file-earmark-text-fill"></i>
+                            </div>
                             <div class="flex-grow-1" style="min-width: 0;">
-                                <div class="fw-bold text-teal small">{{ letter.agenda_number || '-' }}</div>
-                                <div class="fw-semibold text-dark text-truncate small">{{ letter.subject }}</div>
-                                <small class="text-muted text-truncate d-block">{{ letter.sender_unit ||
-                                    letter.sender_name }} &bull; <span class="font-monospace">{{ letter.tracking_code
-                                        }}</span></small>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="fw-bold text-teal small font-monospace">{{ letter.agenda_number || '-' }}</span>
+                                    <span class="dsh-mini-badge" style="font-size: 0.62rem; padding: 0.15rem 0.5rem;">{{ letter.tracking_code }}</span>
+                                </div>
+                                <div class="fw-semibold text-dark text-truncate small mb-1">{{ letter.subject }}</div>
+                                <small class="text-muted text-truncate d-block">
+                                    <i class="bi bi-building me-1 opacity-75"></i>{{ letter.sender_unit || letter.sender_name }}
+                                </small>
                             </div>
                             <StatusBadge :status="letter.status" />
                         </div>
-                        <div v-if="recentLetters.length === 0" class="text-center py-4 text-muted small">Belum ada data
-                            surat.</div>
+                        <div v-if="recentLetters.length === 0" class="text-center py-4 text-muted small">Belum ada data surat.</div>
                     </div>
                 </div>
             </div>
@@ -141,18 +185,24 @@ defineProps<{
                     <div class="d-flex flex-column gap-2">
                         <div v-for="disp in recentDispositions" :key="disp.id" class="dsh-disp-item">
                             <div class="d-flex align-items-center justify-content-between mb-1">
-                                <span class="fw-bold text-teal small">
-                                    <i class="bi bi-person-fill me-1"></i>{{ disp.from_name }} &rarr; {{
-                                        disp.to_unit?.unit_name || disp.to_name || 'Unit' }}
+                                <span class="fw-bold text-teal small d-inline-flex align-items-center gap-1">
+                                    <i class="bi bi-person-circle"></i>
+                                    <span>{{ disp.from_name }}</span>
+                                    <i class="bi bi-arrow-right opacity-50"></i>
+                                    <span>{{ disp.to_unit?.unit_name || disp.to_name || 'Unit' }}</span>
                                 </span>
                                 <span class="dsh-mini-badge">{{ disp.status }}</span>
                             </div>
-                            <p class="mb-1 text-dark small fw-medium text-truncate-2">{{ disp.instruction }}</p>
-                            <small class="text-muted d-block">Terkait: <span class="fw-semibold">{{ disp.letter?.subject
-                                || '-' }}</span></small>
+                            <div class="dsh-disp-instruction-box">
+                                <p class="mb-0 text-dark small fw-medium text-truncate-2">
+                                    <i class="bi bi-chat-left-quote me-1 text-teal opacity-75"></i>{{ disp.instruction }}
+                                </p>
+                            </div>
+                            <small class="text-muted d-block text-truncate">
+                                Terkait: <span class="fw-semibold text-dark">{{ disp.letter?.subject || '-' }}</span>
+                            </small>
                         </div>
-                        <div v-if="recentDispositions.length === 0" class="text-center py-4 text-muted small">Belum ada
-                            instruksi disposisi.</div>
+                        <div v-if="recentDispositions.length === 0" class="text-center py-4 text-muted small">Belum ada instruksi disposisi.</div>
                     </div>
                 </div>
             </div>
@@ -163,8 +213,7 @@ defineProps<{
             <div class="dsh-panel-head">
                 <div>
                     <h5 class="fw-bold mb-0 text-dark">Distribusi Stok Nomor per Jenis Naskah</h5>
-                    <small class="text-muted">Status ketersediaan nomor naskah dinas tahun {{ stats.stock.year
-                        }}</small>
+                    <small class="text-muted">Status ketersediaan nomor naskah dinas tahun {{ stats.stock.year }}</small>
                 </div>
                 <Link href="/ketersediaan-nomor" class="dsh-link">
                     Kelola Ketersediaan Nomor <i class="bi bi-arrow-right ms-1"></i>
@@ -174,13 +223,13 @@ defineProps<{
             <div class="row g-3">
                 <div v-for="type in typesSummary" :key="type.id" class="col-md-6 col-lg-3">
                     <div class="dsh-type-card">
-                        <div class="fw-bold text-dark text-truncate mb-2" :title="type.type_name">{{ type.workbook_name
-                            }}</div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="fw-bold text-dark text-truncate" :title="type.type_name">{{ type.workbook_name }}</div>
+                            <span class="dsh-mini-badge" style="font-size: 0.6rem; padding: 0.15rem 0.45rem;">{{ type.type_code }}</span>
+                        </div>
                         <div class="d-flex justify-content-between small text-muted mb-2">
-                            <span>Tersedia: <strong style="color: var(--st-success);">{{ type.available_slots || 0
-                                    }}</strong></span>
-                            <span>Terpakai: <strong style="color: var(--st-danger);">{{ type.used_slots || 0
-                                    }}</strong></span>
+                            <span>Tersedia: <strong style="color: var(--st-success);">{{ type.available_slots || 0 }}</strong></span>
+                            <span>Terpakai: <strong style="color: var(--st-danger);">{{ type.used_slots || 0 }}</strong></span>
                         </div>
                         <div class="dsh-progress-track">
                             <div class="dsh-progress-fill"
