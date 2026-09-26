@@ -2095,3 +2095,203 @@ h1, h2, h3, h4, h5, h6,
     width: 0%;
   }
 }
+
+/* ==========================================================================
+   FIGMA-INSPIRED DASHBOARD MODEL
+   ========================================================================== */
+
+.fg-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.15rem;
+  background: var(--st-navy, #1e3a8a);
+  color: #fff;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+}
+
+.fg-btn-primary:hover {
+  background: var(--st-primary, #2563eb);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.fg-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.15rem;
+  background: #fff;
+  color: var(--st-navy, #1e3a8a);
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.fg-btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: var(--st-navy, #1e3a8a);
+  transform: translateY(-1px);
+}
+
+/* Stat Cards */
+.fg-card {
+  background: #ffffff;
+  border: 1px solid var(--st-border, #e2e8f0);
+  border-radius: 16px;
+  padding: 1.25rem 1.4rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fg-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.08);
+}
+
+.fg-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+.fg-icon-blue {
+  background: #2563eb;
+}
+
+.fg-icon-purple {
+  background: #8b5cf6;
+}
+
+.fg-icon-teal {
+  background: #0d9488;
+}
+
+.fg-icon-amber {
+  background: #f59e0b;
+}
+
+.fg-arrow-corner {
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+.fg-stat-num {
+  font-size: 2.15rem;
+  font-weight: 800;
+  color: var(--st-navy, #0f172a);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.fg-stat-label {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+/* Panels */
+.fg-panel {
+  background: #ffffff;
+  border: 1px solid var(--st-border, #e2e8f0);
+  border-radius: 16px;
+  padding: 1.4rem 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.fg-link {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2563eb;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.fg-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* Rows in Tindak Lanjut */
+.fg-tl-row {
+  padding: 0.85rem 0;
+}
+
+.fg-tl-row:first-child {
+  padding-top: 0.2rem;
+}
+
+.fg-tl-row:last-child {
+  padding-bottom: 0.2rem;
+}
+
+.fg-priority-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  background: #fff7ed;
+  color: #ea580c;
+  border: 1px solid #fed7aa;
+}
+
+.fg-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.fg-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Rows in Disposisi */
+.fg-disp-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.85rem 0;
+}
+
+.fg-disp-row:first-child {
+  padding-top: 0.2rem;
+}
+
+.fg-disp-row:last-child {
+  padding-bottom: 0.2rem;
+}
+
+.fg-disp-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #2563eb;
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+

@@ -268,26 +268,30 @@ const isActive = (path: string, exact = false) =>
                         <i class="bi bi-list"></i>
                     </button>
                     <div class="topbar-heading">
-                        <span class="topbar-heading-mark"></span>
-                        <div class="d-flex align-items-center flex-wrap gap-2">
-                            <h2 class="topbar-title">{{ title || 'Sistem Tracking Persuratan' }}</h2>
-                            <div class="topbar-instansi-pill d-none d-md-inline-flex align-items-center gap-1 px-2 py-0.5 rounded-pill">
-                                <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="14" height="14" />
-                                <span>KEMNAKER RI</span>
-                            </div>
-                        </div>
+                        <h2 class="topbar-title">{{ title || 'Dashboard' }}</h2>
                     </div>
                 </div>
-                <div class="d-flex align-items-center gap-2">
+
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Search Input (Figma model) -->
+                    <div class="topbar-search-box d-none d-md-flex align-items-center">
+                        <i class="bi bi-search text-muted me-2" style="font-size: 0.85rem;"></i>
+                        <input type="text" placeholder="Cari surat..." class="topbar-search-input" />
+                        <span class="topbar-kbd">⌘K</span>
+                    </div>
+
                     <NotificationBell />
-                    <Link v-if="!isSekjen" href="/scan-status" class="btn-topbar btn-topbar-accent">
-                        <span class="btn-topbar-icon"><i class="bi bi-qr-code-scan"></i></span>
-                        <span class="d-none d-sm-inline">Scan QR</span>
-                    </Link>
-                    <Link href="/tracking" class="btn-topbar" target="_blank">
-                        <span class="btn-topbar-icon"><i class="bi bi-box-arrow-up-right"></i></span>
-                        <span class="d-none d-sm-inline">Portal Publik</span>
-                    </Link>
+
+                    <!-- User Pill Badge (Figma model) -->
+                    <div class="topbar-user-pill d-none d-lg-flex align-items-center gap-2">
+                        <div class="user-avatar-circle user-avatar-topbar">
+                            {{ (user?.name || user?.username || 'A').substring(0, 1).toUpperCase() }}
+                        </div>
+                        <div class="text-start leading-tight">
+                            <div class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.1;">{{ user?.name || user?.username }}</div>
+                            <div class="text-muted" style="font-size: 0.68rem;">{{ roleLabel }}</div>
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -843,20 +847,63 @@ const isActive = (path: string, exact = false) =>
     gap: 0.65rem;
 }
 
-.topbar-heading-mark {
-    width: 4px;
-    height: 22px;
-    border-radius: 999px;
-    flex-shrink: 0;
-    background: var(--st-teal);
-}
-
 .topbar-title {
     margin: 0;
     font-weight: 800;
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     letter-spacing: -0.02em;
     color: var(--st-navy);
+}
+
+.topbar-search-box {
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid var(--st-border, #e2e8f0);
+    border-radius: 9999px;
+    padding: 0.35rem 0.85rem;
+    width: 220px;
+    transition: all 0.2s ease;
+}
+
+.topbar-search-box:focus-within {
+    border-color: #2563eb;
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.topbar-search-input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 0.82rem;
+    color: #1e293b;
+    width: 100%;
+}
+
+.topbar-kbd {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #94a3b8;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 0.1rem 0.35rem;
+    line-height: 1;
+}
+
+.topbar-user-pill {
+    padding: 0.25rem 0.65rem 0.25rem 0.35rem;
+    border-radius: 9999px;
+    background: #ffffff;
+    border: 1px solid var(--st-border, #e2e8f0);
+}
+
+.user-avatar-topbar {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 0.82rem !important;
+    flex-shrink: 0;
 }
 
 .hamburger-btn {
