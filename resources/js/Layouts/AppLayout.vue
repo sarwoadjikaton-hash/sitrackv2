@@ -109,16 +109,21 @@ const isActive = (path: string, exact = false) =>
             </button>
 
             <div class="sidebar-inner" @mouseover="showTooltip" @mouseout="hideTooltip">
-                <!-- Brand Header -->
-                <!-- Brand Header -->
+                <!-- Brand Header (Dual Logo) -->
                 <div class="sidebar-header">
                     <Link href="/dashboard" class="brand-wrapper" @click="closeMobileNav">
-                        <div class="brand-figma-box">
-                            <i class="bi bi-file-earmark-text-fill text-white"></i>
+                        <div class="brand-logos-pair">
+                            <span class="brand-logo-ring" title="SiTrack">
+                                <img src="/images/sitrack_logo.svg" alt="SiTrack" width="28" height="28" />
+                            </span>
+                            <span class="brand-pipe-divider">|</span>
+                            <span class="brand-logo-ring brand-kemnaker-ring" title="Kementerian Ketenagakerjaan RI">
+                                <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="26" height="26" class="brand-kemnaker-img" />
+                            </span>
                         </div>
                         <span class="brand-text">
                             <span class="brand-title">SiTrack</span>
-                            <small class="brand-subtitle">TU Sekjen Kemnaker</small>
+                            <small class="brand-subtitle">TU SEKRETARIAT JENDERAL</small>
                         </span>
                     </Link>
                     <button type="button" class="sidebar-close d-lg-none" @click="closeMobileNav">
@@ -468,16 +473,32 @@ const isActive = (path: string, exact = false) =>
     color: #fff;
 }
 
-.brand-figma-box {
-    width: 36px;
-    height: 36px;
+.brand-logos-pair {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex: none;
+}
+
+.brand-logo-ring {
+    width: 34px;
+    height: 34px;
     display: grid;
     place-items: center;
-    background: rgba(39, 67, 175, 0.6);
-    border: 1px solid rgba(61, 165, 249, 0.4);
+    background: rgba(255, 255, 255, 0.12);
     border-radius: 10px;
     flex: none;
-    font-size: 1.1rem;
+    transition: background 0.2s;
+}
+
+.brand-kemnaker-img {
+    filter: brightness(0) invert(1);
+}
+
+.brand-pipe-divider {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.95rem;
+    font-weight: 300;
 }
 
 .brand-text {

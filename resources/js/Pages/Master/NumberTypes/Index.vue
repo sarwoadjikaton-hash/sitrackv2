@@ -62,11 +62,14 @@ const deleteType = (id: number) => {
         router.delete(`/master/number-types/${id}`);
     }
 };
+import MasterTabs from '@/Components/MasterTabs.vue';
 </script>
 
 <template>
     <AppLayout title="Jenis Naskah & Formula Penomoran">
         <Head title="Jenis Naskah & Formula" />
+
+        <MasterTabs />
 
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
             <div>

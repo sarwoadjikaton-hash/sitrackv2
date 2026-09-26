@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
+import MasterTabs from '@/Components/MasterTabs.vue';
 
 const signatureSteps = [
     { 
@@ -125,6 +126,8 @@ const dispositionExceptions = [
 <template>
     <AppLayout title="Panduan Alur Status Persuratan">
         <Head title="Alur Status Persuratan" />
+
+        <MasterTabs />
 
         <div class="mb-4">
             <span class="text-uppercase fw-bold small text-primary tracking-wide">SOP & Alur Operasional</span>

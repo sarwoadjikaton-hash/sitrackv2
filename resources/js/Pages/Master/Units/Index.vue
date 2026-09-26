@@ -61,11 +61,14 @@ const deleteUnit = (id: number) => {
         router.delete(`/master/units/${id}`);
     }
 };
+import MasterTabs from '@/Components/MasterTabs.vue';
 </script>
 
 <template>
     <AppLayout title="Master Unit Kerja / Direktorat">
         <Head title="Master Unit" />
+
+        <MasterTabs />
 
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
             <div>

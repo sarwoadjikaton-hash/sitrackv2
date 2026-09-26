@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import StatCard from '@/Components/StatCard.vue';
+import MasterTabs from '@/Components/MasterTabs.vue';
 import { LetterNumberType } from '@/types';
 
 const props = defineProps<{
@@ -26,6 +27,8 @@ const exportCsv = (type: 'letters' | 'data_surat') => {
 <template>
     <AppLayout title="Rekapitulasi Master Persuratan">
         <Head title="Rekap Master" />
+
+        <MasterTabs />
 
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
             <div>
