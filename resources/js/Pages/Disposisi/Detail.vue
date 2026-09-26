@@ -4,6 +4,7 @@ import { ref, computed, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
 import Modal from '@/Components/Modal.vue';
+import DisposisiTabs from '@/Components/DisposisiTabs.vue';
 import { Letter, Disposition, LetterStatusLog, LetterRelation, Unit, LetterNumberType } from '@/types';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
@@ -226,6 +227,8 @@ const deleteRelation = (id: number) => {
     <AppLayout :title="`Detail Disposisi: ${letter.agenda_number || letter.tracking_code}`">
 
         <Head :title="`Detail Surat: ${letter.agenda_number}`" />
+
+        <DisposisiTabs />
 
         <!-- Header -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">

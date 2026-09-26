@@ -6,6 +6,7 @@ import StatusBadge from '@/Components/StatusBadge.vue';
 import Pagination from '@/Components/Pagination.vue';
 import Modal from '@/Components/Modal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import TindakLanjutTabs from '@/Components/TindakLanjutTabs.vue';
 import { Letter, LetterNumberType, PaginatedData } from '@/types';
 
 const props = defineProps<{
@@ -141,6 +142,8 @@ const deleteLetter = (id: number) => {
     <AppLayout title="Tindak Lanjut / Penandatanganan">
 
         <Head title="Tindak Lanjut & TTD" />
+
+        <TindakLanjutTabs />
 
         <!-- Header -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">

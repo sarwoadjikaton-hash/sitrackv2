@@ -4,6 +4,7 @@ import { ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
 import Pagination from '@/Components/Pagination.vue';
+import DisposisiTabs from '@/Components/DisposisiTabs.vue';
 import { Letter, PaginatedData } from '@/types';
 
 const props = defineProps<{
@@ -32,6 +33,8 @@ const handleFilter = () => {
 <template>
     <AppLayout title="Lajur Disposisi Pimpinan">
         <Head title="Lajur Disposisi" />
+
+        <DisposisiTabs />
 
         <!-- Header -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">

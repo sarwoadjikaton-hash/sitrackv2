@@ -4,6 +4,7 @@ import { ref, computed, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Letter, LetterCategory, Unit, LetterNumberType, LetterNumber } from '@/types';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import TindakLanjutTabs from '@/Components/TindakLanjutTabs.vue';
 import axios from 'axios';
 
 const props = defineProps<{
@@ -299,6 +300,8 @@ const statusOptions = computed(() =>
     <AppLayout :title="isEditing ? 'Ubah Lembar Tindak Lanjut' : 'Input Tindak Lanjut / TTD Baru'">
 
         <Head :title="isEditing ? 'Ubah Tindak Lanjut' : 'Input Tindak Lanjut'" />
+
+        <TindakLanjutTabs />
 
         <!-- Header -->
         <div class="d-flex align-items-center justify-content-between mb-4">
