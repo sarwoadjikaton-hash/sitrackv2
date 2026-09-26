@@ -380,6 +380,16 @@ const breadcrumb = computed(() => {
             </div>
         </aside>
 
+        <!-- Floating Tooltip for Collapsed Sidebar -->
+        <Teleport to="body">
+            <transition name="tooltip-fade">
+                <div v-if="tooltip.visible && tooltip.text" class="sidebar-tooltip-floating"
+                    :style="{ top: `${tooltip.top}px`, left: `${tooltip.left}px` }">
+                    {{ tooltip.text }}
+                </div>
+            </transition>
+        </Teleport>
+
         <transition name="fade">
             <div v-if="isMobileNavOpen" class="sidebar-backdrop d-lg-none" @click="closeMobileNav"></div>
         </transition>
@@ -756,26 +766,26 @@ const breadcrumb = computed(() => {
 /* TOGGLE BUTTON */
 .sidebar-toggle-btn {
     position: absolute;
-    right: -14px;
-    top: 50px;
-    width: 28px;
-    height: 28px;
+    right: -13px;
+    top: 20px;
+    width: 26px;
+    height: 26px;
     background: #2743AF;
     color: #fff;
-    border: 3px solid #EEF7FC;
+    border: 2px solid #ffffff;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 1100;
-    box-shadow: 0 4px 10px rgba(3, 32, 90, 0.25);
+    box-shadow: 0 2px 8px rgba(3, 32, 90, 0.25);
     transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .sidebar-toggle-btn:hover {
     background: #1f37a0;
-    transform: scale(1.08);
+    transform: scale(1.1);
 }
 
 .sidebar-close {
@@ -1135,12 +1145,21 @@ const breadcrumb = computed(() => {
 /* COLLAPSED STATE ADJUSTMENTS */
 @media (min-width: 992px) {
 
+    .app-sidebar.is-collapsed {
+        width: var(--sidebar-collapsed-width);
+    }
+
     .app-sidebar.is-collapsed .sidebar-header {
         justify-content: center;
-        padding: 1.5rem 0.5rem;
+        padding: 1.1rem 0.5rem;
     }
 
     .app-sidebar.is-collapsed .brand-wrapper {
+        justify-content: center;
+        gap: 0;
+    }
+
+    .app-sidebar.is-collapsed .brand-logos-pair {
         justify-content: center;
     }
 
@@ -1148,15 +1167,47 @@ const breadcrumb = computed(() => {
     .app-sidebar.is-collapsed .brand-pipe-divider,
     .app-sidebar.is-collapsed .brand-kemnaker-ring,
     .app-sidebar.is-collapsed .sidebar-caption,
+    .app-sidebar.is-collapsed .sidebar-caption-btn,
     .app-sidebar.is-collapsed .nav-label,
     .app-sidebar.is-collapsed .user-info,
-    .app-sidebar.is-collapsed .user-profile-hint {
-        display: none;
+    .app-sidebar.is-collapsed .user-profile-hint,
+    .app-sidebar.is-collapsed .group-chevron {
+        display: none !important;
+    }
+
+    .app-sidebar.is-collapsed .sidebar-group-item {
+        margin-bottom: 0.25rem;
+    }
+
+    .app-sidebar.is-collapsed .sidebar-group-item:not(:first-child)::before {
+        content: '';
+        display: block;
+        width: 32px;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.12);
+        margin: 0.35rem auto;
+    }
+
+    .app-sidebar.is-collapsed .sidebar-quick-action {
+        padding: 0 !important;
+        display: flex;
+        justify-content: center;
+    }
+
+    .app-sidebar.is-collapsed .sidebar-scan-btn {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        justify-content: center;
+        margin: 0 auto;
+        border-radius: 10px;
     }
 
     .app-sidebar.is-collapsed .sidebar-nav {
         padding: 0 0.5rem;
         align-items: center;
+        display: flex !important;
+        gap: 0.35rem;
     }
 
     .app-sidebar.is-collapsed .nav-link-item {
@@ -1165,37 +1216,50 @@ const breadcrumb = computed(() => {
         height: 44px;
         padding: 0;
         margin: 0 auto;
+        border-radius: 10px;
+        border-left: none !important;
+    }
+
+    .app-sidebar.is-collapsed .nav-link-item.active {
+        border-left: none !important;
+        background: rgba(61, 165, 249, 0.25);
+        border: 1px solid rgba(61, 165, 249, 0.5);
     }
 
     .app-sidebar.is-collapsed .nav-link-item:hover:not(.active) {
         transform: none;
     }
 
-    /* Logout button above user on collapsed */
     .app-sidebar.is-collapsed .sidebar-footer-container {
-        flex-direction: column-reverse;
+        padding: 0.65rem 0.35rem;
         align-items: center;
     }
 
-    .app-sidebar.is-collapsed .logout-wrapper {
-        padding: 0;
-        margin-top: 1rem;
-        margin-bottom: 0;
-    }
-
-    .app-sidebar.is-collapsed .logout-btn {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
+    .app-sidebar.is-collapsed .sidebar-user-card {
         justify-content: center;
         padding: 0;
+        width: 44px;
+        height: 44px;
+        margin: 0 auto 0.4rem;
     }
 
-    .app-sidebar.is-collapsed .sidebar-user {
-        background: transparent;
-        justify-content: center;
+    .app-sidebar.is-collapsed .sidebar-footer-links {
+        width: 100%;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .app-sidebar.is-collapsed .sidebar-footer-link-btn {
+        width: 44px;
+        height: 44px;
         padding: 0;
-        margin-bottom: 0;
+        justify-content: center;
+        margin: 0 auto;
+        border-radius: 10px;
+    }
+
+    .app-sidebar.is-collapsed .sidebar-footer-link-btn i {
+        font-size: 1.15rem;
     }
 
     .app-sidebar.is-collapsed .sidebar-copyright {
