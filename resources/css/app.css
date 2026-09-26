@@ -193,6 +193,32 @@ body {
   color: #0b1735;
 }
 
+/* Global Text-Decoration Reset for Links & Buttons */
+a,
+a:hover,
+a:focus,
+a:active,
+a:visited,
+button,
+button:hover,
+button:focus,
+button:active,
+.btn,
+.btn:hover,
+.btn:focus,
+.btn:active,
+.nav-link,
+.nav-link-item,
+.sidebar-caption-btn,
+.sidebar-scan-btn,
+.badge,
+.dropdown-item,
+.list-group-item,
+.pagination a,
+.pagination button {
+  text-decoration: none !important;
+}
+
 /* Custom scrollbar (page-level; sidebar has its own thin scrollbar in
    AppLayout.vue) */
 ::-webkit-scrollbar {
@@ -2239,7 +2265,7 @@ h1, h2, h3, h4, h5, h6,
 
 .fg-link:hover {
   color: #1d4ed8;
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 /* Rows in Tindak Lanjut */

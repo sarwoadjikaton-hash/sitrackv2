@@ -195,7 +195,7 @@ const previewWorkbooks = computed(() => {
                             <h2 class="font-display font-semibold text-slate-900 text-sm">Tindak Lanjut Terbaru</h2>
                             <p class="text-xs text-slate-400 mt-0.5">5 naskah terakhir masuk</p>
                         </div>
-                        <Link href="/tindak-lanjut" class="text-xs hover:underline font-medium flex items-center gap-1 text-decoration-none"
+                        <Link href="/tindak-lanjut" class="text-xs font-medium flex items-center gap-1 text-decoration-none"
                             style="color: #2743AF;">
                             <span>Lihat semua</span>
                             <i class="bi bi-arrow-right text-xs"></i>
@@ -239,7 +239,7 @@ const previewWorkbooks = computed(() => {
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                         <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                             <h2 class="font-display font-semibold text-slate-900 text-sm">Disposisi Masuk</h2>
-                            <Link href="/disposisi" class="text-xs hover:underline font-medium flex items-center gap-1 text-decoration-none"
+                            <Link href="/disposisi" class="text-xs font-medium flex items-center gap-1 text-decoration-none"
                                 style="color: #2743AF;">
                                 <span>Semua</span>
                                 <i class="bi bi-arrow-right text-xs"></i>
@@ -290,7 +290,7 @@ const previewWorkbooks = computed(() => {
                                 </div>
                             </div>
                             <Link href="/ketersediaan-nomor"
-                                class="w-full mt-2 text-xs hover:underline text-center font-medium py-1.5 block text-decoration-none"
+                                class="w-full mt-2 text-xs text-center font-medium py-1.5 block text-decoration-none"
                                 style="color: #2743AF;">
                                 Kelola semua nomor &rarr;
                             </Link>
