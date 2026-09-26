@@ -11,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('app_notifications', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('letter_id')->nullable()->constrained('letters')->nullOnDelete();
-            $table->string('type')->default('new_letter_submission');
-            $table->string('title');
-            $table->text('message')->nullable();
-            $table->json('data')->nullable();
-            $table->boolean('is_read')->default(false);
-            $table->timestamp('read_at')->nullable();
-            $table->timestamps();
+        if (!Schema::hasTable('app_notifications')) {
+            Schema::create('app_notifications', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('letter_id')->nullable()->constrained('letters')->nullOnDelete();
+                $table->string('type')->default('new_letter_submission');
+                $table->string('title');
+                $table->text('message')->nullable();
+                $table->json('data')->nullable();
+                $table->boolean('is_read')->default(false);
+                $table->timestamp('read_at')->nullable();
+                $table->timestamps();
 
-            $table->index(['is_read', 'created_at']);
-        });
+                $table->index(['is_read', 'created_at']);
+            });
+        }
     }
 
     /**

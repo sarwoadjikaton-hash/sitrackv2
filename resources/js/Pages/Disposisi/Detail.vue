@@ -25,6 +25,7 @@ const instructionForm = useForm({
     to_unit_ids: [] as number[],
     koordinator_unit_id: null as number | null,
     to_name: '',
+    to_phone: '',
     instruction: '',
     due_date: '',
     item_status: 'Didisposisikan',
@@ -64,7 +65,7 @@ const handleInstructionFile = (e: Event) => {
 const openAddInstruction = (parentId: number | null = null, fromName: string = 'Sekretaris Jenderal') => {
     instructionForm.parent_disposition_id = parentId;
     instructionForm.from_name = fromName;
-    instructionForm.reset('instruction', 'to_name', 'to_unit_ids', 'koordinator_unit_id', 'due_date', 'attachment');
+    instructionForm.reset('instruction', 'to_name', 'to_phone', 'to_unit_ids', 'koordinator_unit_id', 'due_date', 'attachment');
     showInstructionModal.value = true;
 };
 
@@ -375,8 +376,7 @@ const deleteRelation = (id: number) => {
                                 <span class="fw-bold text-primary">
                                     <i class="bi bi-person-circle me-1"></i>{{ disp.from_name }} &rarr;
                                     <span class="text-dark">
-                                        {{ disp.to_unit?.unit_name || 'Unit' }}<template v-if="disp.to_name"> (a.n. {{
-                                            disp.to_name }})</template>
+                                        {{ disp.to_unit?.unit_name || 'Unit' }}<template v-if="disp.to_name"> (Koord: {{ disp.to_name }}<span v-if="disp.to_phone"> - {{ disp.to_phone }}</span>)</template>
                                     </span>
                                     <span v-if="disp.is_koordinator" class="badge bg-warning text-dark ms-2">
                                         <i class="bi bi-star-fill me-1"></i>Koordinator
@@ -426,8 +426,7 @@ const deleteRelation = (id: number) => {
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <span class="fw-bold small text-primary">
                                             <i class="bi bi-arrow-return-right me-1"></i>{{ sub.from_name }} &rarr;
-                                            {{ sub.to_unit?.unit_name || 'Unit' }}<template v-if="sub.to_name"> (a.n. {{
-                                                sub.to_name }})</template>
+                                            {{ sub.to_unit?.unit_name || 'Unit' }}<template v-if="sub.to_name"> (Koord: {{ sub.to_name }}<span v-if="sub.to_phone"> - {{ sub.to_phone }}</span>)</template>
                                             <span v-if="sub.is_koordinator" class="badge bg-warning text-dark ms-1">
                                                 <i class="bi bi-star-fill me-1"></i>Koordinator
                                             </span>
@@ -552,13 +551,20 @@ const deleteRelation = (id: number) => {
                             <span class="small">{{props.units.find(u => u.id === uid)?.unit_name}}</span>
                         </label>
                     </div>
-                    <small class="text-muted">Pilih salah satu unit sebagai koordinator (opsional).</small>
+                    <small class="text-muted">Pilih salah satu unit sebagai koordinator.</small>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Nama Pejabat / Penerima (Opsional)</label>
-                    <input v-model="instructionForm.to_name" type="text" class="form-control"
-                        placeholder="Nama staf/pejabat penerima" />
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Nama Koordinator</label>
+                        <input v-model="instructionForm.to_name" type="text" class="form-control"
+                            placeholder="Nama pejabat / koordinator" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">No. Telp Koordinator</label>
+                        <input v-model="instructionForm.to_phone" type="text" class="form-control"
+                            placeholder="Contoh: 08123456789" />
+                    </div>
                 </div>
 
                 <div class="mb-3">
@@ -568,7 +574,7 @@ const deleteRelation = (id: number) => {
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label small fw-bold">Lampiran (Opsional)</label>
+                    <label class="form-label small fw-bold">Lampiran</label>
                     <input type="file" class="form-control" @change="handleInstructionFile" />
                     <small class="text-muted">PDF/DOCX/gambar, maksimal 20 MB</small>
                 </div>
@@ -612,7 +618,7 @@ const deleteRelation = (id: number) => {
 
 
                 <div class="mb-3">
-                    <label class="form-label small fw-bold">Lampiran (Opsional)</label>
+                    <label class="form-label small fw-bold">Lampiran</label>
                     <input type="file" class="form-control" @change="handleItemFile" />
                     <small class="text-muted">PDF/DOCX/gambar, maksimal 20 MB</small>
                     <div v-if="activeItem?.attachment_path" class="mt-1">
@@ -702,7 +708,7 @@ const deleteRelation = (id: number) => {
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label small fw-bold">Catatan (Opsional)</label>
+                    <label class="form-label small fw-bold">Catatan</label>
                     <textarea v-model="relationForm.notes" class="form-control" rows="2"
                         placeholder="Keterangan tambahan mengenai hubungan ini..."></textarea>
                 </div>

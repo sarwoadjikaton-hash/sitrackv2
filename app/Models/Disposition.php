@@ -15,6 +15,7 @@ class Disposition extends Model
         'from_name',
         'to_unit_id',
         'to_name',
+        'to_phone',
         'instruction',
         'due_date',
         'status',

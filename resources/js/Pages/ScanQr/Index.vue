@@ -466,7 +466,7 @@ watch(mode, (newMode) => {
                     </div>
 
                     <div>
-                        <label class="form-label fw-semibold text-dark small mb-1.5">Catatan Pembaruan (Opsional)</label>
+                        <label class="form-label fw-semibold text-dark small mb-1.5">Catatan Pembaruan</label>
                         <textarea
                             v-model="form.note"
                             rows="2"

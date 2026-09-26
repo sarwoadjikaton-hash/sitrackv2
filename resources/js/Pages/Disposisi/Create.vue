@@ -29,6 +29,7 @@ const form = useForm({
     to_unit_ids: [] as number[],
     koordinator_unit_id: null as number | null,
     to_name: '',
+    to_phone: '',
     due_date: '',
     attachment: null as File | null,
 });
@@ -131,7 +132,7 @@ const submit = () => {
 
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold">Nomor WhatsApp Pengirim</label>
-                                <input v-model="form.sender_phone" type="text" class="form-control" placeholder="08xxxxxxxxxx (Opsional)" />
+                                <input v-model="form.sender_phone" type="text" class="form-control" placeholder="08xxxxxxxxxx" />
                             </div>
 
                             <div class="col-md-4">
@@ -169,8 +170,8 @@ const submit = () => {
                             </div>
                         </div>
 
-                        <!-- Arahan Disposisi Awal (Opsional - Multi Unit & Koordinator) -->
-                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">2. Arahan Disposisi Pimpinan (Opsional)</h5>
+                        <!-- Arahan Disposisi Awal (Multi Unit & Koordinator) -->
+                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">2. Arahan Disposisi Pimpinan</h5>
 
                         <div class="row g-3 mb-4 p-3 bg-light rounded-3 border">
                             <!-- Multi Unit Selector -->
@@ -246,12 +247,17 @@ const submit = () => {
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">Nama Pejabat / Penerima (Jika ada)</label>
-                                <input v-model="form.to_name" type="text" class="form-control" placeholder="Nama pejabat penerima arahan" />
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Nama Koordinator</label>
+                                <input v-model="form.to_name" type="text" class="form-control" placeholder="Nama pejabat / koordinator" />
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">No. Telp Koordinator</label>
+                                <input v-model="form.to_phone" type="text" class="form-control" placeholder="Contoh: 08123456789" />
+                            </div>
+
+                            <div class="col-md-4">
                                 <label class="form-label small fw-bold">Batas Waktu (Due Date)</label>
                                 <input v-model="form.due_date" type="date" class="form-control" />
                             </div>

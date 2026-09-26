@@ -348,7 +348,7 @@ const statusOptions = computed(() =>
 
                             <!-- Alokasi / Penomoran Surat -->
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold">Pilih Slot Nomor Tersedia (Opsional)</label>
+                                <label class="form-label small fw-bold">Pilih Slot Nomor Tersedia</label>
                                 <SearchableSelect
                                     v-model="selectedSlotId"
                                     :options="slotOptions"

@@ -114,13 +114,14 @@ class DispositionLetterController extends Controller
             'notes' => ['nullable', 'string'],
             'letter_source' => ['required', 'in:Manual,SRIKANDI'],
 
-            // Initial Disposition fields (optional)
+            // Initial Disposition fields
             'instruction' => ['nullable', 'string'],
             'to_unit_ids' => ['nullable', 'array'],
             'to_unit_ids.*' => ['exists:units,id'],
             'to_unit_id' => ['nullable', 'exists:units,id'], // fallback
             'koordinator_unit_id' => ['nullable', 'exists:units,id'],
             'to_name' => ['nullable', 'string', 'max:150'],
+            'to_phone' => ['nullable', 'string', 'max:50'],
             'due_date' => ['nullable', 'date'],
             'is_koordinator' => ['nullable', 'boolean'],
             'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
@@ -206,6 +207,7 @@ class DispositionLetterController extends Controller
                         'from_name' => 'Sekretaris Jenderal',
                         'to_unit_id' => $unitId,
                         'to_name' => $validated['to_name'] ?? null,
+                        'to_phone' => $validated['to_phone'] ?? null,
                         'instruction' => $instruction !== '' ? $instruction : 'Mohon ditindaklanjuti sesuai ketentuan.',
                         'due_date' => $validated['due_date'] ?? null,
                         'status' => 'Didisposisikan',
@@ -315,6 +317,7 @@ class DispositionLetterController extends Controller
             'to_unit_ids.*' => ['exists:units,id'],
             'koordinator_unit_id' => ['nullable', 'exists:units,id'],
             'to_name' => ['nullable', 'string', 'max:150'],
+            'to_phone' => ['nullable', 'string', 'max:50'],
             'instruction' => ['required', 'string'],
             'due_date' => ['nullable', 'date'],
             'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
@@ -364,6 +367,7 @@ class DispositionLetterController extends Controller
                     'from_name' => $validated['from_name'],
                     'to_unit_id' => $unitId,
                     'to_name' => $validated['to_name'] ?? null,
+                    'to_phone' => $validated['to_phone'] ?? null,
                     'instruction' => $validated['instruction'],
                     'due_date' => $validated['due_date'] ?? null,
                     'status' => $validated['item_status'] ?: 'Didisposisikan',

@@ -151,6 +151,7 @@ export interface Disposition {
     from_name: string;
     to_unit_id?: number;
     to_name?: string;
+    to_phone?: string;
     instruction: string;
     due_date?: string;
     status: string;
