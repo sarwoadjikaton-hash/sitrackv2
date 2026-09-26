@@ -62,7 +62,7 @@ const form = useForm({
     letter_number: props.letter?.letter_number || '',
     letter_number_type_id: props.letter?.letter_number_type_id || props.letterNumberTypes[0]?.id || null,
     slot_id: null as number | null,
-    letter_type: props.letter?.letter_type || 'in',
+    letter_type: props.letter?.letter_type || 'out',
     letter_source: props.letter?.letter_source || 'Manual',
     sender_unit: props.letter?.sender_unit || '',
     sender_name: props.letter?.sender_name || '',

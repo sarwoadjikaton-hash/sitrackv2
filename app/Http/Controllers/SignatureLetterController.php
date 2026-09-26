@@ -195,7 +195,7 @@ class SignatureLetterController extends Controller
             ? implode(', ', $validated['requested_actions'])
             : ($validated['requested_actions'] ?? null);
 
-        $letterType = $validated['letter_type'] ?? 'in';
+        $letterType = $validated['letter_type'] ?? 'out';
 
         DB::beginTransaction();
         try {
