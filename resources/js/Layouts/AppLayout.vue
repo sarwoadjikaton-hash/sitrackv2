@@ -113,6 +113,10 @@ const hideTooltip = (e: MouseEvent) => {
 };
 
 const showPasswordModal = ref(false);
+const showCurrentPassword = ref(false);
+const showNewPassword = ref(false);
+const showConfirmPassword = ref(false);
+
 const passwordForm = useForm({
     current_password: '',
     password: '',
@@ -122,6 +126,9 @@ const passwordForm = useForm({
 const openPasswordModal = () => {
     passwordForm.reset();
     passwordForm.clearErrors();
+    showCurrentPassword.value = false;
+    showNewPassword.value = false;
+    showConfirmPassword.value = false;
     showPasswordModal.value = true;
 };
 
@@ -530,27 +537,85 @@ const isActive = (path: string, exact = false) =>
                     </button>
                 </div>
                 <form @submit.prevent="submitPasswordChange">
+                    <!-- Password Lama -->
                     <div class="mb-3">
                         <label class="form-label small fw-semibold text-secondary mb-1">Password Lama</label>
-                        <input v-model="passwordForm.current_password" type="password" class="form-control rounded-lg" required
-                            autofocus placeholder="Masukkan password lama" />
-                        <div v-if="passwordForm.errors.current_password" class="text-danger small mt-1">{{
-                            passwordForm.errors.current_password }}</div>
+                        <div class="input-group">
+                            <input
+                                v-model="passwordForm.current_password"
+                                :type="showCurrentPassword ? 'text' : 'password'"
+                                class="form-control rounded-start-lg border-end-0"
+                                required
+                                autofocus
+                                placeholder="Masukkan password lama"
+                            />
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary border border-start-0 text-muted bg-white rounded-end-lg"
+                                @click="showCurrentPassword = !showCurrentPassword"
+                                tabindex="-1"
+                                title="Lihat/Sembunyikan password"
+                            >
+                                <i class="bi" :class="showCurrentPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+                            </button>
+                        </div>
+                        <div v-if="passwordForm.errors.current_password" class="text-danger small mt-1">
+                            {{ passwordForm.errors.current_password }}
+                        </div>
                     </div>
+
+                    <!-- Password Baru -->
                     <div class="mb-3">
                         <label class="form-label small fw-semibold text-secondary mb-1">Password Baru</label>
-                        <input v-model="passwordForm.password" type="password" class="form-control rounded-lg" required
-                            minlength="8" placeholder="Masukkan password baru" />
-                        <div v-if="passwordForm.errors.password" class="text-danger small mt-1">{{
-                            passwordForm.errors.password
-                            }}</div>
+                        <div class="input-group">
+                            <input
+                                v-model="passwordForm.password"
+                                :type="showNewPassword ? 'text' : 'password'"
+                                class="form-control rounded-start-lg border-end-0"
+                                required
+                                minlength="8"
+                                placeholder="Masukkan password baru"
+                            />
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary border border-start-0 text-muted bg-white rounded-end-lg"
+                                @click="showNewPassword = !showNewPassword"
+                                tabindex="-1"
+                                title="Lihat/Sembunyikan password"
+                            >
+                                <i class="bi" :class="showNewPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+                            </button>
+                        </div>
+                        <div v-if="passwordForm.errors.password" class="text-danger small mt-1">
+                            {{ passwordForm.errors.password }}
+                        </div>
                         <small class="text-muted" style="font-size: 0.72rem;">Minimal 8 karakter.</small>
                     </div>
+
+                    <!-- Konfirmasi Password Baru -->
                     <div class="mb-4">
                         <label class="form-label small fw-semibold text-secondary mb-1">Konfirmasi Password Baru</label>
-                        <input v-model="passwordForm.password_confirmation" type="password" class="form-control rounded-lg"
-                            required minlength="8" placeholder="Konfirmasi password baru" />
+                        <div class="input-group">
+                            <input
+                                v-model="passwordForm.password_confirmation"
+                                :type="showConfirmPassword ? 'text' : 'password'"
+                                class="form-control rounded-start-lg border-end-0"
+                                required
+                                minlength="8"
+                                placeholder="Konfirmasi password baru"
+                            />
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary border border-start-0 text-muted bg-white rounded-end-lg"
+                                @click="showConfirmPassword = !showConfirmPassword"
+                                tabindex="-1"
+                                title="Lihat/Sembunyikan password"
+                            >
+                                <i class="bi" :class="showConfirmPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+                            </button>
+                        </div>
                     </div>
+
                     <div class="d-flex gap-2 pt-2 border-top">
                         <button type="button" class="btn btn-light border flex-grow-1 text-secondary font-medium"
                             @click="showPasswordModal = false">Batal</button>

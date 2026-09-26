@@ -828,50 +828,7 @@ const formatDateIndo = (dateStr?: string | null) => {
             </div>
         </div>
 
-        <!-- SPREADSHEET URL SETTINGS MODAL -->
-        <Modal :show="showSyncModal" max-width="lg" @close="showSyncModal = false">
-            <div class="p-4">
-                <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
-                    <h5 class="fw-bold text-dark mb-0">
-                        <i class="bi bi-google text-success me-2"></i> Integrasi Google Spreadsheet
-                    </h5>
-                    <button type="button" class="btn-close" @click="showSyncModal = false"></button>
-                </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold text-dark">URL Link / ID Google Spreadsheet</label>
-                    <input
-                        v-model="syncSpreadsheetUrl"
-                        type="text"
-                        class="form-control"
-                        placeholder="https://docs.google.com/spreadsheets/d/1Qv27GijtAHpEAUu-Vz0YfiLactdUCAt_owmIONpXeyc/edit"
-                    />
-                    <small class="text-muted d-block mt-1">
-                        Pastikan Google Spreadsheet diset ke <strong>"Anyone with the link can view"</strong> (Siapa saja yang memiliki link dapat melihat).
-                    </small>
-                </div>
-
-                <div class="alert alert-info small mb-3">
-                    <i class="bi bi-info-circle me-1"></i>
-                    SiTrack akan otomatis membaca tab/sheet yang namanya cocok dengan Jenis Naskah SiTrack (contoh: <code>NODIN-MEMORANDUM</code>, <code>BIASA-UNDANGAN</code>, <code>KEPUTUSAN</code>, dll) dan memetakan 4 kolom utama: <strong>Tanggal Surat</strong>, <strong>Nomor Urut</strong>, <strong>Perihal Surat</strong>, dan <strong>Unit</strong>.
-                </div>
-
-                <div class="d-flex justify-content-end gap-2 pt-2">
-                    <button type="button" class="btn btn-secondary" @click="showSyncModal = false">
-                        Tutup
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-success fw-bold d-flex align-items-center gap-2"
-                        :disabled="isSyncing || !syncSpreadsheetUrl"
-                        @click="executeSync(false)"
-                    >
-                        <i class="bi" :class="isSyncing ? 'bi-arrow-repeat spin' : 'bi-cloud-download'"></i>
-                        <span>{{ isSyncing ? 'Sedang Menarik...' : 'Simpan & Tarik Data Sekarang' }}</span>
-                    </button>
-                </div>
-            </div>
-        </Modal>
 
         <!-- NUMBER DETAIL / STATUS MODAL -->
         <Modal :show="showDetailModal" max-width="md" @close="showDetailModal = false">

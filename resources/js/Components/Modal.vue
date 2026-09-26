@@ -48,9 +48,9 @@ watch(
                 'modal-xl': maxWidth === 'xl',
             }"
         >
-            <div class="modal-content border-0 shadow-lg" style="border-radius: var(--st-radius-xl); overflow: hidden;">
-                <div class="modal-header border-bottom py-3 px-4" style="background: #f8fafc;">
-                    <h5 class="modal-title fw-bold text-dark fs-6 d-flex align-items-center gap-2">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: var(--st-radius-xl, 1rem); overflow: hidden;">
+                <div v-if="title || $slots.title" class="modal-header border-bottom py-3 px-4" style="background: #f8fafc;">
+                    <h5 class="modal-title fw-bold text-dark fs-6 d-flex align-items-center gap-2 m-0">
                         <slot name="title">{{ title }}</slot>
                     </h5>
                     <button
@@ -60,7 +60,7 @@ watch(
                         @click="close"
                     ></button>
                 </div>
-                <div class="modal-body p-4">
+                <div class="modal-body" :class="{ 'p-4': title || $slots.title, 'p-0': !(title || $slots.title) }">
                     <slot></slot>
                 </div>
                 <div v-if="$slots.footer" class="modal-footer border-top py-3 px-4 bg-light">
