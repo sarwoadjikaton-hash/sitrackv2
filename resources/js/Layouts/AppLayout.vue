@@ -110,25 +110,28 @@ const isActive = (path: string, exact = false) =>
 
             <div class="sidebar-inner" @mouseover="showTooltip" @mouseout="hideTooltip">
                 <!-- Brand Header -->
+                <!-- Brand Header -->
                 <div class="sidebar-header">
                     <Link href="/dashboard" class="brand-wrapper" @click="closeMobileNav">
-                        <div class="brand-logos-pair">
-                            <span class="brand-logo-ring" title="SiTrack">
-                                <img src="/images/sitrack_logo.svg" alt="SiTrack" width="28" height="28" />
-                            </span>
-                            <span class="brand-pipe-divider">|</span>
-                            <span class="brand-logo-ring brand-kemnaker-ring" title="Kementerian Ketenagakerjaan RI">
-                                <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="26" height="26" class="brand-kemnaker-img" />
-                            </span>
+                        <div class="brand-figma-box">
+                            <i class="bi bi-file-earmark-text-fill text-white"></i>
                         </div>
                         <span class="brand-text">
                             <span class="brand-title">SiTrack</span>
-                            <small>TU SEKRETARIAT JENDERAL</small>
+                            <small class="brand-subtitle">TU Sekjen Kemnaker</small>
                         </span>
                     </Link>
                     <button type="button" class="sidebar-close d-lg-none" @click="closeMobileNav">
                         <i class="bi bi-x-lg"></i>
                     </button>
+                </div>
+
+                <!-- Quick Action Button -->
+                <div class="sidebar-quick-action px-3 mb-2">
+                    <Link href="/scan-status" class="sidebar-scan-btn" @click="closeMobileNav" data-tooltip="Scan & Update Status">
+                        <i class="bi bi-qr-code-scan"></i>
+                        <span class="nav-label">Scan &amp; Update Status</span>
+                    </Link>
                 </div>
 
                 <div class="sidebar-scroll">
@@ -147,7 +150,7 @@ const isActive = (path: string, exact = false) =>
                             <Link href="/ketersediaan-nomor" class="nav-link-item"
                                 :class="{ active: isActive('/ketersediaan-nomor') }" @click="closeMobileNav"
                                 data-tooltip="Ketersediaan Nomor">
-                                <i class="bi bi-123"></i>
+                                <i class="bi bi-hash"></i>
                                 <span class="nav-label">Ketersediaan Nomor</span>
                             </Link>
                         </nav>
@@ -156,16 +159,10 @@ const isActive = (path: string, exact = false) =>
                     <template v-if="!isSekjen">
                         <div class="sidebar-caption">Tindak Lanjut / TTD</div>
                         <nav class="sidebar-nav">
-                            <Link href="/tindak-lanjut/create" class="nav-link-item"
-                                :class="{ active: isActive('/tindak-lanjut/create', true) }" @click="closeMobileNav"
-                                data-tooltip="Input Naskah Baru">
-                                <i class="bi bi-file-earmark-plus-fill"></i>
-                                <span class="nav-label">Input Naskah Baru</span>
-                            </Link>
                             <Link href="/tindak-lanjut" class="nav-link-item"
                                 :class="{ active: isActive('/tindak-lanjut') && !isActive('/tindak-lanjut/create', true) }" @click="closeMobileNav"
                                 data-tooltip="Data Tindak Lanjut">
-                                <i class="bi bi-pen-fill"></i>
+                                <i class="bi bi-list-task"></i>
                                 <span class="nav-label">Data Tindak Lanjut</span>
                             </Link>
                             <Link href="/data-surat" class="nav-link-item" :class="{ active: isActive('/data-surat') }"
@@ -181,13 +178,13 @@ const isActive = (path: string, exact = false) =>
                         <Link v-if="!isSekjen" href="/disposisi/create" class="nav-link-item"
                             :class="{ active: isActive('/disposisi/create', true) }" @click="closeMobileNav"
                             data-tooltip="Input Disposisi">
-                            <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                            <i class="bi bi-send"></i>
                             <span class="nav-label">Input Disposisi</span>
                         </Link>
                         <Link href="/disposisi" class="nav-link-item"
                             :class="{ active: isActive('/disposisi') && !isActive('/disposisi/create', true) }"
                             @click="closeMobileNav" data-tooltip="Lajur Disposisi">
-                            <i class="bi bi-diagram-3-fill"></i>
+                            <i class="bi bi-send-fill"></i>
                             <span class="nav-label">Lajur Disposisi</span>
                         </Link>
                     </nav>
@@ -230,28 +227,30 @@ const isActive = (path: string, exact = false) =>
                     </template>
                 </div>
 
-                <!-- FOOTER AREA -->
+                <!-- FOOTER AREA (Figma Prototype Model) -->
                 <div class="sidebar-footer-container">
-                    <!-- Logout Button (Positioned above user on collapse via CSS) -->
-                    <div class="logout-wrapper">
-                        <button type="button" class="logout-btn" @click="logout" data-tooltip="Keluar Sistem">
-                            <i class="bi bi-box-arrow-right"></i>
-                            <span class="nav-label">Keluar Sistem</span>
-                        </button>
-                    </div>
-
                     <!-- User Profile -->
-                    <button type="button" class="sidebar-user border-0 w-100 text-start" data-tooltip="Ubah Password"
-                        @click="openPasswordModal">
+                    <div class="sidebar-user-card" @click="openPasswordModal" data-tooltip="Ubah Password">
                         <div class="user-avatar-circle">
-                            {{ (user?.name || user?.username || 'A').substring(0, 1).toUpperCase() }}
+                            {{ (user?.name || user?.username || 'D').substring(0, 1).toUpperCase() }}
                         </div>
                         <div class="user-info">
                             <div class="user-name">{{ user?.name || user?.username }}</div>
-                            <div class="user-role-badge">{{ roleLabel }}</div>
+                            <div class="user-role-label">{{ roleLabel }}</div>
                         </div>
-                        <i class="bi bi-key-fill user-profile-hint"></i>
-                    </button>
+                    </div>
+
+                    <!-- Footer Action Links -->
+                    <div class="sidebar-footer-links">
+                        <button type="button" class="sidebar-footer-link-btn" @click="openPasswordModal" data-tooltip="Ganti Password">
+                            <i class="bi bi-key"></i>
+                            <span class="nav-label">Ganti Password</span>
+                        </button>
+                        <button type="button" class="sidebar-footer-link-btn" @click="logout" data-tooltip="Keluar">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span class="nav-label">Keluar</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -377,11 +376,11 @@ const isActive = (path: string, exact = false) =>
     bottom: 0;
     width: var(--sidebar-width);
     z-index: 1050;
-    background: #03205A;
+    background: linear-gradient(180deg, #1b2d7a 0%, #142060 100%);
     color: #fff;
     border-radius: 0;
     border-right: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 2px 0 16px rgba(3, 32, 90, 0.12);
+    box-shadow: 2px 0 16px rgba(3, 32, 90, 0.18);
     transition: width var(--transition), transform var(--transition);
 }
 
@@ -455,7 +454,7 @@ const isActive = (path: string, exact = false) =>
 }
 
 .sidebar-header {
-    padding: 1.5rem 1.25rem;
+    padding: 1.25rem 1.25rem 0.9rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -464,44 +463,21 @@ const isActive = (path: string, exact = false) =>
 .brand-wrapper {
     display: flex;
     align-items: center;
-    gap: .7rem;
+    gap: .75rem;
     text-decoration: none;
     color: #fff;
 }
 
-.brand-logos-pair {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    flex: none;
-}
-
-.brand-logo-ring {
-    width: 34px;
-    height: 34px;
+.brand-figma-box {
+    width: 36px;
+    height: 36px;
     display: grid;
     place-items: center;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(39, 67, 175, 0.6);
+    border: 1px solid rgba(61, 165, 249, 0.4);
     border-radius: 10px;
     flex: none;
-    transition: background 0.2s;
-}
-
-.brand-kemnaker-img {
-    filter: brightness(0) invert(1);
-}
-
-.brand-pipe-divider {
-    color: rgba(255, 255, 255, 0.35);
-    font-size: 0.95rem;
-    font-weight: 300;
-}
-
-.brand-sub-pipe {
-    opacity: 0.45;
-    font-weight: 300;
-    font-size: 0.85rem;
-    margin: 0 2px;
+    font-size: 1.1rem;
 }
 
 .brand-text {
@@ -512,23 +488,40 @@ const isActive = (path: string, exact = false) =>
 
 .brand-title {
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 1rem;
     letter-spacing: -0.01em;
 }
 
-.brand-text small {
-    font-size: 0.62rem;
-    letter-spacing: 0.4px;
-    color: #B5CCE3;
+.brand-subtitle {
+    font-size: 0.68rem;
+    color: #93c5fd;
+    font-weight: 500;
 }
 
-.topbar-instansi-pill {
-    background: var(--st-powder-cyan);
-    color: var(--st-navy);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    border: 1px solid var(--st-border);
+.sidebar-scan-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.95rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.sidebar-scan-btn:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.sidebar-scan-btn i {
+    font-size: 1rem;
+    color: #93c5fd;
 }
 
 .sidebar-scroll {
@@ -542,16 +535,17 @@ const isActive = (path: string, exact = false) =>
     font-size: 0.65rem;
     font-weight: 800;
     text-transform: uppercase;
-    color: #B5CCE3;
-    padding: 1.2rem 1.5rem 0.5rem;
+    color: #93c5fd;
+    padding: 1.1rem 1.25rem 0.45rem;
     letter-spacing: 0.5px;
+    opacity: 0.85;
 }
 
 /* NAV ITEMS */
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.25rem;
     padding: 0 0.75rem;
 }
 
@@ -559,8 +553,8 @@ const isActive = (path: string, exact = false) =>
     position: relative;
     display: flex;
     align-items: center;
-    gap: 0.9rem;
-    padding: 0.7rem 1rem;
+    gap: 0.85rem;
+    padding: 0.65rem 0.95rem;
     color: rgba(238, 247, 252, 0.78);
     text-decoration: none;
     font-size: 0.85rem;
@@ -570,10 +564,10 @@ const isActive = (path: string, exact = false) =>
 }
 
 .nav-link-item i {
-    font-size: 1.1rem;
-    width: 24px;
+    font-size: 1.05rem;
+    width: 22px;
     text-align: center;
-    color: #B5CCE3;
+    color: #93c5fd;
     transition: color 0.2s ease, transform 0.2s ease;
 }
 
@@ -589,77 +583,56 @@ const isActive = (path: string, exact = false) =>
 
 /* Active State */
 .nav-link-item.active {
-    background: linear-gradient(135deg, #167992 0%, #0e5b6f 100%);
+    background: rgba(61, 165, 249, 0.18);
+    border: 1.5px solid #3DA5F9;
+    border-radius: 12px;
     color: #ffffff;
-    font-weight: 700;
-    box-shadow: 0 4px 14px rgba(22, 121, 146, 0.4);
+    font-weight: 600;
+    box-shadow: 0 0 14px rgba(61, 165, 249, 0.25);
 }
 
 .nav-link-item.active i {
-    color: #ffffff;
+    color: #3DA5F9;
     transform: scale(1.05);
 }
 
-/* FOOTER AREA */
+/* FOOTER AREA (Figma Model) */
 .sidebar-footer-container {
     margin-top: auto;
-    padding: 0.5rem 0.75rem 1.5rem;
+    padding: 0.75rem 0.85rem 1.25rem;
     display: flex;
     flex-direction: column;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.logout-wrapper {
-    padding: 0 0.5rem 0.5rem;
-}
-
-.logout-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    padding: 0.65rem 1rem;
-    background: rgba(239, 68, 68, 0.15);
-    border: none;
-    border-radius: 12px;
-    color: #fca5a5;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.logout-btn:hover {
-    background: rgba(239, 68, 68, 0.25);
-    color: #fff;
-}
-
-.sidebar-user {
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 1.2rem;
+.sidebar-user-card {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    margin-bottom: 0.5rem;
     cursor: pointer;
-    position: relative;
-    transition: 0.2s;
+    transition: all 0.2s ease;
 }
 
-.sidebar-user:hover {
-    background: rgba(255, 255, 255, 0.15) !important;
+.sidebar-user-card:hover {
+    background: rgba(255, 255, 255, 0.12);
 }
 
 .user-avatar-circle {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #167992;
+    background: #2563eb;
     display: grid;
     place-items: center;
     font-weight: 800;
     color: #fff;
     flex: none;
+    font-size: 0.9rem;
 }
 
 .user-info {
@@ -668,17 +641,50 @@ const isActive = (path: string, exact = false) =>
 }
 
 .user-name {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 700;
     color: #fff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.2;
 }
 
-.user-role-badge {
-    font-size: 0.65rem;
-    color: #B5CCE3;
+.user-role-label {
+    font-size: 0.68rem;
+    color: #93c5fd;
+    font-weight: 500;
+}
+
+.sidebar-footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.sidebar-footer-link-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.45rem 0.75rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+}
+
+.sidebar-footer-link-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-footer-link-btn i {
+    font-size: 0.95rem;
 }
 
 .sidebar-copyright {
@@ -827,18 +833,16 @@ const isActive = (path: string, exact = false) =>
 
 .app-topbar {
     position: sticky;
-    top: 1rem;
+    top: 0;
     z-index: 1000;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 1rem 1.5rem 1.5rem;
-    padding: 1.1rem 1.5rem;
-    border-radius: var(--st-radius);
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--st-border);
-    box-shadow: var(--st-shadow-med);
+    margin: 0;
+    padding: 0.85rem 2rem;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .topbar-heading {
@@ -1004,7 +1008,9 @@ const isActive = (path: string, exact = false) =>
 }
 
 .app-main-body {
-    padding: 0.5rem 1.5rem 1.5rem;
+    padding: 1.75rem 2rem 2.5rem;
+    background-color: #F8FAFC;
+    min-height: calc(100vh - 65px);
 }
 
 .sidebar-backdrop {
