@@ -143,115 +143,90 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
 </script>
 
 <template>
-    <AppLayout title="Tindak Lanjut / Penandatanganan">
+    <AppLayout title="Data Tindak Lanjut / TTD">
+        <Head title="Data Tindak Lanjut & TTD" />
 
-        <Head title="Tindak Lanjut & TTD" />
+        <div class="space-y-5 w-full">
+            <!-- Header (Figma Prototype Model) -->
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                <div>
+                    <h1 class="font-display fw-bold fs-4 text-dark mb-1">Data Tindak Lanjut / TTD</h1>
+                    <p class="text-muted small mb-0">Lajur penandatanganan naskah dinas oleh pimpinan</p>
+                </div>
 
-        <!-- Header -->
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-            <div>
-                <span class="badge-lane-signature d-inline-flex align-items-center gap-1 mb-2">
-                    <i class="bi bi-pen-fill"></i> Lajur Pertama
-                </span>
-                <h2 class="fw-bold mb-1 text-dark">Data Tindak Lanjut / TTD</h2>
-                <p class="text-muted mb-0 small">Lajur penandatanganan naskah dinas, pemeriksaan administrasi, dan paraf pimpinan.</p>
+                <div class="d-flex align-items-center gap-2">
+                    <Link href="/scan-status" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 text-dark fw-medium small border bg-white shadow-xs transition hover:bg-light">
+                        <i class="bi bi-qr-code-scan text-primary"></i>
+                        <span>Update via QR</span>
+                    </Link>
+                    <Link href="/tindak-lanjut/create" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 text-white fw-semibold small border-0 shadow-xs transition" style="background: #2743AF;">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Input Naskah Baru</span>
+                    </Link>
+                </div>
             </div>
 
-            <div class="d-flex align-items-center gap-2">
-                <Link href="/scan-status" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-qr-code-scan me-1"></i> Update via QR
-                </Link>
-                <Link href="/tindak-lanjut/create" class="btn btn-sm btn-primary-blue shadow-sm">
-                    <i class="bi bi-plus-lg me-1"></i> Input Naskah Baru
-                </Link>
-            </div>
-        </div>
-
-        <!-- Mini Stats (Figma Prototype Model) -->
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-md-3">
-                <div class="bg-white rounded-3 border p-3 shadow-xs">
-                    <div class="fs-4 fw-bold text-dark font-display">{{ statsTotal }}</div>
-                    <div class="small text-muted">Total Naskah</div>
+            <!-- Mini stats (Figma Prototype Model) -->
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <div class="rounded-3 border px-4 py-3 bg-white shadow-xs">
+                        <div class="fs-4 fw-bold font-display text-dark">{{ statsTotal }}</div>
+                        <div class="small text-muted mt-0.5">Total</div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="bg-white rounded-3 border p-3 shadow-xs" style="border-left: 4px solid #f59e0b !important;">
-                    <div class="fs-4 fw-bold text-warning font-display">{{ statsProses }}</div>
-                    <div class="small text-muted">Dalam Proses</div>
+                <div class="col-6 col-md-3">
+                    <div class="rounded-3 border px-4 py-3" style="background-color: #fffbeb; border-color: #fef3c7;">
+                        <div class="fs-4 fw-bold font-display" style="color: #b45309;">{{ statsProses }}</div>
+                        <div class="small text-muted mt-0.5">Dalam Proses</div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="bg-white rounded-3 border p-3 shadow-xs" style="border-left: 4px solid #3b82f6 !important;">
-                    <div class="fs-4 fw-bold text-primary font-display">{{ statsSiap }}</div>
-                    <div class="small text-muted">Siap Diambil</div>
+                <div class="col-6 col-md-3">
+                    <div class="rounded-3 border px-4 py-3" style="background-color: #ecfdf5; border-color: #d1fae5;">
+                        <div class="fs-4 fw-bold font-display" style="color: #047857;">{{ statsSiap }}</div>
+                        <div class="small text-muted mt-0.5">Siap Diambil</div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="bg-white rounded-3 border p-3 shadow-xs" style="border-left: 4px solid #10b981 !important;">
-                    <div class="fs-4 fw-bold text-success font-display">{{ statsSelesai }}</div>
-                    <div class="small text-muted">Sudah Diambil</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Filter Section (Matches Laporan Data layout) -->
-        <div class="st-card p-3 mb-4 shadow-sm">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold">Filter Workbook</label>
-                    <SearchableSelect v-model="currentWorkbookId" :options="workbookOptions"
-                        placeholder="Pilih Workbook" />
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Urutkan</label>
-                    <SearchableSelect v-model="filterSort" :options="sortOptions" placeholder="Urutkan" />
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Periode</label>
-                    <select v-model="filterPeriode" class="form-select" @change="applyFilter">
-                        <option value="all">Semua Waktu</option>
-                        <option value="hari">Harian</option>
-                        <option value="bulan">Bulanan</option>
-                    </select>
-                </div>
-                <div class="col-md-2" v-if="filterPeriode === 'hari'">
-                    <label class="form-label small fw-bold">Tanggal</label>
-                    <input type="date" v-model="filterTanggal" class="form-control" @change="applyFilter">
-                </div>
-                <div class="col-md-2" v-if="filterPeriode === 'bulan'">
-                    <label class="form-label small fw-bold">Bulan</label>
-                    <select v-model="filterBulan" class="form-select" @change="applyFilter">
-                        <option v-for="m in 12" :key="m" :value="m">Bulan {{ m }}</option>
-                    </select>
-                </div>
-                <div :class="filterPeriode === 'all' ? 'col-md-5' : 'col-md-3'">
-                    <label class="form-label small fw-bold">Pencarian</label>
-                    <div class="input-group">
-                        <input v-model="search" type="text" class="form-control"
-                            placeholder="Cari perihal, nomor, nama pengirim, dll..." @keyup.enter="applyFilter" />
-                        <button class="btn btn-primary-blue" @click="applyFilter">Cari</button>
+                <div class="col-6 col-md-3">
+                    <div class="rounded-3 border px-4 py-3 bg-white shadow-xs">
+                        <div class="fs-4 fw-bold font-display text-muted">{{ statsSelesai }}</div>
+                        <div class="small text-muted mt-0.5">Sudah Diambil</div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Quick Status Pills -->
-        <div class="d-flex flex-wrap gap-2 mb-3">
-            <button type="button" class="btn btn-xs rounded-pill px-3 py-1 fw-semibold transition"
-                :class="statusFilter === '' ? 'btn-primary shadow-xs' : 'btn-outline-secondary'"
-                @click="statusFilter = ''; applyFilter()">
-                Semua Status
-            </button>
-            <button v-for="s in allowedStatuses" :key="s" type="button" class="btn btn-xs rounded-pill px-3 py-1 fw-semibold transition"
-                :class="statusFilter === s ? 'btn-primary shadow-xs' : 'btn-outline-secondary'"
-                @click="statusFilter = s; applyFilter()">
-                {{ s }}
-            </button>
-        </div>
-
-        <!-- Table -->
-        <div class="st-card p-0 overflow-hidden shadow-sm">
+            <!-- Main Filter & Table Card (Figma Prototype Model) -->
+            <div class="bg-white rounded-4 border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-3 p-sm-4 border-bottom border-slate-100 d-flex flex-column flex-md-row gap-3">
+                    <div class="position-relative flex-grow-1">
+                        <i class="bi bi-search position-absolute text-muted" style="left: 12px; top: 50%; transform: translateY(-50%);"></i>
+                        <input
+                            v-model="search"
+                            type="text"
+                            class="form-control rounded-3 py-2 small shadow-none"
+                            style="padding-left: 36px;"
+                            placeholder="Cari perihal, kode tracking, unit pengirim..."
+                            @keyup.enter="applyFilter"
+                        />
+                    </div>
+                    <select
+                        v-model="statusFilter"
+                        class="form-select border border-slate-200 rounded-3 py-2 small text-dark shadow-none"
+                        style="min-width: 180px; width: auto;"
+                        @change="applyFilter"
+                    >
+                        <option value="">Semua Status</option>
+                        <option v-for="s in allowedStatuses" :key="s" :value="s">{{ s }}</option>
+                    </select>
+                    <select
+                        v-model="currentWorkbookId"
+                        class="form-select border border-slate-200 rounded-3 py-2 small text-dark shadow-none"
+                        style="min-width: 180px; width: auto;"
+                        @change="applyFilter"
+                    >
+                        <option :value="0">Semua Jenis Naskah</option>
+                        <option v-for="t in types" :key="t.id" :value="t.id">[{{ t.type_code }}] {{ t.type_name }}</option>
+                    </select>
+                </div>
             <div class="table-responsive">
                 <table class="table-modern">
                     <thead>
@@ -402,5 +377,6 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                 </div>
             </form>
         </Modal>
+        </div>
     </AppLayout>
 </template>

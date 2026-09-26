@@ -338,105 +338,96 @@ const switchToEdit = () => {
 
 <template>
     <AppLayout title="Laporan Data Surat">
-
         <Head title="Data Surat" />
 
-        <!-- Header Section -->
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 no-print">
-
-            <div>
-                <span class="eyebrow-text">BUKU REGISTER SURAT</span>
-                <h2 class="fw-bold mb-1 text-dark">Data Surat</h2>
-                <p class="text-muted mb-0 small">
-                    Catat, kelola, dan pantau seluruh data surat dalam satu tempat.
-                </p>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <div class="dropdown">
-                    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                        data-bs-toggle="dropdown">
-                        <i class="bi bi-printer me-1"></i> Cetak Laporan
+        <div class="space-y-5 w-full">
+            <!-- Header Section (Figma Prototype Model) -->
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 no-print">
+                <div>
+                    <h1 class="font-display fw-bold fs-4 text-dark mb-1">Laporan Data Surat</h1>
+                    <p class="text-muted small mb-0">Buku register penomoran naskah dinas — Rekap {{ selectedYear }}</p>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <button @click="openCreateModal" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 text-white fw-semibold small border-0 shadow-xs transition" style="background: #2743AF;">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Input Data Surat</span>
                     </button>
-                    <ul class="dropdown-menu shadow-sm border-0">
-                        <li><a class="dropdown-item py-2" href="#" @click.prevent="printData"><i
-                                    class="bi bi-file-earmark-pdf text-danger me-2"></i> Cetak PDF (Semua)</a></li>
-                        <li><a class="dropdown-item py-2" href="#" @click.prevent="exportExcel"><i
-                                    class="bi bi-file-earmark-excel text-success me-2"></i> Unduh Excel</a></li>
-                    </ul>
-                </div>
-                <button @click="openCreateModal" class="btn btn-sm btn-primary-blue"><i class="bi bi-plus-lg me-1"></i>
-                    Tambah Data</button>
-                <button @click="openImportModal" class="btn btn-sm btn-outline-success shadow-sm"><i
-                        class="bi bi-file-earmark-excel me-1"></i> Import Excel</button>
-            </div>
-        </div>
-
-        <!-- Print Header -->
-        <div class="d-none d-print-block mb-4">
-            <div class="text-center border-bottom pb-2">
-                <h3 class="fw-bold mb-0">LAPORAN REGISTER SURAT KELUAR & DINAS</h3>
-                <h5 class="mb-0 text-uppercase text-secondary small">{{ periodeLabel }}</h5>
-            </div>
-            <div class="d-flex justify-content-between mt-2 small">
-                <span>Workbook: {{ currentWorkbookId === 0 ? 'Semua' : selectedType?.workbook_name }}</span>
-                <span>Tahun: {{ selectedYear }} | Cetak: {{ new Date().toLocaleString('id-ID') }}</span>
-            </div>
-        </div>
-
-        <!-- Filter Section -->
-        <div class="st-card p-3 mb-4 no-print shadow-sm">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold">Filter Workbook</label>
-                    <SearchableSelect v-model="currentWorkbookId" :options="workbookOptions"
-                        placeholder="Pilih Workbook" />
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Urutkan</label>
-                    <SearchableSelect v-model="filterSort" :options="sortOptions" placeholder="Urutkan" />
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Periode</label>
-                    <select v-model="filterPeriode" class="form-select">
-                        <option value="all">Semua Waktu</option>
-                        <option value="hari">Harian</option>
-                        <option value="bulan">Bulanan</option>
-                    </select>
-                </div>
-                <div class="col-md-2" v-if="filterPeriode === 'hari'">
-                    <input type="date" v-model="filterTanggal" class="form-control" @change="applyFilter">
-                </div>
-                <div class="col-md-2" v-if="filterPeriode === 'bulan'">
-                    <select v-model="filterBulan" class="form-select" @change="applyFilter">
-                        <option v-for="m in 12" :key="m" :value="m">Bulan {{ m }}</option>
-                    </select>
-                </div>
-                <div :class="filterPeriode === 'all' ? 'col-md-5' : 'col-md-3'">
-                    <label class="form-label small fw-bold">Pencarian</label>
-                    <div class="input-group">
-                        <input v-model="search" type="text" class="form-control"
-                            placeholder="Cari nama, perihal, nomor, atau isi PDF..." @keyup.enter="applyFilter" />
-                        <button class="btn btn-primary-blue" @click="applyFilter">Cari</button>
+                    <button @click="openImportModal" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light">
+                        <i class="bi bi-upload text-primary"></i>
+                        <span>Import Excel</span>
+                    </button>
+                    <div class="dropdown">
+                        <button type="button" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-download text-success"></i>
+                            <span>Export</span>
+                        </button>
+                        <ul class="dropdown-menu shadow-sm border-slate-200">
+                            <li><a class="dropdown-item py-2 small" href="#" @click.prevent="printData"><i class="bi bi-file-earmark-pdf text-danger me-2"></i> Cetak PDF</a></li>
+                            <li><a class="dropdown-item py-2 small" href="#" @click.prevent="exportExcel"><i class="bi bi-file-earmark-excel text-success me-2"></i> Unduh Excel (CSV)</a></li>
+                        </ul>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Stats Banner -->
-        <div class="row g-3 mb-4 no-print">
-            <div class="col-md-4">
-                <StatCard title="Digunakan" :value="stats.used" icon="bi-file-earmark-check-fill" />
+            <!-- Print Header -->
+            <div class="d-none d-print-block mb-4">
+                <div class="text-center border-bottom pb-2">
+                    <h3 class="fw-bold mb-0">LAPORAN REGISTER SURAT KELUAR & DINAS</h3>
+                    <h5 class="mb-0 text-uppercase text-secondary small">{{ periodeLabel }}</h5>
+                </div>
+                <div class="d-flex justify-content-between mt-2 small">
+                    <span>Workbook: {{ currentWorkbookId === 0 ? 'Semua' : selectedType?.workbook_name }}</span>
+                    <span>Tahun: {{ selectedYear }} | Cetak: {{ new Date().toLocaleString('id-ID') }}</span>
+                </div>
             </div>
-            <div class="col-md-4">
-                <StatCard title="Tersedia" :value="stats.available" icon="bi-check-circle-fill" />
-            </div>
-            <div class="col-md-4">
-                <StatCard title="Reservasi" :value="stats.reserved" icon="bi-bookmark-check-fill" />
-            </div>
-        </div>
 
-        <!-- Data Table -->
-        <div class="st-card p-0 overflow-hidden shadow-sm">
+            <!-- Workbook Filter Card (Figma Prototype Model) -->
+            <div class="bg-white rounded-4 border border-slate-200 shadow-sm p-3 p-sm-4 no-print">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center flex-grow-1">
+                        <div>
+                            <label class="d-block small fw-bold text-muted mb-1">Filter Workbook</label>
+                            <select v-model="currentWorkbookId" class="form-select border border-slate-200 rounded-3 py-2 small text-dark shadow-none" style="min-width: 220px;" @change="applyFilter">
+                                <option :value="0">Semua Jenis Naskah</option>
+                                <option v-for="t in types" :key="t.id" :value="t.id">[{{ t.type_code }}] {{ t.type_name }}</option>
+                            </select>
+                        </div>
+                        <div class="flex-grow-1">
+                            <label class="d-block small fw-bold text-muted mb-1">Pencarian</label>
+                            <div class="position-relative">
+                                <i class="bi bi-search position-absolute text-muted" style="left: 12px; top: 50%; transform: translateY(-50%);"></i>
+                                <input
+                                    v-model="search"
+                                    type="text"
+                                    class="form-control rounded-3 py-2 small shadow-none"
+                                    style="padding-left: 36px;"
+                                    placeholder="Cari nomor surat, perihal, unit, penanda tangan..."
+                                    @keyup.enter="applyFilter"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini stats inline (Figma Model) -->
+                    <div class="d-flex gap-2 align-items-end">
+                        <div class="rounded-3 border px-3 py-2 text-center" style="background-color: #f8fafc; border-color: #e2e8f0; min-width: 85px;">
+                            <div class="fs-5 fw-bold font-display text-muted">{{ stats.used }}</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Terpakai</div>
+                        </div>
+                        <div class="rounded-3 border px-3 py-2 text-center" style="background-color: #f0f9ff; border-color: #e0f2fe; min-width: 85px;">
+                            <div class="fs-5 fw-bold font-display" style="color: #0369a1;">{{ stats.available }}</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Tersedia</div>
+                        </div>
+                        <div class="rounded-3 border px-3 py-2 text-center" style="background-color: #fffbeb; border-color: #fef3c7; min-width: 85px;">
+                            <div class="fs-5 fw-bold font-display" style="color: #b45309;">{{ stats.reserved }}</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Reservasi</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table Card (Figma Prototype Model) -->
+            <div class="bg-white rounded-4 border border-slate-200 shadow-sm overflow-hidden">
             <div class="table-responsive">
                 <table class="table-modern">
                     <thead>
@@ -779,6 +770,7 @@ const switchToEdit = () => {
                 </form>
             </div>
         </Modal>
+        </div>
     </AppLayout>
 </template>
 

@@ -400,294 +400,242 @@ const formatDateIndo = (dateStr?: string | null) => {
     <AppLayout title="Ketersediaan Nomor Surat">
         <Head title="Ketersediaan Nomor Surat" />
 
-        <!-- Header Section -->
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-            <div>
-                <span class="text-uppercase fw-bold small text-primary" style="letter-spacing: .08em;">
-                    Manajemen Penomoran & Ketersediaan
-                </span>
-                <h2 class="fw-bold mb-1 text-dark">Ketersediaan Nomor Surat</h2>
-                <p class="text-muted mb-0 small">
-                    Data ketersediaan nomor naskah dinas langsung sinkron dengan Google Spreadsheet.
-                </p>
+        <div class="space-y-5 w-full">
+            <!-- Header Section (Figma Prototype Model) -->
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                <div>
+                    <h1 class="font-display fw-bold fs-4 text-dark mb-1">
+                        Ketersediaan Nomor Surat
+                    </h1>
+                    <p class="text-muted small mb-0">
+                        Manajemen stok penomoran 16 jenis naskah dinas 2026
+                    </p>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <!-- Year Selector -->
+                    <div class="d-flex align-items-center bg-white border border-slate-200 rounded-3 px-2 py-1 shadow-xs">
+                        <span class="small fw-semibold text-muted me-1">Tahun:</span>
+                        <select v-model="selectedYear" class="form-select form-select-sm border-0 fw-bold bg-transparent p-0 shadow-none" style="width: 70px;" @change="changeYear">
+                            <option v-for="y in [2024, 2025, 2026, 2027]" :key="y" :value="y">{{ y }}</option>
+                        </select>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 text-white fw-semibold small shadow-xs border-0 transition"
+                        style="background: #2743AF;"
+                        @click="openCreateModal('available')"
+                    >
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Tambah Batch Nomor</span>
+                    </button>
+
+                    <div class="btn-group">
+                        <button
+                            type="button"
+                            class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light"
+                            :disabled="isSyncing"
+                            @click="executeSync(false)"
+                        >
+                            <i class="bi" :class="isSyncing ? 'bi-arrow-repeat spin' : 'bi-cloud-download text-primary'"></i>
+                            <span>{{ isSyncing ? 'Syncing...' : 'Sync Spreadsheet' }}</span>
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split border-start-0"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            :disabled="isSyncing"
+                        >
+                            <span class="visually-hidden">Toggle</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li>
+                                <a class="dropdown-item py-2 small fw-semibold" href="#" @click.prevent="executeSync(false)">
+                                    <i class="bi bi-file-earmark-text me-2 text-success"></i> Tarik Sheet Ini ({{ activeType?.workbook_name }})
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 small fw-semibold" href="#" @click.prevent="executeSync(true)">
+                                    <i class="bi bi-collection me-2 text-primary"></i> Tarik Semua Jenis Naskah
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider my-1" /></li>
+                            <li>
+                                <a class="dropdown-item py-2 small" href="#" @click.prevent="showSyncModal = true">
+                                    <i class="bi bi-gear me-2 text-muted"></i> Pengaturan Link Spreadsheet
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
-            <!-- Year Filter, Sync API & Actions -->
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <!-- Year Selector -->
-                <div class="input-group input-group-sm year-filter" style="width: 140px;">
-                    <span class="input-group-text bg-white fw-bold">Tahun</span>
-                    <select v-model="selectedYear" class="form-select fw-bold year-select" @change="changeYear">
-                        <option v-for="y in [2024, 2025, 2026, 2027]" :key="y" :value="y">
-                            {{ y }}
+            <!-- Workbook Selector & Card (Figma Prototype Model) -->
+            <div class="bg-white rounded-4 border border-slate-200 shadow-sm overflow-hidden">
+                <!-- Workbook Picker -->
+                <div class="p-3 p-sm-4 border-bottom border-slate-100">
+                    <label class="d-block small fw-bold text-muted mb-2">Pilih Jenis Naskah (Workbook)</label>
+                    <select
+                        v-model="activeTypeId"
+                        class="form-select border border-slate-200 rounded-3 py-2 px-3 small fw-semibold text-dark shadow-none"
+                        @change="switchTab(Number(activeTypeId))"
+                    >
+                        <option v-for="t in types" :key="t.id" :value="t.id">
+                            [{{ t.type_code }}] {{ t.type_name }} — {{ t.workbook_name }}
                         </option>
                     </select>
                 </div>
 
-                <!-- Google Spreadsheet API Sync Button -->
-                <div class="btn-group">
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-success fw-bold d-flex align-items-center gap-2 shadow-sm"
-                        :disabled="isSyncing"
-                        @click="executeSync(false)"
-                        title="Tarik data sheet ini dari Google Spreadsheet"
-                    >
-                        <i class="bi" :class="isSyncing ? 'bi-arrow-repeat spin' : 'bi-cloud-download'"></i>
-                        <span>{{ isSyncing ? 'Menarik Data...' : 'Tarik Spreadsheet' }}</span>
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                        :disabled="isSyncing"
-                    >
-                        <span class="visually-hidden">Toggle Sync Options</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                        <li>
-                            <a class="dropdown-item py-2 fw-semibold" href="#" @click.prevent="executeSync(false)">
-                                <i class="bi bi-file-earmark-text me-2 text-success"></i> Tarik Sheet Ini ({{ activeType?.workbook_name }})
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item py-2 fw-semibold" href="#" @click.prevent="executeSync(true)">
-                                <i class="bi bi-collection me-2 text-primary"></i> Tarik Semua Jenis Naskah
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider" /></li>
-                        <li>
-                            <a class="dropdown-item py-2" href="#" @click.prevent="showSyncModal = true">
-                                <i class="bi bi-gear me-2 text-muted"></i> Pengaturan Link Spreadsheet
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Manual Allocation Dropdown -->
-                <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-primary-blue" @click="openCreateModal('available')">
-                        <i class="bi bi-plus-lg me-1"></i> Buat Stok
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-primary-blue dropdown-toggle dropdown-toggle-split"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                    >
-                        <span class="visually-hidden">Toggle Dropdown</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                        <li>
-                            <a class="dropdown-item py-2 fw-semibold" href="#" @click.prevent="openCreateModal('preorder')">
-                                <i class="bi bi-cart-check me-2 text-primary"></i> Pre-Order Nomor
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item py-2 fw-semibold" href="#" @click.prevent="openCreateModal('reservation')">
-                                <i class="bi bi-bookmark-check me-2 text-warning"></i> Reservasi Nomor
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- Workbook Selector & Quick Stats -->
-        <div class="row g-3 mb-4">
-            <!-- Workbook Selector -->
-            <div class="col-lg-4 col-md-5">
-                <div class="st-card p-3 h-100 bg-white shadow-sm d-flex flex-column justify-content-center">
-                    <label class="form-label text-muted small fw-bold mb-1 text-uppercase">Pilih Jenis Naskah</label>
-                    <button
-                        ref="dropdownTrigger"
-                        type="button"
-                        class="btn btn-outline-primary fw-bold d-flex align-items-center justify-content-between gap-2 text-truncate"
-                        @click="openDropdown"
-                    >
-                        <span class="d-flex align-items-center gap-2 text-truncate">
-                            <i class="bi bi-journal-text text-primary"></i>
-                            <span class="text-truncate">{{ activeType?.workbook_name || 'Pilih Jenis Naskah' }}</span>
-                        </span>
-                        <i class="bi" :class="dropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
-                    </button>
-
-                    <Teleport to="body">
-                        <div
-                            v-if="dropdownOpen"
-                            class="workbook-dropdown-panel shadow-lg"
-                            :style="{ top: dropdownStyle.top, left: dropdownStyle.left, width: dropdownStyle.width }"
-                        >
-                            <div class="workbook-dropdown-search">
-                                <i class="bi bi-search text-muted"></i>
-                                <input
-                                    v-model="dropdownSearch"
-                                    type="text"
-                                    placeholder="Cari jenis naskah..."
-                                    class="form-control form-control-sm border-0 shadow-none"
-                                    @click.stop
-                                />
+                <!-- Type Info & Stats -->
+                <div class="p-3 p-sm-4">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-start gap-3 mb-4">
+                        <div>
+                            <h2 class="font-display fw-bold fs-5 text-dark mb-1">{{ activeType?.type_name }}</h2>
+                            <p class="small text-muted font-mono-tracking mb-2">{{ activeType?.number_pattern || '-' }}</p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-light text-muted border font-monospace">
+                                    {{ activeType?.uses_security_access ? '⚠ Prefiks Keamanan' : 'Tanpa Prefiks' }}
+                                </span>
+                                <span class="badge bg-light text-muted border">
+                                    {{ activeType?.extra_field === 'nd_pengantar' ? 'ND Pengantar' : 'Hasil Pindai' }}
+                                </span>
+                                <span class="badge bg-light text-muted border font-mono-tracking">
+                                    Penanda Tangan: {{ activeType?.default_signer_code || 'Sekjen' }}
+                                </span>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="workbook-dropdown-list">
-                                <button
-                                    v-for="type in filteredTypes"
-                                    :key="type.id"
-                                    type="button"
-                                    class="workbook-dropdown-item d-flex align-items-center justify-content-between fw-semibold"
-                                    :class="{ active: activeTypeId === type.id }"
-                                    @click="selectWorkbookType(type.id)"
-                                >
-                                    <span class="d-flex align-items-center gap-2">
-                                        <i class="bi bi-file-earmark-text"></i>
-                                        {{ type.workbook_name }}
-                                    </span>
-                                    <i v-if="activeTypeId === type.id" class="bi bi-check-lg text-primary"></i>
+                    <!-- 4 Stat Cards (Figma Model) -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-md-3">
+                            <div class="rounded-3 border p-3" style="background-color: #f0f9ff; border-color: #e0f2fe;">
+                                <div class="fs-3 fw-bold font-display" style="color: #0369a1;">{{ stats.available }}</div>
+                                <div class="small text-muted mt-1">Tersedia</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="rounded-3 border p-3" style="background-color: #f5f3ff; border-color: #ede9fe;">
+                                <button type="button" class="w-100 text-start border-0 bg-transparent p-0" @click="openCreateModal('preorder')">
+                                    <div class="fs-3 fw-bold font-display" style="color: #6d28d9;">{{ stats.preorder }}</div>
+                                    <div class="small text-muted mt-1">Pre-Order</div>
                                 </button>
-
-                                <div v-if="filteredTypes.length === 0" class="text-center text-muted small py-3">
-                                    Tidak ada jenis naskah yang cocok.
-                                </div>
                             </div>
                         </div>
-                    </Teleport>
-                </div>
-            </div>
-
-            <!-- Stats Overview Cards -->
-            <div class="col-lg-8 col-md-7">
-                <div class="row g-2 h-100">
-                    <div class="col-6 col-sm-3">
-                        <div class="st-card p-3 h-100 bg-white border-start border-4 border-primary shadow-sm text-center">
-                            <span class="text-muted small fw-bold d-block">TOTAL NOMOR</span>
-                            <h4 class="fw-bold text-dark mb-0">{{ stats.total }}</h4>
+                        <div class="col-6 col-md-3">
+                            <div class="rounded-3 border p-3" style="background-color: #fffbeb; border-color: #fef3c7;">
+                                <button type="button" class="w-100 text-start border-0 bg-transparent p-0" @click="openCreateModal('reservation')">
+                                    <div class="fs-3 fw-bold font-display" style="color: #b45309;">{{ stats.reserved }}</div>
+                                    <div class="small text-muted mt-1">Reservasi</div>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="rounded-3 border p-3" style="background-color: #f8fafc; border-color: #e2e8f0;">
+                                <div class="fs-3 fw-bold font-display text-muted">{{ stats.used }}</div>
+                                <div class="small text-muted mt-1">Terpakai</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-6 col-sm-3">
-                        <div class="st-card p-3 h-100 bg-white border-start border-4 border-success shadow-sm text-center">
-                            <span class="text-muted small fw-bold d-block">TERSEDIA</span>
-                            <h4 class="fw-bold text-success mb-0">{{ stats.available }}</h4>
-                        </div>
-                    </div>
-                    <div class="col-6 col-sm-3">
-                        <div class="st-card p-3 h-100 bg-white border-start border-4 border-danger shadow-sm text-center">
-                            <span class="text-muted small fw-bold d-block">TERPAKAI</span>
-                            <h4 class="fw-bold text-danger mb-0">{{ stats.used }}</h4>
-                        </div>
-                    </div>
-                    <div class="col-6 col-sm-3">
-                        <div class="st-card p-3 h-100 bg-white border-start border-4 border-warning shadow-sm text-center">
-                            <span class="text-muted small fw-bold d-block">PRE-ORDER/RES.</span>
-                            <h4 class="fw-bold text-warning mb-0">{{ stats.preorder + stats.reserved }}</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- MAIN TABLE SECTION: SPREADSHEET VIEW -->
-        <div class="st-card shadow-sm mb-4">
-            <!-- Table Controls Bar -->
-            <div class="p-3 border-bottom bg-light d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                <!-- Status Filter Pills -->
-                <div class="d-flex align-items-center gap-1 flex-wrap">
-                    <button
-                        type="button"
-                        class="btn btn-sm"
-                        :class="statusFilter === 'all' ? 'btn-dark fw-bold' : 'btn-outline-secondary'"
-                        @click="statusFilter = 'all'"
-                    >
-                        Semua ({{ stats.total }})
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-sm"
-                        :class="statusFilter === 'available' ? 'btn-success fw-bold' : 'btn-outline-success'"
-                        @click="statusFilter = 'available'"
-                    >
-                        Tersedia ({{ stats.available }})
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-sm"
-                        :class="statusFilter === 'used' ? 'btn-danger fw-bold' : 'btn-outline-danger'"
-                        @click="statusFilter = 'used'"
-                    >
-                        Terpakai ({{ stats.used }})
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-sm"
-                        :class="statusFilter === 'preorder' ? 'btn-info text-white fw-bold' : 'btn-outline-info'"
-                        @click="statusFilter = 'preorder'"
-                    >
-                        Pre-Order ({{ stats.preorder }})
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-sm"
-                        :class="statusFilter === 'reserved' ? 'btn-warning fw-bold' : 'btn-outline-warning'"
-                        @click="statusFilter = 'reserved'"
-                    >
-                        Reservasi ({{ stats.reserved }})
-                    </button>
-                </div>
-
-                <!-- Search & View Toggle -->
-                <div class="d-flex align-items-center gap-2">
-                    <div class="input-group input-group-sm" style="max-width: 280px;">
-                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                        <input
-                            v-model="searchQuery"
-                            type="text"
-                            class="form-control"
-                            placeholder="Cari no. urut, perihal, unit..."
-                        />
-                        <button
-                            v-if="searchQuery"
-                            class="btn btn-outline-secondary"
-                            type="button"
-                            @click="searchQuery = ''"
-                        >
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-                    </div>
-
-                    <!-- View Switcher -->
-                    <div class="btn-group btn-group-sm">
+                    <!-- Quick Action Buttons -->
+                    <div class="d-flex flex-wrap gap-2 mb-4">
                         <button
                             type="button"
-                            class="btn"
-                            :class="viewMode === 'table' ? 'btn-primary-blue' : 'btn-outline-secondary'"
-                            @click="viewMode = 'table'"
-                            title="Tampilan Tabel Spreadsheet"
+                            class="d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-3 small fw-medium border"
+                            style="color: #6d28d9; background: #f5f3ff; border-color: #ddd6fe;"
+                            @click="openCreateModal('preorder')"
                         >
-                            <i class="bi bi-table"></i>
+                            <i class="bi bi-plus-lg"></i>
+                            Pre-Order Nomor
                         </button>
                         <button
                             type="button"
-                            class="btn"
-                            :class="viewMode === 'grid' ? 'btn-primary-blue' : 'btn-outline-secondary'"
-                            @click="viewMode = 'grid'"
-                            title="Tampilan Grid Slot"
+                            class="d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-3 small fw-medium border"
+                            style="color: #b45309; background: #fffbeb; border-color: #fde68a;"
+                            @click="openCreateModal('reservation')"
                         >
-                            <i class="bi bi-grid-3x3-gap"></i>
+                            <i class="bi bi-hash"></i>
+                            Reservasi Nomor Spesifik
                         </button>
                     </div>
 
-                    <!-- Bulk Mode Toggle -->
-                    <button
-                        type="button"
-                        class="btn btn-sm"
-                        :class="selectionMode ? 'btn-danger' : 'btn-outline-secondary'"
-                        @click="toggleSelectionMode"
-                    >
-                        <i class="bi bi-check2-square me-1"></i>
-                        {{ selectionMode ? 'Batal Pilih' : 'Pilih' }}
-                    </button>
+                    <!-- Filter Bar & Search -->
+                    <div class="d-flex flex-column flex-md-row gap-3 mb-4">
+                        <div class="position-relative flex-grow-1">
+                            <i class="bi bi-search position-absolute text-muted" style="left: 12px; top: 50%; transform: translateY(-50%);"></i>
+                            <input
+                                v-model="searchQuery"
+                                type="text"
+                                class="form-control rounded-3 py-2 small shadow-none"
+                                style="padding-left: 36px;"
+                                placeholder="Cari nomor, unit, perihal..."
+                            />
+                        </div>
+
+                        <!-- Status Filter Buttons (Figma Prototype Model) -->
+                        <div class="d-flex flex-wrap gap-1.5 align-items-center">
+                            <button
+                                type="button"
+                                class="px-3 py-1.5 rounded-3 small fw-medium transition border"
+                                :class="statusFilter === 'all' ? 'text-white border-0' : 'bg-white text-muted border-slate-200'"
+                                :style="statusFilter === 'all' ? 'background: #2743AF;' : ''"
+                                @click="statusFilter = 'all'"
+                            >
+                                Semua ({{ stats.total }})
+                            </button>
+                            <button
+                                type="button"
+                                class="px-3 py-1.5 rounded-3 small fw-medium transition border"
+                                :class="statusFilter === 'available' ? 'text-white border-0' : 'bg-white text-muted border-slate-200'"
+                                :style="statusFilter === 'available' ? 'background: #2743AF;' : ''"
+                                @click="statusFilter = 'available'"
+                            >
+                                Tersedia ({{ stats.available }})
+                            </button>
+                            <button
+                                type="button"
+                                class="px-3 py-1.5 rounded-3 small fw-medium transition border"
+                                :class="statusFilter === 'preorder' ? 'text-white border-0' : 'bg-white text-muted border-slate-200'"
+                                :style="statusFilter === 'preorder' ? 'background: #2743AF;' : ''"
+                                @click="statusFilter = 'preorder'"
+                            >
+                                Pre-Order ({{ stats.preorder }})
+                            </button>
+                            <button
+                                type="button"
+                                class="px-3 py-1.5 rounded-3 small fw-medium transition border"
+                                :class="statusFilter === 'reserved' ? 'text-white border-0' : 'bg-white text-muted border-slate-200'"
+                                :style="statusFilter === 'reserved' ? 'background: #2743AF;' : ''"
+                                @click="statusFilter = 'reserved'"
+                            >
+                                Reservasi ({{ stats.reserved }})
+                            </button>
+                            <button
+                                type="button"
+                                class="px-3 py-1.5 rounded-3 small fw-medium transition border"
+                                :class="statusFilter === 'used' ? 'text-white border-0' : 'bg-white text-muted border-slate-200'"
+                                :style="statusFilter === 'used' ? 'background: #2743AF;' : ''"
+                                @click="statusFilter = 'used'"
+                            >
+                                Terpakai ({{ stats.used }})
+                            </button>
+
+                            <!-- Bulk Mode Toggle -->
+                            <button
+                                type="button"
+                                class="btn btn-sm"
+                                :class="selectionMode ? 'btn-danger' : 'btn-outline-secondary'"
+                                @click="toggleSelectionMode"
+                            >
+                                <i class="bi bi-check2-square me-1"></i>
+                                {{ selectionMode ? 'Batal Pilih' : 'Pilih' }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
             <!-- Bulk Actions Bar (When selecting) -->
             <div v-if="selectionMode" class="p-2 px-3 bg-primary-subtle border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -1114,6 +1062,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                 </div>
             </form>
         </Modal>
+        </div>
     </AppLayout>
 </template>
 
