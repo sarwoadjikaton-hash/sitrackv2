@@ -431,44 +431,26 @@ const formatDateIndo = (dateStr?: string | null) => {
                         <span>Tambah Batch Nomor</span>
                     </button>
 
-                    <div class="btn-group">
-                        <button
-                            type="button"
-                            class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light"
-                            :disabled="isSyncing"
-                            @click="executeSync(false)"
-                        >
-                            <i class="bi" :class="isSyncing ? 'bi-arrow-repeat spin' : 'bi-cloud-download text-primary'"></i>
-                            <span>{{ isSyncing ? 'Syncing...' : 'Sync Spreadsheet' }}</span>
-                        </button>
-                        <button
-                            type="button"
-                            class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split border-start-0"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                            :disabled="isSyncing"
-                        >
-                            <span class="visually-hidden">Toggle</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                            <li>
-                                <a class="dropdown-item py-2 small fw-semibold" href="#" @click.prevent="executeSync(false)">
-                                    <i class="bi bi-file-earmark-text me-2 text-success"></i> Tarik Sheet Ini ({{ activeType?.workbook_name }})
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2 small fw-semibold" href="#" @click.prevent="executeSync(true)">
-                                    <i class="bi bi-collection me-2 text-primary"></i> Tarik Semua Jenis Naskah
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider my-1" /></li>
-                            <li>
-                                <a class="dropdown-item py-2 small" href="#" @click.prevent="showSyncModal = true">
-                                    <i class="bi bi-gear me-2 text-muted"></i> Pengaturan Link Spreadsheet
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+                    <button
+                        type="button"
+                        class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light"
+                        :disabled="isSyncing"
+                        @click="executeSync(false)"
+                        title="Sinkronisasi data dari Google Spreadsheet"
+                    >
+                        <i class="bi" :class="isSyncing ? 'bi-arrow-repeat spin' : 'bi-arrow-repeat text-primary'"></i>
+                        <span>{{ isSyncing ? 'Syncing...' : 'Sync Spreadsheet' }}</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light"
+                        @click="showSyncModal = true"
+                        title="Pengaturan Link Google Spreadsheet"
+                    >
+                        <i class="bi bi-gear text-secondary"></i>
+                        <span>Setting</span>
+                    </button>
                 </div>
             </div>
 
