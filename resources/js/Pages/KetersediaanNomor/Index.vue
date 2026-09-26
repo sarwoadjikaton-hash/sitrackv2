@@ -421,6 +421,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                         </select>
                     </div>
 
+                    <!-- Tombol Tambah Batch Nomor -->
                     <button
                         type="button"
                         class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 text-white fw-semibold small shadow-xs border-0 transition"
@@ -431,6 +432,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                         <span>Tambah Batch Nomor</span>
                     </button>
 
+                    <!-- Tombol Sinkronisasi -->
                     <button
                         type="button"
                         class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light"
@@ -438,19 +440,44 @@ const formatDateIndo = (dateStr?: string | null) => {
                         @click="executeSync(false)"
                         title="Sinkronisasi data dari Google Spreadsheet"
                     >
-                        <i class="bi" :class="isSyncing ? 'bi-arrow-repeat spin' : 'bi-arrow-repeat text-primary'"></i>
-                        <span>{{ isSyncing ? 'Syncing...' : 'Sync Spreadsheet' }}</span>
+                        <i class="bi" :class="isSyncing ? 'bi-arrow-repeat spin' : 'bi-cloud-download text-primary'"></i>
+                        <span>{{ isSyncing ? 'Menyinkronkan...' : 'Sinkronisasi' }}</span>
                     </button>
 
-                    <button
-                        type="button"
-                        class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light"
-                        @click="showSyncModal = true"
-                        title="Pengaturan Link Google Spreadsheet"
-                    >
-                        <i class="bi bi-gear text-secondary"></i>
-                        <span>Setting</span>
-                    </button>
+                    <!-- Tombol Pengaturan -->
+                    <div class="dropdown">
+                        <button
+                            type="button"
+                            class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light dropdown-toggle"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            title="Pengaturan dan opsi sinkronisasi"
+                        >
+                            <i class="bi bi-gear text-secondary"></i>
+                            <span>Pengaturan</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border border-slate-200 rounded-3 py-1">
+                            <li>
+                                <a class="dropdown-item py-2 small fw-semibold d-flex align-items-center gap-2" href="#" @click.prevent="executeSync(false)">
+                                    <i class="bi bi-file-earmark-text text-success"></i>
+                                    <span>Tarik Lembar Ini ({{ activeType?.workbook_name }})</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 small fw-semibold d-flex align-items-center gap-2" href="#" @click.prevent="executeSync(true)">
+                                    <i class="bi bi-collection text-primary"></i>
+                                    <span>Tarik Semua Jenis Naskah</span>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider my-1" /></li>
+                            <li>
+                                <a class="dropdown-item py-2 small d-flex align-items-center gap-2 text-dark" href="#" @click.prevent="showSyncModal = true">
+                                    <i class="bi bi-sliders text-secondary"></i>
+                                    <span>Pengaturan Lanjutan</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -475,7 +502,6 @@ const formatDateIndo = (dateStr?: string | null) => {
                     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-start gap-3 mb-4">
                         <div>
                             <h2 class="font-display fw-bold fs-5 text-dark mb-1">{{ activeType?.type_name }}</h2>
-                            <p class="small text-muted font-mono-tracking mb-2">{{ activeType?.number_pattern || '-' }}</p>
                             <div class="d-flex flex-wrap gap-2">
                                 <span class="badge bg-light text-muted border font-monospace">
                                     {{ activeType?.uses_security_access ? '⚠ Prefiks Keamanan' : 'Tanpa Prefiks' }}
@@ -1043,6 +1069,59 @@ const formatDateIndo = (dateStr?: string | null) => {
                     </button>
                 </div>
             </form>
+        </Modal>
+
+        <!-- Modal Pengaturan Lanjutan Link Spreadsheet -->
+        <Modal :show="showSyncModal" max-width="md" @close="showSyncModal = false">
+            <div class="bg-white rounded-2xl p-4 sm:p-5">
+                <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-sliders text-primary fs-5"></i>
+                        <h5 class="fw-bold text-dark m-0" style="font-size: 1.05rem;">Pengaturan Lanjutan</h5>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-link text-muted p-0 text-decoration-none" @click="showSyncModal = false">
+                        <i class="bi bi-x-lg fs-6"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary mb-1">Tautan Google Spreadsheet</label>
+                        <input
+                            v-model="syncSpreadsheetUrl"
+                            type="url"
+                            class="form-control rounded-lg"
+                            placeholder="https://docs.google.com/spreadsheets/d/.../edit"
+                        />
+                        <small class="text-muted d-block mt-1" style="font-size: 0.72rem;">
+                            Pastikan spreadsheet telah dibagikan dengan akses lihat (Viewer) atau menggunakan Service Account yang sesuai.
+                        </small>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="small fw-semibold text-dark mb-1">Opsi Sinkronisasi:</div>
+                        <div class="text-muted small" style="font-size: 0.75rem;">
+                            Tahun Aktif: <strong class="text-dark">{{ selectedYear }}</strong> &bull; Jenis Naskah: <strong class="text-dark">{{ activeType?.workbook_name || '-' }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 pt-3 border-top mt-4">
+                    <button type="button" class="btn btn-light border flex-grow-1 text-secondary font-medium" @click="showSyncModal = false">
+                        Batal
+                    </button>
+                    <button
+                        type="button"
+                        class="btn text-white flex-grow-1 font-medium"
+                        style="background-color: #2743AF;"
+                        :disabled="isSyncing"
+                        @click="executeSync(false)"
+                    >
+                        <span v-if="isSyncing" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        Simpan &amp; Sinkronkan
+                    </button>
+                </div>
+            </div>
         </Modal>
         </div>
     </AppLayout>
