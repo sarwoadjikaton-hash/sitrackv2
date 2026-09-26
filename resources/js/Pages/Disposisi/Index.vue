@@ -4,6 +4,7 @@ import { ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
 import Pagination from '@/Components/Pagination.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { Letter, PaginatedData } from '@/types';
 
 const props = defineProps<{
@@ -91,22 +92,34 @@ const statsTuntas = computed(() => props.letters.data.filter(l => l.status === '
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small fw-bold mb-1">Sumber Surat</label>
-                    <select v-model="sourceFilter" class="form-select" @change="handleFilter">
-                        <option value="">Semua Sumber</option>
-                        <option value="Manual">Manual</option>
-                        <option value="SRIKANDI">SRIKANDI</option>
-                    </select>
+                    <SearchableSelect
+                        v-model="sourceFilter"
+                        :options="[
+                            { value: '', label: 'Semua Sumber' },
+                            { value: 'Manual', label: 'Manual' },
+                            { value: 'SRIKANDI', label: 'SRIKANDI' }
+                        ]"
+                        placeholder="Semua Sumber"
+                        size="sm"
+                        @update:model-value="handleFilter"
+                    />
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label class="form-label small fw-bold mb-1">Status Lajur</label>
-                    <select v-model="statusFilter" class="form-select" @change="handleFilter">
-                        <option value="">Semua Status</option>
-                        <option v-for="s in allowedStatuses" :key="s" :value="s">{{ s }}</option>
-                    </select>
+                    <SearchableSelect
+                        v-model="statusFilter"
+                        :options="[
+                            { value: '', label: 'Semua Status' },
+                            ...allowedStatuses.map(s => ({ value: s, label: s }))
+                        ]"
+                        placeholder="Semua Status"
+                        size="sm"
+                        @update:model-value="handleFilter"
+                    />
                 </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button class="btn btn-primary-blue w-100 py-2" type="button" @click="handleFilter">
-                        <i class="bi bi-search me-1"></i> Filter
+                <div class="col-md-1 d-flex align-items-end">
+                    <button class="btn btn-primary-blue w-100 py-2 rounded-2" type="button" @click="handleFilter">
+                        <i class="bi bi-search"></i>
                     </button>
                 </div>
             </div>

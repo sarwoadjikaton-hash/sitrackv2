@@ -208,24 +208,30 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                             @keyup.enter="applyFilter"
                         />
                     </div>
-                    <select
-                        v-model="statusFilter"
-                        class="form-select border border-slate-200 rounded-3 py-2 small text-dark shadow-none"
-                        style="min-width: 180px; width: auto;"
-                        @change="applyFilter"
-                    >
-                        <option value="">Semua Status</option>
-                        <option v-for="s in allowedStatuses" :key="s" :value="s">{{ s }}</option>
-                    </select>
-                    <select
-                        v-model="currentWorkbookId"
-                        class="form-select border border-slate-200 rounded-3 py-2 small text-dark shadow-none"
-                        style="min-width: 180px; width: auto;"
-                        @change="applyFilter"
-                    >
-                        <option :value="0">Semua Jenis Naskah</option>
-                        <option v-for="t in types" :key="t.id" :value="t.id">[{{ t.type_code }}] {{ t.type_name }}</option>
-                    </select>
+                    <div style="min-width: 180px;">
+                        <SearchableSelect
+                            v-model="statusFilter"
+                            :options="[
+                                { value: '', label: 'Semua Status' },
+                                ...allowedStatuses.map(s => ({ value: s, label: s }))
+                            ]"
+                            placeholder="Semua Status"
+                            size="sm"
+                            @update:model-value="applyFilter"
+                        />
+                    </div>
+                    <div style="min-width: 200px;">
+                        <SearchableSelect
+                            v-model="currentWorkbookId"
+                            :options="[
+                                { value: 0, label: 'Semua Jenis Naskah' },
+                                ...types.map(t => ({ value: t.id, label: `[${t.type_code}] ${t.type_name}` }))
+                            ]"
+                            placeholder="Semua Jenis Naskah"
+                            size="sm"
+                            @update:model-value="applyFilter"
+                        />
+                    </div>
                 </div>
             <div class="table-responsive">
                 <table class="table-modern">
@@ -329,9 +335,11 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
             <form @submit.prevent="submitStatusUpdate">
                 <div class="mb-3">
                     <label class="form-label small fw-bold">Status Dokumen</label>
-                    <select v-model="statusForm.status" class="form-select" required>
-                        <option v-for="s in allowedStatuses" :key="s" :value="s">{{ s }}</option>
-                    </select>
+                    <SearchableSelect
+                        v-model="statusForm.status"
+                        :options="allowedStatuses.map(s => ({ value: s, label: s }))"
+                        placeholder="Pilih Status..."
+                    />
                 </div>
 
                 <div class="mb-3">

@@ -385,12 +385,18 @@ const switchToEdit = () => {
             <div class="bg-white rounded-4 border border-slate-200 shadow-sm p-3 p-sm-4 no-print">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                     <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center flex-grow-1">
-                        <div>
+                        <div style="min-width: 220px;">
                             <label class="d-block small fw-bold text-muted mb-1">Filter Workbook</label>
-                            <select v-model="currentWorkbookId" class="form-select border border-slate-200 rounded-3 py-2 small text-dark shadow-none" style="min-width: 220px;" @change="applyFilter">
-                                <option :value="0">Semua Jenis Naskah</option>
-                                <option v-for="t in types" :key="t.id" :value="t.id">[{{ t.type_code }}] {{ t.type_name }}</option>
-                            </select>
+                            <SearchableSelect
+                                v-model="currentWorkbookId"
+                                :options="[
+                                    { value: 0, label: 'Semua Jenis Naskah' },
+                                    ...types.map(t => ({ value: t.id, label: `[${t.type_code}] ${t.type_name}` }))
+                                ]"
+                                placeholder="Semua Jenis Naskah"
+                                size="sm"
+                                @update:model-value="applyFilter"
+                            />
                         </div>
                         <div class="flex-grow-1">
                             <label class="d-block small fw-bold text-muted mb-1">Pencarian</label>
@@ -607,12 +613,15 @@ const switchToEdit = () => {
                 <template v-if="!importForm.processing">
                     <div class="mb-4">
                         <label class="form-label small fw-bold">Target Jenis Naskah</label>
-                        <select v-model="importForm.type_id" class="form-select">
-                            <option :value="null" disabled>-- Pilih Jenis Naskah --</option>
-                            <option :value="0">Semua Jenis Naskah (deteksi dari kolom Excel)</option>
-                            <option v-for="t in types" :key="t.id" :value="t.id">{{ t.workbook_name }}</option>
-                        </select>
-                        <small class="text-muted">
+                        <SearchableSelect
+                            v-model="importForm.type_id"
+                            :options="[
+                                { value: 0, label: 'Semua Jenis Naskah (deteksi dari kolom Excel)' },
+                                ...types.map(t => ({ value: t.id, label: t.workbook_name }))
+                            ]"
+                            placeholder="-- Pilih Jenis Naskah --"
+                        />
+                        <small class="text-muted mt-1 d-block">
                             Pilih "Semua Jenis Naskah" kalau file Excel-mu sudah punya kolom JENIS NASKAH per baris.
                         </small>
                     </div>
@@ -658,12 +667,14 @@ const switchToEdit = () => {
                     <div class="row g-3 mb-4">
                         <div class="col-md-6" v-if="!isEditing">
                             <label class="form-label small fw-bold">Pilih Nomor Urut</label>
-                            <select v-model="form.letter_number_id" class="form-select font-monospace fw-bold">
-                                <option v-for="slot in availableSlots" :key="slot.id" :value="slot.id">
-                                    No. {{ String(slot.sequence_number).padStart(selectedType?.sequence_padding || 4,
-                                        '0') }} [{{ slot.status }}]
-                                </option>
-                            </select>
+                            <SearchableSelect
+                                v-model="form.letter_number_id"
+                                :options="availableSlots.map(slot => ({
+                                    value: slot.id,
+                                    label: `No. ${String(slot.sequence_number).padStart(selectedType?.sequence_padding || 4, '0')} [${slot.status}]`
+                                }))"
+                                placeholder="Pilih Nomor Urut..."
+                            />
                         </div>
                         <div class="col-md-12">
                             <div class="alert alert-primary py-2 px-3 small font-monospace">Preview: <strong>{{
@@ -683,12 +694,12 @@ const switchToEdit = () => {
                         <!-- Unit Pengolah -->
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Unit Pengolah</label>
-                            <select v-model="form.unit_id" class="form-select" @change="onUnitSelect">
-                                <option :value="null">-- Pilih Unit --</option>
-                                <option v-for="unit in units" :key="unit.id" :value="unit.id">
-                                    {{ unit.unit_name }}
-                                </option>
-                            </select>
+                            <SearchableSelect
+                                v-model="form.unit_id"
+                                :options="units.map(u => ({ value: u.id, label: u.unit_name }))"
+                                placeholder="-- Pilih Unit --"
+                                @update:model-value="onUnitSelect"
+                            />
                         </div>
 
                         <div class="col-md-6">
@@ -713,12 +724,16 @@ const switchToEdit = () => {
                         <!-- Keamanan & Klasifikasi -->
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Keamanan Akses</label>
-                            <select v-model="form.security_access" class="form-select">
-                                <option value="B">B - Biasa</option>
-                                <option value="T">T - Terbatas</option>
-                                <option value="R">R - Rahasia</option>
-                                <option value="SR">SR - Sangat Rahasia</option>
-                            </select>
+                            <SearchableSelect
+                                v-model="form.security_access"
+                                :options="[
+                                    { value: 'B', label: 'B - Biasa' },
+                                    { value: 'T', label: 'T - Terbatas' },
+                                    { value: 'R', label: 'R - Rahasia' },
+                                    { value: 'SR', label: 'SR - Sangat Rahasia' }
+                                ]"
+                                placeholder="Pilih Keamanan..."
+                            />
                         </div>
 
                         <div class="col-md-6">

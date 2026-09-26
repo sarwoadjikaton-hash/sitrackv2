@@ -19,6 +19,7 @@ const props = withDefaults(defineProps<{
     emptyText?: string;
     allowCustom?: boolean;
     customPlaceholder?: string;
+    size?: 'sm' | 'md' | 'lg';
 }>(), {
     placeholder: '-- Pilih --',
     searchPlaceholder: 'Cari...',
@@ -29,6 +30,7 @@ const props = withDefaults(defineProps<{
     emptyText: 'Tidak ada hasil ditemukan',
     allowCustom: false,
     customPlaceholder: '✨ Gunakan: "{text}" (Input Manual Bebas)',
+    size: 'md',
 });
 
 const emit = defineEmits<{
@@ -183,7 +185,10 @@ onUnmounted(() => {
 
 <template>
     <div class="dd-wrapper" ref="wrapperEl" @keydown="onKeydown">
-        <button type="button" class="dd-trigger" :class="{ 'is-open': isOpen, 'is-disabled': disabled || loading }"
+        <button type="button" class="dd-trigger" :class="[
+            `dd-size-${size}`,
+            { 'is-open': isOpen, 'is-disabled': disabled || loading }
+        ]"
             :disabled="disabled || loading" @click="toggle">
             <span v-if="loading" class="dd-spinner"></span>
             <span class="dd-trigger-label" :class="{ 'is-placeholder': !selectedOption && !loading }">
@@ -247,6 +252,19 @@ onUnmounted(() => {
     text-align: left;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+.dd-trigger.dd-size-sm {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.84rem;
+    border-radius: 8px;
+    gap: 0.4rem;
+}
+
+.dd-trigger.dd-size-lg {
+    padding: 0.85rem 1.15rem;
+    font-size: 1rem;
+    border-radius: 14px;
 }
 
 .dd-trigger:hover:not(.is-disabled) {

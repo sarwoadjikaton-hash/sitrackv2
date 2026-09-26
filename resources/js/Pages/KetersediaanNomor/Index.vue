@@ -3,6 +3,7 @@ import { Head, useForm, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Modal from '@/Components/Modal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import type { LetterNumberType, Unit, LetterNumberAvailabilityBatch } from '@/types';
 
 type NumberDetail = {
@@ -486,15 +487,12 @@ const formatDateIndo = (dateStr?: string | null) => {
                 <!-- Workbook Picker -->
                 <div class="p-3 p-sm-4 border-bottom border-slate-100">
                     <label class="d-block small fw-bold text-muted mb-2">Pilih Jenis Naskah (Workbook)</label>
-                    <select
+                    <SearchableSelect
                         v-model="activeTypeId"
-                        class="form-select border border-slate-200 rounded-3 py-2 px-3 small fw-semibold text-dark shadow-none"
-                        @change="switchTab(Number(activeTypeId))"
-                    >
-                        <option v-for="t in types" :key="t.id" :value="t.id">
-                            [{{ t.type_code }}] {{ t.type_name }} — {{ t.workbook_name }}
-                        </option>
-                    </select>
+                        :options="types.map(t => ({ value: t.id, label: `[${t.type_code}] ${t.type_name} — ${t.workbook_name}` }))"
+                        placeholder="Pilih Jenis Naskah (Workbook)..."
+                        @update:model-value="(val) => switchTab(Number(val))"
+                    />
                 </div>
 
                 <!-- Type Info & Stats -->
@@ -979,10 +977,11 @@ const formatDateIndo = (dateStr?: string | null) => {
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-dark">Unit Pemohon</label>
-                            <select v-model="form.unit_id" class="form-select">
-                                <option :value="null">Pilih Unit Kerja...</option>
-                                <option v-for="u in units" :key="u.id" :value="u.id">{{ u.unit_name }}</option>
-                            </select>
+                            <SearchableSelect
+                                v-model="form.unit_id"
+                                :options="units.map(u => ({ value: u.id, label: u.unit_name }))"
+                                placeholder="Pilih Unit Kerja..."
+                            />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-dark">Nama PIC / Pemohon</label>
@@ -1002,10 +1001,11 @@ const formatDateIndo = (dateStr?: string | null) => {
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-dark">Unit Pemohon</label>
-                            <select v-model="form.unit_id" class="form-select">
-                                <option :value="null">Pilih Unit Kerja...</option>
-                                <option v-for="u in units" :key="u.id" :value="u.id">{{ u.unit_name }}</option>
-                            </select>
+                            <SearchableSelect
+                                v-model="form.unit_id"
+                                :options="units.map(u => ({ value: u.id, label: u.unit_name }))"
+                                placeholder="Pilih Unit Kerja..."
+                            />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-dark">Nama PIC / Keterangan Reservasi</label>

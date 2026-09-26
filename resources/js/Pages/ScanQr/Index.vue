@@ -3,6 +3,7 @@ import { Head, useForm, Link, router } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { Html5Qrcode } from "html5-qrcode";
 import type { Letter } from '@/types';
 
@@ -445,9 +446,12 @@ watch(mode, (newMode) => {
                 <form @submit.prevent="submitUpdate" class="p-4 space-y-4">
                     <div>
                         <label class="form-label fw-semibold text-dark small mb-1.5">Perbarui ke Status</label>
-                        <select v-model="form.status" class="form-select rounded-3 text-sm py-2 px-3 border-slate-200" required>
-                            <option v-for="s in allowedStatuses" :key="s" :value="s">{{ s }}</option>
-                        </select>
+                        <SearchableSelect
+                            v-model="form.status"
+                            :options="allowedStatuses.map(s => ({ value: s, label: s }))"
+                            placeholder="Pilih Status..."
+                            size="md"
+                        />
                     </div>
 
                     <div>
