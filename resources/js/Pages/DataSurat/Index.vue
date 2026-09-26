@@ -7,7 +7,6 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import StatCard from '@/Components/StatCard.vue';
 import Pagination from '@/Components/Pagination.vue';
 import Modal from '@/Components/Modal.vue';
-import TindakLanjutTabs from '@/Components/TindakLanjutTabs.vue';
 import { LetterNumberType, Unit, LetterNumber, PaginatedData } from '@/types';
 import axios from 'axios';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -341,8 +340,6 @@ const switchToEdit = () => {
     <AppLayout title="Laporan Data Surat">
 
         <Head title="Data Surat" />
-
-        <TindakLanjutTabs />
 
         <!-- Header Section -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 no-print">

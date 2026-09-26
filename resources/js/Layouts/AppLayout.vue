@@ -2,7 +2,7 @@
 import { Link, usePage, router, useForm } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import NotificationBell from '@/Components/NotificationBell.vue';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import ToastNotification from '@/Components/ToastNotification.vue';
 import type { PageProps } from '@/types';
 
@@ -30,6 +30,60 @@ const toggleSidebarCollapse = () => {
 };
 
 const logout = () => router.post('/logout');
+
+// ===== Topbar User Dropdown =====
+const showUserDropdown = ref(false);
+const toggleUserDropdown = () => {
+    showUserDropdown.value = !showUserDropdown.value;
+};
+const closeUserDropdown = () => {
+    showUserDropdown.value = false;
+};
+
+// ===== Command Palette / Global Search (Ctrl + K) =====
+const showSearchModal = ref(false);
+const searchQuery = ref('');
+
+const openSearchModal = () => {
+    searchQuery.value = '';
+    showSearchModal.value = true;
+};
+
+const handleGlobalKeydown = (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        showSearchModal.value = !showSearchModal.value;
+    } else if (e.key === 'Escape') {
+        showSearchModal.value = false;
+        showUserDropdown.value = false;
+    }
+};
+
+const executeSearch = () => {
+    if (!searchQuery.value.trim()) return;
+    const q = searchQuery.value.trim();
+    showSearchModal.value = false;
+    router.get('/data-surat', { search: q });
+};
+
+const navigateTo = (url: string) => {
+    showSearchModal.value = false;
+    router.visit(url);
+};
+
+onMounted(() => {
+    window.addEventListener('keydown', handleGlobalKeydown);
+    window.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest('.topbar-user-pill-container')) {
+            closeUserDropdown();
+        }
+    });
+});
+
+onUnmounted(() => {
+    window.removeEventListener('keydown', handleGlobalKeydown);
+});
 
 // ===== Floating Tooltip (Teleport-based) =====
 const sidebarRef = ref<HTMLElement | null>(null);
@@ -277,24 +331,50 @@ const isActive = (path: string, exact = false) =>
                 </div>
 
                 <div class="d-flex align-items-center gap-3">
-                    <!-- Search Input (Figma model) -->
-                    <div class="topbar-search-box d-none d-md-flex align-items-center">
+                    <!-- Search Input (Figma model - click or Ctrl+K opens Command Palette) -->
+                    <div class="topbar-search-box d-none d-md-flex align-items-center cursor-pointer" @click="openSearchModal" title="Tekan Ctrl+K untuk pencarian cepat">
                         <i class="bi bi-search text-muted me-2" style="font-size: 0.85rem;"></i>
-                        <input type="text" placeholder="Cari surat..." class="topbar-search-input" />
+                        <input type="text" placeholder="Cari surat..." class="topbar-search-input pointer-events-none" readonly />
                         <span class="topbar-kbd">⌘K</span>
                     </div>
 
                     <NotificationBell />
 
-                    <!-- User Pill Badge (Figma model) -->
-                    <div class="topbar-user-pill d-none d-lg-flex align-items-center gap-2">
-                        <div class="user-avatar-circle user-avatar-topbar">
-                            {{ (user?.name || user?.username || 'A').substring(0, 1).toUpperCase() }}
-                        </div>
-                        <div class="text-start leading-tight">
-                            <div class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.1;">{{ user?.name || user?.username }}</div>
-                            <div class="text-muted" style="font-size: 0.68rem;">{{ roleLabel }}</div>
-                        </div>
+                    <!-- User Pill Badge (Figma model with Dropdown) -->
+                    <div class="topbar-user-pill-container position-relative">
+                        <button type="button" class="topbar-user-pill d-none d-lg-flex align-items-center gap-2 border-0 bg-transparent" @click="toggleUserDropdown">
+                            <div class="user-avatar-circle user-avatar-topbar">
+                                {{ (user?.name || user?.username || 'A').substring(0, 1).toUpperCase() }}
+                            </div>
+                            <div class="text-start leading-tight">
+                                <div class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.1;">{{ user?.name || user?.username }}</div>
+                                <div class="text-muted" style="font-size: 0.68rem;">{{ roleLabel }}</div>
+                            </div>
+                            <i class="bi bi-chevron-down text-muted ms-1" style="font-size: 0.75rem;"></i>
+                        </button>
+
+                        <!-- User Dropdown Menu -->
+                        <transition name="fade">
+                            <div v-if="showUserDropdown" class="topbar-user-menu-dropdown shadow-lg rounded-3 border bg-white position-absolute end-0 mt-2 py-2" style="width: 240px; z-index: 1060;">
+                                <div class="px-3 py-2 border-bottom">
+                                    <div class="fw-bold text-dark small">{{ user?.name || user?.username }}</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">{{ user?.email || user?.username + '@kemnaker.go.id' }}</div>
+                                    <span class="badge bg-primary-subtle text-primary mt-1" style="font-size: 0.68rem;">{{ roleLabel }}</span>
+                                </div>
+                                <div class="py-1">
+                                    <button type="button" class="dropdown-item px-3 py-2 small d-flex align-items-center gap-2" @click="openPasswordModal(); closeUserDropdown();">
+                                        <i class="bi bi-key text-primary"></i> Ganti Password
+                                    </button>
+                                    <Link href="/alur-status" class="dropdown-item px-3 py-2 small d-flex align-items-center gap-2" @click="closeUserDropdown">
+                                        <i class="bi bi-bezier2 text-info"></i> Panduan Alur SOP
+                                    </Link>
+                                    <div class="dropdown-divider my-1"></div>
+                                    <button type="button" class="dropdown-item px-3 py-2 small text-danger d-flex align-items-center gap-2" @click="logout(); closeUserDropdown();">
+                                        <i class="bi bi-box-arrow-right"></i> Keluar
+                                    </button>
+                                </div>
+                            </div>
+                        </transition>
                     </div>
                 </div>
             </header>
@@ -324,6 +404,121 @@ const isActive = (path: string, exact = false) =>
                 </div>
             </Transition>
         </Teleport>
+
+        <!-- Command Palette / Global Search Modal (Ctrl + K) -->
+        <Modal :show="showSearchModal" max-width="lg" @close="showSearchModal = false">
+            <div class="p-0 overflow-hidden">
+                <!-- Search Input Header -->
+                <div class="p-3 border-bottom d-flex align-items-center gap-3 bg-light">
+                    <i class="bi bi-search fs-5 text-primary"></i>
+                    <input
+                        v-model="searchQuery"
+                        type="text"
+                        class="form-control border-0 bg-transparent fs-6 shadow-none px-0"
+                        placeholder="Ketik nomor surat, nomor agenda, perihal, atau kode tracking..."
+                        autofocus
+                        @keyup.enter="executeSearch"
+                    />
+                    <button v-if="searchQuery" class="btn btn-sm btn-link text-muted p-0 text-decoration-none" @click="searchQuery = ''">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </button>
+                    <span class="badge bg-secondary-subtle text-secondary font-monospace px-2 py-1">ESC</span>
+                </div>
+
+                <!-- Navigation Quick Links / Results -->
+                <div class="p-3" style="max-height: 380px; overflow-y: auto;">
+                    <div v-if="searchQuery.trim()" class="mb-3">
+                        <div class="text-uppercase fw-bold small text-muted mb-2 px-2" style="font-size: 0.72rem;">Hasil Pencarian</div>
+                        <button
+                            type="button"
+                            class="w-100 text-start btn btn-light border-0 d-flex align-items-center justify-content-between p-2.5 rounded-3 mb-1"
+                            @click="executeSearch"
+                        >
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-search text-primary"></i>
+                                <span>Cari "<strong>{{ searchQuery }}</strong>" di semua Data Surat & Register</span>
+                            </div>
+                            <span class="badge bg-primary text-white">Enter ↵</span>
+                        </button>
+                    </div>
+
+                    <!-- Quick Navigation -->
+                    <div class="text-uppercase fw-bold small text-muted mb-2 px-2" style="font-size: 0.72rem;">Navigasi Cepat</div>
+                    <div class="list-group list-group-flush border-0">
+                        <button type="button" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-2 rounded-2 border-0 mb-1" @click="navigateTo('/dashboard')">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <span class="badge bg-primary-subtle text-primary p-2 rounded-2"><i class="bi bi-grid-1x2-fill"></i></span>
+                                <div>
+                                    <div class="fw-semibold small text-dark">Dashboard</div>
+                                    <small class="text-muted" style="font-size: 0.72rem;">Ringkasan eksekutif dan statistik persuratan</small>
+                                </div>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted small"></i>
+                        </button>
+
+                        <button type="button" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-2 rounded-2 border-0 mb-1" @click="navigateTo('/ketersediaan-nomor')">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <span class="badge bg-success-subtle text-success p-2 rounded-2"><i class="bi bi-hash"></i></span>
+                                <div>
+                                    <div class="fw-semibold small text-dark">Ketersediaan Nomor</div>
+                                    <small class="text-muted" style="font-size: 0.72rem;">Cek stok nomor, reservasi nomor dan batch</small>
+                                </div>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted small"></i>
+                        </button>
+
+                        <button type="button" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-2 rounded-2 border-0 mb-1" @click="navigateTo('/tindak-lanjut')">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <span class="badge bg-primary-subtle text-primary p-2 rounded-2"><i class="bi bi-list-task"></i></span>
+                                <div>
+                                    <div class="fw-semibold small text-dark">Data Tindak Lanjut / TTD</div>
+                                    <small class="text-muted" style="font-size: 0.72rem;">Lajur penandatanganan dan paraf naskah dinas</small>
+                                </div>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted small"></i>
+                        </button>
+
+                        <button type="button" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-2 rounded-2 border-0 mb-1" @click="navigateTo('/data-surat')">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <span class="badge bg-info-subtle text-info p-2 rounded-2"><i class="bi bi-table"></i></span>
+                                <div>
+                                    <div class="fw-semibold small text-dark">Laporan Data Surat</div>
+                                    <small class="text-muted" style="font-size: 0.72rem;">Buku register penomoran dan ekspor data</small>
+                                </div>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted small"></i>
+                        </button>
+
+                        <button type="button" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-2 rounded-2 border-0 mb-1" @click="navigateTo('/disposisi')">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <span class="badge bg-warning-subtle text-warning p-2 rounded-2"><i class="bi bi-send-fill"></i></span>
+                                <div>
+                                    <div class="fw-semibold small text-dark">Lajur Disposisi</div>
+                                    <small class="text-muted" style="font-size: 0.72rem;">Arahan pimpinan dan penerusan lembar disposisi</small>
+                                </div>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted small"></i>
+                        </button>
+
+                        <button type="button" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-2 rounded-2 border-0 mb-1" @click="navigateTo('/scan-status')">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <span class="badge bg-danger-subtle text-danger p-2 rounded-2"><i class="bi bi-qr-code-scan"></i></span>
+                                <div>
+                                    <div class="fw-semibold small text-dark">Scan & Update Status</div>
+                                    <small class="text-muted" style="font-size: 0.72rem;">Pindai QR fisik surat untuk update status instan</small>
+                                </div>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted small"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-2.5 bg-light border-top d-flex align-items-center justify-content-between text-muted small px-3" style="font-size: 0.75rem;">
+                    <span>Tip: Gunakan <kbd class="bg-white border text-dark px-1.5 py-0.5 rounded">Ctrl</kbd> + <kbd class="bg-white border text-dark px-1.5 py-0.5 rounded">K</kbd> kapan saja</span>
+                    <span>Tekan <kbd class="bg-white border text-dark px-1.5 py-0.5 rounded">ESC</kbd> untuk tutup</span>
+                </div>
+            </div>
+        </Modal>
 
         <!-- Modal Ubah Password -->
         <Modal :show="showPasswordModal" @close="showPasswordModal = false">

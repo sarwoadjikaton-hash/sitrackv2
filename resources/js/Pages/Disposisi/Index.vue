@@ -4,7 +4,6 @@ import { ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
 import Pagination from '@/Components/Pagination.vue';
-import DisposisiTabs from '@/Components/DisposisiTabs.vue';
 import { Letter, PaginatedData } from '@/types';
 
 const props = defineProps<{
@@ -28,13 +27,15 @@ const handleFilter = () => {
         source: sourceFilter.value,
     }, { preserveState: true });
 };
+
+const statsTotal = computed(() => props.letters.total || props.letters.data.length);
+const statsProses = computed(() => props.letters.data.filter(l => l.status !== 'Dokumen Sudah diambil' && l.status !== 'Selesai').length);
+const statsTuntas = computed(() => props.letters.data.filter(l => l.status === 'Dokumen Sudah diambil' || l.status === 'Selesai').length);
 </script>
 
 <template>
     <AppLayout title="Lajur Disposisi Pimpinan">
         <Head title="Lajur Disposisi" />
-
-        <DisposisiTabs />
 
         <!-- Header -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
@@ -43,13 +44,35 @@ const handleFilter = () => {
                     <i class="bi bi-diagram-3-fill"></i> Lajur Kedua
                 </span>
                 <h2 class="fw-bold mb-1 text-dark">Lajur Disposisi</h2>
-                <p class="text-muted mb-0 small">Kelola surat yang memerlukan arahan Sekretaris Jenderal, penerusan ke unit, dan tindak lanjut disposisi.</p>
+                <p class="text-muted mb-0 small">Arahan disposisi Sekretaris Jenderal kepada unit kerja dan pejabat pelaksana.</p>
             </div>
 
             <div class="d-flex align-items-center gap-2">
-                <Link href="/disposisi/create" class="btn btn-sm btn-primary-blue">
+                <Link href="/disposisi/create" class="btn btn-sm btn-primary-blue shadow-sm">
                     <i class="bi bi-plus-lg me-1"></i> Input Surat Disposisi
                 </Link>
+            </div>
+        </div>
+
+        <!-- Stats Bar (Figma Model) -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="bg-white rounded-3 border p-3 shadow-xs">
+                    <div class="fs-4 fw-bold text-dark font-display">{{ statsTotal }}</div>
+                    <div class="small text-muted">Total Disposisi</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="bg-white rounded-3 border p-3 shadow-xs" style="border-left: 4px solid #f59e0b !important;">
+                    <div class="fs-4 fw-bold text-warning font-display">{{ statsProses }}</div>
+                    <div class="small text-muted">Dalam Proses</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="bg-white rounded-3 border p-3 shadow-xs" style="border-left: 4px solid #10b981 !important;">
+                    <div class="fs-4 fw-bold text-success font-display">{{ statsTuntas }}</div>
+                    <div class="small text-muted">Tuntas / Selesai</div>
+                </div>
             </div>
         </div>
 

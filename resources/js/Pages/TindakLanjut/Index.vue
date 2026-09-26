@@ -6,7 +6,6 @@ import StatusBadge from '@/Components/StatusBadge.vue';
 import Pagination from '@/Components/Pagination.vue';
 import Modal from '@/Components/Modal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
-import TindakLanjutTabs from '@/Components/TindakLanjutTabs.vue';
 import { Letter, LetterNumberType, PaginatedData } from '@/types';
 
 const props = defineProps<{
@@ -136,6 +135,11 @@ const deleteLetter = (id: number) => {
         router.delete(`/tindak-lanjut/${id}`);
     }
 };
+
+const statsTotal = computed(() => props.letters.total || props.letters.data.length);
+const statsProses = computed(() => props.letters.data.filter(l => l.status !== 'Dokumen Sudah diambil' && l.status !== 'Ditolak').length);
+const statsSiap = computed(() => props.letters.data.filter(l => l.status === 'Selesai dan Siap Untuk diambil' || l.status === 'Selesai dan Siap Untuk Diambil').length);
+const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 'Dokumen Sudah diambil').length);
 </script>
 
 <template>
@@ -143,17 +147,14 @@ const deleteLetter = (id: number) => {
 
         <Head title="Tindak Lanjut & TTD" />
 
-        <TindakLanjutTabs />
-
         <!-- Header -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
             <div>
                 <span class="badge-lane-signature d-inline-flex align-items-center gap-1 mb-2">
                     <i class="bi bi-pen-fill"></i> Lajur Pertama
                 </span>
-                <h2 class="fw-bold mb-1 text-dark">Tindak Lanjut / Penandatanganan</h2>
-                <p class="text-muted mb-0 small">Pemeriksaan administrasi, pengendalian tata naskah, paraf, dan tanda
-                    tangan pimpinan.</p>
+                <h2 class="fw-bold mb-1 text-dark">Data Tindak Lanjut / TTD</h2>
+                <p class="text-muted mb-0 small">Lajur penandatanganan naskah dinas, pemeriksaan administrasi, dan paraf pimpinan.</p>
             </div>
 
             <div class="d-flex align-items-center gap-2">
@@ -161,8 +162,36 @@ const deleteLetter = (id: number) => {
                     <i class="bi bi-qr-code-scan me-1"></i> Update via QR
                 </Link>
                 <Link href="/tindak-lanjut/create" class="btn btn-sm btn-primary-blue shadow-sm">
-                    <i class="bi bi-plus-lg me-1"></i> Catat Naskah Baru
+                    <i class="bi bi-plus-lg me-1"></i> Input Naskah Baru
                 </Link>
+            </div>
+        </div>
+
+        <!-- Mini Stats (Figma Prototype Model) -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="bg-white rounded-3 border p-3 shadow-xs">
+                    <div class="fs-4 fw-bold text-dark font-display">{{ statsTotal }}</div>
+                    <div class="small text-muted">Total Naskah</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="bg-white rounded-3 border p-3 shadow-xs" style="border-left: 4px solid #f59e0b !important;">
+                    <div class="fs-4 fw-bold text-warning font-display">{{ statsProses }}</div>
+                    <div class="small text-muted">Dalam Proses</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="bg-white rounded-3 border p-3 shadow-xs" style="border-left: 4px solid #3b82f6 !important;">
+                    <div class="fs-4 fw-bold text-primary font-display">{{ statsSiap }}</div>
+                    <div class="small text-muted">Siap Diambil</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="bg-white rounded-3 border p-3 shadow-xs" style="border-left: 4px solid #10b981 !important;">
+                    <div class="fs-4 fw-bold text-success font-display">{{ statsSelesai }}</div>
+                    <div class="small text-muted">Sudah Diambil</div>
+                </div>
             </div>
         </div>
 

@@ -3,7 +3,6 @@ import { Head, useForm, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Modal from '@/Components/Modal.vue';
-import TindakLanjutTabs from '@/Components/TindakLanjutTabs.vue';
 import type { LetterNumberType, Unit, LetterNumberAvailabilityBatch } from '@/types';
 
 type NumberDetail = {
@@ -400,8 +399,6 @@ const formatDateIndo = (dateStr?: string | null) => {
 <template>
     <AppLayout title="Ketersediaan Nomor Surat">
         <Head title="Ketersediaan Nomor Surat" />
-
-        <TindakLanjutTabs />
 
         <!-- Header Section -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">

@@ -2,7 +2,6 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import DisposisiTabs from '@/Components/DisposisiTabs.vue';
 import { LetterCategory, Unit } from '@/types';
 
 const props = defineProps<{
@@ -74,8 +73,6 @@ const submit = () => {
 <template>
     <AppLayout title="Input Surat Disposisi">
         <Head title="Input Disposisi Baru" />
-
-        <DisposisiTabs />
 
         <!-- Header -->
         <div class="d-flex align-items-center justify-content-between mb-4">
