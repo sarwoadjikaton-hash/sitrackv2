@@ -237,7 +237,7 @@ class LetterAvailabilityController extends Controller
                     ]);
 
                     $trackingCode = LetterNumberService::generateTrackingCode($type->type_code);
-                    $agendaNumber = LetterNumberService::nextAgendaNumber('out');
+                    $agendaNumber = LetterNumberService::nextAgendaNumber('in');
                     $letterSubject = $notes ?: ($purpose === 'preorder' ? "Pre-Order Naskah ({$type->type_name})" : "Reservasi Naskah ({$type->type_name})");
 
                     $letter = Letter::create([
@@ -245,7 +245,7 @@ class LetterAvailabilityController extends Controller
                         'agenda_number' => $agendaNumber,
                         'letter_number' => $numberText,
                         'letter_number_type_id' => $type->id,
-                        'letter_type' => 'out',
+                        'letter_type' => 'in',
                         'process_lane' => 'signature',
                         'sender_unit' => $senderUnit,
                         'sender_name' => $senderName,

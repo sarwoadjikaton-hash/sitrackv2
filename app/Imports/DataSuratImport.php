@@ -389,10 +389,10 @@ class DataSuratImport
 
                 $letter = Letter::create([
                     'tracking_code' => LetterNumberService::generateTrackingCode($type->type_code),
-                    'agenda_number' => LetterNumberService::nextAgendaNumber('out'),
+                    'agenda_number' => LetterNumberService::nextAgendaNumber('in'),
                     'letter_number' => mb_substr($letterNum, 0, 150),
                     'letter_number_type_id' => $type->id,
-                    'letter_type' => 'out',
+                    'letter_type' => 'in',
                     'process_lane' => 'signature',
                     'sender_unit' => $letterNumber->processing_unit_text ? mb_substr($letterNumber->processing_unit_text, 0, 150) : null,
                     'sender_name' => mb_substr($senderName, 0, 150),

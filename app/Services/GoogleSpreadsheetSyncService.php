@@ -442,7 +442,7 @@ class GoogleSpreadsheetSyncService
             $letterData = [
                 'letter_number' => $numberText ?: sprintf('%04d', $sequence),
                 'letter_number_type_id' => $type->id,
-                'letter_type' => 'out',
+                'letter_type' => 'in',
                 'process_lane' => 'signature',
                 'sender_unit' => $unitName ?: 'Unit Pengolah Arsip',
                 'sender_name' => $senderName,
@@ -469,7 +469,7 @@ class GoogleSpreadsheetSyncService
                     $letter->update($letterData);
                 } else {
                     $letterData['tracking_code'] = LetterNumberService::generateTrackingCode($type->type_code);
-                    $letterData['agenda_number'] = LetterNumberService::nextAgendaNumber('out');
+                    $letterData['agenda_number'] = LetterNumberService::nextAgendaNumber('in');
                     $newLetter = Letter::create($letterData);
                     $letterNumber->update(['linked_letter_id' => $newLetter->id]);
 
@@ -484,7 +484,7 @@ class GoogleSpreadsheetSyncService
                 }
             } else {
                 $letterData['tracking_code'] = LetterNumberService::generateTrackingCode($type->type_code);
-                $letterData['agenda_number'] = LetterNumberService::nextAgendaNumber('out');
+                $letterData['agenda_number'] = LetterNumberService::nextAgendaNumber('in');
                 $newLetter = Letter::create($letterData);
                 $letterNumber->update(['linked_letter_id' => $newLetter->id]);
 

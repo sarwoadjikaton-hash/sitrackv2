@@ -279,10 +279,10 @@ class DataSuratController extends Controller
             } else {
                 $letter = Letter::create([
                     'tracking_code' => LetterNumberService::generateTrackingCode($type->type_code),
-                    'agenda_number' => LetterNumberService::nextAgendaNumber('out'),
+                    'agenda_number' => LetterNumberService::nextAgendaNumber('in'),
                     'letter_number' => $numberText,
                     'letter_number_type_id' => $type->id,
-                    'letter_type' => 'out',
+                    'letter_type' => 'in',
                     'process_lane' => 'signature',
                     'sender_unit' => $validated['processing_unit_text'],
                     'sender_name' => $validated['signatory'] ?: 'Arsiparis',
@@ -426,10 +426,10 @@ class DataSuratController extends Controller
             } else {
                 $letter = Letter::create([
                     'tracking_code' => LetterNumberService::generateTrackingCode($type->type_code),
-                    'agenda_number' => LetterNumberService::nextAgendaNumber('out'),
+                    'agenda_number' => LetterNumberService::nextAgendaNumber('in'),
                     'letter_number' => $numberText,
                     'letter_number_type_id' => $type->id,
-                    'letter_type' => 'out',
+                    'letter_type' => 'in',
                     'process_lane' => 'signature',
                     'sender_unit' => $validated['processing_unit_text'],
                     'sender_name' => $validated['signatory'] ?: 'Arsiparis',
