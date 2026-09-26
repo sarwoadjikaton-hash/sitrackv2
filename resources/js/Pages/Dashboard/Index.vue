@@ -85,7 +85,7 @@ const previewWorkbooks = computed(() => {
                 <div class="flex gap-2.5 flex-wrap">
                     <Link href="/tindak-lanjut/create"
                         class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 shadow-sm"
-                        style="background: linear-gradient(135deg, #2743AF, #1a2d7a);">
+                        style="background: #2743AF;">
                         <i class="bi bi-plus-lg text-xs"></i>
                         <span>Surat Baru</span>
                     </Link>
@@ -110,7 +110,7 @@ const previewWorkbooks = computed(() => {
                     class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 text-left hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group block text-decoration-none">
                     <div class="flex items-start justify-between mb-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
-                            style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                            style="background: #2743AF;">
                             <i class="bi bi-file-earmark-text text-white text-lg"></i>
                         </div>
                         <i class="bi bi-arrow-right text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all text-sm"></i>
@@ -130,7 +130,7 @@ const previewWorkbooks = computed(() => {
                     class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 text-left hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group block text-decoration-none">
                     <div class="flex items-start justify-between mb-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
-                            style="background: linear-gradient(135deg, #6366f1, #7c3aed);">
+                            style="background: #6366f1;">
                             <i class="bi bi-send text-white text-base"></i>
                         </div>
                         <i class="bi bi-arrow-right text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all text-sm"></i>
@@ -150,7 +150,7 @@ const previewWorkbooks = computed(() => {
                     class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 text-left hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group block text-decoration-none">
                     <div class="flex items-start justify-between mb-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
-                            style="background: linear-gradient(135deg, #14b8a6, #10b981);">
+                            style="background: #10b981;">
                             <i class="bi bi-hash text-white text-xl"></i>
                         </div>
                         <i class="bi bi-arrow-right text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all text-sm"></i>
@@ -170,7 +170,7 @@ const previewWorkbooks = computed(() => {
                     class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 text-left hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group block text-decoration-none">
                     <div class="flex items-start justify-between mb-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
-                            style="background: linear-gradient(135deg, #f97316, #f59e0b);">
+                            style="background: #f59e0b;">
                             <i class="bi bi-book text-white text-base"></i>
                         </div>
                         <i class="bi bi-arrow-right text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all text-sm"></i>

@@ -522,35 +522,42 @@ const isActive = (path: string, exact = false) =>
 
         <!-- Modal Ubah Password -->
         <Modal :show="showPasswordModal" @close="showPasswordModal = false">
-            <div class="p-4">
-                <h5 class="fw-bold mb-3">Ubah Password</h5>
+            <div class="bg-white rounded-2xl p-4 sm:p-5">
+                <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+                    <h5 class="fw-bold text-dark m-0" style="font-size: 1.05rem;">Ganti Password</h5>
+                    <button type="button" class="btn btn-sm btn-link text-muted p-0 text-decoration-none" @click="showPasswordModal = false">
+                        <i class="bi bi-x-lg fs-6"></i>
+                    </button>
+                </div>
                 <form @submit.prevent="submitPasswordChange">
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Password Saat Ini</label>
-                        <input v-model="passwordForm.current_password" type="password" class="form-control" required
-                            autofocus />
+                        <label class="form-label small fw-semibold text-secondary mb-1">Password Lama</label>
+                        <input v-model="passwordForm.current_password" type="password" class="form-control rounded-lg" required
+                            autofocus placeholder="Masukkan password lama" />
                         <div v-if="passwordForm.errors.current_password" class="text-danger small mt-1">{{
                             passwordForm.errors.current_password }}</div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Password Baru</label>
-                        <input v-model="passwordForm.password" type="password" class="form-control" required
-                            minlength="8" />
+                        <label class="form-label small fw-semibold text-secondary mb-1">Password Baru</label>
+                        <input v-model="passwordForm.password" type="password" class="form-control rounded-lg" required
+                            minlength="8" placeholder="Masukkan password baru" />
                         <div v-if="passwordForm.errors.password" class="text-danger small mt-1">{{
                             passwordForm.errors.password
                             }}</div>
-                        <small class="text-muted">Minimal 8 karakter.</small>
+                        <small class="text-muted" style="font-size: 0.72rem;">Minimal 8 karakter.</small>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Konfirmasi Password Baru</label>
-                        <input v-model="passwordForm.password_confirmation" type="password" class="form-control"
-                            required minlength="8" />
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold text-secondary mb-1">Konfirmasi Password Baru</label>
+                        <input v-model="passwordForm.password_confirmation" type="password" class="form-control rounded-lg"
+                            required minlength="8" placeholder="Konfirmasi password baru" />
                     </div>
-                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
-                        <button type="button" class="btn btn-secondary"
+                    <div class="d-flex gap-2 pt-2 border-top">
+                        <button type="button" class="btn btn-light border flex-grow-1 text-secondary font-medium"
                             @click="showPasswordModal = false">Batal</button>
-                        <button type="submit" class="btn btn-primary-blue" :disabled="passwordForm.processing">Simpan
-                            Password</button>
+                        <button type="submit" class="btn text-white flex-grow-1 font-medium" style="background-color: #2743AF;" :disabled="passwordForm.processing">
+                            <span v-if="passwordForm.processing" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            Simpan
+                        </button>
                     </div>
                 </form>
             </div>
@@ -576,7 +583,7 @@ const isActive = (path: string, exact = false) =>
     bottom: 0;
     width: var(--sidebar-width);
     z-index: 1050;
-    background: linear-gradient(180deg, #1b2d7a 0%, #142060 100%);
+    background: #1a2d7a;
     color: #fff;
     border-radius: 0;
     border-right: 1px solid rgba(255, 255, 255, 0.08);
@@ -624,7 +631,7 @@ const isActive = (path: string, exact = false) =>
     top: 50px;
     width: 28px;
     height: 28px;
-    background: #167992;
+    background: #2743AF;
     color: #fff;
     border: 3px solid #EEF7FC;
     border-radius: 50%;
@@ -638,7 +645,7 @@ const isActive = (path: string, exact = false) =>
 }
 
 .sidebar-toggle-btn:hover {
-    background: #126277;
+    background: #1f37a0;
     transform: scale(1.08);
 }
 
@@ -654,10 +661,11 @@ const isActive = (path: string, exact = false) =>
 }
 
 .sidebar-header {
-    padding: 1.25rem 1.25rem 0.9rem;
+    padding: 1.1rem 1.25rem 0.85rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .brand-wrapper {
@@ -676,12 +684,13 @@ const isActive = (path: string, exact = false) =>
 }
 
 .brand-logo-ring {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     display: grid;
     place-items: center;
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
+    background: rgba(61, 165, 249, 0.25);
+    border: 1px solid rgba(61, 165, 249, 0.4);
+    border-radius: 8px;
     flex: none;
     transition: background 0.2s;
 }
@@ -704,12 +713,12 @@ const isActive = (path: string, exact = false) =>
 
 .brand-title {
     font-weight: 800;
-    font-size: 1rem;
+    font-size: 0.95rem;
     letter-spacing: -0.01em;
 }
 
 .brand-subtitle {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     color: #93c5fd;
     font-weight: 500;
 }
@@ -717,22 +726,20 @@ const isActive = (path: string, exact = false) =>
 .sidebar-scan-btn {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.65rem 0.95rem;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 12px;
-    color: #ffffff;
-    font-size: 0.82rem;
-    font-weight: 600;
+    gap: 0.65rem;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border-radius: 8px;
+    color: #dbeafe;
+    font-size: 0.85rem;
+    font-weight: 500;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
 }
 
 .sidebar-scan-btn:hover {
-    background: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.08);
     color: #ffffff;
-    transform: translateY(-1px);
 }
 
 .sidebar-scan-btn i {
@@ -744,111 +751,108 @@ const isActive = (path: string, exact = false) =>
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-bottom: 1rem;
+    padding: 0.5rem 0 1rem;
 }
 
 .sidebar-caption {
-    font-size: 0.65rem;
-    font-weight: 800;
+    font-size: 10px;
+    font-weight: 600;
     text-transform: uppercase;
-    color: #93c5fd;
-    padding: 1.1rem 1.25rem 0.45rem;
-    letter-spacing: 0.5px;
-    opacity: 0.85;
+    letter-spacing: 0.1em;
+    color: rgba(147, 197, 253, 0.7);
+    padding: 0.75rem 0.85rem 0.25rem;
 }
 
 /* NAV ITEMS */
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    padding: 0 0.75rem;
+    gap: 0.15rem;
+    padding: 0 0.5rem;
 }
 
 .nav-link-item {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 0.85rem;
-    padding: 0.65rem 0.95rem;
-    color: rgba(238, 247, 252, 0.78);
+    gap: 0.65rem;
+    padding: 0.5rem 0.75rem;
+    color: #dbeafe;
     text-decoration: none;
     font-size: 0.85rem;
-    font-weight: 500;
-    border-radius: 12px;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 400;
+    border-radius: 8px;
+    transition: all 0.15s ease;
 }
 
 .nav-link-item i {
-    font-size: 1.05rem;
-    width: 22px;
+    font-size: 0.95rem;
+    width: 18px;
     text-align: center;
     color: #93c5fd;
-    transition: color 0.2s ease, transform 0.2s ease;
+    transition: color 0.15s ease;
 }
 
 .nav-link-item:hover:not(.active) {
-    transform: translateX(3px);
     color: #fff;
     background: rgba(255, 255, 255, 0.08);
 }
 
 .nav-link-item:hover:not(.active) i {
-    color: #E4F5F9;
+    color: #fff;
 }
 
 /* Active State */
 .nav-link-item.active {
     background: rgba(61, 165, 249, 0.18);
-    border: 1.5px solid #3DA5F9;
-    border-radius: 12px;
+    border-left: 3px solid #3DA5F9;
+    border-radius: 8px;
     color: #ffffff;
-    font-weight: 600;
-    box-shadow: 0 0 14px rgba(61, 165, 249, 0.25);
+    font-weight: 500;
+    padding-left: calc(0.75rem - 3px);
 }
 
 .nav-link-item.active i {
     color: #3DA5F9;
-    transform: scale(1.05);
 }
 
 /* FOOTER AREA (Figma Model) */
 .sidebar-footer-container {
     margin-top: auto;
-    padding: 0.75rem 0.85rem 1.25rem;
+    padding: 0.75rem;
     display: flex;
     flex-direction: column;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-user-card {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.65rem 0.75rem;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 14px;
-    margin-bottom: 0.5rem;
+    gap: 0.65rem;
+    padding: 0.5rem 0.65rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 0.25rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
 }
 
 .sidebar-user-card:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .user-avatar-circle {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: #2563eb;
+    background: rgba(61, 165, 249, 0.3);
     display: grid;
     place-items: center;
-    font-weight: 800;
+    font-weight: 700;
     color: #fff;
     flex: none;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .user-info {
@@ -857,8 +861,8 @@ const isActive = (path: string, exact = false) =>
 }
 
 .user-name {
-    font-size: 0.82rem;
-    font-weight: 700;
+    font-size: 0.75rem;
+    font-weight: 600;
     color: #fff;
     white-space: nowrap;
     overflow: hidden;
@@ -867,28 +871,29 @@ const isActive = (path: string, exact = false) =>
 }
 
 .user-role-label {
-    font-size: 0.68rem;
+    font-size: 10px;
     color: #93c5fd;
-    font-weight: 500;
+    font-weight: 400;
+    margin-top: 2px;
 }
 
 .sidebar-footer-links {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: 0.15rem;
 }
 
 .sidebar-footer-link-btn {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
-    padding: 0.45rem 0.75rem;
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
     background: transparent;
     border: none;
     border-radius: 8px;
-    color: #94a3b8;
-    font-size: 0.8rem;
-    font-weight: 500;
+    color: #bfdbfe;
+    font-size: 0.75rem;
+    font-weight: 400;
     cursor: pointer;
     text-align: left;
     transition: all 0.15s ease;
@@ -899,8 +904,13 @@ const isActive = (path: string, exact = false) =>
     background: rgba(255, 255, 255, 0.08);
 }
 
+.sidebar-footer-link-btn:last-child:hover {
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.12);
+}
+
 .sidebar-footer-link-btn i {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
 }
 
 .sidebar-copyright {
