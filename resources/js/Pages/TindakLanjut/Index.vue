@@ -124,9 +124,20 @@ const closeStatusModal = () => {
 
 const submitStatusUpdate = () => {
     if (!activeLetter.value) return;
+    const trackingCode = activeLetter.value.tracking_code;
+    const targetStatus = statusForm.status;
     statusForm.post(`/tindak-lanjut/${activeLetter.value.id}/status`, {
         forceFormData: true,
-        onSuccess: () => closeStatusModal(),
+        preserveScroll: true,
+        onSuccess: () => {
+            closeStatusModal();
+            window.dispatchEvent(new CustomEvent('toast', {
+                detail: {
+                    message: `Status naskah ${trackingCode} berhasil diperbarui menjadi "${targetStatus}".`,
+                    type: 'success'
+                }
+            }));
+        },
     });
 };
 

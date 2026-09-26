@@ -796,6 +796,14 @@ h1, h2, h3, h4, h5, h6,
   .modal-content {
     border-radius: 14px !important;
   }
+
+  /* Responsive action buttons wrapping */
+  .modal-footer,
+  .card-footer,
+  .form-actions-wrap {
+    flex-wrap: wrap !important;
+    gap: 0.5rem;
+  }
 }
 
 @media (max-width: 575.98px) {
@@ -815,6 +823,22 @@ h1, h2, h3, h4, h5, h6,
   .btn-mobile-full {
     width: 100% !important;
     justify-content: center !important;
+  }
+
+  /* Ensure buttons don't get cut off on small mobile screens */
+  .btn {
+    white-space: normal;
+    word-break: break-word;
+    max-width: 100%;
+  }
+
+  .btn-group {
+    flex-wrap: wrap;
+  }
+
+  .d-flex.justify-content-end,
+  .d-flex.justify-content-between {
+    flex-wrap: wrap;
   }
 }
 

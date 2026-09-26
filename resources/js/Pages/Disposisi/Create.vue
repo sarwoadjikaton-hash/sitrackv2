@@ -2,6 +2,7 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { LetterCategory, Unit } from '@/types';
 
 const props = defineProps<{
@@ -9,6 +10,28 @@ const props = defineProps<{
     units: Unit[];
     allowedStatuses: string[];
 }>();
+
+const letterSourceOptions = [
+    { value: 'Manual', label: 'Manual / Cetak' },
+    { value: 'SRIKANDI', label: 'Aplikasi SRIKANDI' },
+];
+
+const categoryOptions = computed(() => [
+    { value: '', label: 'Pilih Kategori' },
+    ...props.categories.map((c) => ({ value: c.id, label: c.category_name })),
+]);
+
+const priorityOptions = [
+    { value: 'normal', label: 'Biasa' },
+    { value: 'high', label: 'Penting' },
+    { value: 'urgent', label: 'Mendesak / Segera' },
+];
+
+const securityLevelOptions = [
+    { value: 'Biasa', label: 'Biasa' },
+    { value: 'Rahasia', label: 'Rahasia' },
+    { value: 'Sangat Rahasia', label: 'Sangat Rahasia' },
+];
 
 const form = useForm({
     letter_number: '',
@@ -99,18 +122,21 @@ const submit = () => {
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold">Sumber Surat</label>
-                                <select v-model="form.letter_source" class="form-select" required>
-                                    <option value="Manual">Manual / Cetak</option>
-                                    <option value="SRIKANDI">Aplikasi SRIKANDI</option>
-                                </select>
+                                <SearchableSelect
+                                    v-model="form.letter_source"
+                                    :options="letterSourceOptions"
+                                    :searchable="false"
+                                    placeholder="Pilih Sumber Surat"
+                                />
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold">Kategori Dokumen</label>
-                                <select v-model="form.category_id" class="form-select">
-                                    <option :value="null">Pilih Kategori</option>
-                                    <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.category_name }}</option>
-                                </select>
+                                <SearchableSelect
+                                    v-model="form.category_id"
+                                    :options="categoryOptions"
+                                    placeholder="Pilih Kategori"
+                                />
                             </div>
 
                             <div class="col-md-4">
@@ -147,20 +173,22 @@ const submit = () => {
 
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Tingkat Prioritas</label>
-                                <select v-model="form.priority" class="form-select">
-                                    <option value="normal">Biasa</option>
-                                    <option value="high">Penting</option>
-                                    <option value="urgent">Mendesak / Segera</option>
-                                </select>
+                                <SearchableSelect
+                                    v-model="form.priority"
+                                    :options="priorityOptions"
+                                    :searchable="false"
+                                    placeholder="Pilih Prioritas"
+                                />
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Derajat Keamanan</label>
-                                <select v-model="form.security_level" class="form-select">
-                                    <option value="Biasa">Biasa</option>
-                                    <option value="Rahasia">Rahasia</option>
-                                    <option value="Sangat Rahasia">Sangat Rahasia</option>
-                                </select>
+                                <SearchableSelect
+                                    v-model="form.security_level"
+                                    :options="securityLevelOptions"
+                                    :searchable="false"
+                                    placeholder="Pilih Keamanan"
+                                />
                             </div>
 
                             <div class="col-12">
@@ -284,9 +312,9 @@ const submit = () => {
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
-                            <Link href="/disposisi" class="btn btn-secondary">Batal</Link>
-                            <button type="submit" class="btn btn-primary-blue" :disabled="form.processing">
+                        <div class="d-flex flex-column-reverse flex-sm-row justify-content-sm-end gap-2 pt-3 border-top">
+                            <Link href="/disposisi" class="btn btn-secondary text-center">Batal</Link>
+                            <button type="submit" class="btn btn-primary-blue text-center d-flex align-items-center justify-content-center" :disabled="form.processing">
                                 <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
                                 <i class="bi bi-check2-circle me-1"></i> Simpan Surat Disposisi
                             </button>

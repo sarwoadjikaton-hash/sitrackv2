@@ -38,19 +38,45 @@ const checkNotificationPermission = () => {
 };
 
 const requestNotificationPermission = async () => {
+    playChimeSound();
     if (typeof window !== 'undefined' && 'Notification' in window) {
         try {
-            const perm = await Notification.requestPermission();
+            let perm = Notification.permission;
+            if (perm !== 'granted') {
+                const res = await Notification.requestPermission();
+                perm = res || Notification.permission;
+            }
             desktopPermission.value = perm;
             if (perm === 'granted') {
-                playChimeSound();
                 new Notification('SiTrack - Notifikasi Aktif', {
-                    body: 'Notifikasi desktop pengajuan surat masuk telah aktif!',
+                    body: 'Notifikasi browser dan desktop pengajuan surat masuk telah aktif!',
                     icon: '/favicon.ico',
                 });
+                window.dispatchEvent(new CustomEvent('toast', {
+                    detail: {
+                        message: 'Notifikasi desktop dan suara telah berhasil diaktifkan!',
+                        type: 'success'
+                    }
+                }));
+            } else if (perm === 'denied') {
+                window.dispatchEvent(new CustomEvent('toast', {
+                    detail: {
+                        message: 'Izin notifikasi diblokir browser. Silakan klik ikon gembok / setelan situs di address bar browser untuk mengizinkan.',
+                        type: 'warning'
+                    }
+                }));
             }
         } catch (e) {
-            // ignore
+            console.error('Error requesting notification permission:', e);
+        }
+    } else {
+        if (typeof window !== 'undefined') {
+            (window as any).dispatchEvent(new CustomEvent('toast', {
+                detail: {
+                    message: 'Browser Anda tidak mendukung Web Notifications API.',
+                    type: 'warning'
+                }
+            }));
         }
     }
 };
@@ -291,19 +317,27 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Desktop Permission Banner -->
-                <div v-if="desktopPermission !== 'granted'" class="notif-desktop-banner">
+                <div v-if="desktopPermission !== 'granted'" class="notif-desktop-banner" :class="{ 'is-denied': desktopPermission === 'denied' }">
                     <div class="d-flex align-items-center justify-content-between gap-2">
-                        <div class="d-flex align-items-center gap-1.5 small text-primary fw-medium" style="font-size: 0.74rem;">
-                            <i class="bi bi-display"></i>
-                            <span>Munculkan notif di layar/desktop</span>
+                        <div class="d-flex align-items-center gap-1.5 small fw-medium" :class="desktopPermission === 'denied' ? 'text-danger' : 'text-primary'" style="font-size: 0.74rem;">
+                            <i :class="desktopPermission === 'denied' ? 'bi bi-exclamation-triangle-fill text-danger' : 'bi bi-display'"></i>
+                            <span v-if="desktopPermission === 'denied'">Izin notifikasi diblokir browser</span>
+                            <span v-else>Munculkan notif di layar/desktop</span>
                         </div>
                         <button
                             type="button"
                             class="btn-enable-desktop"
+                            :class="{ 'btn-denied-help': desktopPermission === 'denied' }"
                             @click="requestNotificationPermission"
                         >
-                            Aktifkan
+                            {{ desktopPermission === 'denied' ? 'Buka Izin' : 'Aktifkan' }}
                         </button>
+                    </div>
+                </div>
+                <div v-else class="notif-desktop-banner is-active">
+                    <div class="d-flex align-items-center gap-1.5 small text-success fw-semibold" style="font-size: 0.74rem;">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Notifikasi desktop aktif</span>
                     </div>
                 </div>
 

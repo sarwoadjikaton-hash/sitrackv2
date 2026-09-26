@@ -515,9 +515,9 @@ const statusOptions = computed(() =>
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
-                            <Link href="/tindak-lanjut" class="btn btn-secondary">Batal</Link>
-                            <button type="submit" class="btn btn-primary-blue" :disabled="form.processing">
+                        <div class="d-flex flex-column-reverse flex-sm-row justify-content-sm-end gap-2 pt-3 border-top">
+                            <Link href="/tindak-lanjut" class="btn btn-secondary text-center">Batal</Link>
+                            <button type="submit" class="btn btn-primary-blue text-center d-flex align-items-center justify-content-center" :disabled="form.processing">
                                 <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
                                 <i class="bi bi-check2-circle me-1"></i>
                                 {{ isEditing ? 'Simpan Perubahan' : 'Catat Lembar Tindak Lanjut' }}

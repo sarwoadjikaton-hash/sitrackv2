@@ -100,9 +100,18 @@ const onScanSuccess = (decodedText: string) => {
 };
 
 const submitUpdate = () => {
+    const targetStatus = form.status;
+    const trackingCode = props.letter?.tracking_code || form.tracking_code;
     form.post(route('scan-status.update'), {
+        preserveScroll: true,
         onSuccess: () => {
             form.reset('note');
+            window.dispatchEvent(new CustomEvent('toast', {
+                detail: {
+                    message: `Status naskah ${trackingCode} berhasil diperbarui menjadi "${targetStatus}".`,
+                    type: 'success'
+                }
+            }));
         }
     });
 };

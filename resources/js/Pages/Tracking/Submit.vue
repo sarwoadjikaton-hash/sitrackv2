@@ -31,6 +31,11 @@ const typeOptions = computed(() =>
     props.types.map((t) => ({ value: t.id, label: t.workbook_name }))
 );
 
+const priorityOptions = [
+    { value: 'Biasa', label: 'Biasa' },
+    { value: 'Segera', label: 'Segera' },
+];
+
 const submit = () => {
     form.post('/ajukan-surat');
 };
@@ -90,10 +95,12 @@ const submit = () => {
 
                                 <div class="col-md-6 animate-field" style="--delay: 4">
                                     <label class="form-label small fw-bold">Sifat Naskah</label>
-                                    <select v-model="form.priority" class="form-select custom-input" required>
-                                        <option value="Biasa">Biasa</option>
-                                        <option value="Segera">Segera</option>
-                                    </select>
+                                    <SearchableSelect
+                                        v-model="form.priority"
+                                        :options="priorityOptions"
+                                        :searchable="false"
+                                        placeholder="Pilih Sifat Naskah"
+                                    />
                                     <Transition name="fade-error">
                                         <div v-if="form.errors.priority" class="text-danger small mt-1">{{
                                             form.errors.priority }}</div>

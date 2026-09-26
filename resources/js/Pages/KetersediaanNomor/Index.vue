@@ -41,6 +41,21 @@ const props = defineProps<{
 const selectedYear = ref(props.year);
 const activeTypeId = ref(props.openTypeId || (props.types[0]?.id ?? 0));
 
+const yearOptions = [
+    { value: 2024, label: 'Tahun 2024' },
+    { value: 2025, label: 'Tahun 2025' },
+    { value: 2026, label: 'Tahun 2026' },
+    { value: 2027, label: 'Tahun 2027' },
+    { value: 2028, label: 'Tahun 2028' },
+];
+
+const numberStatusOptions = [
+    { value: 'available', label: 'Tersedia (Kosongkan)' },
+    { value: 'reserved', label: 'Direservasi' },
+    { value: 'preorder', label: 'Pre-Order' },
+    { value: 'used', label: 'Terpakai' },
+];
+
 // --- Workbook Dropdown Navigation ---
 const dropdownOpen = ref(false);
 const dropdownTrigger = ref<HTMLElement | null>(null);
@@ -415,11 +430,14 @@ const formatDateIndo = (dateStr?: string | null) => {
 
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <!-- Year Selector -->
-                    <div class="d-flex align-items-center bg-white border border-slate-200 rounded-3 px-2 py-1 shadow-xs flex-grow-1 flex-sm-grow-0 justify-content-between">
-                        <span class="small fw-semibold text-muted me-1">Tahun:</span>
-                        <select v-model="selectedYear" class="form-select form-select-sm border-0 fw-bold bg-transparent p-0 shadow-none" style="width: 70px;" @change="changeYear">
-                            <option v-for="y in [2024, 2025, 2026, 2027]" :key="y" :value="y">{{ y }}</option>
-                        </select>
+                    <div style="min-width: 140px;" class="flex-grow-1 flex-sm-grow-0">
+                        <SearchableSelect
+                            v-model="selectedYear"
+                            :options="yearOptions"
+                            :searchable="false"
+                            size="sm"
+                            @update:model-value="changeYear"
+                        />
                     </div>
 
                     <!-- Tombol Tambah Batch Nomor -->
@@ -653,12 +671,14 @@ const formatDateIndo = (dateStr?: string | null) => {
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
-                    <select v-model="bulkStatusTarget" class="form-select form-select-sm" style="width: auto;">
-                        <option value="available">Ubah ke: Tersedia</option>
-                        <option value="reserved">Ubah ke: Direservasi</option>
-                        <option value="preorder">Ubah ke: Pre-Order</option>
-                        <option value="used">Ubah ke: Terpakai</option>
-                    </select>
+                    <div style="min-width: 175px;">
+                        <SearchableSelect
+                            v-model="bulkStatusTarget"
+                            :options="numberStatusOptions"
+                            :searchable="false"
+                            size="sm"
+                        />
+                    </div>
                     <button
                         type="button"
                         class="btn btn-sm btn-primary-blue"
@@ -961,12 +981,12 @@ const formatDateIndo = (dateStr?: string | null) => {
                 <!-- Ubah Status Manual -->
                 <div class="pt-3 border-top mb-3">
                     <label class="form-label fw-bold small text-dark">Ubah Status Nomor</label>
-                    <select v-model="statusForm" class="form-select form-select-sm">
-                        <option value="available">Tersedia (Kosongkan)</option>
-                        <option value="reserved">Direservasi</option>
-                        <option value="preorder">Pre-Order</option>
-                        <option value="used">Terpakai</option>
-                    </select>
+                    <SearchableSelect
+                        v-model="statusForm"
+                        :options="numberStatusOptions"
+                        :searchable="false"
+                        size="md"
+                    />
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center pt-2">

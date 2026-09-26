@@ -29,6 +29,14 @@ const toggleSidebarCollapse = () => {
     localStorage.setItem('sitrack:sidebar-collapsed', isSidebarCollapsed.value ? '1' : '0');
 };
 
+const handleToggleSidebar = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 992) {
+        toggleMobileNav();
+    } else {
+        toggleSidebarCollapse();
+    }
+};
+
 const expandedGroups = ref<Set<string>>(
     new Set(['Menu Utama', 'Penomoran Surat', 'Tindak Lanjut / TTD', 'Lajur Disposisi', 'Master Data'])
 );
@@ -42,6 +50,21 @@ const toggleGroup = (title: string) => {
 };
 
 const logout = () => router.post('/logout');
+
+// ===== Mobile Bottom Bar Navigation & Dropdown =====
+const activeMobileDropdown = ref<string | null>(null);
+
+const toggleMobileDropdown = (tabName: string) => {
+    if (activeMobileDropdown.value === tabName) {
+        activeMobileDropdown.value = null;
+    } else {
+        activeMobileDropdown.value = tabName;
+    }
+};
+
+const closeMobileDropdown = () => {
+    activeMobileDropdown.value = null;
+};
 
 // ===== Topbar User Dropdown =====
 const showUserDropdown = ref(false);
@@ -68,6 +91,7 @@ const handleGlobalKeydown = (e: KeyboardEvent) => {
     } else if (e.key === 'Escape') {
         showSearchModal.value = false;
         showUserDropdown.value = false;
+        activeMobileDropdown.value = null;
     }
 };
 
@@ -80,6 +104,7 @@ const executeSearch = () => {
 
 const navigateTo = (url: string) => {
     showSearchModal.value = false;
+    closeMobileDropdown();
     router.visit(url);
 };
 
@@ -90,6 +115,15 @@ onMounted(() => {
         if (!target.closest('.topbar-user-pill-container')) {
             closeUserDropdown();
         }
+        if (!target.closest('.mobile-bottom-bar') && !target.closest('.mobile-sheet-dropdown')) {
+            closeMobileDropdown();
+        }
+    });
+
+    router.on('navigate', () => {
+        closeMobileDropdown();
+        closeMobileNav();
+        closeUserDropdown();
     });
 });
 
@@ -194,13 +228,9 @@ const breadcrumb = computed(() => {
         <!-- Sidebar Navigation -->
         <aside class="app-sidebar" ref="sidebarRef"
             :class="{ 'is-open': isMobileNavOpen, 'is-collapsed': isSidebarCollapsed }">
-            <!-- Toggle Button (Floating on Edge) -->
-            <button type="button" class="sidebar-toggle-btn d-none d-lg-flex" @click="toggleSidebarCollapse">
-                <i class="bi" :class="isSidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
-            </button>
-
             <div class="sidebar-inner" @mouseover="showTooltip" @mouseout="hideTooltip">
                 <!-- Brand Header (Dual Logo) -->
+                <!-- Brand Header (Dual Logo + Official Title) -->
                 <div class="sidebar-header">
                     <Link href="/dashboard" class="brand-wrapper" @click="closeMobileNav">
                         <div class="brand-logos-pair">
@@ -212,10 +242,11 @@ const breadcrumb = computed(() => {
                                 <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="26" height="26" class="brand-kemnaker-img" />
                             </span>
                         </div>
-                        <span class="brand-text">
-                            <span class="brand-title">SiTrack</span>
-                            <small class="brand-subtitle">TU SEKRETARIAT JENDERAL</small>
-                        </span>
+                        <div class="brand-text-gov">
+                            <span class="gov-line">KEMENTERIAN</span>
+                            <span class="gov-line">KETENAGAKERJAAN</span>
+                            <span class="gov-line">REPUBLIK INDONESIA</span>
+                        </div>
                     </Link>
                     <button type="button" class="sidebar-close d-lg-none" @click="closeMobileNav">
                         <i class="bi bi-x-lg"></i>
@@ -272,6 +303,12 @@ const breadcrumb = computed(() => {
                                 <i class="bi bi-chevron-down group-chevron" :class="{ 'rotate-minus-90': !expandedGroups.has('Tindak Lanjut / TTD') }"></i>
                             </button>
                             <div v-show="expandedGroups.has('Tindak Lanjut / TTD')" class="sidebar-nav">
+                                <Link href="/tindak-lanjut/create" class="nav-link-item"
+                                    :class="{ active: isActive('/tindak-lanjut/create', true) }" @click="closeMobileNav"
+                                    data-tooltip="Input Naskah Baru">
+                                    <i class="bi bi-file-earmark-plus"></i>
+                                    <span class="nav-label">Input Naskah Baru</span>
+                                </Link>
                                 <Link href="/tindak-lanjut" class="nav-link-item"
                                     :class="{ active: isActive('/tindak-lanjut') && !isActive('/tindak-lanjut/create', true) }" @click="closeMobileNav"
                                     data-tooltip="Data Tindak Lanjut">
@@ -397,21 +434,52 @@ const breadcrumb = computed(() => {
         <!-- Main Workspace -->
         <div class="app-content" :class="{ 'content-expanded': isSidebarCollapsed }">
             <header class="app-topbar no-print">
-                <div class="d-flex align-items-center gap-3">
-                    <button type="button" class="hamburger-btn d-lg-none" @click="toggleMobileNav">
-                        <i class="bi bi-list"></i>
+                <div class="d-flex align-items-center gap-2.5">
+                    <button type="button" class="collapse-toggle-btn d-none d-lg-inline-flex" @click="handleToggleSidebar" :title="isSidebarCollapsed ? 'Buka Sidebar' : 'Tutup Sidebar'">
+                        <!-- Left panel icon (when sidebar is open) -->
+                        <svg v-if="!isSidebarCollapsed && !isMobileNavOpen" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="5" ry="5" />
+                            <line x1="9" y1="3" x2="9" y2="21" />
+                            <line x1="5.5" y1="8" x2="6.5" y2="8" />
+                            <line x1="5.5" y1="11.5" x2="6.5" y2="11.5" />
+                        </svg>
+                        <!-- Right panel icon (when sidebar is closed/collapsed) -->
+                        <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="5" ry="5" />
+                            <line x1="15" y1="3" x2="15" y2="21" />
+                            <line x1="17.5" y1="8" x2="18.5" y2="8" />
+                            <line x1="17.5" y1="11.5" x2="18.5" y2="11.5" />
+                        </svg>
                     </button>
-                    <div class="topbar-heading">
-                        <div class="d-none d-sm-flex align-items-center gap-1.5 small">
+
+                    <!-- Mobile Brand Header (Dual Logo + 3-Line Ministry Title) -->
+                    <Link href="/dashboard" class="topbar-mobile-brand d-flex d-lg-none align-items-center gap-2 text-decoration-none" @click="closeMobileDropdown">
+                        <div class="brand-logos-pair">
+                            <span class="brand-logo-ring topbar-logo-ring" title="SiTrack">
+                                <img src="/images/sitrack_logo.svg" alt="SiTrack" width="18" height="18" />
+                            </span>
+                            <span class="topbar-brand-pipe">|</span>
+                            <span class="brand-logo-ring topbar-kemnaker-ring" title="Kementerian Ketenagakerjaan RI">
+                                <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="18" height="18" />
+                            </span>
+                        </div>
+                        <div class="topbar-brand-text-gov">
+                            <span class="topbar-gov-line">KEMENTERIAN</span>
+                            <span class="topbar-gov-line">KETENAGAKERJAAN</span>
+                            <span class="topbar-gov-line">REPUBLIK INDONESIA</span>
+                        </div>
+                    </Link>
+
+                    <div class="topbar-heading d-none d-lg-flex">
+                        <div class="d-flex align-items-center gap-1.5 small">
                             <span class="text-secondary">{{ breadcrumb.group }}</span>
                             <span class="text-muted opacity-50">/</span>
                             <span class="text-dark fw-bold font-display">{{ breadcrumb.page }}</span>
                         </div>
-                        <h2 class="topbar-title d-sm-none">{{ title || 'Dashboard' }}</h2>
                     </div>
                 </div>
 
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2.5">
                     <!-- Search Input (Figma model - click or Ctrl+K opens Command Palette) -->
                     <div class="topbar-search-box d-none d-md-flex align-items-center cursor-pointer" @click="openSearchModal" title="Tekan Ctrl+K untuk pencarian cepat">
                         <i class="bi bi-search text-muted me-2" style="font-size: 0.85rem;"></i>
@@ -419,19 +487,30 @@ const breadcrumb = computed(() => {
                         <span class="topbar-kbd">⌘K</span>
                     </div>
 
+                    <!-- Quick Mobile Scan QR Button in Topbar -->
+                    <Link
+                        href="/scan-status"
+                        class="topbar-mobile-scan-btn d-flex d-lg-none align-items-center justify-content-center text-decoration-none"
+                        :class="{ active: isActive('/scan-status') || isActive('/scan-qr') }"
+                        title="Scan QR & Update Status"
+                        @click="closeMobileDropdown"
+                    >
+                        <i class="bi bi-qr-code-scan"></i>
+                    </Link>
+
                     <NotificationBell />
 
                     <!-- User Pill Badge (Figma model with Dropdown) -->
                     <div class="topbar-user-pill-container position-relative">
-                        <button type="button" class="topbar-user-pill d-none d-lg-flex align-items-center gap-2 border-0 bg-transparent" @click="toggleUserDropdown">
+                        <button type="button" class="topbar-user-pill d-flex align-items-center gap-2 border-0 bg-transparent p-0 p-lg-1" @click="toggleUserDropdown" title="Profil Pengguna">
                             <div class="user-avatar-circle user-avatar-topbar">
                                 {{ (user?.name || user?.username || 'A').substring(0, 1).toUpperCase() }}
                             </div>
-                            <div class="text-start leading-tight">
+                            <div class="text-start leading-tight d-none d-lg-block">
                                 <div class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.1;">{{ user?.name || user?.username }}</div>
                                 <div class="text-muted" style="font-size: 0.68rem;">{{ roleLabel }}</div>
                             </div>
-                            <i class="bi bi-chevron-down text-muted ms-1" style="font-size: 0.75rem;"></i>
+                            <i class="bi bi-chevron-down text-muted ms-1 d-none d-lg-block" style="font-size: 0.75rem;"></i>
                         </button>
 
                         <!-- User Dropdown Menu -->
@@ -475,6 +554,466 @@ const breadcrumb = computed(() => {
                 </div>
             </footer>
         </div>
+
+        <!-- ============================================================== -->
+        <!-- MOBILE BOTTOM BAR & POPUP DROPDOWN SHEETS (< 992px)            -->
+        <!-- ============================================================== -->
+
+        <!-- Mobile Dropdown Backdrop Overlay -->
+        <transition name="mobile-backdrop">
+            <div
+                v-if="activeMobileDropdown"
+                class="mobile-sheet-backdrop d-lg-none"
+                @click="closeMobileDropdown"
+            ></div>
+        </transition>
+
+        <!-- Mobile Dropdown Sheets Popup -->
+        <transition name="mobile-sheet">
+            <div
+                v-if="activeMobileDropdown"
+                class="mobile-sheet-dropdown d-lg-none"
+            >
+                <!-- 1. Tindak Lanjut & TTD Dropdown -->
+                <div v-if="activeMobileDropdown === 'tindak-lanjut'" class="mobile-sheet-content">
+                    <div class="mobile-sheet-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="mobile-sheet-header-icon bg-primary-subtle text-primary">
+                                <i class="bi bi-file-earmark-check-fill"></i>
+                            </div>
+                            <div>
+                                <h6 class="mobile-sheet-title">Tindak Lanjut &amp; TTD</h6>
+                                <span class="mobile-sheet-subtitle">Pilih menu naskah dinas &amp; penomoran</span>
+                            </div>
+                        </div>
+                        <button type="button" class="mobile-sheet-close-btn" @click="closeMobileDropdown">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <div class="mobile-sheet-menu-list">
+                        <!-- Highlighted: Input Naskah Baru -->
+                        <Link
+                            href="/tindak-lanjut/create"
+                            class="mobile-sheet-menu-item item-highlight"
+                            :class="{ active: isActive('/tindak-lanjut/create', true) }"
+                            @click="closeMobileDropdown"
+                        >
+                            <div class="menu-item-icon-box text-white" style="background: #2743AF;">
+                                <i class="bi bi-file-earmark-plus-fill"></i>
+                            </div>
+                            <div class="menu-item-text">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="menu-item-title fw-bold" style="color: #2743AF;">Input Naskah Baru</span>
+                                    <span class="badge text-white px-2 py-0.5 rounded-pill" style="font-size: 0.65rem; background: #2743AF;">+ Baru</span>
+                                </div>
+                                <span class="menu-item-desc">Registrasi &amp; upload berkas baru untuk paraf / TTD pimpinan</span>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted ms-auto small"></i>
+                        </Link>
+
+                        <!-- Data Tindak Lanjut -->
+                        <Link
+                            href="/tindak-lanjut"
+                            class="mobile-sheet-menu-item"
+                            :class="{ active: isActive('/tindak-lanjut') && !isActive('/tindak-lanjut/create', true) }"
+                            @click="closeMobileDropdown"
+                        >
+                            <div class="menu-item-icon-box bg-primary-subtle text-primary">
+                                <i class="bi bi-list-task"></i>
+                            </div>
+                            <div class="menu-item-text">
+                                <span class="menu-item-title">Data Tindak Lanjut</span>
+                                <span class="menu-item-desc">Daftar berkas naskah, progress paraf &amp; update status</span>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted ms-auto small"></i>
+                        </Link>
+
+                        <!-- Laporan Data Surat -->
+                        <Link
+                            href="/data-surat"
+                            class="mobile-sheet-menu-item"
+                            :class="{ active: isActive('/data-surat') }"
+                            @click="closeMobileDropdown"
+                        >
+                            <div class="menu-item-icon-box bg-info-subtle text-info">
+                                <i class="bi bi-book-half"></i>
+                            </div>
+                            <div class="menu-item-text">
+                                <span class="menu-item-title">Laporan Data Surat</span>
+                                <span class="menu-item-desc">Buku register penomoran &amp; ekspor data persuratan</span>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted ms-auto small"></i>
+                        </Link>
+                    </div>
+                </div>
+
+                <!-- 2. Lajur Disposisi Dropdown -->
+                <div v-else-if="activeMobileDropdown === 'disposisi'" class="mobile-sheet-content">
+                    <div class="mobile-sheet-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="mobile-sheet-header-icon bg-warning-subtle text-warning">
+                                <i class="bi bi-send-fill"></i>
+                            </div>
+                            <div>
+                                <h6 class="mobile-sheet-title">Lajur Disposisi</h6>
+                                <span class="mobile-sheet-subtitle">Instruksi pimpinan &amp; penerusan disposisi</span>
+                            </div>
+                        </div>
+                        <button type="button" class="mobile-sheet-close-btn" @click="closeMobileDropdown">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <div class="mobile-sheet-menu-list">
+                        <!-- Input Disposisi (if not Sekjen) -->
+                        <Link
+                            v-if="!isSekjen"
+                            href="/disposisi/create"
+                            class="mobile-sheet-menu-item item-highlight"
+                            :class="{ active: isActive('/disposisi/create', true) }"
+                            @click="closeMobileDropdown"
+                        >
+                            <div class="menu-item-icon-box bg-warning text-dark shadow-sm">
+                                <i class="bi bi-envelope-plus-fill"></i>
+                            </div>
+                            <div class="menu-item-text">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="menu-item-title fw-bold" style="color: #92400e;">Input Disposisi Baru</span>
+                                    <span class="badge bg-warning-subtle text-warning-emphasis px-2 py-0.5 rounded-pill" style="font-size: 0.65rem;">+ Input</span>
+                                </div>
+                                <span class="menu-item-desc">Buat lembar disposisi baru dari pimpinan</span>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted ms-auto small"></i>
+                        </Link>
+
+                        <!-- Daftar Lajur Disposisi -->
+                        <Link
+                            href="/disposisi"
+                            class="mobile-sheet-menu-item"
+                            :class="{ active: isActive('/disposisi') && !isActive('/disposisi/create', true) }"
+                            @click="closeMobileDropdown"
+                        >
+                            <div class="menu-item-icon-box bg-warning-subtle text-warning-emphasis">
+                                <i class="bi bi-send-fill"></i>
+                            </div>
+                            <div class="menu-item-text">
+                                <span class="menu-item-title">Daftar Lajur Disposisi</span>
+                                <span class="menu-item-desc">Pantau status &amp; detail instruksi pimpinan</span>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted ms-auto small"></i>
+                        </Link>
+                    </div>
+                </div>
+
+                <!-- 3. Master Data Dropdown (Super Admin) -->
+                <div v-else-if="activeMobileDropdown === 'master' && isSuperAdmin" class="mobile-sheet-content">
+                    <div class="mobile-sheet-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="mobile-sheet-header-icon" style="background: #e0e7ff; color: #4338ca;">
+                                <i class="bi bi-database-fill"></i>
+                            </div>
+                            <div>
+                                <h6 class="mobile-sheet-title">Master Data</h6>
+                                <span class="mobile-sheet-subtitle">Konfigurasi &amp; tabel referensi sistem</span>
+                            </div>
+                        </div>
+                        <button type="button" class="mobile-sheet-close-btn" @click="closeMobileDropdown">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <div class="mobile-sheet-grid">
+                        <Link
+                            href="/master/units"
+                            class="mobile-sheet-grid-item"
+                            :class="{ active: isActive('/master/units') }"
+                            @click="closeMobileDropdown"
+                        >
+                            <div class="grid-item-icon bg-primary-subtle text-primary">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <span class="grid-item-label">Unit Kerja</span>
+                        </Link>
+
+                        <Link
+                            href="/master/number-types"
+                            class="mobile-sheet-grid-item"
+                            :class="{ active: isActive('/master/number-types') }"
+                            @click="closeMobileDropdown"
+                        >
+                            <div class="grid-item-icon bg-success-subtle text-success">
+                                <i class="bi bi-tag-fill"></i>
+                            </div>
+                            <span class="grid-item-label">Jenis Naskah</span>
+                        </Link>
+
+                        <Link
+                            href="/master/categories"
+                            class="mobile-sheet-grid-item"
+                            :class="{ active: isActive('/master/categories') }"
+                            @click="closeMobileDropdown"
+                        >
+                            <div class="grid-item-icon bg-warning-subtle text-warning">
+                                <i class="bi bi-folder-fill"></i>
+                            </div>
+                            <span class="grid-item-label">Kategori Surat</span>
+                        </Link>
+
+                        <Link
+                            href="/master/users"
+                            class="mobile-sheet-grid-item"
+                            :class="{ active: isActive('/master/users') }"
+                            @click="closeMobileDropdown"
+                        >
+                            <div class="grid-item-icon bg-danger-subtle text-danger">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <span class="grid-item-label">User &amp; Akses</span>
+                        </Link>
+
+                        <Link
+                            href="/alur-status"
+                            class="mobile-sheet-grid-item"
+                            :class="{ active: isActive('/alur-status', true) }"
+                            @click="closeMobileDropdown"
+                        >
+                            <div class="grid-item-icon bg-info-subtle text-info">
+                                <i class="bi bi-activity"></i>
+                            </div>
+                            <span class="grid-item-label">Alur Status</span>
+                        </Link>
+
+                        <Link
+                            href="/master/rekap"
+                            class="mobile-sheet-grid-item"
+                            :class="{ active: isActive('/master/rekap') }"
+                            @click="closeMobileDropdown"
+                        >
+                            <div class="grid-item-icon bg-secondary-subtle text-secondary">
+                                <i class="bi bi-bar-chart-fill"></i>
+                            </div>
+                            <span class="grid-item-label">Rekap Master</span>
+                        </Link>
+                    </div>
+
+                    <!-- Profile quick actions in Master sheet -->
+                    <div class="pt-2.5 mt-2.5 d-flex gap-2" style="border-top: 1px solid rgba(255, 255, 255, 0.08) !important;">
+                        <button
+                            type="button"
+                            class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1.5 py-2 rounded-3 border-0"
+                            style="background: rgba(255, 255, 255, 0.08); color: #FFFFFF; font-size: 0.78rem; font-weight: 600;"
+                            @click="openPasswordModal(); closeMobileDropdown();"
+                        >
+                            <i class="bi bi-key-fill text-info"></i> Ganti Password
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1.5 py-2 rounded-3 border-0"
+                            style="background: rgba(239, 68, 68, 0.18); color: #FCA5A5; font-size: 0.78rem; font-weight: 600;"
+                            @click="logout(); closeMobileDropdown();"
+                        >
+                            <i class="bi bi-box-arrow-right"></i> Keluar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4. Layanan Dropdown (Non-Super Admin) -->
+                <div v-else-if="activeMobileDropdown === 'layanan'" class="mobile-sheet-content">
+                    <div class="mobile-sheet-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="mobile-sheet-header-icon bg-primary-subtle text-primary">
+                                <i class="bi bi-grid-fill"></i>
+                            </div>
+                            <div>
+                                <h6 class="mobile-sheet-title">Layanan &amp; Pengaturan</h6>
+                                <span class="mobile-sheet-subtitle">Menu cepat operasional</span>
+                            </div>
+                        </div>
+                        <button type="button" class="mobile-sheet-close-btn" @click="closeMobileDropdown">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <div class="mobile-sheet-menu-list">
+                        <Link
+                            href="/scan-status"
+                            class="mobile-sheet-menu-item"
+                            :class="{ active: isActive('/scan-status') || isActive('/scan-qr') }"
+                            @click="closeMobileDropdown"
+                        >
+                            <div class="menu-item-icon-box bg-primary-subtle text-primary">
+                                <i class="bi bi-qr-code-scan"></i>
+                            </div>
+                            <div class="menu-item-text">
+                                <span class="menu-item-title">Scan QR &amp; Update Status</span>
+                                <span class="menu-item-desc">Pindai kode QR fisik untuk update status instan</span>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted ms-auto small"></i>
+                        </Link>
+
+                        <Link
+                            href="/alur-status"
+                            class="mobile-sheet-menu-item"
+                            :class="{ active: isActive('/alur-status', true) }"
+                            @click="closeMobileDropdown"
+                        >
+                            <div class="menu-item-icon-box bg-info-subtle text-info">
+                                <i class="bi bi-bezier2"></i>
+                            </div>
+                            <div class="menu-item-text">
+                                <span class="menu-item-title">Panduan Alur SOP</span>
+                                <span class="menu-item-desc">Diagram visual alur proses persuratan</span>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted ms-auto small"></i>
+                        </Link>
+
+                        <button
+                            type="button"
+                            class="mobile-sheet-menu-item border-0 w-100 text-start"
+                            @click="openPasswordModal(); closeMobileDropdown();"
+                        >
+                            <div class="menu-item-icon-box bg-secondary-subtle text-secondary">
+                                <i class="bi bi-key-fill"></i>
+                            </div>
+                            <div class="menu-item-text">
+                                <span class="menu-item-title">Ganti Password</span>
+                                <span class="menu-item-desc">Perbarui kata sandi akun pengguna Anda</span>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted ms-auto small"></i>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="mobile-sheet-menu-item border-0 w-100 text-start"
+                            style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25);"
+                            @click="logout(); closeMobileDropdown();"
+                        >
+                            <div class="menu-item-icon-box bg-danger-subtle text-danger">
+                                <i class="bi bi-box-arrow-right"></i>
+                            </div>
+                            <div class="menu-item-text">
+                                <span class="menu-item-title" style="color: #FCA5A5 !important;">Keluar</span>
+                                <span class="menu-item-desc" style="color: #F87171 !important;">Akhiri sesi kerja persuratan Anda</span>
+                            </div>
+                            <i class="bi bi-chevron-right text-danger ms-auto small"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- Mobile Bottom Bar Navigation Fixed (5 Tabs) -->
+        <nav class="mobile-bottom-bar d-lg-none no-print" aria-label="Mobile Navigation">
+            <div class="mobile-bottom-bar-inner">
+                <!-- 1. Beranda -->
+                <Link
+                    href="/dashboard"
+                    class="bottom-nav-item"
+                    :class="{ active: isActive('/dashboard', true) }"
+                    @click="closeMobileDropdown"
+                >
+                    <div class="bottom-nav-icon-box">
+                        <i class="bi bi-house-door-fill"></i>
+                    </div>
+                    <span class="bottom-nav-label">Beranda</span>
+                </Link>
+
+                <!-- 2. Ketersediaan Nomor Surat -->
+                <Link
+                    v-if="!isSekjen"
+                    href="/ketersediaan-nomor"
+                    class="bottom-nav-item"
+                    :class="{ active: isActive('/ketersediaan-nomor') }"
+                    @click="closeMobileDropdown"
+                >
+                    <div class="bottom-nav-icon-box">
+                        <i class="bi bi-hash"></i>
+                    </div>
+                    <span class="bottom-nav-label">No. Surat</span>
+                </Link>
+
+                <!-- 3. Tindak Lanjut / TTD (Dropdown) -->
+                <template v-if="!isSekjen">
+                    <button
+                        type="button"
+                        class="bottom-nav-item bottom-nav-dropdown-trigger"
+                        :class="{
+                            active: (isActive('/tindak-lanjut') || isActive('/data-surat')) && !activeMobileDropdown,
+                            'is-open': activeMobileDropdown === 'tindak-lanjut'
+                        }"
+                        @click="toggleMobileDropdown('tindak-lanjut')"
+                    >
+                        <div class="bottom-nav-icon-box">
+                            <i class="bi bi-file-earmark-check-fill"></i>
+                        </div>
+                        <div class="d-flex align-items-center gap-0.5 justify-content-center">
+                            <span class="bottom-nav-label">Tindak Lanjut</span>
+                            <i class="bi bi-chevron-up bottom-nav-arrow" :class="{ 'rotate-180': activeMobileDropdown === 'tindak-lanjut' }"></i>
+                        </div>
+                    </button>
+                </template>
+
+                <!-- 4. Lajur Disposisi (Dropdown) -->
+                <button
+                    type="button"
+                    class="bottom-nav-item bottom-nav-dropdown-trigger"
+                    :class="{
+                        active: isActive('/disposisi') && !activeMobileDropdown,
+                        'is-open': activeMobileDropdown === 'disposisi'
+                    }"
+                    @click="toggleMobileDropdown('disposisi')"
+                >
+                    <div class="bottom-nav-icon-box">
+                        <i class="bi bi-send-fill"></i>
+                    </div>
+                    <div class="d-flex align-items-center gap-0.5 justify-content-center">
+                        <span class="bottom-nav-label">Disposisi</span>
+                        <i class="bi bi-chevron-up bottom-nav-arrow" :class="{ 'rotate-180': activeMobileDropdown === 'disposisi' }"></i>
+                    </div>
+                </button>
+
+                <!-- 5. Master Data (Dropdown if Super Admin, else Layanan) -->
+                <template v-if="isSuperAdmin">
+                    <button
+                        type="button"
+                        class="bottom-nav-item bottom-nav-dropdown-trigger"
+                        :class="{
+                            active: (isActive('/master') || isActive('/alur-status')) && !activeMobileDropdown,
+                            'is-open': activeMobileDropdown === 'master'
+                        }"
+                        @click="toggleMobileDropdown('master')"
+                    >
+                        <div class="bottom-nav-icon-box">
+                            <i class="bi bi-database-fill"></i>
+                        </div>
+                        <div class="d-flex align-items-center gap-0.5 justify-content-center">
+                            <span class="bottom-nav-label">Master Data</span>
+                            <i class="bi bi-chevron-up bottom-nav-arrow" :class="{ 'rotate-180': activeMobileDropdown === 'master' }"></i>
+                        </div>
+                    </button>
+                </template>
+                <template v-else>
+                    <button
+                        type="button"
+                        class="bottom-nav-item bottom-nav-dropdown-trigger"
+                        :class="{
+                            active: (isActive('/scan-status') || isActive('/alur-status')) && !activeMobileDropdown,
+                            'is-open': activeMobileDropdown === 'layanan'
+                        }"
+                        @click="toggleMobileDropdown('layanan')"
+                    >
+                        <div class="bottom-nav-icon-box">
+                            <i class="bi bi-grid-fill"></i>
+                        </div>
+                        <div class="d-flex align-items-center gap-0.5 justify-content-center">
+                            <span class="bottom-nav-label">Layanan</span>
+                            <i class="bi bi-chevron-up bottom-nav-arrow" :class="{ 'rotate-180': activeMobileDropdown === 'layanan' }"></i>
+                        </div>
+                    </button>
+                </template>
+            </div>
+        </nav>
 
         <!-- Floating Tooltip (Teleport, lepas dari overflow sidebar) -->
         <Teleport to="body">
@@ -721,6 +1260,9 @@ const breadcrumb = computed(() => {
     left: 0;
     bottom: 0;
     width: var(--sidebar-width);
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
     z-index: 1050;
     background: #1a2d7a;
     color: #fff;
@@ -743,24 +1285,18 @@ const breadcrumb = computed(() => {
 
 @media (max-width: 991px) {
     .app-sidebar {
-        top: 0;
-        left: 0;
-        bottom: 0;
-        transform: translateX(-110%);
-        width: 280px;
-    }
-
-    .app-sidebar.is-open {
-        transform: translateX(0);
+        display: none !important;
     }
 }
 
 .sidebar-inner {
     height: 100%;
+    max-height: 100%;
     display: flex;
     flex-direction: column;
     position: relative;
     z-index: 2;
+    overflow: hidden;
 }
 
 /* TOGGLE BUTTON */
@@ -770,22 +1306,25 @@ const breadcrumb = computed(() => {
     top: 20px;
     width: 26px;
     height: 26px;
-    background: #2743AF;
-    color: #fff;
-    border: 2px solid #ffffff;
-    border-radius: 50%;
+    background: #F8FAFC;
+    color: #1E293B;
+    border: 1px solid #CBD5E1;
+    border-radius: 7px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 1100;
-    box-shadow: 0 2px 8px rgba(3, 32, 90, 0.25);
-    transition: background 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 2px 8px rgba(3, 32, 90, 0.15);
+    transition: all 0.2s ease;
 }
 
 .sidebar-toggle-btn:hover {
-    background: #1f37a0;
+    background: #FFFFFF;
+    color: #2743AF;
+    border-color: #3DA5F9;
     transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(61, 165, 249, 0.25);
 }
 
 .sidebar-close {
@@ -797,34 +1336,40 @@ const breadcrumb = computed(() => {
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
     color: #fff;
+    flex-shrink: 0;
 }
 
 .sidebar-header {
-    padding: 1.1rem 1.25rem 0.85rem;
+    padding: 0.9rem 0.9rem 0.75rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 0.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
 }
 
 .brand-wrapper {
     display: flex;
     align-items: center;
-    gap: .75rem;
+    gap: 0.5rem;
     text-decoration: none;
     color: #fff;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
 }
 
 .brand-logos-pair {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.25rem;
     flex: none;
 }
 
 .brand-logo-ring {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     display: grid;
     place-items: center;
     background: rgba(61, 165, 249, 0.25);
@@ -844,22 +1389,56 @@ const breadcrumb = computed(() => {
     font-weight: 300;
 }
 
+.brand-text-gov {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.15;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+}
+
+.brand-text-gov .gov-line {
+    font-weight: 800;
+    font-size: 0.65rem;
+    letter-spacing: 0.02em;
+    color: #FFFFFF;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+}
+
 .brand-text {
     display: flex;
     flex-direction: column;
     line-height: 1.2;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
 }
 
 .brand-title {
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .brand-subtitle {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: #93c5fd;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-quick-action {
+    flex-shrink: 0;
 }
 
 .sidebar-scan-btn {
@@ -887,10 +1466,12 @@ const breadcrumb = computed(() => {
 }
 
 .sidebar-scroll {
-    flex: 1;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0.5rem 0 1rem;
+    -webkit-overflow-scrolling: touch;
 }
 
 .sidebar-group-item {
@@ -992,11 +1573,14 @@ const breadcrumb = computed(() => {
 
 /* FOOTER AREA (Figma Model) */
 .sidebar-footer-container {
+    flex-shrink: 0;
     margin-top: auto;
     padding: 0.75rem;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0.75rem));
     display: flex;
     flex-direction: column;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: #1a2d7a;
 }
 
 .sidebar-user-card {
@@ -1163,6 +1747,7 @@ const breadcrumb = computed(() => {
         justify-content: center;
     }
 
+    .app-sidebar.is-collapsed .brand-text-gov,
     .app-sidebar.is-collapsed .brand-text,
     .app-sidebar.is-collapsed .brand-pipe-divider,
     .app-sidebar.is-collapsed .brand-kemnaker-ring,
@@ -1294,9 +1879,12 @@ const breadcrumb = computed(() => {
     align-items: center;
     margin: 0;
     padding: 0.85rem 2rem;
-    background: #ffffff;
-    border-bottom: 1px solid #e2e8f0;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    background: rgba(248, 250, 252, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    box-shadow: none;
+    transition: background 0.25s ease, backdrop-filter 0.25s ease;
 }
 
 .topbar-heading {
@@ -1364,25 +1952,29 @@ const breadcrumb = computed(() => {
     flex-shrink: 0;
 }
 
-.hamburger-btn {
-    width: 42px;
-    height: 42px;
-    display: grid;
-    place-items: center;
-    background: var(--st-surface);
-    border: 1px solid var(--st-border);
-    border-radius: var(--st-radius-sm);
-    color: var(--st-navy);
-    transition: background-color 0.2s var(--st-ease), border-color 0.2s var(--st-ease), transform 0.15s var(--st-ease);
+.collapse-toggle-btn {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #F8FAFC;
+    border: 1px solid var(--st-border, #E2E8F0);
+    border-radius: 10px;
+    color: var(--st-navy, #03205A);
+    cursor: pointer;
+    transition: background-color 0.2s var(--st-ease), border-color 0.2s var(--st-ease), transform 0.15s var(--st-ease), color 0.2s var(--st-ease);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.hamburger-btn:hover {
-    background: var(--st-powder-cyan);
-    border-color: var(--st-teal);
-    color: var(--st-teal);
+.collapse-toggle-btn:hover {
+    background: #EEF2F6;
+    border-color: var(--st-teal, #167992);
+    color: var(--st-teal, #167992);
+    transform: translateY(-1px);
 }
 
-.hamburger-btn:active {
+.collapse-toggle-btn:active {
     transform: scale(0.94);
 }
 
@@ -1474,6 +2066,11 @@ const breadcrumb = computed(() => {
 
     .app-main-body {
         padding: 1rem 0.85rem 2rem;
+        padding-bottom: calc(85px + env(safe-area-inset-bottom, 16px)) !important;
+    }
+
+    .app-page-footer {
+        padding-bottom: calc(75px + env(safe-area-inset-bottom, 16px)) !important;
     }
 }
 
@@ -1484,6 +2081,7 @@ const breadcrumb = computed(() => {
 
     .app-main-body {
         padding: 0.85rem 0.65rem 1.75rem;
+        padding-bottom: calc(85px + env(safe-area-inset-bottom, 16px)) !important;
     }
 }
 
@@ -1493,5 +2091,469 @@ const breadcrumb = computed(() => {
     background: rgba(3, 32, 90, 0.5);
     backdrop-filter: blur(4px);
     z-index: 1040;
+}
+
+.topbar-mobile-brand {
+    min-width: 0;
+    max-width: calc(100vw - 160px);
+}
+
+.topbar-logo-ring {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    background: rgba(39, 67, 175, 0.08) !important;
+    border: 1px solid rgba(39, 67, 175, 0.2) !important;
+    border-radius: 7px;
+    flex: none;
+}
+
+.topbar-kemnaker-ring {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    background: rgba(3, 32, 90, 0.06) !important;
+    border: 1px solid rgba(3, 32, 90, 0.15) !important;
+    border-radius: 7px;
+    flex: none;
+}
+
+.topbar-kemnaker-ring img {
+    filter: none !important;
+}
+
+.topbar-brand-pipe {
+    color: #cbd5e1;
+    font-size: 0.85rem;
+    font-weight: 300;
+}
+
+.topbar-brand-text-gov {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.15;
+    min-width: 0;
+}
+
+.topbar-gov-line {
+    font-weight: 800;
+    font-size: 0.54rem;
+    letter-spacing: 0.02em;
+    color: #03205A !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.18;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+@media (max-width: 380px) {
+    .topbar-gov-line {
+        font-size: 0.46rem;
+    }
+    .topbar-logo-ring,
+    .topbar-kemnaker-ring {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+.topbar-mobile-scan-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(39, 67, 175, 0.08);
+    color: #2743AF;
+    font-size: 1.05rem;
+    transition: all 0.2s ease;
+}
+
+.topbar-mobile-scan-btn.active,
+.topbar-mobile-scan-btn:hover {
+    background: #2743AF;
+    color: #ffffff;
+}
+
+/* ===== MOBILE BOTTOM BAR (d-lg-none) ===== */
+.mobile-bottom-bar {
+    position: fixed;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    left: 12px;
+    right: 12px;
+    max-width: 440px;
+    margin: 0 auto;
+    z-index: 1045;
+    background: #03205A;
+    background: linear-gradient(135deg, #03205A 0%, #1C386F 100%);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 28px;
+    box-shadow: 0 16px 36px -4px rgba(3, 32, 90, 0.45), 0 4px 12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    padding: 3px;
+}
+
+.mobile-bottom-bar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 56px;
+    padding: 0 2px;
+}
+
+.bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 5px 2px;
+    color: rgba(255, 255, 255, 0.65);
+    text-decoration: none;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.bottom-nav-icon-box {
+    position: relative;
+    width: 30px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent !important;
+    border: none !important;
+    transition: all 0.2s ease;
+}
+
+.bottom-nav-icon-box i {
+    font-size: 1.15rem;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.65);
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.bottom-nav-label {
+    font-size: 0.62rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.65);
+    transition: color 0.2s ease, font-weight 0.2s ease;
+}
+
+.bottom-nav-arrow {
+    font-size: 0.5rem;
+    color: rgba(255, 255, 255, 0.45);
+    transition: transform 0.25s ease, color 0.2s ease;
+}
+
+.bottom-nav-arrow.rotate-180 {
+    transform: rotate(180deg);
+}
+
+.bottom-nav-item:hover {
+    color: #FFFFFF;
+}
+
+.bottom-nav-item:hover .bottom-nav-icon-box i {
+    color: #FFFFFF;
+}
+
+.bottom-nav-item:hover .bottom-nav-label {
+    color: #FFFFFF;
+}
+
+.bottom-nav-item:hover .bottom-nav-arrow {
+    color: #FFFFFF;
+}
+
+.bottom-nav-item.active,
+.bottom-nav-item.is-open {
+    color: #FFFFFF !important;
+    background: transparent !important;
+}
+
+.bottom-nav-item.active .bottom-nav-icon-box i,
+.bottom-nav-item.is-open .bottom-nav-icon-box i {
+    color: #FFFFFF !important;
+    transform: scale(1.12);
+}
+
+.bottom-nav-item.active .bottom-nav-label,
+.bottom-nav-item.is-open .bottom-nav-label {
+    color: #FFFFFF !important;
+    font-weight: 700;
+}
+
+.bottom-nav-item.active .bottom-nav-arrow,
+.bottom-nav-item.is-open .bottom-nav-arrow {
+    color: #FFFFFF !important;
+}
+
+/* ===== MOBILE BOTTOM SHEET DROPDOWN ===== */
+.mobile-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 16, 38, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 1042;
+}
+
+.mobile-sheet-dropdown {
+    position: fixed;
+    bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+    left: 12px;
+    right: 12px;
+    max-width: 440px;
+    margin: 0 auto;
+    background: rgba(3, 32, 90, 0.98);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    box-shadow: 0 24px 50px -10px rgba(3, 32, 90, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    z-index: 1043;
+    overflow: hidden;
+    max-height: calc(100vh - 130px);
+    display: flex;
+    flex-direction: column;
+    color: #FFFFFF;
+}
+
+.mobile-sheet-content {
+    padding: 1.15rem;
+    overflow-y: auto;
+}
+
+.mobile-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mobile-sheet-header-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    border: none;
+}
+
+.mobile-sheet-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.mobile-sheet-subtitle {
+    font-size: 0.72rem;
+    color: #94A3B8;
+    line-height: 1;
+}
+
+.mobile-sheet-close-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: #94A3B8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.mobile-sheet-close-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #FFFFFF;
+}
+
+.mobile-sheet-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.mobile-sheet-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    text-decoration: none;
+    color: #FFFFFF;
+    transition: all 0.2s ease;
+}
+
+.mobile-sheet-menu-item:hover,
+.mobile-sheet-menu-item:active {
+    background: rgba(39, 67, 175, 0.3);
+    border-color: rgba(96, 165, 250, 0.35);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    color: #FFFFFF;
+}
+
+.mobile-sheet-menu-item.active {
+    background: rgba(39, 67, 175, 0.35);
+    border-color: rgba(96, 165, 250, 0.4);
+    color: #FFFFFF;
+}
+
+.mobile-sheet-menu-item.item-highlight {
+    background: rgba(39, 67, 175, 0.2);
+    border-color: rgba(96, 165, 250, 0.3);
+}
+
+.mobile-sheet-menu-item.item-highlight:hover,
+.mobile-sheet-menu-item.item-highlight:active {
+    background: rgba(39, 67, 175, 0.35);
+    border-color: rgba(96, 165, 250, 0.45);
+}
+
+.menu-item-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    border: none;
+}
+
+.menu-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.menu-item-title {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #FFFFFF;
+    line-height: 1.2;
+}
+
+.menu-item-desc {
+    font-size: 0.72rem;
+    color: #94A3B8;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mobile-sheet-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.65rem;
+}
+
+.mobile-sheet-grid-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.85rem 0.5rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    text-decoration: none;
+    color: #E2E8F0;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.mobile-sheet-grid-item:hover,
+.mobile-sheet-grid-item:active {
+    background: rgba(39, 67, 175, 0.3);
+    border-color: rgba(96, 165, 250, 0.35);
+    color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.mobile-sheet-grid-item.active {
+    background: rgba(39, 67, 175, 0.35);
+    border-color: rgba(96, 165, 250, 0.4);
+    color: #FFFFFF;
+    font-weight: 700;
+}
+
+.grid-item-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    border: none;
+}
+
+.grid-item-label {
+    font-size: 0.74rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #E2E8F0;
+}
+
+/* Animations */
+.mobile-backdrop-enter-active,
+.mobile-backdrop-leave-active {
+    transition: opacity 0.22s ease;
+}
+
+.mobile-backdrop-enter-from,
+.mobile-backdrop-leave-to {
+    opacity: 0;
+}
+
+.mobile-sheet-enter-active {
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-sheet-leave-active {
+    transition: all 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.mobile-sheet-enter-from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+}
+
+.mobile-sheet-leave-to {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
 }
 </style>

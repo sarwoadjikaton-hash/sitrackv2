@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3';
-import { computed, watch, ref, nextTick } from 'vue';
+import { usePage, router } from '@inertiajs/vue3';
+import { computed, watch, ref, nextTick, onMounted, onUnmounted } from 'vue';
 
 const page = usePage<any>();
 
@@ -15,25 +15,71 @@ const DURATION = 5000;
 
 const typeMeta = computed(() => {
     switch (type.value) {
-        case 'success': return { icon: 'bi-check-circle-fill', color: 'var(--st-success)' };
-        case 'danger': return { icon: 'bi-exclamation-triangle-fill', color: 'var(--st-danger)' };
-        case 'warning': return { icon: 'bi-exclamation-circle-fill', color: 'var(--st-warning)' };
-        default: return { icon: 'bi-info-circle-fill', color: 'var(--st-info)' };
+        case 'success': return { icon: 'bi-check-circle-fill', color: 'var(--st-success, #10B981)' };
+        case 'danger': return { icon: 'bi-exclamation-triangle-fill', color: 'var(--st-danger, #EF4444)' };
+        case 'warning': return { icon: 'bi-exclamation-circle-fill', color: 'var(--st-warning, #F59E0B)' };
+        default: return { icon: 'bi-info-circle-fill', color: 'var(--st-info, #3DA5F9)' };
     }
 });
 
 const isLong = computed(() => message.value.length > 70);
 
+const handleFlash = (flash: any) => {
+    if (!flash) return;
+    if (flash.success) {
+        type.value = 'success';
+        message.value = flash.success;
+        displayToast();
+    } else if (flash.error) {
+        type.value = 'danger';
+        message.value = flash.error;
+        displayToast();
+    } else if (flash.warning) {
+        type.value = 'warning';
+        message.value = flash.warning;
+        displayToast();
+    } else if (flash.info) {
+        type.value = 'info';
+        message.value = flash.info;
+        displayToast();
+    }
+};
+
 watch(
     () => page.props.flash,
     (newFlash) => {
-        if (newFlash?.success) { type.value = 'success'; message.value = newFlash.success; displayToast(); }
-        else if (newFlash?.error) { type.value = 'danger'; message.value = newFlash.error; displayToast(); }
-        else if (newFlash?.warning) { type.value = 'warning'; message.value = newFlash.warning; displayToast(); }
-        else if (newFlash?.info) { type.value = 'info'; message.value = newFlash.info; displayToast(); }
+        handleFlash(newFlash);
     },
     { deep: true, immediate: true }
 );
+
+let removeInertiaListener: (() => void) | null = null;
+
+const onWindowToast = (e: any) => {
+    if (e.detail?.message) {
+        type.value = e.detail.type || 'success';
+        message.value = e.detail.message;
+        displayToast();
+    }
+};
+
+onMounted(() => {
+    window.addEventListener('toast', onWindowToast);
+
+    removeInertiaListener = router.on('success', (event: any) => {
+        const flash = event.detail?.page?.props?.flash;
+        if (flash) {
+            handleFlash(flash);
+        }
+    });
+});
+
+onUnmounted(() => {
+    window.removeEventListener('toast', onWindowToast);
+    if (removeInertiaListener) {
+        removeInertiaListener();
+    }
+});
 
 async function displayToast() {
     expanded.value = false;

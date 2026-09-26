@@ -79,7 +79,7 @@ const previewWorkbooks = computed(() => {
                         {{ greeting() }}, {{ firstName }} 👋
                     </h1>
                     <p class="text-sm text-slate-500 mt-0.5">
-                        {{ todayDateFormatted }} · Sistem berjalan normal
+                        {{ todayDateFormatted }}
                     </p>
                 </div>
                 <div class="flex gap-2.5 flex-wrap">
@@ -95,10 +95,11 @@ const previewWorkbooks = computed(() => {
                         <i class="bi bi-send text-xs"></i>
                         <span>Input Disposisi</span>
                     </Link>
-                    <Link href="/scan-status"
-                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors bg-white">
-                        <i class="bi bi-qr-code-scan text-xs"></i>
-                        <span>Scan QR</span>
+                    <Link href="/tracking"
+                        target="_blank"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors bg-white text-decoration-none">
+                        <i class="bi bi-globe text-xs text-primary"></i>
+                        <span>Portal Publik</span>
                     </Link>
                 </div>
             </div>

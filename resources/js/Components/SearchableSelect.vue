@@ -253,38 +253,44 @@ onUnmounted(() => {
     width: 100%;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: .6rem;
     background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 0.75rem 1rem;
-    font-size: .95rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.55rem 0.85rem;
+    font-size: .875rem;
     color: #0f172a;
     text-align: left;
     cursor: pointer;
     transition: all 0.2s ease;
+    min-height: 40px;
+    box-sizing: border-box;
+    line-height: 1.5;
 }
 
 .dd-trigger.dd-size-sm {
-    padding: 0.45rem 0.75rem;
-    font-size: 0.84rem;
-    border-radius: 8px;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.815rem;
+    border-radius: 6px;
     gap: 0.4rem;
+    min-height: 32px;
 }
 
 .dd-trigger.dd-size-lg {
-    padding: 0.85rem 1.15rem;
-    font-size: 1rem;
-    border-radius: 14px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 10px;
+    min-height: 46px;
 }
 
 .dd-trigger:hover:not(.is-disabled) {
-    border-color: #cbd5e1;
+    border-color: #94a3b8;
 }
 
 .dd-trigger.is-open {
-    border-color: #3DA5F9;
-    box-shadow: 0 0 0 4px rgba(61, 165, 249, 0.15);
+    border-color: #2743AF;
+    box-shadow: 0 0 0 3px rgba(39, 67, 175, 0.15);
 }
 
 .dd-trigger.is-disabled {
@@ -299,6 +305,8 @@ onUnmounted(() => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.4;
+    display: block;
 }
 
 .dd-trigger-label.is-placeholder {
@@ -310,11 +318,14 @@ onUnmounted(() => {
     font-size: .8rem;
     color: #94a3b8;
     transition: transform .2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .dd-trigger.is-open .dd-chevron {
     transform: rotate(180deg);
-    color: #167992;
+    color: #2743AF;
 }
 
 .dd-spinner {

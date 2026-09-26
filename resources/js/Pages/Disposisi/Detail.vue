@@ -80,6 +80,12 @@ const submitInstruction = () => {
 // Update Disposition Item Modal
 const showItemModal = ref(false);
 const activeItem = ref<Disposition | null>(null);
+const itemStatusOptions = [
+    { value: 'Didisposisikan', label: 'Didisposisikan' },
+    { value: 'Dalam Tindak Lanjut', label: 'Dalam Tindak Lanjut' },
+    { value: 'Selesai', label: 'Selesai' },
+    { value: 'Dikembalikan', label: 'Dikembalikan' },
+];
 const itemForm = useForm({
     status: 'Didisposisikan',
     follow_up_note: '',
@@ -242,15 +248,15 @@ const deleteRelation = (id: number) => {
                 </div>
             </div>
 
-            <div class="d-flex align-items-center gap-2">
-                <Link :href="`/cetak/disposisi/${letter.id}`" class="btn btn-sm btn-outline-secondary" target="_blank">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <Link :href="`/cetak/disposisi/${letter.id}`" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center flex-grow-1 flex-sm-grow-0" target="_blank">
                     <i class="bi bi-printer me-1"></i> Cetak Lembar Disposisi
                 </Link>
-                <button type="button" class="btn btn-sm btn-primary-blue"
+                <button type="button" class="btn btn-sm btn-primary-blue d-flex align-items-center justify-content-center flex-grow-1 flex-sm-grow-0"
                     @click="openAddInstruction(null, 'Sekretaris Jenderal')">
                     <i class="bi bi-plus-lg me-1"></i> Tambah Arahan
                 </button>
-                <Link href="/disposisi" class="btn btn-sm btn-outline-secondary">
+                <Link href="/disposisi" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center flex-grow-1 flex-sm-grow-0">
                     Kembali
                 </Link>
             </div>
@@ -602,12 +608,12 @@ const deleteRelation = (id: number) => {
             <form @submit.prevent="submitItemUpdate">
                 <div class="mb-3">
                     <label class="form-label small fw-bold">Status Tindak Lanjut</label>
-                    <select v-model="itemForm.status" class="form-select" required>
-                        <option value="Didisposisikan">Didisposisikan</option>
-                        <option value="Dalam Tindak Lanjut">Dalam Tindak Lanjut</option>
-                        <option value="Selesai">Selesai</option>
-                        <option value="Dikembalikan">Dikembalikan</option>
-                    </select>
+                    <SearchableSelect
+                        v-model="itemForm.status"
+                        :options="itemStatusOptions"
+                        :searchable="false"
+                        placeholder="Pilih Status..."
+                    />
                 </div>
 
                 <div class="mb-3">

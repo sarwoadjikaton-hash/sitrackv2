@@ -4,6 +4,7 @@ import { ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import StatCard from '@/Components/StatCard.vue';
 import MasterTabs from '@/Components/MasterTabs.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { LetterNumberType } from '@/types';
 
 const props = defineProps<{
@@ -14,6 +15,14 @@ const props = defineProps<{
 }>();
 
 const year = ref(props.selectedYear);
+
+const yearOptions = [
+    { value: 2024, label: 'Tahun 2024' },
+    { value: 2025, label: 'Tahun 2025' },
+    { value: 2026, label: 'Tahun 2026' },
+    { value: 2027, label: 'Tahun 2027' },
+    { value: 2028, label: 'Tahun 2028' },
+];
 
 const changeYear = () => {
     router.get('/master/rekap', { year: year.value });
@@ -37,10 +46,16 @@ const exportCsv = (type: 'letters' | 'data_surat') => {
                 <p class="text-muted mb-0 small">Ringkasan menyeluruh pemakaian penomoran dan lajur dokumen persuratan.</p>
             </div>
 
-            <div class="d-flex align-items-center gap-2">
-                <select v-model="year" class="form-select form-select-sm fw-bold" style="width: 120px;" @change="changeYear">
-                    <option v-for="y in [2024, 2025, 2026, 2027]" :key="y" :value="y">Tahun {{ y }}</option>
-                </select>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <div style="min-width: 130px;">
+                    <SearchableSelect
+                        v-model="year"
+                        :options="yearOptions"
+                        :searchable="false"
+                        size="sm"
+                        @update:model-value="changeYear"
+                    />
+                </div>
 
                 <button type="button" class="btn btn-sm btn-outline-success" @click="exportCsv('data_surat')">
                     <i class="bi bi-file-earmark-excel me-1"></i> Export Data Surat CSV
