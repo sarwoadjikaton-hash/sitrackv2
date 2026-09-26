@@ -1467,6 +1467,26 @@ const breadcrumb = computed(() => {
     min-height: calc(100vh - 65px);
 }
 
+@media (max-width: 991px) {
+    .app-topbar {
+        padding: 0.75rem 1rem;
+    }
+
+    .app-main-body {
+        padding: 1rem 0.85rem 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .app-topbar {
+        padding: 0.65rem 0.85rem;
+    }
+
+    .app-main-body {
+        padding: 0.85rem 0.65rem 1.75rem;
+    }
+}
+
 .sidebar-backdrop {
     position: fixed;
     inset: 0;

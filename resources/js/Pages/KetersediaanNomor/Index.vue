@@ -415,7 +415,7 @@ const formatDateIndo = (dateStr?: string | null) => {
 
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <!-- Year Selector -->
-                    <div class="d-flex align-items-center bg-white border border-slate-200 rounded-3 px-2 py-1 shadow-xs">
+                    <div class="d-flex align-items-center bg-white border border-slate-200 rounded-3 px-2 py-1 shadow-xs flex-grow-1 flex-sm-grow-0 justify-content-between">
                         <span class="small fw-semibold text-muted me-1">Tahun:</span>
                         <select v-model="selectedYear" class="form-select form-select-sm border-0 fw-bold bg-transparent p-0 shadow-none" style="width: 70px;" @change="changeYear">
                             <option v-for="y in [2024, 2025, 2026, 2027]" :key="y" :value="y">{{ y }}</option>
@@ -425,7 +425,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                     <!-- Tombol Tambah Batch Nomor -->
                     <button
                         type="button"
-                        class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 text-white fw-semibold small shadow-xs border-0 transition"
+                        class="d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 text-white fw-semibold small shadow-xs border-0 transition flex-grow-1 flex-sm-grow-0"
                         style="background: #2743AF;"
                         @click="openCreateModal('available')"
                     >
@@ -436,7 +436,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                     <!-- Tombol Sinkronisasi -->
                     <button
                         type="button"
-                        class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light"
+                        class="d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light flex-grow-1 flex-sm-grow-0"
                         :disabled="isSyncing"
                         @click="executeSync(false)"
                         title="Sinkronisasi data dari Google Spreadsheet"
@@ -446,10 +446,10 @@ const formatDateIndo = (dateStr?: string | null) => {
                     </button>
 
                     <!-- Tombol Pengaturan -->
-                    <div class="dropdown">
+                    <div class="dropdown flex-grow-1 flex-sm-grow-0">
                         <button
                             type="button"
-                            class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light dropdown-toggle"
+                            class="w-100 d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light dropdown-toggle"
                             data-bs-toggle="dropdown"
                             aria-expanded="false"
                             title="Pengaturan dan opsi sinkronisasi"
@@ -550,7 +550,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                     <div class="d-flex flex-wrap gap-2 mb-4">
                         <button
                             type="button"
-                            class="d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-3 small fw-medium border"
+                            class="d-flex align-items-center justify-content-center gap-1.5 px-3 py-1.5 rounded-3 small fw-medium border flex-grow-1 flex-sm-grow-0"
                             style="color: #6d28d9; background: #f5f3ff; border-color: #ddd6fe;"
                             @click="openCreateModal('preorder')"
                         >
@@ -559,7 +559,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                         </button>
                         <button
                             type="button"
-                            class="d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-3 small fw-medium border"
+                            class="d-flex align-items-center justify-content-center gap-1.5 px-3 py-1.5 rounded-3 small fw-medium border flex-grow-1 flex-sm-grow-0"
                             style="color: #b45309; background: #fffbeb; border-color: #fde68a;"
                             @click="openCreateModal('reservation')"
                         >
@@ -582,7 +582,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                         </div>
 
                         <!-- Status Filter Buttons (Figma Prototype Model) -->
-                        <div class="d-flex flex-wrap gap-1.5 align-items-center">
+                        <div class="filter-pills-scroll">
                             <button
                                 type="button"
                                 class="px-3 py-1.5 rounded-3 small fw-medium transition border"
@@ -632,7 +632,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                             <!-- Bulk Mode Toggle -->
                             <button
                                 type="button"
-                                class="btn btn-sm"
+                                class="btn btn-sm text-nowrap"
                                 :class="selectionMode ? 'btn-danger' : 'btn-outline-secondary'"
                                 @click="toggleSelectionMode"
                             >

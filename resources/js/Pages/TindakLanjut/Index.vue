@@ -154,12 +154,12 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                     <p class="text-muted small mb-0">Lajur penandatanganan naskah dinas oleh pimpinan</p>
                 </div>
 
-                <div class="d-flex align-items-center gap-2">
-                    <Link href="/scan-status" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 text-dark fw-medium small border bg-white shadow-xs transition hover:bg-light">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <Link href="/scan-status" class="d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 text-dark fw-medium small border bg-white shadow-xs transition hover:bg-light flex-grow-1 flex-sm-grow-0">
                         <i class="bi bi-qr-code-scan text-primary"></i>
                         <span>Update via QR</span>
                     </Link>
-                    <Link href="/tindak-lanjut/create" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 text-white fw-semibold small border-0 shadow-xs transition" style="background: #2743AF;">
+                    <Link href="/tindak-lanjut/create" class="d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 text-white fw-semibold small border-0 shadow-xs transition flex-grow-1 flex-sm-grow-0" style="background: #2743AF;">
                         <i class="bi bi-plus-lg"></i>
                         <span>Input Naskah Baru</span>
                     </Link>

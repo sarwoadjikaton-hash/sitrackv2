@@ -90,8 +90,19 @@ const updatePosition = () => {
     const panelHeight = panelEl.value?.offsetHeight || 300;
     const openUpward = spaceBelow < panelHeight + 12 && rect.top > panelHeight;
 
-    panelStyle.left = `${rect.left}px`;
-    panelStyle.width = `${rect.width}px`;
+    let left = rect.left;
+    let width = rect.width;
+
+    // Mobile screen protection: ensure width fits viewport and doesn't bleed out
+    if (window.innerWidth < 576) {
+        width = Math.max(width, Math.min(window.innerWidth - 24, 340));
+        if (left + width > window.innerWidth - 12) {
+            left = Math.max(12, window.innerWidth - width - 12);
+        }
+    }
+
+    panelStyle.left = `${Math.max(8, left)}px`;
+    panelStyle.width = `${Math.min(width, window.innerWidth - 16)}px`;
     panelStyle.top = openUpward
         ? `${rect.top - panelHeight - 6}px`
         : `${rect.bottom + 6}px`;

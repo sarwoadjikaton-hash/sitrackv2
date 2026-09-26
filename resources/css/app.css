@@ -712,19 +712,109 @@ h1, h2, h3, h4, h5, h6,
 }
 
 /* ==========================================================================
-   RESPONSIVE
+   RESPONSIVE & MOBILE ADAPTATION
    ========================================================================== */
+
+/* Universal touch table scrolling */
+.table-responsive {
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-modern {
+  min-width: 600px;
+}
+
+/* Horizontal scrollable filter pills for small viewports */
+.filter-pills-scroll {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  padding-bottom: 2px;
+}
+
+.filter-pills-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.filter-pills-scroll::-webkit-scrollbar-thumb {
+  background: var(--st-border);
+  border-radius: 4px;
+}
+
+.filter-pills-scroll > * {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+  /* Prevent automatic mobile browser zoom when tapping inputs */
+  input[type="text"],
+  input[type="search"],
+  input[type="password"],
+  input[type="email"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea,
+  .form-control,
+  .form-select {
+    font-size: 15px !important;
+  }
+
+  /* Responsive header actions on mobile */
+  .page-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .page-header-actions > * {
+    flex: 1 1 auto;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .btn-primary-blue,
+  .btn-outline-blue,
+  .btn-teal {
+    padding: 0.55rem 0.95rem;
+    font-size: 0.85rem;
+  }
+
+  /* Modal responsive improvements */
+  .modal-dialog {
+    margin: 0.5rem auto !important;
+    width: calc(100% - 1rem) !important;
+    max-width: 100% !important;
+  }
+
+  .modal-content {
+    border-radius: 14px !important;
+  }
+}
 
 @media (max-width: 575.98px) {
   .st-card {
-    padding: 1.1rem;
+    padding: 1rem;
     border-radius: 14px;
   }
+
   .stat-number {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
   }
+
   .public-hero {
-    padding: 2.75rem 0 3.5rem;
+    padding: 2.25rem 0 3rem;
+  }
+
+  .btn-mobile-full {
+    width: 100% !important;
+    justify-content: center !important;
   }
 }
 

@@ -48,8 +48,8 @@ const statsTuntas = computed(() => props.letters.data.filter(l => l.status === '
                 <p class="text-muted mb-0 small">Arahan disposisi Sekretaris Jenderal kepada unit kerja dan pejabat pelaksana.</p>
             </div>
 
-            <div class="d-flex align-items-center gap-2">
-                <Link href="/disposisi/create" class="btn btn-sm btn-primary-blue shadow-sm">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <Link href="/disposisi/create" class="btn btn-sm btn-primary-blue shadow-sm flex-grow-1 flex-md-grow-0 d-flex align-items-center justify-content-center">
                     <i class="bi bi-plus-lg me-1"></i> Input Surat Disposisi
                 </Link>
             </div>
@@ -57,19 +57,19 @@ const statsTuntas = computed(() => props.letters.data.filter(l => l.status === '
 
         <!-- Stats Bar (Figma Model) -->
         <div class="row g-3 mb-4">
-            <div class="col-md-4">
+            <div class="col-12 col-sm-4">
                 <div class="bg-white rounded-3 border p-3 shadow-xs">
                     <div class="fs-4 fw-bold text-dark font-display">{{ statsTotal }}</div>
                     <div class="small text-muted">Total Disposisi</div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-6 col-sm-4">
                 <div class="bg-white rounded-3 border p-3 shadow-xs" style="border-left: 4px solid #f59e0b !important;">
                     <div class="fs-4 fw-bold text-warning font-display">{{ statsProses }}</div>
                     <div class="small text-muted">Dalam Proses</div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-6 col-sm-4">
                 <div class="bg-white rounded-3 border p-3 shadow-xs" style="border-left: 4px solid #10b981 !important;">
                     <div class="fs-4 fw-bold text-success font-display">{{ statsTuntas }}</div>
                     <div class="small text-muted">Tuntas / Selesai</div>
@@ -79,8 +79,8 @@ const statsTuntas = computed(() => props.letters.data.filter(l => l.status === '
 
         <!-- Filter Panel -->
         <div class="st-card p-3 mb-4">
-            <div class="row g-3 align-items-center">
-                <div class="col-md-5">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-md-5">
                     <label class="form-label small fw-bold mb-1">Cari Surat</label>
                     <input
                         v-model="search"
@@ -90,7 +90,7 @@ const statsTuntas = computed(() => props.letters.data.filter(l => l.status === '
                         @keyup.enter="handleFilter"
                     />
                 </div>
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                     <label class="form-label small fw-bold mb-1">Sumber Surat</label>
                     <SearchableSelect
                         v-model="sourceFilter"
@@ -104,7 +104,7 @@ const statsTuntas = computed(() => props.letters.data.filter(l => l.status === '
                         @update:model-value="handleFilter"
                     />
                 </div>
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                     <label class="form-label small fw-bold mb-1">Status Lajur</label>
                     <SearchableSelect
                         v-model="statusFilter"
@@ -117,8 +117,8 @@ const statsTuntas = computed(() => props.letters.data.filter(l => l.status === '
                         @update:model-value="handleFilter"
                     />
                 </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button class="btn btn-primary-blue w-100 py-2 rounded-2" type="button" @click="handleFilter">
+                <div class="col-12 col-md-1">
+                    <button class="btn btn-primary-blue w-100 py-2 rounded-2 d-flex align-items-center justify-content-center" type="button" @click="handleFilter">
                         <i class="bi bi-search"></i>
                     </button>
                 </div>

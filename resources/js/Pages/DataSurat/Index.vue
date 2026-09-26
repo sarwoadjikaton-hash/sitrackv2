@@ -348,20 +348,20 @@ const switchToEdit = () => {
                     <p class="text-muted small mb-0">Buku register penomoran naskah dinas — Rekap {{ selectedYear }}</p>
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <button @click="openCreateModal" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 text-white fw-semibold small border-0 shadow-xs transition" style="background: #2743AF;">
+                    <button @click="openCreateModal" class="d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 text-white fw-semibold small border-0 shadow-xs transition flex-grow-1 flex-sm-grow-0" style="background: #2743AF;">
                         <i class="bi bi-plus-lg"></i>
                         <span>Input Data Surat</span>
                     </button>
-                    <button @click="openImportModal" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light">
+                    <button @click="openImportModal" class="d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light flex-grow-1 flex-sm-grow-0">
                         <i class="bi bi-upload text-primary"></i>
                         <span>Import Excel</span>
                     </button>
-                    <div class="dropdown">
-                        <button type="button" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light dropdown-toggle" data-bs-toggle="dropdown">
+                    <div class="dropdown flex-grow-1 flex-sm-grow-0">
+                        <button type="button" class="w-100 d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light dropdown-toggle" data-bs-toggle="dropdown">
                             <i class="bi bi-download text-success"></i>
                             <span>Export</span>
                         </button>
-                        <ul class="dropdown-menu shadow-sm border-slate-200">
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-slate-200">
                             <li><a class="dropdown-item py-2 small" href="#" @click.prevent="printData"><i class="bi bi-file-earmark-pdf text-danger me-2"></i> Cetak PDF</a></li>
                             <li><a class="dropdown-item py-2 small" href="#" @click.prevent="exportExcel"><i class="bi bi-file-earmark-excel text-success me-2"></i> Unduh Excel (CSV)</a></li>
                         </ul>
@@ -385,7 +385,7 @@ const switchToEdit = () => {
             <div class="bg-white rounded-4 border border-slate-200 shadow-sm p-3 p-sm-4 no-print">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                     <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center flex-grow-1">
-                        <div style="min-width: 220px;">
+                        <div style="min-width: 200px;">
                             <label class="d-block small fw-bold text-muted mb-1">Filter Workbook</label>
                             <SearchableSelect
                                 v-model="currentWorkbookId"
@@ -415,16 +415,16 @@ const switchToEdit = () => {
                     </div>
 
                     <!-- Mini stats inline (Figma Model) -->
-                    <div class="d-flex gap-2 align-items-end">
-                        <div class="rounded-3 border px-3 py-2 text-center" style="background-color: #f8fafc; border-color: #e2e8f0; min-width: 85px;">
+                    <div class="d-flex gap-2 align-items-end flex-wrap flex-sm-nowrap">
+                        <div class="rounded-3 border px-3 py-2 text-center flex-grow-1 flex-sm-grow-0" style="background-color: #f8fafc; border-color: #e2e8f0; min-width: 80px;">
                             <div class="fs-5 fw-bold font-display text-muted">{{ stats.used }}</div>
                             <div class="small text-muted" style="font-size: 0.72rem;">Terpakai</div>
                         </div>
-                        <div class="rounded-3 border px-3 py-2 text-center" style="background-color: #f0f9ff; border-color: #e0f2fe; min-width: 85px;">
+                        <div class="rounded-3 border px-3 py-2 text-center flex-grow-1 flex-sm-grow-0" style="background-color: #f0f9ff; border-color: #e0f2fe; min-width: 80px;">
                             <div class="fs-5 fw-bold font-display" style="color: #0369a1;">{{ stats.available }}</div>
                             <div class="small text-muted" style="font-size: 0.72rem;">Tersedia</div>
                         </div>
-                        <div class="rounded-3 border px-3 py-2 text-center" style="background-color: #fffbeb; border-color: #fef3c7; min-width: 85px;">
+                        <div class="rounded-3 border px-3 py-2 text-center flex-grow-1 flex-sm-grow-0" style="background-color: #fffbeb; border-color: #fef3c7; min-width: 80px;">
                             <div class="fs-5 fw-bold font-display" style="color: #b45309;">{{ stats.reserved }}</div>
                             <div class="small text-muted" style="font-size: 0.72rem;">Reservasi</div>
                         </div>
