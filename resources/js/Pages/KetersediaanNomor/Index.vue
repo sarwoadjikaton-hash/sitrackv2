@@ -679,7 +679,8 @@ const formatDateIndo = (dateStr?: string | null) => {
             </div>
 
             <!-- TABEL 4 KOLOM UTAMA: TANGGAL SURAT, NOMOR URUT, PERIHAL SURAT, UNIT -->
-            <div v-if="viewMode === 'table'" class="table-responsive">
+            <!-- Desktop Table View (>= md) -->
+            <div v-if="viewMode === 'table'" class="d-none d-md-block table-responsive">
                 <table class="table table-hover align-middle mb-0 table-modern">
                     <thead class="table-light">
                         <tr>
@@ -800,6 +801,68 @@ const formatDateIndo = (dateStr?: string | null) => {
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Mobile Card View (< md) -->
+            <div v-if="viewMode === 'table'" class="d-block d-md-none">
+                <div
+                    v-for="num in filteredNumbers"
+                    :key="'mob-kn-' + num.id"
+                    class="p-3 border-bottom bg-white cursor-pointer hover:bg-slate-50 transition"
+                    :class="{ 'bg-primary-subtle': isSelected(num.id) }"
+                    @click="openNumberDetail(num)"
+                >
+                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <input
+                                v-if="selectionMode"
+                                type="checkbox"
+                                class="form-check-input mt-0"
+                                :checked="isSelected(num.id)"
+                                @click.stop
+                                @change="toggleSelectNumber(num)"
+                            />
+                            <span class="badge bg-light text-dark border font-monospace fs-6 px-2.5 py-1">
+                                {{ String(num.sequence_number).padStart(activeType?.sequence_padding || 4, '0') }}
+                            </span>
+                        </div>
+                        <span
+                            class="badge px-2.5 py-1 rounded-pill"
+                            :class="{
+                                'bg-success text-white': num.status === 'available',
+                                'bg-danger text-white': num.status === 'used',
+                                'bg-info text-white': num.status === 'preorder',
+                                'bg-warning text-dark': num.status === 'reserved',
+                            }"
+                        >
+                            {{ statusLabel(num.status) }}
+                        </span>
+                    </div>
+
+                    <div class="mb-2">
+                        <div class="fw-bold text-dark mb-1 leading-snug">
+                            {{ num.subject || num.reserved_for || (num.status === 'available' ? 'Slot Nomor Tersedia' : 'Tanpa Perihal') }}
+                        </div>
+                        <div v-if="num.number_text" class="small text-muted font-monospace text-truncate">
+                            {{ num.number_text }}
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between text-muted small pt-1 border-top border-slate-100 flex-wrap gap-1">
+                        <span class="text-truncate" style="max-width: 200px;">
+                            <i class="bi bi-building me-1"></i>
+                            {{ num.unit?.unit_name || num.processing_unit_text || '-' }}
+                        </span>
+                        <span>
+                            <i class="bi bi-calendar3 me-1"></i>
+                            {{ formatDateIndo(num.letter_date) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div v-if="filteredNumbers.length === 0" class="text-center py-5 text-muted p-3">
+                    Tidak ada data nomor surat yang cocok.
+                </div>
             </div>
 
             <!-- GRID VIEW (ALTERNATIVE) -->

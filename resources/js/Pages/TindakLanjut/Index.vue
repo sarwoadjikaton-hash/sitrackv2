@@ -233,7 +233,9 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                         />
                     </div>
                 </div>
-            <div class="table-responsive">
+
+            <!-- Desktop Table View (>= md) -->
+            <div class="d-none d-md-block table-responsive">
                 <table class="table-modern">
                     <thead>
                         <tr>
@@ -255,22 +257,18 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                                 </template>
                                 <template v-else>
                                     <div class="fw-bold text-primary">{{ letter.agenda_number || '-' }}</div>
-                                    <span class="badge bg-light text-dark font-monospace border">{{ letter.tracking_code
-                                        }}</span>
+                                    <span class="badge bg-light text-dark font-monospace border">{{ letter.tracking_code }}</span>
                                 </template>
                             </td>
                             <td>
-                                <div class="fw-bold text-dark text-truncate" style="max-width: 260px;"
-                                    :title="letter.subject">
+                                <div class="fw-bold text-dark text-truncate" style="max-width: 260px;" :title="letter.subject">
                                     {{ letter.subject }}
                                 </div>
-                                <small class="text-muted d-block">No: {{ letter.letter_number || '(Belum ada nomor)'
-                                    }}</small>
+                                <small class="text-muted d-block">No: {{ letter.letter_number || '(Belum ada nomor)' }}</small>
                             </td>
                             <td>
                                 <div class="fw-semibold text-dark">{{ letter.sender_unit || letter.sender_name }}</div>
-                                <small class="text-muted">&rarr; {{ letter.recipient_unit?.unit_name || letter.destination || 'Tata Usaha'
-                                    }}</small>
+                                <small class="text-muted">&rarr; {{ letter.recipient_unit?.unit_name || letter.destination || 'Tata Usaha' }}</small>
                             </td>
                             <td>
                                 <span class="badge bg-primary-subtle text-primary fw-semibold px-2 py-1">
@@ -318,7 +316,77 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                 </table>
             </div>
 
-            <div class="p-3 border-top d-flex justify-content-between align-items-center">
+            <!-- Mobile Card View (< md) -->
+            <div class="d-block d-md-none">
+                <div v-for="letter in letters.data" :key="'mob-' + letter.id" class="p-3 border-bottom bg-white">
+                    <!-- Top row: Agenda & Status -->
+                    <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                        <div>
+                            <template v-if="letter.letter_source === 'SRIKANDI'">
+                                <span class="badge bg-info-subtle text-info fw-bold px-2 py-1">
+                                    <i class="bi bi-cloud-check-fill me-1"></i>SRIKANDI
+                                </span>
+                            </template>
+                            <template v-else>
+                                <div class="fw-bold text-primary fs-6">{{ letter.agenda_number || '-' }}</div>
+                                <span class="badge bg-light text-dark font-monospace border mt-0.5">{{ letter.tracking_code }}</span>
+                            </template>
+                        </div>
+                        <StatusBadge :status="letter.status" />
+                    </div>
+
+                    <!-- Subject & Letter Number -->
+                    <div class="mb-2">
+                        <div class="fw-bold text-dark mb-1 leading-snug">{{ letter.subject }}</div>
+                        <div class="small text-muted font-monospace">No: {{ letter.letter_number || '(Belum ada nomor)' }}</div>
+                    </div>
+
+                    <!-- Meta info box -->
+                    <div class="bg-light rounded-3 p-2.5 mb-2.5 small text-secondary">
+                        <div class="d-flex align-items-center gap-1.5 mb-1.5 text-truncate">
+                            <i class="bi bi-send text-muted flex-shrink-0"></i>
+                            <span class="fw-semibold text-dark text-truncate">{{ letter.sender_unit || letter.sender_name }}</span>
+                            <span class="text-muted">&rarr;</span>
+                            <span class="text-truncate">{{ letter.recipient_unit?.unit_name || letter.destination || 'Tata Usaha' }}</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                            <div class="d-flex align-items-center gap-1.5">
+                                <i class="bi bi-geo-alt text-primary flex-shrink-0"></i>
+                                <span class="fw-medium text-dark">{{ letter.current_position }}</span>
+                            </div>
+                            <div v-if="letter.requested_actions" class="text-truncate text-muted" style="max-width: 180px;">
+                                <i class="bi bi-check2-square text-primary me-1"></i>{{ letter.requested_actions }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions Row -->
+                    <div class="d-flex align-items-center justify-content-end gap-1.5 flex-wrap">
+                        <button v-if="letter.letter_source !== 'SRIKANDI'" type="button"
+                            class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 px-2.5 py-1.5 flex-grow-1 justify-content-center"
+                            @click="openStatusModal(letter)">
+                            <i class="bi bi-arrow-repeat"></i>
+                            <span class="small fw-semibold">Update Status</span>
+                        </button>
+                        <Link :href="`/cetak/pendamping/${letter.id}`" class="btn btn-sm btn-outline-secondary p-1.5 px-2.5" title="Cetak Lembar Pendamping" target="_blank">
+                            <i class="bi bi-printer"></i>
+                        </Link>
+                        <Link :href="`/tindak-lanjut/${letter.id}/edit`" class="btn btn-sm btn-outline-secondary p-1.5 px-2.5" title="Ubah Detail">
+                            <i class="bi bi-pencil-square"></i>
+                        </Link>
+                        <button type="button" class="btn btn-sm btn-outline-danger p-1.5 px-2.5" title="Hapus Surat" @click="deleteLetter(letter.id)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div v-if="letters.data.length === 0" class="text-center py-5 text-muted p-3">
+                    Belum ada berkas pada lajur tindak lanjut / penandatanganan sesuai filter yang dipilih.
+                </div>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div class="p-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 text-center text-sm-start">
                 <small class="text-muted">
                     Menampilkan {{ letters.data.length }} dari total {{ letters.total }} dokumen
                 </small>

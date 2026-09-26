@@ -125,9 +125,10 @@ const statsTuntas = computed(() => props.letters.data.filter(l => l.status === '
             </div>
         </div>
 
-        <!-- Table -->
+        <!-- Table & Mobile Card View -->
         <div class="st-card p-0 overflow-hidden">
-            <div class="table-responsive">
+            <!-- Desktop Table View (>= md) -->
+            <div class="d-none d-md-block table-responsive">
                 <table class="table-modern">
                     <thead>
                         <tr>
@@ -192,7 +193,52 @@ const statsTuntas = computed(() => props.letters.data.filter(l => l.status === '
                 </table>
             </div>
 
-            <div class="p-3 border-top d-flex justify-content-between align-items-center">
+            <!-- Mobile Card View (< md) -->
+            <div class="d-block d-md-none">
+                <div v-for="letter in letters.data" :key="'mob-disp-' + letter.id" class="p-3 border-bottom bg-white">
+                    <!-- Top: Agenda & Status -->
+                    <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                        <div>
+                            <div class="fw-bold text-primary fs-6">{{ letter.agenda_number || '-' }}</div>
+                            <span class="badge bg-light text-dark font-monospace border mt-0.5">{{ letter.tracking_code }}</span>
+                        </div>
+                        <StatusBadge :status="letter.status" />
+                    </div>
+
+                    <!-- Subject & No Surat -->
+                    <div class="mb-2">
+                        <div class="fw-bold text-dark mb-1 leading-snug">{{ letter.subject }}</div>
+                        <small class="text-muted d-block font-monospace">No: {{ letter.letter_number || '-' }}</small>
+                    </div>
+
+                    <!-- Meta info box -->
+                    <div class="bg-light rounded-3 p-2.5 mb-2.5 small text-secondary">
+                        <div class="d-flex align-items-center justify-content-between gap-2 mb-1.5 flex-wrap">
+                            <span class="fw-semibold text-dark text-truncate" style="max-width: 220px;">{{ letter.sender_unit || letter.sender_name }}</span>
+                            <span class="badge px-2 py-0.5 font-monospace" :class="letter.letter_source === 'SRIKANDI' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary'">{{ letter.letter_source }}</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                            <span class="badge bg-primary-subtle text-primary fw-bold px-2 py-1"><i class="bi bi-diagram-2 me-1"></i>{{ letter.dispositions_count || 0 }} Arahan</span>
+                            <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-geo-alt me-1 text-primary"></i>{{ letter.current_position }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div>
+                        <Link :href="`/disposisi/${letter.id}`" class="btn btn-sm btn-outline-blue w-100 text-center d-flex align-items-center justify-content-center gap-1.5 py-1.5">
+                            <i class="bi bi-folder2-open"></i>
+                            <span>Detail &amp; Arahan</span>
+                        </Link>
+                    </div>
+                </div>
+
+                <div v-if="letters.data.length === 0" class="text-center py-5 text-muted p-3">
+                    Belum ada berkas pada lajur disposisi.
+                </div>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div class="p-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 text-center text-sm-start">
                 <small class="text-muted">
                     Menampilkan {{ letters.data.length }} dari total {{ letters.total }} dokumen
                 </small>

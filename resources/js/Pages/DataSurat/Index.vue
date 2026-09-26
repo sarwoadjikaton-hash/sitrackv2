@@ -434,7 +434,8 @@ const switchToEdit = () => {
 
             <!-- Data Table Card (Figma Prototype Model) -->
             <div class="bg-white rounded-4 border border-slate-200 shadow-sm overflow-hidden">
-            <div class="table-responsive">
+            <!-- Desktop Table View (>= md) -->
+            <div class="d-none d-md-block table-responsive">
                 <table class="table-modern">
                     <thead>
                         <tr>
@@ -490,8 +491,47 @@ const switchToEdit = () => {
                 </table>
             </div>
 
+            <!-- Mobile Card View (< md) -->
+            <div class="d-block d-md-none no-print">
+                <div v-for="record in displayRecords" :key="'mob-ds-' + record.id" class="p-3 border-bottom bg-white">
+                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                        <span class="badge bg-primary-subtle text-primary font-monospace px-2.5 py-1 fs-6">
+                            #{{ String(record.sequence_number).padStart(record.type?.sequence_padding || 4, '0') }}
+                        </span>
+                        <div class="small text-muted d-flex align-items-center gap-1">
+                            <i class="bi bi-calendar3"></i>
+                            <span>{{ record.letter_date ? new Date(record.letter_date).toLocaleDateString('id-ID') : '-' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <div class="fw-bold text-dark mb-1 leading-snug">{{ record.subject || '(Tanpa Perihal)' }}</div>
+                        <div class="small font-monospace text-primary fw-semibold">{{ record.number_text || '-' }}</div>
+                    </div>
+
+                    <div class="bg-light rounded-3 p-2.5 mb-2.5 small text-secondary">
+                        <div class="mb-1 text-truncate"><span class="text-muted">Unit:</span> <strong class="text-dark">{{ record.processing_unit_text || '-' }}</strong></div>
+                        <div class="text-truncate"><span class="text-muted">Tujuan:</span> <span class="text-dark">{{ record.destination || '-' }}</span></div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-end gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center gap-1.5 px-3 py-1.5 flex-grow-1" @click="openViewModal(record)">
+                            <i class="bi bi-eye"></i>
+                            <span>Detail</span>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary p-1.5 px-3" title="Edit" @click="openEditModal(record)">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div v-if="displayRecords.length === 0" class="text-center py-5 text-muted p-3">
+                    Belum ada data surat.
+                </div>
+            </div>
+
             <!-- Pagination -->
-            <div class="p-3 border-top d-flex justify-content-between align-items-center no-print" v-if="!isPrintMode">
+            <div class="p-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 text-center text-sm-start no-print" v-if="!isPrintMode">
                 <small class="text-muted">Menampilkan {{ (props.records as any)?.data?.length || 0 }} dari {{
                     (props.records as any)?.total || 0 }} data</small>
                 <Pagination v-if="(props.records as any)?.links" :links="(props.records as any).links" />
