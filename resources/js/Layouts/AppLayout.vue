@@ -6,7 +6,7 @@ import { computed, ref, onMounted, onUnmounted } from 'vue';
 import ToastNotification from '@/Components/ToastNotification.vue';
 import type { PageProps } from '@/types';
 
-defineProps<{
+const props = defineProps<{
     title?: string;
 }>();
 
@@ -27,6 +27,18 @@ const isSidebarCollapsed = ref(
 const toggleSidebarCollapse = () => {
     isSidebarCollapsed.value = !isSidebarCollapsed.value;
     localStorage.setItem('sitrack:sidebar-collapsed', isSidebarCollapsed.value ? '1' : '0');
+};
+
+const expandedGroups = ref<Set<string>>(
+    new Set(['Menu Utama', 'Penomoran Surat', 'Tindak Lanjut / TTD', 'Lajur Disposisi', 'Master Data'])
+);
+
+const toggleGroup = (title: string) => {
+    if (expandedGroups.value.has(title)) {
+        expandedGroups.value.delete(title);
+    } else {
+        expandedGroups.value.add(title);
+    }
 };
 
 const logout = () => router.post('/logout');
@@ -155,6 +167,24 @@ const roleLabel = computed(() => {
 const currentUrl = computed(() => page.url);
 const isActive = (path: string, exact = false) =>
     exact ? currentUrl.value === path : currentUrl.value.startsWith(path);
+
+const breadcrumb = computed(() => {
+    const url = currentUrl.value;
+    if (url.startsWith('/dashboard')) return { group: 'Menu Utama', page: 'Dashboard' };
+    if (url.startsWith('/ketersediaan-nomor')) return { group: 'Penomoran Surat', page: 'Ketersediaan Nomor' };
+    if (url.startsWith('/tindak-lanjut')) return { group: 'Tindak Lanjut / TTD', page: 'Data Tindak Lanjut' };
+    if (url.startsWith('/data-surat')) return { group: 'Tindak Lanjut / TTD', page: 'Laporan Data Surat' };
+    if (url.startsWith('/disposisi/create')) return { group: 'Lajur Disposisi', page: 'Input Disposisi' };
+    if (url.startsWith('/disposisi')) return { group: 'Lajur Disposisi', page: 'Lajur Disposisi' };
+    if (url.startsWith('/scan-status') || url.startsWith('/scan-qr')) return { group: 'Layanan', page: 'Scan & Update Status' };
+    if (url.startsWith('/master/units')) return { group: 'Master Data', page: 'Unit Kerja' };
+    if (url.startsWith('/master/number-types')) return { group: 'Master Data', page: 'Jenis Naskah' };
+    if (url.startsWith('/master/categories')) return { group: 'Master Data', page: 'Kategori Surat' };
+    if (url.startsWith('/master/users')) return { group: 'Master Data', page: 'User & Akses' };
+    if (url.startsWith('/alur-status')) return { group: 'Master Data', page: 'Alur Status' };
+    if (url.startsWith('/master/rekap')) return { group: 'Master Data', page: 'Rekap Master' };
+    return { group: 'Menu Utama', page: props.title || 'Dashboard' };
+});
 </script>
 
 <template>
@@ -194,102 +224,131 @@ const isActive = (path: string, exact = false) =>
 
                 <!-- Quick Action Button -->
                 <div class="sidebar-quick-action px-3 mb-2">
-                    <Link href="/scan-status" class="sidebar-scan-btn" @click="closeMobileNav" data-tooltip="Scan & Update Status">
+                    <Link href="/scan-status" class="sidebar-scan-btn" :class="{ active: isActive('/scan-status') || isActive('/scan-qr') }" @click="closeMobileNav" data-tooltip="Scan & Update Status">
                         <i class="bi bi-qr-code-scan"></i>
                         <span class="nav-label">Scan &amp; Update Status</span>
                     </Link>
                 </div>
 
                 <div class="sidebar-scroll">
-                    <div class="sidebar-caption">Menu Utama</div>
-                    <nav class="sidebar-nav">
-                        <Link href="/dashboard" class="nav-link-item" :class="{ active: isActive('/dashboard') }"
-                            @click="closeMobileNav" data-tooltip="Dashboard">
-                            <i class="bi bi-grid-1x2-fill"></i>
-                            <span class="nav-label">Dashboard</span>
-                        </Link>
-                    </nav>
-
-                    <template v-if="!isSekjen">
-                        <div class="sidebar-caption">Penomoran Surat</div>
-                        <nav class="sidebar-nav">
-                            <Link href="/ketersediaan-nomor" class="nav-link-item"
-                                :class="{ active: isActive('/ketersediaan-nomor') }" @click="closeMobileNav"
-                                data-tooltip="Ketersediaan Nomor">
-                                <i class="bi bi-hash"></i>
-                                <span class="nav-label">Ketersediaan Nomor</span>
+                    <!-- Menu Utama -->
+                    <div class="sidebar-group-item">
+                        <button type="button" class="sidebar-caption-btn" @click="toggleGroup('Menu Utama')">
+                            <span>Menu Utama</span>
+                            <i class="bi bi-chevron-down group-chevron" :class="{ 'rotate-minus-90': !expandedGroups.has('Menu Utama') }"></i>
+                        </button>
+                        <div v-show="expandedGroups.has('Menu Utama')" class="sidebar-nav">
+                            <Link href="/dashboard" class="nav-link-item" :class="{ active: isActive('/dashboard') }"
+                                @click="closeMobileNav" data-tooltip="Dashboard">
+                                <i class="bi bi-grid-1x2-fill"></i>
+                                <span class="nav-label">Dashboard</span>
                             </Link>
-                        </nav>
+                        </div>
+                    </div>
+
+                    <!-- Penomoran Surat -->
+                    <template v-if="!isSekjen">
+                        <div class="sidebar-group-item">
+                            <button type="button" class="sidebar-caption-btn" @click="toggleGroup('Penomoran Surat')">
+                                <span>Penomoran Surat</span>
+                                <i class="bi bi-chevron-down group-chevron" :class="{ 'rotate-minus-90': !expandedGroups.has('Penomoran Surat') }"></i>
+                            </button>
+                            <div v-show="expandedGroups.has('Penomoran Surat')" class="sidebar-nav">
+                                <Link href="/ketersediaan-nomor" class="nav-link-item"
+                                    :class="{ active: isActive('/ketersediaan-nomor') }" @click="closeMobileNav"
+                                    data-tooltip="Ketersediaan Nomor">
+                                    <i class="bi bi-hash"></i>
+                                    <span class="nav-label">Ketersediaan Nomor</span>
+                                </Link>
+                            </div>
+                        </div>
                     </template>
 
+                    <!-- Tindak Lanjut / TTD -->
                     <template v-if="!isSekjen">
-                        <div class="sidebar-caption">Tindak Lanjut / TTD</div>
-                        <nav class="sidebar-nav">
-                            <Link href="/tindak-lanjut" class="nav-link-item"
-                                :class="{ active: isActive('/tindak-lanjut') && !isActive('/tindak-lanjut/create', true) }" @click="closeMobileNav"
-                                data-tooltip="Data Tindak Lanjut">
-                                <i class="bi bi-list-task"></i>
-                                <span class="nav-label">Data Tindak Lanjut</span>
-                            </Link>
-                            <Link href="/data-surat" class="nav-link-item" :class="{ active: isActive('/data-surat') }"
-                                @click="closeMobileNav" data-tooltip="Laporan Data Surat">
-                                <i class="bi bi-table"></i>
-                                <span class="nav-label">Laporan Data Surat</span>
-                            </Link>
-                        </nav>
+                        <div class="sidebar-group-item">
+                            <button type="button" class="sidebar-caption-btn" @click="toggleGroup('Tindak Lanjut / TTD')">
+                                <span>Tindak Lanjut / TTD</span>
+                                <i class="bi bi-chevron-down group-chevron" :class="{ 'rotate-minus-90': !expandedGroups.has('Tindak Lanjut / TTD') }"></i>
+                            </button>
+                            <div v-show="expandedGroups.has('Tindak Lanjut / TTD')" class="sidebar-nav">
+                                <Link href="/tindak-lanjut" class="nav-link-item"
+                                    :class="{ active: isActive('/tindak-lanjut') && !isActive('/tindak-lanjut/create', true) }" @click="closeMobileNav"
+                                    data-tooltip="Data Tindak Lanjut">
+                                    <i class="bi bi-list-task"></i>
+                                    <span class="nav-label">Data Tindak Lanjut</span>
+                                </Link>
+                                <Link href="/data-surat" class="nav-link-item" :class="{ active: isActive('/data-surat') }"
+                                    @click="closeMobileNav" data-tooltip="Laporan Data Surat">
+                                    <i class="bi bi-book"></i>
+                                    <span class="nav-label">Laporan Data Surat</span>
+                                </Link>
+                            </div>
+                        </div>
                     </template>
 
-                    <div class="sidebar-caption">Lajur Disposisi</div>
-                    <nav class="sidebar-nav">
-                        <Link v-if="!isSekjen" href="/disposisi/create" class="nav-link-item"
-                            :class="{ active: isActive('/disposisi/create', true) }" @click="closeMobileNav"
-                            data-tooltip="Input Disposisi">
-                            <i class="bi bi-send"></i>
-                            <span class="nav-label">Input Disposisi</span>
-                        </Link>
-                        <Link href="/disposisi" class="nav-link-item"
-                            :class="{ active: isActive('/disposisi') && !isActive('/disposisi/create', true) }"
-                            @click="closeMobileNav" data-tooltip="Lajur Disposisi">
-                            <i class="bi bi-send-fill"></i>
-                            <span class="nav-label">Lajur Disposisi</span>
-                        </Link>
-                    </nav>
+                    <!-- Lajur Disposisi -->
+                    <div class="sidebar-group-item">
+                        <button type="button" class="sidebar-caption-btn" @click="toggleGroup('Lajur Disposisi')">
+                            <span>Lajur Disposisi</span>
+                            <i class="bi bi-chevron-down group-chevron" :class="{ 'rotate-minus-90': !expandedGroups.has('Lajur Disposisi') }"></i>
+                        </button>
+                        <div v-show="expandedGroups.has('Lajur Disposisi')" class="sidebar-nav">
+                            <Link v-if="!isSekjen" href="/disposisi/create" class="nav-link-item"
+                                :class="{ active: isActive('/disposisi/create', true) }" @click="closeMobileNav"
+                                data-tooltip="Input Disposisi">
+                                <i class="bi bi-envelope"></i>
+                                <span class="nav-label">Input Disposisi</span>
+                            </Link>
+                            <Link href="/disposisi" class="nav-link-item"
+                                :class="{ active: isActive('/disposisi') && !isActive('/disposisi/create', true) }"
+                                @click="closeMobileNav" data-tooltip="Lajur Disposisi">
+                                <i class="bi bi-send-fill"></i>
+                                <span class="nav-label">Lajur Disposisi</span>
+                            </Link>
+                        </div>
+                    </div>
 
+                    <!-- Master Data -->
                     <template v-if="isSuperAdmin">
-                        <div class="sidebar-caption">Master Data</div>
-                        <nav class="sidebar-nav">
-                            <Link href="/master/units" class="nav-link-item"
-                                :class="{ active: isActive('/master/units') }" @click="closeMobileNav"
-                                data-tooltip="Unit Kerja">
-                                <i class="bi bi-building"></i> <span class="nav-label">Unit Kerja</span>
-                            </Link>
-                            <Link href="/master/number-types" class="nav-link-item"
-                                :class="{ active: isActive('/master/number-types') }" @click="closeMobileNav"
-                                data-tooltip="Jenis Naskah">
-                                <i class="bi bi-file-code"></i> <span class="nav-label">Jenis Naskah</span>
-                            </Link>
-                            <Link href="/master/categories" class="nav-link-item"
-                                :class="{ active: isActive('/master/categories') }" @click="closeMobileNav"
-                                data-tooltip="Kategori Surat">
-                                <i class="bi bi-tags-fill"></i> <span class="nav-label">Kategori Surat</span>
-                            </Link>
-                            <Link href="/master/users" class="nav-link-item"
-                                :class="{ active: isActive('/master/users') }" @click="closeMobileNav"
-                                data-tooltip="User & Akses">
-                                <i class="bi bi-person-gear"></i> <span class="nav-label">User &amp; Akses</span>
-                            </Link>
-                            <Link href="/alur-status" class="nav-link-item"
-                                :class="{ active: isActive('/alur-status', true) }" @click="closeMobileNav"
-                                data-tooltip="Alur Status">
-                                <i class="bi bi-bezier2"></i> <span class="nav-label">Alur Status</span>
-                            </Link>
-                            <Link href="/master/rekap" class="nav-link-item"
-                                :class="{ active: isActive('/master/rekap') }" @click="closeMobileNav"
-                                data-tooltip="Rekap Master">
-                                <i class="bi bi-file-earmark-spreadsheet"></i> <span class="nav-label">Rekap
-                                    Master</span>
-                            </Link>
-                        </nav>
+                        <div class="sidebar-group-item">
+                            <button type="button" class="sidebar-caption-btn" @click="toggleGroup('Master Data')">
+                                <span>Master Data</span>
+                                <i class="bi bi-chevron-down group-chevron" :class="{ 'rotate-minus-90': !expandedGroups.has('Master Data') }"></i>
+                            </button>
+                            <div v-show="expandedGroups.has('Master Data')" class="sidebar-nav">
+                                <Link href="/master/units" class="nav-link-item"
+                                    :class="{ active: isActive('/master/units') }" @click="closeMobileNav"
+                                    data-tooltip="Unit Kerja">
+                                    <i class="bi bi-building"></i> <span class="nav-label">Unit Kerja</span>
+                                </Link>
+                                <Link href="/master/number-types" class="nav-link-item"
+                                    :class="{ active: isActive('/master/number-types') }" @click="closeMobileNav"
+                                    data-tooltip="Jenis Naskah">
+                                    <i class="bi bi-tag"></i> <span class="nav-label">Jenis Naskah</span>
+                                </Link>
+                                <Link href="/master/categories" class="nav-link-item"
+                                    :class="{ active: isActive('/master/categories') }" @click="closeMobileNav"
+                                    data-tooltip="Kategori Surat">
+                                    <i class="bi bi-folder"></i> <span class="nav-label">Kategori Surat</span>
+                                </Link>
+                                <Link href="/master/users" class="nav-link-item"
+                                    :class="{ active: isActive('/master/users') }" @click="closeMobileNav"
+                                    data-tooltip="User & Akses">
+                                    <i class="bi bi-people"></i> <span class="nav-label">User &amp; Akses</span>
+                                </Link>
+                                <Link href="/alur-status" class="nav-link-item"
+                                    :class="{ active: isActive('/alur-status', true) }" @click="closeMobileNav"
+                                    data-tooltip="Alur Status">
+                                    <i class="bi bi-activity"></i> <span class="nav-label">Alur Status</span>
+                                </Link>
+                                <Link href="/master/rekap" class="nav-link-item"
+                                    :class="{ active: isActive('/master/rekap') }" @click="closeMobileNav"
+                                    data-tooltip="Rekap Master">
+                                    <i class="bi bi-bar-chart"></i> <span class="nav-label">Rekap Master</span>
+                                </Link>
+                            </div>
+                        </div>
                     </template>
                 </div>
 
@@ -309,7 +368,7 @@ const isActive = (path: string, exact = false) =>
                     <!-- Footer Action Links -->
                     <div class="sidebar-footer-links">
                         <button type="button" class="sidebar-footer-link-btn" @click="openPasswordModal" data-tooltip="Ganti Password">
-                            <i class="bi bi-key"></i>
+                            <i class="bi bi-lock"></i>
                             <span class="nav-label">Ganti Password</span>
                         </button>
                         <button type="button" class="sidebar-footer-link-btn" @click="logout" data-tooltip="Keluar">
@@ -333,7 +392,12 @@ const isActive = (path: string, exact = false) =>
                         <i class="bi bi-list"></i>
                     </button>
                     <div class="topbar-heading">
-                        <h2 class="topbar-title">{{ title || 'Dashboard' }}</h2>
+                        <div class="d-none d-sm-flex align-items-center gap-1.5 small">
+                            <span class="text-secondary">{{ breadcrumb.group }}</span>
+                            <span class="text-muted opacity-50">/</span>
+                            <span class="text-dark fw-bold font-display">{{ breadcrumb.page }}</span>
+                        </div>
+                        <h2 class="topbar-title d-sm-none">{{ title || 'Dashboard' }}</h2>
                     </div>
                 </div>
 
@@ -817,6 +881,41 @@ const isActive = (path: string, exact = false) =>
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0.5rem 0 1rem;
+}
+
+.sidebar-group-item {
+    margin-bottom: 0.35rem;
+}
+
+.sidebar-caption-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(147, 197, 253, 0.7);
+    padding: 0.45rem 0.85rem 0.25rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.15s ease;
+}
+
+.sidebar-caption-btn:hover {
+    color: #ffffff;
+}
+
+.group-chevron {
+    font-size: 10px;
+    transition: transform 0.2s ease;
+}
+
+.rotate-minus-90 {
+    transform: rotate(-90deg);
 }
 
 .sidebar-caption {
