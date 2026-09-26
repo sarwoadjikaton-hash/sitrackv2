@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import StatusBadge from '@/Components/StatusBadge.vue';
 import { Letter, Disposition, LetterNumberType, PageProps } from '@/types';
 import { computed } from 'vue';
 
@@ -18,12 +19,17 @@ const props = defineProps<{
 const page = usePage<PageProps>();
 const user = computed(() => page.props.auth.user);
 
-const greeting = computed(() => {
-    const hour = new Date().getHours();
-    if (hour < 11) return 'Selamat pagi';
-    if (hour < 15) return 'Selamat siang';
-    if (hour < 18) return 'Selamat sore';
+const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 11) return 'Selamat pagi';
+    if (h < 15) return 'Selamat siang';
+    if (h < 18) return 'Selamat sore';
     return 'Selamat malam';
+};
+
+const firstName = computed(() => {
+    const rawName = user.value?.name || user.value?.username || 'Dyah Permatasari';
+    return rawName.split(',')[0].split(' ').slice(-2).join(' ');
 });
 
 const todayDateFormatted = computed(() => {
@@ -35,256 +41,259 @@ const todayDateFormatted = computed(() => {
     }).format(new Date());
 });
 
-const getStatusBadgeStyle = (status: string) => {
-    const s = (status || '').toLowerCase();
-    if (s.includes('selesai') || s.includes('siap') || s.includes('diambil')) {
-        return {
-            bg: 'rgba(16, 185, 129, 0.12)',
-            color: '#059669',
-            dot: '#10b981'
-        };
+const isSekjen = computed(() => {
+    const r = user.value?.roles?.[0] || user.value?.role || '';
+    return r === 'sekjen' || r === 'Sekretaris Jenderal';
+});
+
+// Workbook preview list
+const workbookColors = ['#3DA5F9', '#10B981', '#F59E0B', '#8B5CF6', '#06B6D4', '#EC4899'];
+const previewWorkbooks = computed(() => {
+    if (!props.typesSummary || props.typesSummary.length === 0) {
+        return [
+            { id: 1, name: 'NODIN', available: 45, total: 247, color: '#3DA5F9' },
+            { id: 2, name: 'Surat Tugas', available: 60, total: 292, color: '#10B981' },
+            { id: 3, name: 'Undangan', available: 30, total: 130, color: '#F59E0B' },
+            { id: 4, name: 'SK', available: 20, total: 53, color: '#8B5CF6' },
+        ];
     }
-    if (s.includes('sekjen')) {
-        return {
-            bg: 'rgba(245, 158, 11, 0.12)',
-            color: '#d97706',
-            dot: '#f59e0b'
-        };
-    }
-    if (s.includes('kasubbag') || s.includes('kasubag')) {
-        return {
-            bg: 'rgba(139, 92, 246, 0.12)',
-            color: '#7c3aed',
-            dot: '#8b5cf6'
-        };
-    }
-    return {
-        bg: 'rgba(37, 99, 235, 0.12)',
-        color: '#2563eb',
-        dot: '#3b82f6'
-    };
-};
+    return props.typesSummary.slice(0, 4).map((t, idx) => ({
+        id: t.id,
+        name: t.workbook_name || t.type_name,
+        available: t.available_slots || 0,
+        total: (t.total_slots && t.total_slots > 0) ? t.total_slots : ((t.available_slots || 0) + (t.used_slots || 0) || 100),
+        color: workbookColors[idx % workbookColors.length]
+    }));
+});
 </script>
 
 <template>
     <AppLayout title="Dashboard">
         <Head title="Dashboard" />
 
-        <!-- Header Greeting & Actions (Figma Model: Clean on page canvas) -->
-        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4 pt-1">
-            <div>
-                <h2 class="fw-bold mb-1 text-dark" style="font-size: 1.65rem; letter-spacing: -0.02em;">
-                    {{ greeting }}, {{ user?.name || 'Dyah Permatasari' }} 👋
-                </h2>
-                <div class="d-flex align-items-center gap-2 text-muted small">
-                    <span>{{ todayDateFormatted }}</span>
-                    <span>&bull;</span>
-                    <span class="d-inline-flex align-items-center gap-1 text-success">
-                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span>
-                        Sistem berjalan normal
-                    </span>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <Link href="/tindak-lanjut/create" class="fg-btn-primary">
-                    <i class="bi bi-plus-lg"></i>
-                    <span>Surat Baru</span>
-                </Link>
-                <Link href="/disposisi/create" class="fg-btn-secondary">
-                    <i class="bi bi-send"></i>
-                    <span>Input Disposisi</span>
-                </Link>
-                <Link href="/scan-status" class="fg-btn-secondary">
-                    <i class="bi bi-qr-code-scan"></i>
-                    <span>Scan QR</span>
-                </Link>
-            </div>
-        </div>
-
-        <!-- 4 Stat Cards Grid (Figma Model) -->
-        <div class="row g-3 mb-4">
-            <!-- Card 1: Tindak Lanjut / TTD -->
-            <div class="col-md-6 col-xl-3">
-                <div class="fg-card h-100">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="fg-icon-box fg-icon-blue">
-                            <i class="bi bi-file-earmark-text-fill"></i>
-                        </div>
-                        <i class="bi bi-arrow-up-right fg-arrow-corner"></i>
-                    </div>
-                    <div class="fg-stat-num">{{ stats.signature.total }}</div>
-                    <div class="fg-stat-label">Tindak Lanjut / TTD</div>
-                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top small">
-                        <span class="text-warning-emphasis fw-medium">{{ stats.signature.in_progress }} Dalam Proses</span>
-                        <span class="text-success fw-medium">{{ stats.signature.completed }} Selesai</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 2: Lajur Disposisi -->
-            <div class="col-md-6 col-xl-3">
-                <div class="fg-card h-100">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="fg-icon-box fg-icon-purple">
-                            <i class="bi bi-send-fill"></i>
-                        </div>
-                        <i class="bi bi-arrow-up-right fg-arrow-corner"></i>
-                    </div>
-                    <div class="fg-stat-num">{{ stats.disposition.total }}</div>
-                    <div class="fg-stat-label">Lajur Disposisi</div>
-                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top small">
-                        <span class="text-warning-emphasis fw-medium">{{ stats.disposition.in_progress }} Dalam Proses</span>
-                        <span class="text-success fw-medium">{{ stats.disposition.completed }} Tuntas</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 3: Nomor Tersedia -->
-            <div class="col-md-6 col-xl-3">
-                <div class="fg-card h-100">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="fg-icon-box fg-icon-teal">
-                            <i class="bi bi-hash"></i>
-                        </div>
-                        <i class="bi bi-arrow-up-right fg-arrow-corner"></i>
-                    </div>
-                    <div class="fg-stat-num" style="color: var(--st-teal, #0d9488);">{{ stats.stock.available }}</div>
-                    <div class="fg-stat-label">Nomor Tersedia</div>
-                    <div class="mt-3 pt-2 border-top small text-muted">
-                        <span>Seluruh workbook</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 4: Nomor Terpakai -->
-            <div class="col-md-6 col-xl-3">
-                <div class="fg-card h-100">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="fg-icon-box fg-icon-amber">
-                            <i class="bi bi-file-earmark-check-fill"></i>
-                        </div>
-                        <i class="bi bi-arrow-up-right fg-arrow-corner"></i>
-                    </div>
-                    <div class="fg-stat-num">{{ stats.stock.used }}</div>
-                    <div class="fg-stat-label">Nomor Terpakai</div>
-                    <div class="mt-3 pt-2 border-top small text-muted">
-                        <span>{{ stats.stock.used }} Bulan ini</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Two Panels Grid (Figma Model: Tindak Lanjut Terbaru & Disposisi Masuk) -->
-        <div class="row g-4 mb-4">
-            <!-- Left: Tindak Lanjut Terbaru -->
-            <div class="col-lg-7">
-                <div class="fg-panel h-100">
-                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
-                        <div>
-                            <h5 class="fw-bold mb-0 text-dark">Tindak Lanjut Terbaru</h5>
-                            <small class="text-muted">5 naskah terakhir masuk</small>
-                        </div>
-                        <Link href="/tindak-lanjut" class="fg-link">
-                            Lihat semua <i class="bi bi-arrow-right ms-1"></i>
-                        </Link>
-                    </div>
-
-                    <div class="d-flex flex-column">
-                        <div v-for="(letter, idx) in recentLetters" :key="letter.id" 
-                            class="fg-tl-row" :class="{ 'border-bottom': idx < recentLetters.length - 1 }">
-                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="font-monospace text-muted small">{{ letter.tracking_code || letter.agenda_number || '-' }}</span>
-                                    <span v-if="(letter.priority || '').toLowerCase() === 'urgent' || (letter.priority || '').toLowerCase() === 'segera'" 
-                                        class="fg-priority-badge">SEGERA</span>
-                                </div>
-                                <span class="fg-pill-badge" :style="{ backgroundColor: getStatusBadgeStyle(letter.status).bg, color: getStatusBadgeStyle(letter.status).color }">
-                                    <span class="fg-pill-dot" :style="{ backgroundColor: getStatusBadgeStyle(letter.status).dot }"></span>
-                                    <span>{{ letter.status }}</span>
-                                </span>
-                            </div>
-                            <div class="fw-semibold text-dark small mb-1 text-truncate" :title="letter.subject">
-                                {{ letter.subject }}
-                            </div>
-                            <div class="text-muted" style="font-size: 0.78rem;">
-                                <span>{{ letter.sender_unit || letter.sender_name || 'Unit Pengirim' }}</span>
-                                <span class="mx-1">&bull;</span>
-                                <span>{{ letter.letter_date || '-' }}</span>
-                            </div>
-                        </div>
-
-                        <div v-if="recentLetters.length === 0" class="text-center py-4 text-muted small">
-                            Belum ada data naskah tindak lanjut.
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right: Disposisi Masuk -->
-            <div class="col-lg-5">
-                <div class="fg-panel h-100">
-                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
-                        <div>
-                            <h5 class="fw-bold mb-0 text-dark">Disposisi Masuk</h5>
-                        </div>
-                        <Link href="/disposisi" class="fg-link">
-                            Semua <i class="bi bi-arrow-right ms-1"></i>
-                        </Link>
-                    </div>
-
-                    <div class="d-flex flex-column">
-                        <div v-for="(disp, idx) in recentDispositions" :key="disp.id" 
-                            class="fg-disp-row" :class="{ 'border-bottom': idx < recentDispositions.length - 1 }">
-                            <div class="fg-disp-icon">
-                                <i class="bi bi-send-fill"></i>
-                            </div>
-                            <div class="flex-grow-1" style="min-width: 0;">
-                                <div class="fw-semibold text-dark small text-truncate-2 mb-1" :title="disp.instruction || disp.letter?.subject">
-                                    {{ disp.letter?.subject || disp.instruction }}
-                                </div>
-                                <div class="text-muted" style="font-size: 0.78rem;">
-                                    {{ disp.from_name || disp.to_name || 'Instansi Terkait' }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div v-if="recentDispositions.length === 0" class="text-center py-4 text-muted small">
-                            Belum ada instruksi disposisi.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Workbook Types Stock Summary -->
-        <div class="fg-panel">
-            <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+        <div class="max-w-7xl mx-auto space-y-6">
+            <!-- Greeting & Actions -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h5 class="fw-bold mb-0 text-dark">Distribusi Stok Nomor per Jenis Naskah</h5>
-                    <small class="text-muted">Status ketersediaan nomor naskah dinas tahun {{ stats.stock.year }}</small>
+                    <h1 class="font-display font-bold text-xl text-slate-900">
+                        {{ greeting() }}, {{ firstName }} 👋
+                    </h1>
+                    <p class="text-sm text-slate-500 mt-0.5">
+                        {{ todayDateFormatted }} · Sistem berjalan normal
+                    </p>
                 </div>
-                <Link href="/ketersediaan-nomor" class="fg-link">
-                    Kelola Ketersediaan Nomor <i class="bi bi-arrow-right ms-1"></i>
+                <div class="flex gap-2.5 flex-wrap">
+                    <Link href="/tindak-lanjut/create"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 shadow-sm"
+                        style="background: linear-gradient(135deg, #2743AF, #1a2d7a);">
+                        <i class="bi bi-plus-lg text-xs"></i>
+                        <span>Surat Baru</span>
+                    </Link>
+                    <Link v-if="!isSekjen" href="/disposisi/create"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-white"
+                        style="color: #2743AF; border: 1px solid #C7D2FE;">
+                        <i class="bi bi-send text-xs"></i>
+                        <span>Input Disposisi</span>
+                    </Link>
+                    <Link href="/scan-status"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors bg-white">
+                        <i class="bi bi-qr-code-scan text-xs"></i>
+                        <span>Scan QR</span>
+                    </Link>
+                </div>
+            </div>
+
+            <!-- Stat cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Card 1: Tindak Lanjut -->
+                <Link href="/tindak-lanjut"
+                    class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 text-left hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group block text-decoration-none">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                            style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                            <i class="bi bi-file-earmark-text text-white text-lg"></i>
+                        </div>
+                        <i class="bi bi-arrow-right text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all text-sm"></i>
+                    </div>
+                    <div class="text-2xl font-bold font-display mb-1 text-slate-900">
+                        {{ stats.signature.total.toLocaleString('id-ID') }}
+                    </div>
+                    <div class="text-xs font-medium text-slate-600 mb-2 leading-tight">Tindak Lanjut / TTD</div>
+                    <div class="flex gap-3 text-xs">
+                        <span class="text-amber-600 font-medium">{{ stats.signature.in_progress }} Dalam Proses</span>
+                        <span class="text-emerald-600 font-medium">{{ stats.signature.completed }} Selesai</span>
+                    </div>
+                </Link>
+
+                <!-- Card 2: Lajur Disposisi -->
+                <Link href="/disposisi"
+                    class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 text-left hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group block text-decoration-none">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                            style="background: linear-gradient(135deg, #6366f1, #7c3aed);">
+                            <i class="bi bi-send text-white text-base"></i>
+                        </div>
+                        <i class="bi bi-arrow-right text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all text-sm"></i>
+                    </div>
+                    <div class="text-2xl font-bold font-display mb-1 text-slate-900">
+                        {{ stats.disposition.total.toLocaleString('id-ID') }}
+                    </div>
+                    <div class="text-xs font-medium text-slate-600 mb-2 leading-tight">Lajur Disposisi</div>
+                    <div class="flex gap-3 text-xs">
+                        <span class="text-amber-600 font-medium">{{ stats.disposition.in_progress }} Dalam Proses</span>
+                        <span class="text-emerald-600 font-medium">{{ stats.disposition.completed }} Tuntas</span>
+                    </div>
+                </Link>
+
+                <!-- Card 3: Nomor Tersedia -->
+                <Link href="/ketersediaan-nomor"
+                    class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 text-left hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group block text-decoration-none">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                            style="background: linear-gradient(135deg, #14b8a6, #10b981);">
+                            <i class="bi bi-hash text-white text-xl"></i>
+                        </div>
+                        <i class="bi bi-arrow-right text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all text-sm"></i>
+                    </div>
+                    <div class="text-2xl font-bold font-display mb-1" style="color: #2743AF;">
+                        {{ stats.stock.available.toLocaleString('id-ID') }}
+                    </div>
+                    <div class="text-xs font-medium text-slate-600 mb-2 leading-tight">Nomor Tersedia</div>
+                    <div class="flex gap-3 text-xs">
+                        <span class="text-slate-500">Seluruh workbook</span>
+                        <span class="text-slate-400">Stok {{ stats.stock.year }}</span>
+                    </div>
+                </Link>
+
+                <!-- Card 4: Nomor Terpakai -->
+                <Link href="/data-surat"
+                    class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 text-left hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group block text-decoration-none">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                            style="background: linear-gradient(135deg, #f97316, #f59e0b);">
+                            <i class="bi bi-book text-white text-base"></i>
+                        </div>
+                        <i class="bi bi-arrow-right text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all text-sm"></i>
+                    </div>
+                    <div class="text-2xl font-bold font-display mb-1 text-slate-900">
+                        {{ stats.stock.used.toLocaleString('id-ID') }}
+                    </div>
+                    <div class="text-xs font-medium text-slate-600 mb-2 leading-tight">Nomor Terpakai</div>
+                    <div class="flex gap-3 text-xs">
+                        <span class="font-medium" style="color: #2743AF;">{{ stats.stock.used }} Bulan ini</span>
+                        <span class="text-slate-400">Tahun {{ stats.stock.year }}</span>
+                    </div>
                 </Link>
             </div>
 
-            <div class="row g-3">
-                <div v-for="type in typesSummary" :key="type.id" class="col-md-6 col-lg-3">
-                    <div class="p-3 rounded-3 border bg-white h-100">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <div class="fw-bold text-dark text-truncate small" :title="type.type_name">{{ type.workbook_name }}</div>
-                            <span class="badge bg-light text-secondary border" style="font-size: 0.65rem;">{{ type.type_code }}</span>
+            <!-- Main Columns Grid (5 Columns: 3 Left, 2 Right) -->
+            <div class="grid lg:grid-cols-5 gap-6">
+                <!-- Left: Recent Tindak Lanjut (3 Cols) -->
+                <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                    <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <div>
+                            <h2 class="font-display font-semibold text-slate-900 text-sm">Tindak Lanjut Terbaru</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">5 naskah terakhir masuk</p>
                         </div>
-                        <div class="d-flex justify-content-between small text-muted mb-2" style="font-size: 0.75rem;">
-                            <span>Tersedia: <strong style="color: var(--st-success, #10b981);">{{ type.available_slots || 0 }}</strong></span>
-                            <span>Terpakai: <strong style="color: var(--st-danger, #ef4444);">{{ type.used_slots || 0 }}</strong></span>
-                        </div>
-                        <div style="height: 6px; border-radius: 999px; background: #e2e8f0; overflow: hidden;">
-                            <div style="height: 100%; border-radius: 999px; background: var(--st-teal, #0d9488);"
-                                :style="{ width: type.total_slots && type.total_slots > 0 ? `${((type.used_slots || 0) / type.total_slots) * 100}%` : '0%' }">
+                        <Link href="/tindak-lanjut" class="text-xs hover:underline font-medium flex items-center gap-1 text-decoration-none"
+                            style="color: #2743AF;">
+                            <span>Lihat semua</span>
+                            <i class="bi bi-arrow-right text-xs"></i>
+                        </Link>
+                    </div>
+
+                    <div class="divide-y divide-slate-100 flex-1">
+                        <Link v-for="l in recentLetters" :key="l.id" :href="`/tindak-lanjut/${l.id}/edit`"
+                            class="px-5 py-3 hover:bg-slate-50 transition-colors cursor-pointer block text-decoration-none">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="font-mono text-[11px] text-slate-400 tracking-tight">{{ l.tracking_code || l.agenda_number || '-' }}</span>
+                                        <span v-if="(l.priority || '').toLowerCase() === 'urgent' || (l.priority || '').toLowerCase() === 'segera'"
+                                            class="text-[10px] font-bold px-1.5 py-0.5 rounded text-orange-700 bg-orange-50 border border-orange-200">
+                                            SEGERA
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-slate-800 font-medium line-clamp-1 leading-snug mb-0.5">
+                                        {{ l.subject }}
+                                    </p>
+                                    <p class="text-xs text-slate-400 mt-0.5 mb-0">
+                                        {{ l.sender_unit || l.sender_name }} &bull; {{ l.received_date || l.letter_date || '-' }}
+                                    </p>
+                                </div>
+                                <div class="flex-shrink-0 pt-0.5">
+                                    <StatusBadge :status="l.status" />
+                                </div>
                             </div>
+                        </Link>
+
+                        <div v-if="recentLetters.length === 0" class="text-center py-8 text-slate-400 text-sm">
+                            Belum ada naskah tindak lanjut.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column (2 Cols: Disposisi + Workbook Stock) -->
+                <div class="lg:col-span-2 space-y-5">
+                    <!-- Recent Disposisi -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                            <h2 class="font-display font-semibold text-slate-900 text-sm">Disposisi Masuk</h2>
+                            <Link href="/disposisi" class="text-xs hover:underline font-medium flex items-center gap-1 text-decoration-none"
+                                style="color: #2743AF;">
+                                <span>Semua</span>
+                                <i class="bi bi-arrow-right text-xs"></i>
+                            </Link>
+                        </div>
+                        <div class="divide-y divide-slate-100">
+                            <Link v-for="d in recentDispositions" :key="d.id" :href="`/disposisi/${d.letter_id || d.id}`"
+                                class="px-5 py-3 hover:bg-slate-50 transition-colors cursor-pointer block text-decoration-none">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                                        style="background: #EEF1FB;">
+                                        <i class="bi bi-send text-xs" style="color: #2743AF;"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-semibold text-slate-800 line-clamp-2 leading-snug mb-1">
+                                            {{ d.letter?.subject || d.instruction }}
+                                        </p>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-[11px] text-slate-400 text-truncate">
+                                                {{ d.from_name || d.to_name || 'Instansi Terkait' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Link>
+
+                            <div v-if="recentDispositions.length === 0" class="text-center py-8 text-slate-400 text-sm">
+                                Belum ada instruksi disposisi.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Workbook Stock Stats -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-5 py-4 border-b border-slate-100">
+                            <h2 class="font-display font-semibold text-slate-900 text-sm">Stok Nomor per Workbook</h2>
+                        </div>
+                        <div class="p-4 space-y-3">
+                            <div v-for="wb in previewWorkbooks" :key="wb.id">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-xs font-semibold text-slate-700">{{ wb.name }}</span>
+                                    <span class="text-[11px] text-slate-400">{{ wb.available }} tersedia</span>
+                                </div>
+                                <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full transition-all duration-300"
+                                        :style="{ width: `${Math.min(100, Math.max(0, (wb.available / wb.total) * 100))}%`, background: wb.color }">
+                                    </div>
+                                </div>
+                            </div>
+                            <Link href="/ketersediaan-nomor"
+                                class="w-full mt-2 text-xs hover:underline text-center font-medium py-1.5 block text-decoration-none"
+                                style="color: #2743AF;">
+                                Kelola semua nomor &rarr;
+                            </Link>
                         </div>
                     </div>
                 </div>
