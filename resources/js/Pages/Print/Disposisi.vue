@@ -373,12 +373,12 @@ const toggleAction = (actionName: string) => {
     border: none;
 }
 
-/* --- AREA KERTAS A5 --- */
+/* --- AREA KERTAS A4 (Standar Kemnaker) --- */
 .print-container {
-    width: 148mm;
-    min-height: 210mm;
+    width: 210mm;
+    min-height: 297mm;
     margin: 20px auto;
-    padding: 6mm 8mm;
+    padding: 10mm 12mm;
     background: white;
     font-family: 'Arial', 'Calibri', sans-serif;
     color: black;
@@ -387,26 +387,26 @@ const toggleAction = (actionName: string) => {
 
 /* --- KOP SURAT --- */
 .kop-header {
-    padding-bottom: 2px;
-    margin-bottom: 6px;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .logo-text {
-    font-size: 7.5px;
+    font-size: 8.5px;
     letter-spacing: 0.5px;
     color: #0f172a;
-    margin-top: 1px;
+    margin-top: 2px;
 }
 
 .instansi-name {
-    font-size: 10.5px;
-    letter-spacing: 0.3px;
+    font-size: 13px;
+    letter-spacing: 0.5px;
     color: black;
 }
 
 .sekjen-name {
-    font-size: 12px;
-    letter-spacing: 0.5px;
+    font-size: 15px;
+    letter-spacing: 0.6px;
     color: black;
 }
 
@@ -417,10 +417,10 @@ const toggleAction = (actionName: string) => {
 }
 
 .table-header-title {
-    font-size: 11px;
-    letter-spacing: 0.6px;
-    padding: 3px;
-    border-bottom: 1px solid black;
+    font-size: 13.5px;
+    letter-spacing: 0.8px;
+    padding: 5px;
+    border-bottom: 1.5px solid black;
     background: #ffffff;
 }
 
@@ -430,18 +430,18 @@ const toggleAction = (actionName: string) => {
 }
 
 .meta-table td {
-    padding: 2px 3.5px;
-    font-size: 9px;
+    padding: 3.5px 5.5px;
+    font-size: 10.5px;
     vertical-align: middle;
 }
 
 .meta-label {
-    font-size: 8.5px;
+    font-size: 10px;
     white-space: nowrap;
 }
 
 .meta-val {
-    font-size: 9px;
+    font-size: 10.5px;
 }
 
 /* --- UNIT DISPOSISI --- */
@@ -450,26 +450,26 @@ const toggleAction = (actionName: string) => {
 }
 
 .unit-row {
-    margin-bottom: 1.5px;
+    margin-bottom: 3px;
     cursor: pointer;
     user-select: none;
 }
 
 .unit-name {
-    font-size: 8px;
-    line-height: 1.15;
+    font-size: 9.5px;
+    line-height: 1.25;
     color: black;
 }
 
 .custom-checkbox {
-    width: 11px;
-    height: 11px;
-    min-width: 11px;
-    border: 1px solid black;
+    width: 13px;
+    height: 13px;
+    min-width: 13px;
+    border: 1.2px solid black;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 8.5px;
+    font-size: 9.5px;
     font-weight: bold;
     line-height: 1;
     background: white;
@@ -481,7 +481,7 @@ const toggleAction = (actionName: string) => {
 
 .custom-unit-input {
     outline: none;
-    min-height: 14px;
+    min-height: 16px;
 }
 
 .custom-unit-input:empty::before {
@@ -491,37 +491,62 @@ const toggleAction = (actionName: string) => {
 
 /* --- LAJUR DISPOSISI --- */
 .lajur-header {
-    font-size: 9px;
-    letter-spacing: 0.3px;
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    padding-bottom: 3px;
+    margin-bottom: 3px;
 }
 
 .lajur-row {
-    margin-bottom: 1.5px;
+    margin-bottom: 3px;
     cursor: pointer;
     user-select: none;
 }
 
 .lajur-name {
-    font-size: 8px;
-    line-height: 1.15;
+    font-size: 9.5px;
+    line-height: 1.25;
 }
 
 /* --- CATATAN & TTD --- */
 .notes-header {
-    font-size: 9px;
+    font-size: 11px;
 }
 
 .notes-content {
     outline: none;
+    min-height: 70px;
+    font-size: 10.5px;
+    line-height: 1.35;
+}
+
+.signature-box {
+    padding: 6px;
+}
+
+.pejabat-title {
+    font-size: 11px;
+}
+
+.signature-space {
+    height: 44px;
+}
+
+.pejabat-name {
+    font-size: 11px;
+}
+
+.pejabat-nip {
+    font-size: 10px;
 }
 
 /* --- FOOTER INFO --- */
 .print-footer-info {
-    font-size: 7.5px;
-    padding-top: 3px;
+    font-size: 9px;
+    padding-top: 5px;
 }
 
-/* --- PRINT MEDIA RULES --- */
+/* --- PRINT MEDIA RULES (A4 PORTRAIT) --- */
 @media print {
     .no-print {
         display: none !important;
@@ -535,16 +560,16 @@ const toggleAction = (actionName: string) => {
 
     .print-container {
         margin: 0 auto !important;
-        padding: 4mm 6mm !important;
-        width: 148mm !important;
-        max-width: 148mm !important;
+        padding: 6mm 10mm !important;
+        width: 210mm !important;
+        max-width: 210mm !important;
         min-height: auto !important;
         box-shadow: none !important;
     }
 
     @page {
-        size: portrait;
-        margin: 4mm 5mm;
+        size: A4 portrait;
+        margin: 6mm 8mm;
     }
 
     .custom-checkbox {

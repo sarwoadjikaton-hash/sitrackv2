@@ -553,7 +553,7 @@ const goBack = () => window.history.back();
 
 @media print {
     @page {
-        size: portrait;
+        size: A5 portrait;
         margin: 4mm 5mm;
     }
 
