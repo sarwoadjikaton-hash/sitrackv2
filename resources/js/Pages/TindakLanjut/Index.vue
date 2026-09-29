@@ -57,7 +57,7 @@ const applyFilter = () => {
     }, { preserveState: true, replace: true });
 };
 
-watch([currentWorkbookId, filterSort, filterPeriode], () => {
+watch([currentWorkbookId, filterSort, filterPeriode, statusFilter], () => {
     applyFilter();
 });
 
@@ -207,8 +207,8 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
 
             <!-- Main Filter & Table Card (Figma Prototype Model) -->
             <div class="bg-white rounded-4 border border-slate-200 shadow-sm overflow-hidden">
-                <div class="p-3 p-sm-4 border-bottom border-slate-100 d-flex flex-column flex-md-row gap-3">
-                    <div class="position-relative flex-grow-1">
+                <div class="p-3 p-sm-4 border-bottom border-slate-100 d-flex flex-column flex-md-row gap-3 flex-wrap flex-lg-nowrap">
+                    <div class="position-relative flex-grow-1" style="min-width: 200px;">
                         <i class="bi bi-search position-absolute text-muted" style="left: 12px; top: 50%; transform: translateY(-50%);"></i>
                         <input
                             v-model="search"
@@ -219,7 +219,16 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                             @keyup.enter="applyFilter"
                         />
                     </div>
-                    <div style="min-width: 180px;">
+                    <div style="min-width: 170px;">
+                        <SearchableSelect
+                            v-model="filterSort"
+                            :options="sortOptions"
+                            placeholder="Urutan"
+                            size="sm"
+                            @update:model-value="applyFilter"
+                        />
+                    </div>
+                    <div style="min-width: 170px;">
                         <SearchableSelect
                             v-model="statusFilter"
                             :options="[
@@ -231,7 +240,7 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                             @update:model-value="applyFilter"
                         />
                     </div>
-                    <div style="min-width: 200px;">
+                    <div style="min-width: 190px;">
                         <SearchableSelect
                             v-model="currentWorkbookId"
                             :options="[

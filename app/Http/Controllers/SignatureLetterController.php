@@ -111,8 +111,8 @@ class SignatureLetterController extends Controller
         match ($sort) {
             'number_asc' => $query->orderBy('agenda_number', 'asc')->orderBy('id', 'asc'),
             'number_desc' => $query->orderBy('agenda_number', 'desc')->orderBy('id', 'desc'),
-            'date_asc' => $query->orderBy('letter_date', 'asc')->orderBy('id', 'asc'),
-            default => $query->orderBy('letter_date', 'desc')->orderBy('id', 'desc'),
+            'date_asc' => $query->orderByRaw('letter_date ASC NULLS LAST')->orderBy('id', 'asc'),
+            default => $query->orderByRaw('letter_date DESC NULLS LAST')->orderBy('id', 'desc'),
         };
 
         $letters = $query->paginate(15)->withQueryString();

@@ -46,10 +46,10 @@ const workbookOptions = computed(() => [
 ]);
 
 const sortOptions = [
-    { value: 'number_desc', label: 'No. Urut (Besar → Kecil)' },
-    { value: 'number_asc', label: 'No. Urut (Kecil → Besar)' },
     { value: 'date_desc', label: 'Tanggal Terbaru' },
     { value: 'date_asc', label: 'Tanggal Terlama' },
+    { value: 'number_desc', label: 'No. Urut (Besar → Kecil)' },
+    { value: 'number_asc', label: 'No. Urut (Kecil → Besar)' },
 ];
 
 // Modal state
@@ -383,9 +383,9 @@ const switchToEdit = () => {
 
             <!-- Workbook Filter Card (Figma Prototype Model) -->
             <div class="bg-white rounded-4 border border-slate-200 shadow-sm p-3 p-sm-4 no-print">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                    <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center flex-grow-1">
-                        <div style="min-width: 200px;">
+                <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-3">
+                    <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center flex-grow-1 flex-wrap flex-md-nowrap">
+                        <div style="min-width: 180px;">
                             <label class="d-block small fw-bold text-muted mb-1">Filter Workbook</label>
                             <SearchableSelect
                                 v-model="currentWorkbookId"
@@ -398,7 +398,17 @@ const switchToEdit = () => {
                                 @update:model-value="applyFilter"
                             />
                         </div>
-                        <div class="flex-grow-1">
+                        <div style="min-width: 180px;">
+                            <label class="d-block small fw-bold text-muted mb-1">Urutan</label>
+                            <SearchableSelect
+                                v-model="filterSort"
+                                :options="sortOptions"
+                                placeholder="Pilih Urutan"
+                                size="sm"
+                                @update:model-value="applyFilter"
+                            />
+                        </div>
+                        <div class="flex-grow-1" style="min-width: 200px;">
                             <label class="d-block small fw-bold text-muted mb-1">Pencarian</label>
                             <div class="position-relative">
                                 <i class="bi bi-search position-absolute text-muted" style="left: 12px; top: 50%; transform: translateY(-50%);"></i>
