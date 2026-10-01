@@ -568,7 +568,7 @@ class GoogleSpreadsheetSyncService
     /**
      * Kirim (Push) data surat dari SiTrack ke Google Spreadsheet via Webhook / Apps Script
      */
-    public function push(string $webhookUrl, ?int $targetTypeId = null, int $year = 2026, ?string $secretToken = null): array
+    public function push(string $webhookUrl, ?int $targetTypeId = null, int $year = 2026, ?string $secretToken = null, ?string $spreadsheetUrl = null): array
     {
         $trimmedUrl = trim($webhookUrl);
         if (!filter_var($trimmedUrl, FILTER_VALIDATE_URL)) {
@@ -639,9 +639,14 @@ class GoogleSpreadsheetSyncService
             ];
         }
 
+        $targetUrl = $spreadsheetUrl ?: self::getDefaultSpreadsheetUrl();
+        $targetId = self::extractSpreadsheetId($targetUrl);
+
         $postData = [
             'token' => $secretToken ?: 'SITRACK_SECRET_2026',
             'year' => $year,
+            'spreadsheet_url' => $targetUrl,
+            'spreadsheet_id' => $targetId,
             'sheets' => $sheetsPayload,
             'sent_at' => now()->toIso8601String(),
         ];
@@ -712,7 +717,30 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let ss = null;
+    try {
+      ss = SpreadsheetApp.getActiveSpreadsheet();
+    } catch (err) {}
+
+    if (!ss && payload.spreadsheet_id) {
+      try {
+        ss = SpreadsheetApp.openById(payload.spreadsheet_id);
+      } catch (err) {}
+    }
+
+    if (!ss && payload.spreadsheet_url) {
+      try {
+        ss = SpreadsheetApp.openByUrl(payload.spreadsheet_url);
+      } catch (err) {}
+    }
+
+    if (!ss) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "error",
+        message: "Spreadsheet target tidak ditemukan. Pastikan Anda membuka Apps Script dari menu Ekstensi > Apps Script di dalam file Spreadsheet target."
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     const sheetsData = payload.sheets || [];
     let totalUpdated = 0;
     let totalInserted = 0;
@@ -735,7 +763,7 @@ function doPost(e) {
 
     return ContentService.createTextOutput(JSON.stringify({
       status: "success",
-      message: "Sync berhasil! " + totalInserted + " baris baru ditambahkan, " + totalUpdated + " baris diperbarui.",
+      message: "Sync berhasil! " + totalInserted + " baris baru ditambahkan, " + totalUpdated + " baris diperbarui pada spreadsheet '" + ss.getName() + "'.",
       total_inserted: totalInserted,
       total_updated: totalUpdated
     })).setMimeType(ContentService.MimeType.JSON);

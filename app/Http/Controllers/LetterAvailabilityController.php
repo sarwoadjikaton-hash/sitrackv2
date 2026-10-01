@@ -591,18 +591,20 @@ class LetterAvailabilityController extends Controller
     {
         $validated = $request->validate([
             'webhook_url' => ['required', 'url'],
+            'spreadsheet_url' => ['nullable', 'string'],
             'secret_token' => ['nullable', 'string', 'max:100'],
             'type_id' => ['nullable', 'exists:letter_number_types,id'],
             'year' => ['nullable', 'integer', 'min:2000', 'max:2200'],
         ]);
 
         $webhookUrl = trim($validated['webhook_url']);
+        $spreadsheetUrl = !empty($validated['spreadsheet_url']) ? trim($validated['spreadsheet_url']) : null;
         $secretToken = $validated['secret_token'] ?? null;
         $typeId = !empty($validated['type_id']) ? (int) $validated['type_id'] : null;
         $year = (int) ($validated['year'] ?? date('Y'));
 
         try {
-            $result = $syncService->push($webhookUrl, $typeId, $year, $secretToken);
+            $result = $syncService->push($webhookUrl, $typeId, $year, $secretToken, $spreadsheetUrl);
 
             return redirect()->route('ketersediaan-nomor.index', [
                 'year' => $year,

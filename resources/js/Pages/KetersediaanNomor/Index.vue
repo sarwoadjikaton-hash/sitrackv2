@@ -351,7 +351,30 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let ss = null;
+    try {
+      ss = SpreadsheetApp.getActiveSpreadsheet();
+    } catch (err) {}
+
+    if (!ss && payload.spreadsheet_id) {
+      try {
+        ss = SpreadsheetApp.openById(payload.spreadsheet_id);
+      } catch (err) {}
+    }
+
+    if (!ss && payload.spreadsheet_url) {
+      try {
+        ss = SpreadsheetApp.openByUrl(payload.spreadsheet_url);
+      } catch (err) {}
+    }
+
+    if (!ss) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "error",
+        message: "Spreadsheet target tidak ditemukan. Pastikan Anda membuka Apps Script dari menu Ekstensi > Apps Script di dalam file Spreadsheet target."
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     const sheetsData = payload.sheets || [];
     let totalUpdated = 0;
     let totalInserted = 0;
@@ -374,7 +397,7 @@ function doPost(e) {
 
     return ContentService.createTextOutput(JSON.stringify({
       status: "success",
-      message: "Sync berhasil! " + totalInserted + " baris baru ditambahkan, " + totalUpdated + " baris diperbarui.",
+      message: "Sync berhasil! " + totalInserted + " baris baru ditambahkan, " + totalUpdated + " baris diperbarui pada spreadsheet '" + ss.getName() + "'.",
       total_inserted: totalInserted,
       total_updated: totalUpdated
     })).setMimeType(ContentService.MimeType.JSON);
@@ -514,6 +537,7 @@ const executePush = (targetAll: boolean = false) => {
         '/ketersediaan-nomor/push-spreadsheet',
         {
             webhook_url: webhookUrl.value,
+            spreadsheet_url: syncSpreadsheetUrl.value,
             secret_token: secretToken.value,
             type_id: targetAll ? null : activeTypeId.value,
             year: selectedYear.value,
