@@ -583,5 +583,38 @@ class LetterAvailabilityController extends Controller
             ])->with('error', 'Gagal menarik data dari Google Spreadsheet: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Kirim (Push) data ke Google Spreadsheet Webhook / Apps Script
+     */
+    public function pushSpreadsheet(Request $request, GoogleSpreadsheetSyncService $syncService)
+    {
+        $validated = $request->validate([
+            'webhook_url' => ['required', 'url'],
+            'secret_token' => ['nullable', 'string', 'max:100'],
+            'type_id' => ['nullable', 'exists:letter_number_types,id'],
+            'year' => ['nullable', 'integer', 'min:2000', 'max:2200'],
+        ]);
+
+        $webhookUrl = trim($validated['webhook_url']);
+        $secretToken = $validated['secret_token'] ?? null;
+        $typeId = !empty($validated['type_id']) ? (int) $validated['type_id'] : null;
+        $year = (int) ($validated['year'] ?? date('Y'));
+
+        try {
+            $result = $syncService->push($webhookUrl, $typeId, $year, $secretToken);
+
+            return redirect()->route('ketersediaan-nomor.index', [
+                'year' => $year,
+                'open_type' => $typeId,
+            ])->with('success', $result['message']);
+        } catch (\Throwable $e) {
+            return redirect()->route('ketersediaan-nomor.index', [
+                'year' => $year,
+                'open_type' => $typeId,
+            ])->with('error', 'Gagal mengirim data ke Google Spreadsheet: ' . $e->getMessage());
+        }
+    }
 }
+
 

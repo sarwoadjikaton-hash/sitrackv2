@@ -109,6 +109,13 @@ onMounted(() => {
     document.addEventListener('click', handleClickOutside);
     window.addEventListener('resize', handleScrollResize);
     window.addEventListener('scroll', handleScrollResize, true);
+
+    try {
+        const savedWebhook = localStorage.getItem('sitrack_webhook_url');
+        if (savedWebhook) webhookUrl.value = savedWebhook;
+        const savedToken = localStorage.getItem('sitrack_secret_token');
+        if (savedToken) secretToken.value = savedToken;
+    } catch {}
 });
 
 onUnmounted(() => {
@@ -298,13 +305,180 @@ const statusLabel = (status: string) => {
     return status;
 };
 
-// --- Google Spreadsheet API Synchronization ---
+// --- Google Spreadsheet Two-Way Synchronization ---
 const showSyncModal = ref(false);
+const syncModalTab = ref<'pull' | 'push' | 'guide'>('push');
 const syncSpreadsheetUrl = ref(
     props.defaultSpreadsheetUrl ||
         'https://docs.google.com/spreadsheets/d/1Qv27GijtAHpEAUu-Vz0YfiLactdUCAt_owmIONpXeyc/edit'
 );
+const webhookUrl = ref('');
+const secretToken = ref('SITRACK_SECRET_2026');
 const isSyncing = ref(false);
+const isPushing = ref(false);
+const copySuccess = ref(false);
+
+const appsScriptCode = `/**
+ * ==========================================================================
+ * SiTrack - Google Spreadsheet Two-Way Webhook Sync
+ * ==========================================================================
+ * CARA PASANG:
+ * 1. Di Google Spreadsheet Anda, buka menu: Ekstensi (Extensions) > Apps Script
+ * 2. Hapus semua kode yang ada di editor, lalu TEMPEL (Paste) seluruh kode ini.
+ * 3. Klik tombol "Deploy" (di kanan atas) > "New deployment" (Deployment baru)
+ * 4. Pilih tipe: "Web app" (ikon bola dunia)
+ * 5. Isi Description: SiTrack Webhook Sync
+ * 6. Execute as: "Me" (Email Google Anda)
+ * 7. Who has access: "Anyone" (Siapa saja)
+ * 8. Klik "Deploy", beri izin akses Google jika diminta, lalu SALIN Web app URL.
+ * 9. Tempelkan URL tersebut ke pengaturan SiTrack!
+ */
+
+const SECRET_TOKEN = "SITRACK_SECRET_2026";
+
+function doPost(e) {
+  try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "No data payload received" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const payload = JSON.parse(e.postData.contents);
+
+    // Validasi token keamanan
+    if (SECRET_TOKEN && payload.token && payload.token !== SECRET_TOKEN) {
+      return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Token keamanan tidak valid" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheetsData = payload.sheets || [];
+    let totalUpdated = 0;
+    let totalInserted = 0;
+
+    sheetsData.forEach(function (sheetItem) {
+      const sheetName = sheetItem.sheet_name || "Data Surat";
+      let sheet = ss.getSheetByName(sheetName);
+
+      // Buat sheet baru jika belum ada
+      if (!sheet) {
+        sheet = ss.insertSheet(sheetName);
+        initSheetHeaders(sheet, sheetName, payload.year || new Date().getFullYear());
+      }
+
+      const rows = sheetItem.rows || [];
+      const res = upsertRows(sheet, rows);
+      totalUpdated += res.updated;
+      totalInserted += res.inserted;
+    });
+
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "success",
+      message: "Sync berhasil! " + totalInserted + " baris baru ditambahkan, " + totalUpdated + " baris diperbarui.",
+      total_inserted: totalInserted,
+      total_updated: totalUpdated
+    })).setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function initSheetHeaders(sheet, sheetName, year) {
+  sheet.getRange("A1").setValue("REKAP NOMOR SURAT KELUAR (" + sheetName + ")");
+  sheet.getRange("A1").setFontWeight("bold").setFontSize(14);
+  
+  sheet.getRange("A3").setValue("TAHUN " + year);
+  sheet.getRange("A3").setFontWeight("bold").setFontColor("#1E40AF");
+
+  const headers = [
+    "No Urut", "Tanggal Masuk", "Unit Pengolah Arsip", "Penandatangan Surat",
+    "Permohonan", "Tujuan Surat", "Tanggal Surat", "Keamanan Akses",
+    "Nomor Urut", "Kode Klas. Arsip", "Bulan", "Nomor Surat",
+    "Perihal Surat", "Petugas Unit Teknis"
+  ];
+
+  sheet.getRange(5, 1, 1, headers.length).setValues([headers]);
+  const headerRange = sheet.getRange(5, 1, 1, headers.length);
+  headerRange.setBackground("#1C386F").setFontColor("#FFFFFF").setFontWeight("bold");
+  headerRange.setHorizontalAlignment("center");
+}
+
+function upsertRows(sheet, records) {
+  if (!records || records.length === 0) return { updated: 0, inserted: 0 };
+
+  const lastRow = Math.max(sheet.getLastRow(), 5);
+  let updated = 0;
+  let inserted = 0;
+
+  // Baca baris yang sudah ada berdasarkan Nomor Urut (Kolom I) atau Nomor Surat (Kolom L)
+  const existingMap = {};
+  if (lastRow > 5) {
+    const values = sheet.getRange(6, 1, lastRow - 5, 14).getValues();
+    values.forEach(function (row, idx) {
+      const seq = String(row[8] || "").trim();
+      const numText = String(row[11] || "").trim();
+      const rowNum = 6 + idx;
+      if (seq && seq !== "-" && seq !== "") existingMap["seq_" + seq] = rowNum;
+      if (numText && numText !== "-" && numText !== "(Belum Diberi Nomor)" && numText !== "") {
+        existingMap["num_" + numText] = rowNum;
+      }
+    });
+  }
+
+  const newRows = [];
+
+  records.forEach(function (rec, index) {
+    const rowValues = [
+      rec.no_urut || (index + 1),
+      rec.tanggal_masuk || "",
+      rec.unit_pengolah_arsip || "-",
+      rec.penandatangan_surat || "-",
+      rec.permohonan || "-",
+      rec.tujuan_surat || "-",
+      rec.tanggal_surat || "",
+      rec.keamanan_akses || "B",
+      rec.nomor_urut || "-",
+      rec.kode_klas_arsip || "UM.01",
+      rec.bulan || "",
+      rec.nomor_surat || "(Belum Diberi Nomor)",
+      rec.perihal_surat || "-",
+      rec.petugas_unit_teknis || "-"
+    ];
+
+    const seqKey = rec.nomor_urut ? "seq_" + String(rec.nomor_urut).trim() : null;
+    const numKey = (rec.nomor_surat && rec.nomor_surat !== "(Belum Diberi Nomor)") ? "num_" + String(rec.nomor_surat).trim() : null;
+
+    let targetRowNum = null;
+    if (seqKey && existingMap[seqKey]) {
+      targetRowNum = existingMap[seqKey];
+    } else if (numKey && existingMap[numKey]) {
+      targetRowNum = existingMap[numKey];
+    }
+
+    if (targetRowNum) {
+      sheet.getRange(targetRowNum, 1, 1, 14).setValues([rowValues]);
+      updated++;
+    } else {
+      newRows.push(rowValues);
+      inserted++;
+    }
+  });
+
+  if (newRows.length > 0) {
+    const startInsertRow = sheet.getLastRow() + 1;
+    sheet.getRange(startInsertRow, 1, newRows.length, 14).setValues(newRows);
+  }
+
+  return { updated: updated, inserted: inserted };
+}`;
+
+const copyScript = () => {
+    navigator.clipboard.writeText(appsScriptCode);
+    copySuccess.value = true;
+    setTimeout(() => { copySuccess.value = false; }, 3000);
+};
 
 const executeSync = (targetAll: boolean = false) => {
     isSyncing.value = true;
@@ -319,6 +493,35 @@ const executeSync = (targetAll: boolean = false) => {
             preserveScroll: true,
             onFinish: () => {
                 isSyncing.value = false;
+                showSyncModal.value = false;
+            },
+        }
+    );
+};
+
+const executePush = (targetAll: boolean = false) => {
+    if (!webhookUrl.value) {
+        alert('Silakan masukkan Webhook URL Google Apps Script Anda.');
+        return;
+    }
+    try {
+        localStorage.setItem('sitrack_webhook_url', webhookUrl.value);
+        if (secretToken.value) localStorage.setItem('sitrack_secret_token', secretToken.value);
+    } catch {}
+
+    isPushing.value = true;
+    router.post(
+        '/ketersediaan-nomor/push-spreadsheet',
+        {
+            webhook_url: webhookUrl.value,
+            secret_token: secretToken.value,
+            type_id: targetAll ? null : activeTypeId.value,
+            year: selectedYear.value,
+        },
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                isPushing.value = false;
                 showSyncModal.value = false;
             },
         }
@@ -451,48 +654,37 @@ const formatDateIndo = (dateStr?: string | null) => {
                         <span>Tambah Batch Nomor</span>
                     </button>
 
-                    <!-- Tombol Sinkronisasi -->
-                    <button
-                        type="button"
-                        class="d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light flex-grow-1 flex-sm-grow-0"
-                        :disabled="isSyncing"
-                        @click="executeSync(false)"
-                        title="Sinkronisasi data dari Google Spreadsheet"
-                    >
-                        <i class="bi" :class="isSyncing ? 'bi-arrow-repeat spin' : 'bi-cloud-download text-primary'"></i>
-                        <span>{{ isSyncing ? 'Menyinkronkan...' : 'Sinkronisasi' }}</span>
-                    </button>
-
-                    <!-- Tombol Pengaturan -->
+                    <!-- Tombol Google Spreadsheet Menu -->
                     <div class="dropdown flex-grow-1 flex-sm-grow-0">
                         <button
                             type="button"
                             class="w-100 d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 fw-medium small border bg-white text-dark shadow-xs transition hover:bg-light dropdown-toggle"
                             data-bs-toggle="dropdown"
                             aria-expanded="false"
-                            title="Pengaturan dan opsi sinkronisasi"
+                            title="Sinkronisasi Dua Arah Google Spreadsheet"
                         >
-                            <i class="bi bi-gear text-secondary"></i>
-                            <span>Pengaturan</span>
+                            <i class="bi" :class="(isSyncing || isPushing) ? 'bi-arrow-repeat spin text-primary' : 'bi-file-earmark-spreadsheet text-success'"></i>
+                            <span>{{ isSyncing ? 'Menarik Data...' : (isPushing ? 'Mengirim Data...' : 'Google Spreadsheet') }}</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border border-slate-200 rounded-3 py-1">
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border border-slate-200 rounded-3 py-1" style="min-width: 240px;">
+                            <li><h6 class="dropdown-header small text-uppercase text-muted fw-bold">Sinkronisasi SiTrack &amp; Sheet</h6></li>
                             <li>
-                                <a class="dropdown-item py-2 small fw-semibold d-flex align-items-center gap-2" href="#" @click.prevent="executeSync(false)">
-                                    <i class="bi bi-file-earmark-text text-success"></i>
-                                    <span>Tarik Lembar Ini ({{ activeType?.workbook_name }})</span>
+                                <a class="dropdown-item py-2 small fw-semibold d-flex align-items-center gap-2 text-primary" href="#" @click.prevent="syncModalTab = 'push'; showSyncModal = true">
+                                    <i class="bi bi-cloud-upload text-primary"></i>
+                                    <span>Kirim Data ke Sheet (Push)</span>
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item py-2 small fw-semibold d-flex align-items-center gap-2" href="#" @click.prevent="executeSync(true)">
-                                    <i class="bi bi-collection text-primary"></i>
-                                    <span>Tarik Semua Jenis Naskah</span>
+                                <a class="dropdown-item py-2 small fw-semibold d-flex align-items-center gap-2 text-success" href="#" @click.prevent="syncModalTab = 'pull'; showSyncModal = true">
+                                    <i class="bi bi-cloud-download text-success"></i>
+                                    <span>Tarik Data dari Sheet (Pull)</span>
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider my-1" /></li>
                             <li>
-                                <a class="dropdown-item py-2 small d-flex align-items-center gap-2 text-dark" href="#" @click.prevent="showSyncModal = true">
-                                    <i class="bi bi-sliders text-secondary"></i>
-                                    <span>Pengaturan Lanjutan</span>
+                                <a class="dropdown-item py-2 small d-flex align-items-center gap-2 text-dark" href="#" @click.prevent="syncModalTab = 'guide'; showSyncModal = true">
+                                    <i class="bi bi-code-slash text-secondary"></i>
+                                    <span>Panduan &amp; Salin Kode Script</span>
                                 </a>
                             </li>
                         </ul>
@@ -1111,22 +1303,139 @@ const formatDateIndo = (dateStr?: string | null) => {
             </form>
         </Modal>
 
-        <!-- Modal Pengaturan Lanjutan Link Spreadsheet -->
-        <Modal :show="showSyncModal" max-width="md" @close="showSyncModal = false">
+        <!-- Modal Sinkronisasi Dua Arah Google Spreadsheet -->
+        <Modal :show="showSyncModal" max-width="lg" @close="showSyncModal = false">
             <div class="bg-white rounded-2xl p-4 sm:p-5">
-                <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-sliders text-primary fs-5"></i>
-                        <h5 class="fw-bold text-dark m-0" style="font-size: 1.05rem;">Pengaturan Lanjutan</h5>
+                        <i class="bi bi-cloud-arrow-up-down text-primary fs-4"></i>
+                        <div>
+                            <h5 class="fw-bold text-dark m-0" style="font-size: 1.1rem;">Sinkronisasi Google Spreadsheet</h5>
+                            <small class="text-muted" style="font-size: 0.75rem;">Hubungkan SiTrack dengan Google Spreadsheet secara aman &amp; instan</small>
+                        </div>
                     </div>
                     <button type="button" class="btn btn-sm btn-link text-muted p-0 text-decoration-none" @click="showSyncModal = false">
                         <i class="bi bi-x-lg fs-6"></i>
                     </button>
                 </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="form-label small fw-semibold text-secondary mb-1">Tautan Google Spreadsheet</label>
+
+                <!-- Nav Tabs -->
+                <div class="d-flex border-bottom mb-4 gap-2">
+                    <button
+                        type="button"
+                        class="btn btn-sm px-3 py-2 border-0 fw-semibold position-relative rounded-0"
+                        :class="syncModalTab === 'push' ? 'text-primary border-bottom border-primary border-2 bg-primary-subtle rounded-top' : 'text-secondary'"
+                        @click="syncModalTab = 'push'"
+                    >
+                        <i class="bi bi-cloud-upload me-1.5"></i>
+                        Kirim Data (Push ke Sheet)
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-sm px-3 py-2 border-0 fw-semibold position-relative rounded-0"
+                        :class="syncModalTab === 'pull' ? 'text-primary border-bottom border-primary border-2 bg-primary-subtle rounded-top' : 'text-secondary'"
+                        @click="syncModalTab = 'pull'"
+                    >
+                        <i class="bi bi-cloud-download me-1.5"></i>
+                        Tarik Data (Pull ke SiTrack)
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-sm px-3 py-2 border-0 fw-semibold position-relative rounded-0"
+                        :class="syncModalTab === 'guide' ? 'text-primary border-bottom border-primary border-2 bg-primary-subtle rounded-top' : 'text-secondary'"
+                        @click="syncModalTab = 'guide'"
+                    >
+                        <i class="bi bi-code-slash me-1.5"></i>
+                        Kode Apps Script &amp; Panduan
+                    </button>
+                </div>
+
+                <!-- Tab 1: Push (Kirim Data ke Spreadsheet) -->
+                <div v-if="syncModalTab === 'push'" class="space-y-3">
+                    <div class="alert alert-primary d-flex align-items-start gap-2 py-2 px-3 small border-0 mb-3" style="background-color: #eff6ff; color: #1e40af;">
+                        <i class="bi bi-info-circle-fill fs-6 mt-0.5"></i>
+                        <div>
+                            Fitur <strong>Push</strong> akan mengirim seluruh data nomor surat dari SiTrack ke lembar (sheet) Google Spreadsheet Anda secara otomatis sesuai format resmi Kemnaker.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">
+                            URL Webhook Google Apps Script <span class="text-danger">*</span>
+                        </label>
+                        <input
+                            v-model="webhookUrl"
+                            type="url"
+                            class="form-control rounded-lg"
+                            placeholder="https://script.google.com/macros/s/.../exec"
+                        />
+                        <small class="text-muted d-block mt-1" style="font-size: 0.72rem;">
+                            Dapatkan URL ini dari menu <em>Deploy &gt; New deployment &gt; Web app</em> di Google Spreadsheet Anda.
+                            <a href="#" class="text-primary fw-semibold ms-1" @click.prevent="syncModalTab = 'guide'">Belum pasang? Lihat panduan 1 menit &raquo;</a>
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">
+                            Token Rahasia (Secret Token)
+                        </label>
+                        <input
+                            v-model="secretToken"
+                            type="text"
+                            class="form-control rounded-lg font-monospace small"
+                            placeholder="SITRACK_SECRET_2026"
+                        />
+                        <small class="text-muted d-block mt-1" style="font-size: 0.72rem;">
+                            Token pengaman untuk mencegah akses tidak sah ke Spreadsheet Anda (opsional tapi disarankan).
+                        </small>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="small fw-semibold text-dark mb-1">Target Pengiriman:</div>
+                        <div class="text-muted small" style="font-size: 0.78rem;">
+                            Tahun: <strong class="text-dark">{{ selectedYear }}</strong> &bull; Lembar Naskah: <strong class="text-primary">{{ activeType?.workbook_name || '-' }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column flex-sm-row gap-2 pt-3 border-top mt-4">
+                        <button type="button" class="btn btn-light border text-secondary font-medium" @click="showSyncModal = false">
+                            Tutup
+                        </button>
+                        <button
+                            type="button"
+                            class="btn text-white font-medium flex-grow-1"
+                            style="background-color: #2743AF;"
+                            :disabled="isPushing || !webhookUrl"
+                            @click="executePush(false)"
+                        >
+                            <span v-if="isPushing" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            <i v-else class="bi bi-file-earmark-arrow-up me-1"></i>
+                            Kirim Lembar Ini Saja ({{ activeType?.workbook_name }})
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary font-medium"
+                            :disabled="isPushing || !webhookUrl"
+                            @click="executePush(true)"
+                        >
+                            <span v-if="isPushing" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            <i v-else class="bi bi-cloud-arrow-up me-1"></i>
+                            Kirim Semua Naskah
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Pull (Tarik Data dari Spreadsheet) -->
+                <div v-else-if="syncModalTab === 'pull'" class="space-y-3">
+                    <div class="alert alert-secondary d-flex align-items-start gap-2 py-2 px-3 small border-0 mb-3" style="background-color: #f8fafc; color: #334155;">
+                        <i class="bi bi-cloud-download fs-6 mt-0.5 text-primary"></i>
+                        <div>
+                            Fitur <strong>Tarik Data</strong> membaca data dari Google Spreadsheet dan memperbarui ketersediaan nomor di SiTrack secara otomatis.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">Tautan Google Spreadsheet</label>
                         <input
                             v-model="syncSpreadsheetUrl"
                             type="url"
@@ -1134,32 +1443,77 @@ const formatDateIndo = (dateStr?: string | null) => {
                             placeholder="https://docs.google.com/spreadsheets/d/.../edit"
                         />
                         <small class="text-muted d-block mt-1" style="font-size: 0.72rem;">
-                            Pastikan spreadsheet telah dibagikan dengan akses lihat (Viewer) atau menggunakan Service Account yang sesuai.
+                            Pastikan spreadsheet telah dibagikan dengan akses lihat (Viewer) atau dapat diakses publik.
                         </small>
                     </div>
 
                     <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                        <div class="small fw-semibold text-dark mb-1">Opsi Sinkronisasi:</div>
-                        <div class="text-muted small" style="font-size: 0.75rem;">
+                        <div class="small fw-semibold text-dark mb-1">Opsi Tarik Data:</div>
+                        <div class="text-muted small" style="font-size: 0.78rem;">
                             Tahun Aktif: <strong class="text-dark">{{ selectedYear }}</strong> &bull; Jenis Naskah: <strong class="text-dark">{{ activeType?.workbook_name || '-' }}</strong>
                         </div>
                     </div>
+
+                    <div class="d-flex flex-column flex-sm-row gap-2 pt-3 border-top mt-4">
+                        <button type="button" class="btn btn-light border text-secondary font-medium" @click="showSyncModal = false">
+                            Tutup
+                        </button>
+                        <button
+                            type="button"
+                            class="btn text-white flex-grow-1 font-medium"
+                            style="background-color: #2743AF;"
+                            :disabled="isSyncing"
+                            @click="executeSync(false)"
+                        >
+                            <span v-if="isSyncing" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            <i v-else class="bi bi-cloud-download me-1"></i>
+                            Tarik Lembar Ini Saja
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary font-medium"
+                            :disabled="isSyncing"
+                            @click="executeSync(true)"
+                        >
+                            <span v-if="isSyncing" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            <i v-else class="bi bi-collection me-1"></i>
+                            Tarik Semua Naskah
+                        </button>
+                    </div>
                 </div>
 
-                <div class="d-flex gap-2 pt-3 border-top mt-4">
-                    <button type="button" class="btn btn-light border flex-grow-1 text-secondary font-medium" @click="showSyncModal = false">
-                        Batal
-                    </button>
-                    <button
-                        type="button"
-                        class="btn text-white flex-grow-1 font-medium"
-                        style="background-color: #2743AF;"
-                        :disabled="isSyncing"
-                        @click="executeSync(false)"
-                    >
-                        <span v-if="isSyncing" class="spinner-border spinner-border-sm me-1" role="status"></span>
-                        Simpan &amp; Sinkronkan
-                    </button>
+                <!-- Tab 3: Panduan Pasang & Kode Script -->
+                <div v-else-if="syncModalTab === 'guide'" class="space-y-3">
+                    <div class="bg-light p-3 rounded-3 border mb-3">
+                        <div class="fw-bold small text-dark mb-2">
+                            <i class="bi bi-check2-circle text-success me-1"></i>
+                            Langkah Mudah Pasang Webhook (Hanya Sekali &plusmn; 1 Menit):
+                        </div>
+                        <ol class="small text-secondary mb-0 ps-3 space-y-1" style="font-size: 0.8rem; line-height: 1.5;">
+                            <li>Buka dokumen <strong>Google Spreadsheet</strong> Anda di browser.</li>
+                            <li>Klik menu atas: <strong>Ekstensi (Extensions)</strong> &gt; <strong>Apps Script</strong>.</li>
+                            <li>Hapus semua teks yang ada, lalu klik tombol <strong>"Salin Seluruh Kode Script"</strong> di bawah dan <strong>Tempel (Paste)</strong> ke editor Apps Script.</li>
+                            <li>Klik tombol biru <strong>"Deploy"</strong> (kanan atas) &gt; pilih <strong>"New deployment"</strong>.</li>
+                            <li>Pilih jenis <strong>"Web app"</strong> (ikon bola dunia 🌐).</li>
+                            <li>Atur <em>Execute as</em>: <strong>Me</strong> dan <em>Who has access</em>: <strong>Anyone</strong> (Siapa saja).</li>
+                            <li>Klik <strong>Deploy</strong>, izinkan akses akun Google Anda, lalu <strong>SALIN Web app URL</strong> yang dihasilkan dan tempelkan di tab <strong>"Kirim Data"</strong>.</li>
+                        </ol>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small fw-bold text-dark">Kode Google Apps Script:</span>
+                        <button
+                            type="button"
+                            class="btn btn-sm"
+                            :class="copySuccess ? 'btn-success' : 'btn-outline-primary'"
+                            @click="copyScript"
+                        >
+                            <i class="bi" :class="copySuccess ? 'bi-check-lg' : 'bi-clipboard'"></i>
+                            {{ copySuccess ? 'Berhasil Disalin!' : 'Salin Seluruh Kode Script' }}
+                        </button>
+                    </div>
+
+                    <pre class="bg-dark text-light p-3 rounded-3 small font-monospace overflow-auto" style="max-height: 200px; font-size: 0.72rem; line-height: 1.4;"><code>{{ appsScriptCode }}</code></pre>
                 </div>
             </div>
         </Modal>
