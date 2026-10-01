@@ -631,10 +631,13 @@ class GoogleSpreadsheetSyncService
                 $rawSec = strtoupper(trim((string) ($num->security_access ?? '')));
                 $keamananAkses = in_array($rawSec, ['B', 'R', 'SR', 'K'], true) ? $rawSec : 'B';
 
+                // Normalisasi Unit Pengolah Arsip sesuai 14 unit resmi Kemnaker
+                $unitPengolah = self::normalizeUnitKemnaker($num->processing_unit_text ?: $num->unit?->unit_name);
+
                 $rows[] = [
                     'no_urut' => $rowCounter,
                     'tanggal_masuk' => $num->incoming_date ? \Carbon\Carbon::parse($num->incoming_date)->format('d/m/Y') : '',
-                    'unit_pengolah_arsip' => $num->processing_unit_text ?: '-',
+                    'unit_pengolah_arsip' => $unitPengolah,
                     'penandatangan_surat' => $penandatangan,
                     'permohonan' => $permohonan,
                     'tujuan_surat' => $num->destination ?: '-',
@@ -703,6 +706,60 @@ class GoogleSpreadsheetSyncService
             Log::error("Error pushing data to Google Spreadsheet Webhook: " . $e->getMessage());
             throw new \RuntimeException($e->getMessage());
         }
+    }
+
+    /**
+     * Normalisasi nama unit kerja sesuai 14 pilihan dropdown resmi Spreadsheet Kemnaker
+     */
+    public static function normalizeUnitKemnaker(?string $rawUnit): string
+    {
+        $u = mb_strtolower(trim((string) $rawUnit));
+        if (empty($u) || $u === '-') {
+            return 'Biro Umum';
+        }
+        if (str_contains($u, 'binalattas') || str_contains($u, 'vokasi') || str_contains($u, 'pelatihan')) {
+            return 'Ditjen Binalattas';
+        }
+        if (str_contains($u, 'binapenta') || str_contains($u, 'penempatan') || str_contains($u, 'pkk')) {
+            return 'Ditjen Binapenta & PKK';
+        }
+        if (str_contains($u, 'phi') || str_contains($u, 'jsk') || str_contains($u, 'industrial')) {
+            return 'Ditjen PHI & JSK';
+        }
+        if (str_contains($u, 'binwasnaker') || str_contains($u, 'k3') || str_contains($u, 'pengawasan')) {
+            return 'Ditjen Binwasnaker & K3';
+        }
+        if (str_contains($u, 'barenbang') || str_contains($u, 'litbang')) {
+            return 'Barenbang Naker';
+        }
+        if (str_contains($u, 'itjen') || str_contains($u, 'inspektorat')) {
+            return 'Itjen';
+        }
+        if (str_contains($u, 'perencanaan') || str_contains($u, 'kinerja') || str_contains($u, 'manj')) {
+            return 'Biro Perencanaan & Manj. Kinerja';
+        }
+        if (str_contains($u, 'keuangan')) {
+            return 'Biro Keuangan';
+        }
+        if (str_contains($u, 'organisasi') || str_contains($u, 'sdm') || str_contains($u, 'aparatur')) {
+            return 'Biro Organisasi & SDM Aparatur';
+        }
+        if (str_contains($u, 'hukum')) {
+            return 'Biro Hukum';
+        }
+        if (str_contains($u, 'kerjasama') || str_contains($u, 'luar negeri') || str_contains($u, 'ln')) {
+            return 'Biro Kerjasama LN';
+        }
+        if (str_contains($u, 'humas') || str_contains($u, 'masyarakat') || str_contains($u, 'hub.')) {
+            return 'Biro Hub. Masyarakat';
+        }
+        if (str_contains($u, 'pusdiklat') || str_contains($u, 'diklat')) {
+            return 'Pusdiklat';
+        }
+        if (str_contains($u, 'umum')) {
+            return 'Biro Umum';
+        }
+        return 'Biro Umum';
     }
 
     /**
@@ -873,10 +930,45 @@ function upsertRows(sheet, records) {
       reqVal = "Tanda Tangan";
     }
 
+    // Normalisasi Unit Kerja
+    let unitVal = String(rec.unit_pengolah_arsip || "").trim();
+    const uLower = unitVal.toLowerCase();
+    if (uLower.indexOf("binalattas") !== -1 || uLower.indexOf("vokasi") !== -1 || uLower.indexOf("pelatihan") !== -1) {
+      unitVal = "Ditjen Binalattas";
+    } else if (uLower.indexOf("binapenta") !== -1 || uLower.indexOf("penempatan") !== -1 || uLower.indexOf("pkk") !== -1) {
+      unitVal = "Ditjen Binapenta & PKK";
+    } else if (uLower.indexOf("phi") !== -1 || uLower.indexOf("jsk") !== -1 || uLower.indexOf("industrial") !== -1) {
+      unitVal = "Ditjen PHI & JSK";
+    } else if (uLower.indexOf("binwasnaker") !== -1 || uLower.indexOf("k3") !== -1 || uLower.indexOf("pengawasan") !== -1) {
+      unitVal = "Ditjen Binwasnaker & K3";
+    } else if (uLower.indexOf("barenbang") !== -1 || uLower.indexOf("litbang") !== -1) {
+      unitVal = "Barenbang Naker";
+    } else if (uLower.indexOf("itjen") !== -1 || uLower.indexOf("inspektorat") !== -1) {
+      unitVal = "Itjen";
+    } else if (uLower.indexOf("perencanaan") !== -1 || uLower.indexOf("kinerja") !== -1 || uLower.indexOf("manj") !== -1) {
+      unitVal = "Biro Perencanaan & Manj. Kinerja";
+    } else if (uLower.indexOf("keuangan") !== -1) {
+      unitVal = "Biro Keuangan";
+    } else if (uLower.indexOf("organisasi") !== -1 || uLower.indexOf("sdm") !== -1 || uLower.indexOf("aparatur") !== -1) {
+      unitVal = "Biro Organisasi & SDM Aparatur";
+    } else if (uLower.indexOf("hukum") !== -1) {
+      unitVal = "Biro Hukum";
+    } else if (uLower.indexOf("kerjasama") !== -1 || uLower.indexOf("luar negeri") !== -1 || uLower.indexOf("ln") !== -1) {
+      unitVal = "Biro Kerjasama LN";
+    } else if (uLower.indexOf("humas") !== -1 || uLower.indexOf("masyarakat") !== -1 || uLower.indexOf("hub.") !== -1) {
+      unitVal = "Biro Hub. Masyarakat";
+    } else if (uLower.indexOf("pusdiklat") !== -1 || uLower.indexOf("diklat") !== -1) {
+      unitVal = "Pusdiklat";
+    } else if (uLower.indexOf("umum") !== -1) {
+      unitVal = "Biro Umum";
+    } else {
+      unitVal = "Biro Umum";
+    }
+
     const rowValues = [
       rec.no_urut || (index + 1),
       rec.tanggal_masuk || "",
-      rec.unit_pengolah_arsip || "-",
+      unitVal,
       signerVal,
       reqVal,
       rec.tujuan_surat || "-",

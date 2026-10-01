@@ -479,10 +479,45 @@ function upsertRows(sheet, records) {
       reqVal = "Tanda Tangan";
     }
 
+    // Normalisasi Unit Kerja
+    let unitVal = String(rec.unit_pengolah_arsip || "").trim();
+    const uLower = unitVal.toLowerCase();
+    if (uLower.indexOf("binalattas") !== -1 || uLower.indexOf("vokasi") !== -1 || uLower.indexOf("pelatihan") !== -1) {
+      unitVal = "Ditjen Binalattas";
+    } else if (uLower.indexOf("binapenta") !== -1 || uLower.indexOf("penempatan") !== -1 || uLower.indexOf("pkk") !== -1) {
+      unitVal = "Ditjen Binapenta & PKK";
+    } else if (uLower.indexOf("phi") !== -1 || uLower.indexOf("jsk") !== -1 || uLower.indexOf("industrial") !== -1) {
+      unitVal = "Ditjen PHI & JSK";
+    } else if (uLower.indexOf("binwasnaker") !== -1 || uLower.indexOf("k3") !== -1 || uLower.indexOf("pengawasan") !== -1) {
+      unitVal = "Ditjen Binwasnaker & K3";
+    } else if (uLower.indexOf("barenbang") !== -1 || uLower.indexOf("litbang") !== -1) {
+      unitVal = "Barenbang Naker";
+    } else if (uLower.indexOf("itjen") !== -1 || uLower.indexOf("inspektorat") !== -1) {
+      unitVal = "Itjen";
+    } else if (uLower.indexOf("perencanaan") !== -1 || uLower.indexOf("kinerja") !== -1 || uLower.indexOf("manj") !== -1) {
+      unitVal = "Biro Perencanaan & Manj. Kinerja";
+    } else if (uLower.indexOf("keuangan") !== -1) {
+      unitVal = "Biro Keuangan";
+    } else if (uLower.indexOf("organisasi") !== -1 || uLower.indexOf("sdm") !== -1 || uLower.indexOf("aparatur") !== -1) {
+      unitVal = "Biro Organisasi & SDM Aparatur";
+    } else if (uLower.indexOf("hukum") !== -1) {
+      unitVal = "Biro Hukum";
+    } else if (uLower.indexOf("kerjasama") !== -1 || uLower.indexOf("luar negeri") !== -1 || uLower.indexOf("ln") !== -1) {
+      unitVal = "Biro Kerjasama LN";
+    } else if (uLower.indexOf("humas") !== -1 || uLower.indexOf("masyarakat") !== -1 || uLower.indexOf("hub.") !== -1) {
+      unitVal = "Biro Hub. Masyarakat";
+    } else if (uLower.indexOf("pusdiklat") !== -1 || uLower.indexOf("diklat") !== -1) {
+      unitVal = "Pusdiklat";
+    } else if (uLower.indexOf("umum") !== -1) {
+      unitVal = "Biro Umum";
+    } else {
+      unitVal = "Biro Umum";
+    }
+
     const rowValues = [
       rec.no_urut || (index + 1),
       rec.tanggal_masuk || "",
-      rec.unit_pengolah_arsip || "-",
+      unitVal,
       signerVal,
       reqVal,
       rec.tujuan_surat || "-",
