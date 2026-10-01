@@ -310,12 +310,12 @@ onMounted(() => {
     }
 });
 
-const exportExcel = () => {
+const exportExcel = (statusOverride?: string) => {
     window.location.href = route('data-surat.export', {
         workbook: currentWorkbookId.value,
         search: search.value,
         year: props.selectedYear,
-        status: filterStatus.value,
+        status: statusOverride !== undefined ? statusOverride : filterStatus.value,
     });
 };
 
@@ -382,9 +382,12 @@ const switchToEdit = () => {
                             <i class="bi bi-download text-success"></i>
                             <span>Export</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-slate-200">
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-slate-200" style="min-width: 250px;">
                             <li><a class="dropdown-item py-2 small" href="#" @click.prevent="printData"><i class="bi bi-file-earmark-pdf text-danger me-2"></i> Cetak PDF</a></li>
-                            <li><a class="dropdown-item py-2 small" href="#" @click.prevent="exportExcel"><i class="bi bi-file-earmark-excel text-success me-2"></i> Unduh Excel (CSV)</a></li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li><a class="dropdown-item py-2 small fw-semibold" href="#" @click.prevent="exportExcel('all')"><i class="bi bi-file-earmark-excel text-success me-2"></i> Unduh Excel (Semua - Sheet Terpisah)</a></li>
+                            <li><a class="dropdown-item py-2 small" href="#" @click.prevent="exportExcel('with_number')"><i class="bi bi-check-circle text-primary me-2"></i> Unduh Excel (Hanya Sudah Bernomor)</a></li>
+                            <li><a class="dropdown-item py-2 small" href="#" @click.prevent="exportExcel('without_number')"><i class="bi bi-dash-circle text-warning me-2"></i> Unduh Excel (Hanya Belum Bernomor)</a></li>
                         </ul>
                     </div>
                 </div>

@@ -36,14 +36,16 @@ class DataSuratExport implements
         protected SupportCollection $types,
         protected int $year,
         protected string $search = '',
-        protected string $status = 'all'
+        protected string $status = 'all',
+        protected ?string $customSheetTitle = null
     ) {
         $this->lastColumn = Coordinate::stringFromColumnIndex(count($this->headings()));
     }
 
     public function title(): string
     {
-        $safeTitle = preg_replace('/[:\\\\\/\?\*\[\]]/', '-', $this->workbookName);
+        $raw = $this->customSheetTitle ?: $this->workbookName;
+        $safeTitle = preg_replace('/[:\\\\\/\?\*\[\]]/', '-', $raw);
         return mb_substr($safeTitle, 0, 31);
     }
 
@@ -195,8 +197,8 @@ class DataSuratExport implements
             'I' => 10,
             'J' => 16,
             'K' => 8,
-            'L' => 22,
-            'M' => 42,
+            'L' => 24,
+            'M' => 44,
             'N' => 18,
         ];
     }
@@ -210,15 +212,22 @@ class DataSuratExport implements
 
                 $sheet->insertNewRowBefore(1, 4);
 
+                $isUnnumbered = in_array($this->status, ['without_number', 'no_number']);
+                $titleText = $isUnnumbered
+                    ? 'REKAP SURAT / NASKAH BELUM DIBERI NOMOR (' . $this->workbookName . ')'
+                    : 'REKAP NOMOR SURAT KELUAR (' . $this->workbookName . ')';
+
+                $headerBgColor = $isUnnumbered ? '9A3412' : '1C386F';
+
                 $sheet->mergeCells("A1:{$lastCol}1");
-                $sheet->setCellValue('A1', 'REKAP NOMOR SURAT KELUAR (' . $this->workbookName . ')');
-                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+                $sheet->setCellValue('A1', $titleText);
+                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(15);
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 $sheet->mergeCells("A3:{$lastCol}3");
                 $sheet->setCellValue('A3', 'TAHUN ' . $this->year);
-                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(13);
-                $sheet->getStyle('A3')->getFont()->getColor()->setRGB('FF0000');
+                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(12);
+                $sheet->getStyle('A3')->getFont()->getColor()->setRGB($isUnnumbered ? 'C2410C' : '1E40AF');
                 $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 $headerRow = 5;
@@ -226,7 +235,7 @@ class DataSuratExport implements
 
                 $sheet->getStyle($headerRange)->applyFromArray([
                     'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '375623']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $headerBgColor]],
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER,
                         'vertical' => Alignment::VERTICAL_CENTER,
@@ -236,7 +245,7 @@ class DataSuratExport implements
                 ]);
                 $sheet->getRowDimension($headerRow)->setRowHeight(32);
 
-                $lastRow = $sheet->getHighestRow();
+                $lastRow = max($sheet->getHighestRow(), 6);
                 $sheet->getStyle("A{$headerRow}:{$lastCol}{$lastRow}")->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'B7B7B7']]],
                 ]);
