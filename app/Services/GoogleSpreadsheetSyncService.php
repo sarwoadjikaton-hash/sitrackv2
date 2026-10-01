@@ -603,6 +603,20 @@ class GoogleSpreadsheetSyncService
                 $padding = $num->type?->sequence_padding ?? 4;
                 $seqText = $num->sequence_number ? str_pad((string) $num->sequence_number, $padding, '0', STR_PAD_LEFT) : '-';
 
+                // Normalisasi Penandatangan Surat ("Sekretaris Jenderal", "a.n. Menaker", "a.n. Sekretaris Jenderal", "Plh. Sekjen", "Plt. Sekjen")
+                $rawSigner = trim((string) ($num->signatory ?? ''));
+                if (stripos($rawSigner, 'menaker') !== false || stripos($rawSigner, 'menteri') !== false) {
+                    $penandatangan = 'a.n. Menaker';
+                } elseif (stripos($rawSigner, 'an sekjen') !== false || stripos($rawSigner, 'a.n. sekjen') !== false || stripos($rawSigner, 'a.n. sekretaris') !== false) {
+                    $penandatangan = 'a.n. Sekretaris Jenderal';
+                } elseif (stripos($rawSigner, 'plh') !== false) {
+                    $penandatangan = 'Plh. Sekjen';
+                } elseif (stripos($rawSigner, 'plt') !== false) {
+                    $penandatangan = 'Plt. Sekjen';
+                } else {
+                    $penandatangan = 'Sekretaris Jenderal';
+                }
+
                 // Normalisasi Permohonan agar sesuai Aturan Validasi Data Spreadsheet Kemnaker ("Tanda Tangan", "Paraf", "Tanda Tangan & Paraf")
                 $rawReq = trim((string) ($num->request_type ?? ''));
                 if (stripos($rawReq, 'paraf') !== false && (stripos($rawReq, 'tanda tangan') !== false || stripos($rawReq, 'ttd') !== false)) {
@@ -621,7 +635,7 @@ class GoogleSpreadsheetSyncService
                     'no_urut' => $rowCounter,
                     'tanggal_masuk' => $num->incoming_date ? \Carbon\Carbon::parse($num->incoming_date)->format('d/m/Y') : '',
                     'unit_pengolah_arsip' => $num->processing_unit_text ?: '-',
-                    'penandatangan_surat' => $num->signatory ?: '-',
+                    'penandatangan_surat' => $penandatangan,
                     'permohonan' => $permohonan,
                     'tujuan_surat' => $num->destination ?: '-',
                     'tanggal_surat' => $num->letter_date ? \Carbon\Carbon::parse($num->letter_date)->format('d M Y') : '',
@@ -833,12 +847,38 @@ function upsertRows(sheet, records) {
   const newRows = [];
 
   records.forEach(function (rec, index) {
+    // Normalisasi Penandatangan
+    let signerVal = String(rec.penandatangan_surat || "").trim();
+    const sLower = signerVal.toLowerCase();
+    if (sLower.indexOf("menaker") !== -1 || sLower.indexOf("menteri") !== -1) {
+      signerVal = "a.n. Menaker";
+    } else if (sLower.indexOf("an sekjen") !== -1 || sLower.indexOf("a.n.") !== -1) {
+      signerVal = "a.n. Sekretaris Jenderal";
+    } else if (sLower.indexOf("plh") !== -1) {
+      signerVal = "Plh. Sekjen";
+    } else if (sLower.indexOf("plt") !== -1) {
+      signerVal = "Plt. Sekjen";
+    } else {
+      signerVal = "Sekretaris Jenderal";
+    }
+
+    // Normalisasi Permohonan
+    let reqVal = String(rec.permohonan || "").trim();
+    const rLower = reqVal.toLowerCase();
+    if (rLower.indexOf("paraf") !== -1 && (rLower.indexOf("tanda tangan") !== -1 || rLower.indexOf("ttd") !== -1)) {
+      reqVal = "Tanda Tangan & Paraf";
+    } else if (rLower.indexOf("paraf") !== -1) {
+      reqVal = "Paraf";
+    } else {
+      reqVal = "Tanda Tangan";
+    }
+
     const rowValues = [
       rec.no_urut || (index + 1),
       rec.tanggal_masuk || "",
       rec.unit_pengolah_arsip || "-",
-      rec.penandatangan_surat || "-",
-      rec.permohonan || "Tanda Tangan",
+      signerVal,
+      reqVal,
       rec.tujuan_surat || "-",
       rec.tanggal_surat || "",
       rec.keamanan_akses || "B",

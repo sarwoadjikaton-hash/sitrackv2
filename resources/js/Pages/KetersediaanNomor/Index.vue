@@ -453,12 +453,38 @@ function upsertRows(sheet, records) {
   const newRows = [];
 
   records.forEach(function (rec, index) {
+    // Normalisasi Penandatangan
+    let signerVal = String(rec.penandatangan_surat || "").trim();
+    const sLower = signerVal.toLowerCase();
+    if (sLower.indexOf("menaker") !== -1 || sLower.indexOf("menteri") !== -1) {
+      signerVal = "a.n. Menaker";
+    } else if (sLower.indexOf("an sekjen") !== -1 || sLower.indexOf("a.n.") !== -1) {
+      signerVal = "a.n. Sekretaris Jenderal";
+    } else if (sLower.indexOf("plh") !== -1) {
+      signerVal = "Plh. Sekjen";
+    } else if (sLower.indexOf("plt") !== -1) {
+      signerVal = "Plt. Sekjen";
+    } else {
+      signerVal = "Sekretaris Jenderal";
+    }
+
+    // Normalisasi Permohonan
+    let reqVal = String(rec.permohonan || "").trim();
+    const rLower = reqVal.toLowerCase();
+    if (rLower.indexOf("paraf") !== -1 && (rLower.indexOf("tanda tangan") !== -1 || rLower.indexOf("ttd") !== -1)) {
+      reqVal = "Tanda Tangan & Paraf";
+    } else if (rLower.indexOf("paraf") !== -1) {
+      reqVal = "Paraf";
+    } else {
+      reqVal = "Tanda Tangan";
+    }
+
     const rowValues = [
       rec.no_urut || (index + 1),
       rec.tanggal_masuk || "",
       rec.unit_pengolah_arsip || "-",
-      rec.penandatangan_surat || "-",
-      rec.permohonan || "Tanda Tangan",
+      signerVal,
+      reqVal,
       rec.tujuan_surat || "-",
       rec.tanggal_surat || "",
       rec.keamanan_akses || "B",
