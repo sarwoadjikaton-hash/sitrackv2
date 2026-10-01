@@ -244,7 +244,7 @@ const goBack = () => window.history.back();
                 <td width="2%">:</td>
                 <td width="53%" contenteditable="true">{{ letter.sender_unit || letter.sender_name }}</td>
                 <td width="25%" class="border-left text-center" contenteditable="true">
-                    {{ formatDate(letter.letter_date || letter.received_date) }}
+                    {{ formatDate(letter.received_date || letter.created_at) }}
                 </td>
             </tr>
             <tr>
@@ -285,7 +285,7 @@ const goBack = () => window.history.back();
 
             <!-- Receiver Signature Area (With Existing TTD Image or Canvas) -->
             <div class="receiver-area">
-                <p class="mb-1 text-center small fw-bold" style="font-size: 9.5px;">
+                <p class="mb-1 text-center small fw-bold receiver-title">
                     Yang Menerima Surat :
                 </p>
 
@@ -320,7 +320,7 @@ const goBack = () => window.history.back();
                 </div>
 
                 <div class="text-center mt-1">
-                    <p class="mb-0 text-center small text-dark" style="font-size: 9px;" contenteditable="true" @input="receiverName = ($event.target as HTMLElement).innerText">
+                    <p class="mb-0 text-center text-dark receiver-name-text" contenteditable="true" @input="receiverName = ($event.target as HTMLElement).innerText">
                         ( {{ receiverName ? receiverName : '....................................' }} )
                     </p>
                 </div>
@@ -328,7 +328,7 @@ const goBack = () => window.history.back();
         </div>
 
         <div class="notes-section">
-            <p class="fw-bold mb-1" style="font-size: 9.5px;">Catatan / Tindak Lanjut Sekjen :</p>
+            <p class="fw-bold mb-1 notes-title">Catatan / Tindak Lanjut Sekjen :</p>
             <div class="notes-content" contenteditable="true">{{ letter.notes || '' }}</div>
         </div>
 
@@ -349,7 +349,7 @@ const goBack = () => window.history.back();
                     <td>Tanggal</td>
                     <td>:</td>
                     <td contenteditable="true">
-                        {{ formatDate(letter.letter_date || letter.received_date) }}
+                        {{ letter.letter_date ? formatDate(letter.letter_date) : '-' }}
                     </td>
                 </tr>
             </table>
@@ -358,9 +358,9 @@ const goBack = () => window.history.back();
         <div class="qr-footer mt-2">
             <div class="d-flex align-items-center border border-dark p-2">
                 <div class="qr-img me-3">
-                    <img :src="qrCodeBase64" width="56" height="56" alt="QR Code" />
+                    <img :src="qrCodeBase64" width="58" height="58" alt="QR Code" />
                 </div>
-                <div class="qr-text small" style="font-size: 9.5px; line-height: 1.25;">
+                <div class="qr-text small">
                     <p class="mb-0 fw-bold">Scan QR untuk Update Status & Tracking Surat</p>
                     <p class="mb-0">Kode Resi: <strong class="font-monospace">{{ letter.tracking_code }}</strong></p>
                     <p class="mb-0 text-muted">Aplikasi SiTrack - TU SEKJEN</p>
@@ -420,15 +420,16 @@ const goBack = () => window.history.back();
 /* AREA CHECKBOX */
 .checkbox-area {
     flex: 3;
-    padding: 10px;
+    padding: 10px 12px;
     border-right: 1.5px solid black;
     background-color: #fff;
     cursor: default;
 }
 
 .check-item {
-    font-size: 9.5px;
-    margin-bottom: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-bottom: 5px;
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -440,19 +441,20 @@ const goBack = () => window.history.back();
 }
 
 .check-item i {
-    font-size: 14px;
+    font-size: 16px;
 }
 
 /* STYLE TABEL & GARIS */
 .header-box {
     border: 1.5px solid black;
     border-bottom: none;
-    padding: 6px;
+    padding: 7px 8px;
 }
 
 .header-box h2 {
-    font-size: 10.5px;
-    line-height: 1.3;
+    font-size: 12px;
+    line-height: 1.35;
+    letter-spacing: 0.2px;
 }
 
 .main-table {
@@ -463,8 +465,9 @@ const goBack = () => window.history.back();
 
 .main-table td {
     border: 1px solid black;
-    padding: 3.5px 5px;
-    font-size: 9px;
+    padding: 4.5px 6px;
+    font-size: 11px;
+    line-height: 1.35;
 }
 
 .middle-section {
@@ -480,6 +483,15 @@ const goBack = () => window.history.back();
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
+}
+
+.receiver-title {
+    font-size: 11px;
+}
+
+.receiver-name-text {
+    font-size: 11px;
+    font-weight: 600;
 }
 
 .signature-canvas-box {
@@ -516,7 +528,7 @@ const goBack = () => window.history.back();
 
 .signature-hint {
     position: absolute;
-    font-size: 9px;
+    font-size: 9.5px;
     color: #94a3b8;
     pointer-events: none;
     user-select: none;
@@ -540,15 +552,26 @@ const goBack = () => window.history.back();
     min-height: 85px;
 }
 
+.notes-title {
+    font-size: 11.5px;
+}
+
 .notes-content {
     min-height: 65px;
-    font-size: 9px;
+    font-size: 11px;
+    line-height: 1.35;
     outline: none;
 }
 
 .bottom-info td {
-    padding: 1.5px 4px;
-    font-size: 8.5px;
+    padding: 2.5px 4px;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.qr-text {
+    font-size: 11px;
+    line-height: 1.35;
 }
 
 @media print {

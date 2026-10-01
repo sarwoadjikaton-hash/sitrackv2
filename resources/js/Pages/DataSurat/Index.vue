@@ -23,11 +23,13 @@ const props = defineProps<{
         year: number;
         periode?: string;
         sort?: string;
+        status?: string;
     };
     stats: {
         used: number;
         available: number;
         reserved: number;
+        without_number?: number;
     };
     periodeLabel: string;
     isPrintMode: boolean;
@@ -37,6 +39,7 @@ const search = ref(props.filters.search || '');
 const currentWorkbookId = ref(props.selectedWorkbookId || 0);
 const filterPeriode = ref(props.filters.periode || 'all');
 const filterSort = ref(props.filters.sort || 'number_desc');
+const filterStatus = ref(props.filters.status || 'all');
 const filterTanggal = ref(new Date().toISOString().substring(0, 10));
 const filterBulan = ref(new Date().getMonth() + 1);
 
@@ -52,10 +55,17 @@ const sortOptions = [
     { value: 'number_asc', label: 'No. Urut (Kecil → Besar)' },
 ];
 
+const statusOptions = [
+    { value: 'all', label: 'Semua Status (Bernomor & Belum)' },
+    { value: 'with_number', label: 'Sudah Diberi Nomor' },
+    { value: 'without_number', label: 'Belum Diberi Nomor' },
+    { value: 'reserved', label: 'Reservasi / Booking' },
+];
+
 // Modal state
 const showEditModal = ref(false);
 const showImportModal = ref(false);
-const editingId = ref<number | null>(null);
+const editingId = ref<number | string | null>(null);
 const isEditing = ref(false);
 
 const availableSlots = ref<LetterNumber[]>([]);
@@ -204,15 +214,18 @@ const applyFilter = () => {
         bulan: filterBulan.value,
         tahun: props.selectedYear,
         sort: filterSort.value,
+        status: filterStatus.value,
     }, { preserveState: true });
 };
 
 watch(filterPeriode, () => applyFilter());
 watch(filterSort, () => applyFilter());
+watch(filterStatus, () => applyFilter());
 watch(currentWorkbookId, () => applyFilter());
 
 const openCreateModal = () => {
     isEditing.value = false;
+    editingId.value = null;
     form.reset();
     form.type_id = currentWorkbookId.value > 0 ? currentWorkbookId.value : (props.types[0]?.id || 1);
     fetchSlots(Number(form.type_id));
@@ -235,12 +248,19 @@ const formatDateToInput = (val?: string | null): string => {
     return val.substring(0, 10);
 };
 
-const openEditModal = (record: LetterNumber) => {
-    isEditing.value = true;
-    editingId.value = record.id;
+const openEditModal = (record: any) => {
+    isEditing.value = !record.is_unnumbered;
+    editingId.value = record.actual_id || record.id;
 
-    form.letter_number_id = record.id;
-    form.type_id = record.type_id ?? record.type?.id ?? props.types[0]?.id ?? 1;
+    if (record.is_unnumbered) {
+        form.letter_number_id = '';
+        form.type_id = record.type_id ?? record.type?.id ?? props.types[0]?.id ?? 1;
+        fetchSlots(Number(form.type_id));
+    } else {
+        form.letter_number_id = record.actual_id || record.id;
+        form.type_id = record.type_id ?? record.type?.id ?? props.types[0]?.id ?? 1;
+    }
+
     form.incoming_date = formatDateToInput(record.incoming_date);
     form.letter_date = formatDateToInput(record.letter_date);
     form.unit_id = record.unit_id ?? null;
@@ -295,6 +315,7 @@ const exportExcel = () => {
         workbook: currentWorkbookId.value,
         search: search.value,
         year: props.selectedYear,
+        status: filterStatus.value,
     });
 };
 
@@ -381,11 +402,11 @@ const switchToEdit = () => {
                 </div>
             </div>
 
-            <!-- Workbook Filter Card (Figma Prototype Model) -->
+            <!-- Workbook & Status Filter Card -->
             <div class="bg-white rounded-4 border border-slate-200 shadow-sm p-3 p-sm-4 no-print">
                 <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-3">
-                    <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center flex-grow-1 flex-wrap flex-md-nowrap">
-                        <div style="min-width: 180px;">
+                    <div class="d-flex flex-column flex-sm-row gap-2.5 align-items-sm-center flex-grow-1 flex-wrap">
+                        <div style="min-width: 170px;">
                             <label class="d-block small fw-bold text-muted mb-1">Filter Workbook</label>
                             <SearchableSelect
                                 v-model="currentWorkbookId"
@@ -398,7 +419,17 @@ const switchToEdit = () => {
                                 @update:model-value="applyFilter"
                             />
                         </div>
-                        <div style="min-width: 180px;">
+                        <div style="min-width: 185px;">
+                            <label class="d-block small fw-bold text-muted mb-1">Status Penomoran</label>
+                            <SearchableSelect
+                                v-model="filterStatus"
+                                :options="statusOptions"
+                                placeholder="Status Penomoran"
+                                size="sm"
+                                @update:model-value="applyFilter"
+                            />
+                        </div>
+                        <div style="min-width: 150px;">
                             <label class="d-block small fw-bold text-muted mb-1">Urutan</label>
                             <SearchableSelect
                                 v-model="filterSort"
@@ -408,7 +439,7 @@ const switchToEdit = () => {
                                 @update:model-value="applyFilter"
                             />
                         </div>
-                        <div class="flex-grow-1" style="min-width: 200px;">
+                        <div class="flex-grow-1" style="min-width: 180px;">
                             <label class="d-block small fw-bold text-muted mb-1">Pencarian</label>
                             <div class="position-relative">
                                 <i class="bi bi-search position-absolute text-muted" style="left: 12px; top: 50%; transform: translateY(-50%);"></i>
@@ -417,26 +448,30 @@ const switchToEdit = () => {
                                     type="text"
                                     class="form-control rounded-3 py-2 small shadow-none"
                                     style="padding-left: 36px;"
-                                    placeholder="Cari nomor surat, perihal, unit, penanda tangan..."
+                                    placeholder="Cari nomor, perihal, unit..."
                                     @keyup.enter="applyFilter"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <!-- Mini stats inline (Figma Model) -->
+                    <!-- Mini stats inline (4 Cards) -->
                     <div class="d-flex gap-2 align-items-end flex-wrap flex-sm-nowrap">
-                        <div class="rounded-3 border px-3 py-2 text-center flex-grow-1 flex-sm-grow-0" style="background-color: #f8fafc; border-color: #e2e8f0; min-width: 80px;">
+                        <div class="rounded-3 border px-2.5 py-2 text-center flex-grow-1 flex-sm-grow-0" style="background-color: #f8fafc; border-color: #e2e8f0; min-width: 75px;">
                             <div class="fs-5 fw-bold font-display text-muted">{{ stats.used }}</div>
-                            <div class="small text-muted" style="font-size: 0.72rem;">Terpakai</div>
+                            <div class="small text-muted" style="font-size: 0.7rem;">Bernomor</div>
                         </div>
-                        <div class="rounded-3 border px-3 py-2 text-center flex-grow-1 flex-sm-grow-0" style="background-color: #f0f9ff; border-color: #e0f2fe; min-width: 80px;">
+                        <div class="rounded-3 border px-2.5 py-2 text-center flex-grow-1 flex-sm-grow-0" style="background-color: #fffbeb; border-color: #fef3c7; min-width: 75px;">
+                            <div class="fs-5 fw-bold font-display" style="color: #b45309;">{{ stats.without_number || 0 }}</div>
+                            <div class="small text-muted" style="font-size: 0.7rem;">Belum Ada No</div>
+                        </div>
+                        <div class="rounded-3 border px-2.5 py-2 text-center flex-grow-1 flex-sm-grow-0" style="background-color: #f0f9ff; border-color: #e0f2fe; min-width: 75px;">
                             <div class="fs-5 fw-bold font-display" style="color: #0369a1;">{{ stats.available }}</div>
-                            <div class="small text-muted" style="font-size: 0.72rem;">Tersedia</div>
+                            <div class="small text-muted" style="font-size: 0.7rem;">Slot Tersedia</div>
                         </div>
-                        <div class="rounded-3 border px-3 py-2 text-center flex-grow-1 flex-sm-grow-0" style="background-color: #fffbeb; border-color: #fef3c7; min-width: 80px;">
-                            <div class="fs-5 fw-bold font-display" style="color: #b45309;">{{ stats.reserved }}</div>
-                            <div class="small text-muted" style="font-size: 0.72rem;">Reservasi</div>
+                        <div class="rounded-3 border px-2.5 py-2 text-center flex-grow-1 flex-sm-grow-0" style="background-color: #faf5ff; border-color: #f3e8ff; min-width: 75px;">
+                            <div class="fs-5 fw-bold font-display" style="color: #7e22ce;">{{ stats.reserved }}</div>
+                            <div class="small text-muted" style="font-size: 0.7rem;">Reservasi</div>
                         </div>
                     </div>
                 </div>
@@ -460,27 +495,40 @@ const switchToEdit = () => {
                     </thead>
                     <tbody>
                         <tr v-for="record in displayRecords" :key="record.id">
-                            <td class="text-center fw-bold">{{
-                                String(record.sequence_number).padStart(record.type?.sequence_padding || 4, '0') }}</td>
+                            <td class="text-center">
+                                <span v-if="record.sequence_number" class="fw-bold font-monospace">
+                                    #{{ String(record.sequence_number).padStart(record.type?.sequence_padding || 4, '0') }}
+                                </span>
+                                <span v-else class="badge bg-secondary-subtle text-secondary border font-monospace" style="font-size: 0.75rem;">
+                                    Belum Ada
+                                </span>
+                            </td>
                             <td>
-                                <div class="fw-bold text-primary">{{ record.number_text || '-' }}</div>
-                                <small class="text-muted">Tgl: {{ record.letter_date ? new
-                                    Date(record.letter_date).toLocaleDateString('id-ID') : '-' }}</small>
+                                <div v-if="record.number_text" class="fw-bold text-primary font-monospace">{{ record.number_text }}</div>
+                                <div v-else class="badge bg-warning-subtle text-warning-emphasis font-monospace fw-semibold" style="font-size: 0.78rem;">
+                                    <i class="bi bi-clock-history me-1"></i>Belum Diberi Nomor
+                                </div>
+                                <small class="text-muted d-block mt-0.5">Tgl: {{ record.letter_date ? new
+                                    Date(record.letter_date).toLocaleDateString('id-ID') : (record.incoming_date ? new Date(record.incoming_date).toLocaleDateString('id-ID') : '-') }}</small>
                             </td>
                             <td>
                                 <div class="fw-semibold">{{ record.processing_unit_text || '-' }}</div>
                                 <small class="text-muted">TTD: {{ record.signatory || '-' }}</small>
                             </td>
                             <td>
-                                <div>{{ record.destination || '-' }}</div><small class="text-muted">Mohon: {{
-                                    record.request_type || '-' }}</small>
+                                <div>{{ record.destination || '-' }}</div>
+                                <small class="text-muted">Mohon: {{ record.request_type || '-' }}</small>
                             </td>
                             <td style="max-width: 300px;">
                                 <div :class="{ 'text-truncate': !isPrintMode }">{{ record.subject }}</div>
                                 <small v-if="record.technical_officer" class="text-muted">Oleh: {{
                                     record.technical_officer }}</small>
+                                <div v-if="record.tracking_code" class="text-muted font-monospace" style="font-size: 0.72rem;">Resi: {{ record.tracking_code }}</div>
                             </td>
-                            <td><small>{{ record.scan_result || record.nd_pengantar || '-' }}</small></td>
+                            <td>
+                                <small class="d-block">{{ record.scan_result || record.nd_pengantar || '-' }}</small>
+                                <span v-if="record.is_unnumbered" class="badge bg-info-subtle text-info-emphasis" style="font-size: 0.7rem;">Menunggu Penomoran</span>
+                            </td>
                             <td v-if="!isPrintMode" class="text-end no-print">
                                 <div class="d-inline-flex gap-1">
                                     <button @click="openViewModal(record)"
@@ -488,8 +536,11 @@ const switchToEdit = () => {
                                         <i class="bi bi-eye"></i>
                                     </button>
                                     <button @click="openEditModal(record)"
-                                        class="btn btn-sm btn-outline-primary border-0" title="Edit">
-                                        <i class="bi bi-pencil-square"></i>
+                                        class="btn btn-sm"
+                                        :class="record.is_unnumbered ? 'btn-primary-blue fw-semibold px-2 py-1' : 'btn-outline-primary border-0'"
+                                        :title="record.is_unnumbered ? 'Beri Nomor Surat' : 'Edit Data'">
+                                        <i class="bi" :class="record.is_unnumbered ? 'bi-hash' : 'bi-pencil-square'"></i>
+                                        <span v-if="record.is_unnumbered" class="ms-1 small">Beri No</span>
                                     </button>
                                 </div>
                             </td>
@@ -505,18 +556,22 @@ const switchToEdit = () => {
             <div class="d-block d-md-none no-print">
                 <div v-for="record in displayRecords" :key="'mob-ds-' + record.id" class="p-3 border-bottom bg-white">
                     <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                        <span class="badge bg-primary-subtle text-primary font-monospace px-2.5 py-1 fs-6">
+                        <span v-if="record.sequence_number" class="badge bg-primary-subtle text-primary font-monospace px-2.5 py-1 fs-6">
                             #{{ String(record.sequence_number).padStart(record.type?.sequence_padding || 4, '0') }}
+                        </span>
+                        <span v-else class="badge bg-warning-subtle text-warning-emphasis font-monospace px-2.5 py-1">
+                            <i class="bi bi-clock me-1"></i>Belum Ada Nomor
                         </span>
                         <div class="small text-muted d-flex align-items-center gap-1">
                             <i class="bi bi-calendar3"></i>
-                            <span>{{ record.letter_date ? new Date(record.letter_date).toLocaleDateString('id-ID') : '-' }}</span>
+                            <span>{{ record.letter_date ? new Date(record.letter_date).toLocaleDateString('id-ID') : (record.incoming_date ? new Date(record.incoming_date).toLocaleDateString('id-ID') : '-') }}</span>
                         </div>
                     </div>
 
                     <div class="mb-2">
                         <div class="fw-bold text-dark mb-1 leading-snug">{{ record.subject || '(Tanpa Perihal)' }}</div>
-                        <div class="small font-monospace text-primary fw-semibold">{{ record.number_text || '-' }}</div>
+                        <div v-if="record.number_text" class="small font-monospace text-primary fw-semibold">{{ record.number_text }}</div>
+                        <div v-else class="small text-warning-emphasis fw-semibold"><i class="bi bi-clock-history me-1"></i>Belum Diberi Nomor</div>
                     </div>
 
                     <div class="bg-light rounded-3 p-2.5 mb-2.5 small text-secondary">
@@ -529,8 +584,8 @@ const switchToEdit = () => {
                             <i class="bi bi-eye"></i>
                             <span>Detail</span>
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary p-1.5 px-3" title="Edit" @click="openEditModal(record)">
-                            <i class="bi bi-pencil-square"></i>
+                        <button type="button" class="btn btn-sm btn-outline-secondary p-1.5 px-3" :title="record.is_unnumbered ? 'Beri Nomor' : 'Edit'" @click="openEditModal(record)">
+                            <i class="bi" :class="record.is_unnumbered ? 'bi-hash' : 'bi-pencil-square'"></i>
                         </button>
                     </div>
                 </div>
@@ -557,12 +612,14 @@ const switchToEdit = () => {
                             Detail Surat
                         </span>
                         <h5 class="fw-bold mb-0 text-dark">
-                            {{ viewingRecord.number_text || '-' }}
+                            {{ viewingRecord.number_text || '(Belum Diberi Nomor)' }}
                         </h5>
                     </div>
-                    <span class="badge bg-primary-subtle text-primary px-3 py-2">
-                        No. Urut {{ String(viewingRecord.sequence_number).padStart(viewingRecord.type?.sequence_padding
-                            || 4, '0') }}
+                    <span v-if="viewingRecord.sequence_number" class="badge bg-primary-subtle text-primary px-3 py-2 font-monospace">
+                        No. Urut {{ String(viewingRecord.sequence_number).padStart(viewingRecord.type?.sequence_padding || 4, '0') }}
+                    </span>
+                    <span v-else class="badge bg-warning-subtle text-warning-emphasis px-3 py-2 font-monospace fw-semibold">
+                        <i class="bi bi-clock me-1"></i>Belum Diberi Nomor
                     </span>
                 </div>
 
@@ -648,7 +705,8 @@ const switchToEdit = () => {
                 <div class="d-flex justify-content-end gap-2 pt-4 mt-4 border-top">
                     <button type="button" class="btn btn-secondary" @click="closeViewModal">Tutup</button>
                     <button type="button" class="btn btn-primary-blue" @click="switchToEdit">
-                        <i class="bi bi-pencil-square me-1"></i> Edit Data Ini
+                        <i class="bi" :class="viewingRecord.is_unnumbered ? 'bi-hash' : 'bi-pencil-square'"></i>
+                        <span class="ms-1">{{ viewingRecord.is_unnumbered ? 'Beri Nomor / Alokasikan' : 'Edit Data Ini' }}</span>
                     </button>
                 </div>
             </div>

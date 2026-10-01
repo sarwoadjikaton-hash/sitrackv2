@@ -549,7 +549,7 @@ onUnmounted(disposeThree);
                             <i class="bi bi-arrow-up-right"></i>
                         </span>
                         <span class="gooey-label">
-                            <i class="bi bi-pen-fill me-2"></i>Ajukan Permohonan Paraf
+                            <i class="bi bi-pen-fill me-2"></i>Ajukan Permohonan Tanda Tangan & Paraf
                         </span>
                     </Link>
                 </div>

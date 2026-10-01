@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poster Panduan Penggunaan SiTrack - Ukuran A4</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Warna Resmi Design System SiTrack Kemnaker (Solid Flat) */
+            --st-navy: #03205A;          /* Deep Navy */
+            --st-trust-blue: #1C386F;    /* Trust Blue */
+            --st-navy-mid: #2743AF;      /* Navy Mid */
+            --st-teal: #167992;          /* Teal Accent */
+            --st-accent: #3DA5F9;        /* Accent Blue */
+            --st-soft-blue: #B5CCE3;     /* Soft Blue */
+            --st-powder-cyan: #E4F5F9;   /* Powder Cyan */
+            --st-ice-white: #EEF7FC;     /* Ice White */
+            --card-bg: #FFFFFF;
+            --text-main: #03205A;
+            --text-body: #1C386F;
+            --text-muted: #4b6282;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #cbd5e1;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 12px;
+        }
+
+        /* Toolbar Layar */
+        .no-print-toolbar {
+            width: 210mm;
+            max-width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(3, 32, 90, 0.08);
+            border: 1px solid var(--st-soft-blue);
+        }
+
+        .btn-print {
+            background: var(--st-trust-blue);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.15s;
+        }
+
+        .btn-print:hover {
+            background: var(--st-navy);
+        }
+
+        /* Canvas Poster Standar A4 (210mm x 297mm) */
+        .poster-canvas {
+            width: 210mm;
+            height: 297mm;
+            max-width: 100%;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(3, 32, 90, 0.15);
+            border: 2px solid var(--st-navy);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Header Poster - Solid Deep Navy */
+        .poster-header {
+            background: var(--st-navy);
+            color: #ffffff;
+            padding: 24px 30px 20px;
+            border-bottom: 4px solid var(--st-teal);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #143775;
+            padding-bottom: 12px;
+        }
+
+        .instansi-tag {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .instansi-tag img {
+            height: 44px;
+            width: auto;
+        }
+
+        .instansi-text h4 {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--st-soft-blue);
+            font-weight: 700;
+        }
+
+        .instansi-text h3 {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.3px;
+        }
+
+        .app-badge {
+            background: var(--st-trust-blue);
+            border: 1px solid var(--st-teal);
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--st-powder-cyan);
+            letter-spacing: 0.5px;
+        }
+
+        .poster-title-area {
+            text-align: center;
+        }
+
+        .poster-title-area h1 {
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1.25;
+            color: #ffffff;
+            letter-spacing: -0.2px;
+            margin-bottom: 5px;
+        }
+
+        .poster-title-area p {
+            font-size: 12.5px;
+            color: var(--st-powder-cyan);
+            max-width: 580px;
+            margin: 0 auto;
+            line-height: 1.45;
+        }
+
+        /* Body Poster */
+        .poster-body {
+            padding: 20px 30px;
+            background: #ffffff;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Headline Section */
+        .section-headline {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .section-headline span {
+            background: var(--st-powder-cyan);
+            color: var(--st-navy);
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--st-soft-blue);
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+
+        .section-headline h2 {
+            font-size: 16.5px;
+            font-weight: 800;
+            color: var(--st-navy);
+        }
+
+        /* 4 Langkah Grid */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .step-card {
+            background: var(--st-ice-white);
+            border: 1.5px solid var(--st-soft-blue);
+            border-radius: 7px;
+            padding: 12px 14px;
+            display: flex;
+            gap: 11px;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            background: var(--st-navy);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 800;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step-card:nth-child(1) .step-num { background: var(--st-trust-blue); }
+        .step-card:nth-child(2) .step-num { background: var(--st-teal); }
+        .step-card:nth-child(3) .step-num { background: var(--st-navy-mid); }
+        .step-card:nth-child(4) .step-num { background: var(--st-navy); }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h3 {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--st-navy);
+            margin-bottom: 3px;
+            line-height: 1.3;
+        }
+
+        .step-content p {
+            font-size: 11px;
+            color: var(--text-body);
+            line-height: 1.4;
+            margin-bottom: 6px;
+        }
+
+        .step-tag {
+            display: inline-flex;
+            align-items: center;
+            font-size: 9.5px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid var(--st-soft-blue);
+            background: var(--st-powder-cyan);
+            color: var(--st-navy);
+        }
+
+        /* Dua Lajur Penjelasan - Solid SiTrack Theme */
+        .lanes-container {
+            background: var(--st-powder-cyan);
+            border: 1.5px solid var(--st-soft-blue);
+            border-radius: 7px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+        }
+
+        .lanes-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--st-navy);
+            margin-bottom: 8px;
+        }
+
+        .lanes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .lane-box {
+            background: #ffffff;
+            border-radius: 5px;
+            padding: 10px 12px;
+            border: 1px solid var(--st-soft-blue);
+            border-left: 4px solid var(--st-trust-blue);
+        }
+
+        .lane-box.disposisi {
+            border-left-color: var(--st-teal);
+        }
+
+        .lane-box h4 {
+            font-size: 11.5px;
+            font-weight: 800;
+            margin-bottom: 3px;
+            color: var(--st-navy);
+        }
+
+        .lane-box p {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            line-height: 1.35;
+        }
+
+        /* Fitur Unggulan Bar - Solid SiTrack Theme */
+        .features-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .feature-item {
+            text-align: center;
+            background: #ffffff;
+            border: 1px solid var(--st-soft-blue);
+            padding: 10px 6px;
+            border-radius: 6px;
+        }
+
+        .feature-item svg {
+            width: 20px;
+            height: 20px;
+            margin-bottom: 3px;
+        }
+
+        .feature-item h5 {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--st-navy);
+            margin-bottom: 2px;
+        }
+
+        .feature-item span {
+            font-size: 9.5px;
+            color: var(--text-muted);
+        }
+
+        /* Footer Poster - Solid Deep Navy */
+        .poster-footer {
+            background: var(--st-navy);
+            color: #ffffff;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 3px solid var(--st-teal);
+        }
+
+        .footer-left h4 {
+            font-size: 12px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .footer-left p {
+            font-size: 10.5px;
+            color: var(--st-soft-blue);
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+
+        .footer-right .domain-pill {
+            display: inline-block;
+            background: var(--st-teal);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 5px 12px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .footer-right p {
+            font-size: 9.5px;
+            color: var(--st-soft-blue);
+            margin-top: 3px;
+        }
+
+        /* Print Media Styling Khusus Ukuran Kertas A4 (Tepat 1 Lembar) */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+            html, body {
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+                overflow: hidden !important;
+            }
+            .no-print-toolbar {
+                display: none !important;
+            }
+            .poster-canvas {
+                width: 210mm !important;
+                height: 297mm !important;
+                max-width: 210mm !important;
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toolbar Layar (Tidak ikut tercetak) -->
+    <div class="no-print-toolbar">
+        <div>
+            <strong style="color: #03205A; font-size: 14px;">SiTrack Poster Panduan</strong>
+            <span style="font-size: 12px; color: #4b6282; margin-left: 8px;">Ukuran Presisi Kertas A4 (210 × 297 mm) • 1 Halaman Pas</span>
+        </div>
+        <button class="btn-print" onclick="window.print()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Cetak Poster A4 / Simpan PDF
+        </button>
+    </div>
+
+    <!-- Canvas Poster Utama A4 -->
+    <div class="poster-canvas">
+        
+        <!-- Header -->
+        <header class="poster-header">
+            <div class="header-top">
+                <div class="instansi-tag">
+                    <img src="/images/kemnaker_logo.png" alt="Logo Kemnaker RI" onerror="this.style.display='none'">
+                    <div class="instansi-text">
+                        <h4>Kementerian Ketenagakerjaan RI</h4>
+                        <h3>Tata Usaha Sekretariat Jenderal</h3>
+                    </div>
+                </div>
+                <div class="app-badge">SiTrack</div>
+            </div>
+
+            <div class="poster-title-area">
+                <h1>PANDUAN TATA CARA PERSURATAN</h1>
+                <p>Alur layanan persuratan, pelacakan digital real-time, dan tata kelola naskah dinas resmi di lingkungan Sekretariat Jenderal Kemnaker RI.</p>
+            </div>
+        </header>
+
+        <!-- Body -->
+        <main class="poster-body">
+
+            <!-- Section 4 Langkah Alur -->
+            <div class="section-headline">
+                <span>Alur Layanan</span>
+                <h2>4 Langkah Persuratan SiTrack</h2>
+            </div>
+
+            <div class="steps-grid">
+                
+                <!-- Langkah 1 -->
+                <div class="step-card">
+                    <div class="step-num">1</div>
+                    <div class="step-content">
+                        <h3>Pengajuan Berkas</h3>
+                        <p>Akses portal <strong>sitrack.my.id</strong> atau loket TU. Isi perihal, unit kerja, nama pemohon, lampiran, dan <strong>nomor WhatsApp aktif</strong>.</p>
+                        <div class="step-tag">Mandiri / Loket TU</div>
+                    </div>
+                </div>
+
+                <!-- Langkah 2 -->
+                <div class="step-card">
+                    <div class="step-num">2</div>
+                    <div class="step-content">
+                        <h3>Terima Resi & QR Code</h3>
+                        <p>Sistem otomatis menerbitkan <strong>Kode Pelacakan Unik</strong> dan QR Code pada lembar disposisi / tanda terima untuk ditempel pada berkas fisik.</p>
+                        <div class="step-tag">Resi & QR Code Instan</div>
+                    </div>
+                </div>
+
+                <!-- Langkah 3 -->
+                <div class="step-card">
+                    <div class="step-num">3</div>
+                    <div class="step-content">
+                        <h3>Pantau Status Real-Time</h3>
+                        <p>Cek posisi berkas di menu <strong>Lacak Surat</strong> atau tunggu <strong>Notifikasi WhatsApp otomatis</strong> saat dokumen diverifikasi & ditandatangani.</p>
+                        <div class="step-tag">WhatsApp Gateway Otomatis</div>
+                    </div>
+                </div>
+
+                <!-- Langkah 4 -->
+                <div class="step-card">
+                    <div class="step-num">4</div>
+                    <div class="step-content">
+                        <h3>Pengambilan Dokumen</h3>
+                        <p>Ambil dokumen fisik di loket TU Sekjen. Petugas memvalidasi dan pemohon membubuhkan <strong>Tanda Tangan Digital</strong> di layar <em>Signature Pad</em>.</p>
+                        <div class="step-tag">Digital Handover / Serah Terima</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Dua Lajur Persuratan -->
+            <div class="lanes-container">
+                <div class="lanes-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#03205A" stroke-width="2.5">
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                    </svg>
+                    Dua Lajur Pemrosesan Berkas di SiTrack
+                </div>
+                <div class="lanes-grid">
+                    <div class="lane-box">
+                        <h4 style="color:#1C386F;">1. Lajur Tindak Lanjut / TTD</h4>
+                        <p>Khusus naskah keluar, nota dinas, surat edaran, SK, dan naskah dinas yang membutuhkan verifikasi tata naskah serta tanda tangan pimpinan.</p>
+                    </div>
+                    <div class="lane-box disposisi">
+                        <h4 style="color:#167992;">2. Lajur Disposisi Masuk</h4>
+                        <p>Khusus surat masuk eksternal/internal yang memerlukan instruksi, arahan tindak lanjut, dan lembar disposisi resmi dari Sekretaris Jenderal.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fitur Tambahan & Keunggulan -->
+            <div class="features-row">
+                <div class="feature-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#1C386F" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <rect x="7" y="7" width="3" height="3"></rect>
+                        <rect x="14" y="7" width="3" height="3"></rect>
+                        <rect x="7" y="14" width="3" height="3"></rect>
+                        <rect x="14" y="14" width="3" height="3"></rect>
+                    </svg>
+                    <h5>Scan QR Bergerak</h5>
+                    <span>Update posisi fisik instan</span>
+                </div>
+                <div class="feature-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#167992" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    <h5>16 Format Naskah</h5>
+                    <span>Penomoran standar resmi</span>
+                </div>
+                <div class="feature-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#03205A" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    <h5>Audit Trail Akurat</h5>
+                    <span>Riwayat & waktu tercatat resmi</span>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="poster-footer">
+            <div class="footer-left">
+                <h4>Bagian Tata Usaha Sekretariat Jenderal</h4>
+                <p>Gedung Kemnaker RI, Jl. Gatot Subroto Kav. 51, Jakarta Selatan</p>
+            </div>
+            <div class="footer-right">
+                <div class="domain-pill">sitrack.my.id</div>
+                <p>Layanan Persuratan & Pelacakan Mandiri</p>
+            </div>
+        </footer>
+
+    </div>
+
+</body>
+</html>

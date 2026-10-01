@@ -41,85 +41,253 @@ class DataSuratController extends Controller
         $year = (int) $request->input('year', date('Y'));
         $periode = $request->input('periode', 'all');
         $sort = $request->input('sort', 'number_desc');
-        $statusFilter = $request->input('status', 'all');
-
-        $query = LetterNumber::with(['type', 'unit'])
-            ->where('number_year', $year);
-
-        if ($statusFilter === 'all') {
-            $query->whereIn('status', ['used', 'reserved', 'preorder']);
-        } else {
-            $query->where('status', $statusFilter);
-        }
-
-        if ($selectedWorkbookId > 0) {
-            $query->where('type_id', $selectedWorkbookId);
-        }
-
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('subject', 'ILIKE', '%' . $search . '%')
-                    ->orWhere('number_text', 'ILIKE', '%' . $search . '%')
-                    ->orWhere('processing_unit_text', 'ILIKE', '%' . $search . '%')
-                    ->orWhere('destination', 'ILIKE', '%' . $search . '%')
-                    ->orWhere('signatory', 'ILIKE', '%' . $search . '%')
-                    ->orWhere('technical_officer', 'ILIKE', '%' . $search . '%')
-                    ->orWhere('reserved_for', 'ILIKE', '%' . $search . '%')
-                    ->orWhereHas('unit', function ($uq) use ($search) {
-                        $uq->where('unit_name', 'ILIKE', '%' . $search . '%');
-                    })
-                    ->orWhereHas('letter', function ($lq) use ($search) {
-                        $lq->where('sender_name', 'ILIKE', '%' . $search . '%')
-                            ->orWhere('sender_unit', 'ILIKE', '%' . $search . '%');
-                    })
-                    ->orWhere('pdf_content', 'ILIKE', '%' . $search . '%');
-            });
-        }
+        $statusFilter = $request->input('status', 'all'); // 'all', 'with_number', 'without_number', 'reserved'
 
         $periodeLabel = "Semua Waktu";
+        $date = $request->tanggal ?: now()->toDateString();
+        $bulan = $request->bulan ?: now()->month;
 
         if ($periode === 'hari') {
-            $date = $request->tanggal ?: now()->toDateString();
-            $query->whereDate('letter_date', $date);
             $periodeLabel = "Tanggal: " . date('d/m/Y', strtotime($date));
         } elseif ($periode === 'minggu') {
-            $start = now()->startOfWeek()->toDateString();
-            $end = now()->endOfWeek()->toDateString();
-            $query->whereBetween('letter_date', [$start, $end]);
             $periodeLabel = "Minggu Ini";
         } elseif ($periode === 'bulan') {
-            $bulan = $request->bulan ?: now()->month;
-            $query->whereMonth('letter_date', $bulan);
             $periodeLabel = "Bulan Ke-" . $bulan . " Tahun " . $year;
         }
 
-        // --- FIX: satu titik penentu urutan, sesuai pilihan dropdown sort ---
-        $applySort = function ($q) use ($sort) {
-            return match ($sort) {
-                'number_asc' => $q->orderBy('sequence_number', 'asc'),
-                'date_desc' => $q->orderBy('letter_date', 'desc')->orderBy('sequence_number', 'desc'),
-                'date_asc' => $q->orderBy('letter_date', 'asc')->orderBy('sequence_number', 'asc'),
-                default => $q->orderBy('sequence_number', 'desc'),
-            };
-        };
+        $items = collect();
 
-        if ($request->has('print')) {
-            // Cetak selalu urut nomor naik (sesuai buku register fisik), terlepas dari pilihan sort di layar
-            $records = (clone $query)->orderBy('sequence_number', 'asc')->get();
-        } else {
-            $records = $applySort(clone $query)->paginate(20)->withQueryString();
+        // 1. Ambil Data Surat yang Bernomor / Reservasi (dari LetterNumber) jika filter 'all', 'with_number', atau 'reserved'
+        if (in_array($statusFilter, ['all', 'with_number', 'used', 'reserved'])) {
+            $lnQuery = LetterNumber::with(['type', 'unit', 'letter'])
+                ->where('number_year', $year);
+
+            if ($statusFilter === 'with_number' || $statusFilter === 'used') {
+                $lnQuery->where('status', 'used');
+            } elseif ($statusFilter === 'reserved') {
+                $lnQuery->whereIn('status', ['reserved', 'preorder']);
+            } else {
+                $lnQuery->whereIn('status', ['used', 'reserved', 'preorder']);
+            }
+
+            if ($selectedWorkbookId > 0) {
+                $lnQuery->where('type_id', $selectedWorkbookId);
+            }
+
+            if ($search) {
+                $lnQuery->where(function ($q) use ($search) {
+                    $q->where('subject', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('number_text', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('processing_unit_text', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('destination', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('signatory', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('technical_officer', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('reserved_for', 'ILIKE', '%' . $search . '%')
+                        ->orWhereHas('unit', fn($uq) => $uq->where('unit_name', 'ILIKE', '%' . $search . '%'))
+                        ->orWhereHas('letter', function ($lq) use ($search) {
+                            $lq->where('sender_name', 'ILIKE', '%' . $search . '%')
+                                ->orWhere('sender_unit', 'ILIKE', '%' . $search . '%')
+                                ->orWhere('tracking_code', 'ILIKE', '%' . $search . '%');
+                        })
+                        ->orWhere('pdf_content', 'ILIKE', '%' . $search . '%');
+                });
+            }
+
+            if ($periode === 'hari') {
+                $lnQuery->whereDate('letter_date', $date);
+            } elseif ($periode === 'minggu') {
+                $start = now()->startOfWeek()->toDateString();
+                $end = now()->endOfWeek()->toDateString();
+                $lnQuery->whereBetween('letter_date', [$start, $end]);
+            } elseif ($periode === 'bulan') {
+                $lnQuery->whereMonth('letter_date', $bulan);
+            }
+
+            $lnRecords = $lnQuery->get()->map(function ($ln) {
+                return (object) [
+                    'id' => $ln->id,
+                    'actual_id' => $ln->id,
+                    'letter_id' => $ln->linked_letter_id,
+                    'is_unnumbered' => false,
+                    'type_id' => $ln->type_id,
+                    'number_year' => $ln->number_year,
+                    'sequence_number' => $ln->sequence_number,
+                    'status' => $ln->status,
+                    'signer_code' => $ln->signer_code,
+                    'security_access' => $ln->security_access,
+                    'classification_code' => $ln->classification_code,
+                    'month_number' => $ln->month_number,
+                    'number_text' => $ln->number_text,
+                    'incoming_date' => $ln->incoming_date ? $ln->incoming_date->toDateString() : null,
+                    'unit_id' => $ln->unit_id,
+                    'processing_unit_text' => $ln->processing_unit_text,
+                    'signatory' => $ln->signatory,
+                    'request_type' => $ln->request_type,
+                    'destination' => $ln->destination,
+                    'letter_date' => $ln->letter_date ? $ln->letter_date->toDateString() : null,
+                    'subject' => $ln->subject,
+                    'technical_officer' => $ln->technical_officer,
+                    'scan_result' => $ln->scan_result,
+                    'nd_pengantar' => $ln->nd_pengantar,
+                    'attachment_path' => $ln->attachment_path,
+                    'pdf_content' => $ln->pdf_content,
+                    'type' => $ln->type,
+                    'unit' => $ln->unit,
+                    'created_at' => $ln->created_at,
+                    'tracking_code' => $ln->letter?->tracking_code,
+                    'agenda_number' => $ln->letter?->agenda_number,
+                ];
+            });
+
+            $items = $items->concat($lnRecords);
         }
 
+        // 2. Ambil Surat yang Belum Diberi Nomor (dari tabel Letter) jika filter 'all' atau 'without_number'
+        if (in_array($statusFilter, ['all', 'without_number', 'no_number'])) {
+            $unQuery = Letter::with(['letterNumberType', 'recipientUnit', 'category'])
+                ->where(function ($q) {
+                    $q->whereNull('letter_number')->orWhere('letter_number', '');
+                })
+                ->where(function ($q) use ($year) {
+                    $q->whereYear('received_date', $year)
+                      ->orWhere(function ($sub) use ($year) {
+                          $sub->whereNull('received_date')->whereYear('created_at', $year);
+                      });
+                });
+
+            if ($selectedWorkbookId > 0) {
+                $unQuery->where('letter_number_type_id', $selectedWorkbookId);
+            }
+
+            if ($search) {
+                $unQuery->where(function ($q) use ($search) {
+                    $q->where('subject', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('sender_unit', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('sender_name', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('destination', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('tracking_code', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('agenda_number', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('signatory_name', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('technical_officer', 'ILIKE', '%' . $search . '%')
+                        ->orWhere('pdf_content', 'ILIKE', '%' . $search . '%');
+                });
+            }
+
+            if ($periode === 'hari') {
+                $unQuery->whereDate('received_date', $date);
+            } elseif ($periode === 'minggu') {
+                $start = now()->startOfWeek()->toDateString();
+                $end = now()->endOfWeek()->toDateString();
+                $unQuery->whereBetween('received_date', [$start, $end]);
+            } elseif ($periode === 'bulan') {
+                $unQuery->whereMonth('received_date', $bulan);
+            }
+
+            $unRecords = $unQuery->get()->map(function ($l) use ($year) {
+                return (object) [
+                    'id' => 'letter_' . $l->id,
+                    'actual_id' => $l->id,
+                    'letter_id' => $l->id,
+                    'is_unnumbered' => true,
+                    'type_id' => $l->letter_number_type_id,
+                    'number_year' => $l->received_date ? $l->received_date->year : ($l->created_at ? $l->created_at->year : $year),
+                    'sequence_number' => null,
+                    'status' => 'without_number',
+                    'signer_code' => '1',
+                    'security_access' => $l->security_level ?: 'B',
+                    'classification_code' => $l->archive_classification_code ?: 'UM.01',
+                    'month_number' => $l->received_date ? $l->received_date->month : ($l->letter_date ? $l->letter_date->month : null),
+                    'number_text' => null,
+                    'incoming_date' => $l->received_date ? $l->received_date->toDateString() : ($l->created_at ? $l->created_at->toDateString() : null),
+                    'unit_id' => $l->recipient_unit_id,
+                    'processing_unit_text' => $l->sender_unit ?: $l->sender_name ?: '-',
+                    'signatory' => $l->signatory_name ?: $l->sender_name ?: '-',
+                    'request_type' => $l->requested_actions ?: ($l->priority ?: 'Biasa'),
+                    'destination' => $l->destination ?: ($l->recipientUnit?->unit_name ?: '-'),
+                    'letter_date' => $l->letter_date ? $l->letter_date->toDateString() : null,
+                    'subject' => $l->subject,
+                    'technical_officer' => $l->technical_officer,
+                    'scan_result' => $l->status ?: 'Proses',
+                    'nd_pengantar' => $l->cover_letter_number ?: $l->agenda_number ?: $l->tracking_code,
+                    'attachment_path' => $l->attachment_path,
+                    'pdf_content' => $l->pdf_content,
+                    'type' => $l->letterNumberType,
+                    'unit' => $l->recipientUnit,
+                    'created_at' => $l->created_at,
+                    'tracking_code' => $l->tracking_code,
+                    'agenda_number' => $l->agenda_number,
+                ];
+            });
+
+            $items = $items->concat($unRecords);
+        }
+
+        // --- SORTING LOGIC ---
+        if ($sort === 'number_asc') {
+            $sortedItems = $items->sort(function ($a, $b) {
+                if ($a->sequence_number !== null && $b->sequence_number !== null) {
+                    return $a->sequence_number <=> $b->sequence_number;
+                }
+                return ($a->sequence_number !== null) ? -1 : 1;
+            })->values();
+        } elseif ($sort === 'date_desc') {
+            $sortedItems = $items->sortByDesc(function ($item) {
+                return $item->letter_date ?: $item->incoming_date ?: '1970-01-01';
+            })->values();
+        } elseif ($sort === 'date_asc') {
+            $sortedItems = $items->sortBy(function ($item) {
+                return $item->letter_date ?: $item->incoming_date ?: '9999-12-31';
+            })->values();
+        } else {
+            // number_desc (default)
+            $sortedItems = $items->sort(function ($a, $b) {
+                if ($a->sequence_number !== null && $b->sequence_number !== null) {
+                    return $b->sequence_number <=> $a->sequence_number;
+                }
+                if ($a->sequence_number !== null) return -1;
+                if ($b->sequence_number !== null) return 1;
+                return strcmp($b->incoming_date ?? '', $a->incoming_date ?? '');
+            })->values();
+        }
+
+        // --- PAGINATION / PRINT ---
+        if ($request->has('print')) {
+            $records = $sortedItems;
+        } else {
+            $page = (int) $request->input('page', 1);
+            $perPage = 20;
+            $records = new \Illuminate\Pagination\LengthAwarePaginator(
+                $sortedItems->forPage($page, $perPage)->values(),
+                $sortedItems->count(),
+                $perPage,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        }
+
+        // --- STATS BASE ---
         $statsBase = LetterNumber::where('number_year', $year);
         if ($selectedWorkbookId > 0) {
             $statsBase->where('type_id', $selectedWorkbookId);
         }
 
         $statsRow = $statsBase->selectRaw("
-        COUNT(*) FILTER (WHERE status = 'used') as used,
-        COUNT(*) FILTER (WHERE status = 'available') as available,
-        COUNT(*) FILTER (WHERE status = 'reserved') as reserved
-    ")->first();
+            COUNT(*) FILTER (WHERE status = 'used') as used,
+            COUNT(*) FILTER (WHERE status = 'available') as available,
+            COUNT(*) FILTER (WHERE status = 'reserved' OR status = 'preorder') as reserved
+        ")->first();
+
+        $statsWithoutNumber = Letter::where(function ($q) {
+                $q->whereNull('letter_number')->orWhere('letter_number', '');
+            })
+            ->where(function ($q) use ($year) {
+                $q->whereYear('received_date', $year)
+                  ->orWhere(function ($sub) use ($year) {
+                      $sub->whereNull('received_date')->whereYear('created_at', $year);
+                  });
+            })
+            ->when($selectedWorkbookId > 0, fn($q) => $q->where('letter_number_type_id', $selectedWorkbookId))
+            ->count();
 
         return Inertia::render('DataSurat/Index', [
             'records' => $records,
@@ -135,11 +303,13 @@ class DataSuratController extends Controller
                 'year' => $year,
                 'periode' => $periode,
                 'sort' => $sort,
+                'status' => $statusFilter,
             ],
             'stats' => [
                 'used' => (int) ($statsRow->used ?? 0),
                 'available' => (int) ($statsRow->available ?? 0),
                 'reserved' => (int) ($statsRow->reserved ?? 0),
+                'without_number' => $statsWithoutNumber,
             ],
         ]);
     }
@@ -477,9 +647,10 @@ class DataSuratController extends Controller
         $typeId = (int) $request->input('workbook', 0);
         $year = (int) $request->input('year', date('Y'));
         $search = trim((string) $request->input('search', ''));
+        $status = $request->input('status', 'all');
 
         return Excel::download(
-            new DataSuratMultiSheetExport($typeId, $year, $search),
+            new DataSuratMultiSheetExport($typeId, $year, $search, $status),
             'laporan-data-surat-' . now()->format('Ymd-His') . '.xlsx'
         );
     }

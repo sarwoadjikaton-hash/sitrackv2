@@ -74,23 +74,26 @@ export interface LetterNumberAvailabilityBatch {
 }
 
 export interface LetterNumber {
-    id: number;
+    id: number | string;
+    actual_id?: number | string;
+    letter_id?: number;
+    is_unnumbered?: boolean;
     type_id: number;
     number_year: number;
-    sequence_number: number;
-    status: 'available' | 'reserved' | 'used';
-    signer_code: string;
+    sequence_number?: number | null;
+    status: 'available' | 'reserved' | 'used' | 'without_number' | string;
+    signer_code?: string;
     security_access?: string;
     classification_code?: string;
     month_number?: number;
-    number_text?: string;
-    incoming_date?: string;
-    unit_id?: number;
+    number_text?: string | null;
+    incoming_date?: string | null;
+    unit_id?: number | null;
     processing_unit_text?: string;
     signatory?: string;
     request_type?: string;
     destination?: string;
-    letter_date?: string;
+    letter_date?: string | null;
     subject?: string;
     technical_officer?: string;
     scan_result?: string;
@@ -98,6 +101,8 @@ export interface LetterNumber {
     attachment_path?: string | null;
     pdf_content?: string | null;
     linked_letter_id?: number;
+    tracking_code?: string;
+    agenda_number?: string;
     reserved_for?: string;
     reserved_at?: string;
     used_at?: string;

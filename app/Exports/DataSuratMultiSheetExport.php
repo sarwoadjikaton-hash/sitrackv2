@@ -10,7 +10,8 @@ class DataSuratMultiSheetExport implements WithMultipleSheets
     public function __construct(
         protected int $typeId,
         protected int $year,
-        protected string $search
+        protected string $search = '',
+        protected string $status = 'all'
     ) {
     }
 
@@ -29,7 +30,8 @@ class DataSuratMultiSheetExport implements WithMultipleSheets
                 $workbookName,
                 $typesInWorkbook,
                 $this->year,
-                $this->search
+                $this->search,
+                $this->status
             ))
             ->values()
             ->all();

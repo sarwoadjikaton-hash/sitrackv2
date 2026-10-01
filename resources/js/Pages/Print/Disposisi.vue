@@ -318,25 +318,24 @@ const toggleAction = (actionName: string) => {
                 <!-- CATATAN & TANDA TANGAN (KANAN) -->
                 <div class="notes-and-signature-col flex-fill d-flex flex-column">
                     <!-- KOTAK CATATAN (ATAS) -->
-                    <div class="notes-box p-1 flex-grow-1">
+                    <div class="notes-box p-2 flex-grow-1">
                         <div class="notes-header text-center fw-bold mb-1">Catatan</div>
                         <div
                             class="notes-content"
                             contenteditable="true"
-                            style="min-height: 48px; font-size: 9px; line-height: 1.3;"
                         >
                             {{ letter.notes || letter.dispositions?.[0]?.instruction || '' }}
                         </div>
                     </div>
 
                     <!-- KOTAK PEJABAT PENANDATANGAN (BAWAH) -->
-                    <div class="signature-box border-top border-dark p-1 text-center">
-                        <div class="fw-bold mb-0" style="font-size: 9.5px;">Sekretaris Jenderal,</div>
-                        <div class="signature-space" style="height: 32px;"></div>
-                        <div class="pejabat-name fw-bold" style="font-size: 9.5px;">
+                    <div class="signature-box border-top border-dark p-2 text-center">
+                        <div class="pejabat-title fw-bold mb-0">Sekretaris Jenderal,</div>
+                        <div class="signature-space"></div>
+                        <div class="pejabat-name fw-bold">
                             Dr. Cris Kuntadi, S.E., M.M.
                         </div>
-                        <div class="pejabat-nip fw-bold" style="font-size: 8.5px;">
+                        <div class="pejabat-nip fw-bold">
                             NIP 19690624 199003 1 004
                         </div>
                     </div>
@@ -345,7 +344,7 @@ const toggleAction = (actionName: string) => {
         </div>
 
         <!-- FOOTER TEKS HALUS -->
-        <div class="print-footer-info d-flex justify-content-between align-items-center mt-1 no-print-bg">
+        <div class="print-footer-info d-flex justify-content-between align-items-center mt-2 no-print-bg">
             <span class="text-muted">
                 Kode Tracking: <strong>{{ letter.tracking_code }}</strong> · Agenda: <strong>{{ letter.agenda_number || '-' }}</strong>
             </span>
@@ -392,20 +391,20 @@ const toggleAction = (actionName: string) => {
 }
 
 .logo-text {
-    font-size: 8.5px;
+    font-size: 10px;
     letter-spacing: 0.5px;
     color: #0f172a;
     margin-top: 2px;
 }
 
 .instansi-name {
-    font-size: 13px;
+    font-size: 15px;
     letter-spacing: 0.5px;
     color: black;
 }
 
 .sekjen-name {
-    font-size: 15px;
+    font-size: 17px;
     letter-spacing: 0.6px;
     color: black;
 }
@@ -417,9 +416,9 @@ const toggleAction = (actionName: string) => {
 }
 
 .table-header-title {
-    font-size: 13.5px;
+    font-size: 16px;
     letter-spacing: 0.8px;
-    padding: 5px;
+    padding: 6px;
     border-bottom: 1.5px solid black;
     background: #ffffff;
 }
@@ -430,18 +429,20 @@ const toggleAction = (actionName: string) => {
 }
 
 .meta-table td {
-    padding: 3.5px 5.5px;
-    font-size: 10.5px;
+    padding: 4.5px 7px;
+    font-size: 12px;
+    line-height: 1.35;
     vertical-align: middle;
 }
 
 .meta-label {
-    font-size: 10px;
+    font-size: 12px;
+    font-weight: 500;
     white-space: nowrap;
 }
 
 .meta-val {
-    font-size: 10.5px;
+    font-size: 12px;
 }
 
 /* --- UNIT DISPOSISI --- */
@@ -450,26 +451,26 @@ const toggleAction = (actionName: string) => {
 }
 
 .unit-row {
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     cursor: pointer;
     user-select: none;
 }
 
 .unit-name {
-    font-size: 9.5px;
-    line-height: 1.25;
+    font-size: 11.5px;
+    line-height: 1.3;
     color: black;
 }
 
 .custom-checkbox {
-    width: 13px;
-    height: 13px;
-    min-width: 13px;
-    border: 1.2px solid black;
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    border: 1.3px solid black;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 9.5px;
+    font-size: 11px;
     font-weight: bold;
     line-height: 1;
     background: white;
@@ -491,33 +492,33 @@ const toggleAction = (actionName: string) => {
 
 /* --- LAJUR DISPOSISI --- */
 .lajur-header {
-    font-size: 11px;
-    letter-spacing: 0.4px;
-    padding-bottom: 3px;
-    margin-bottom: 3px;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    padding-bottom: 4px;
+    margin-bottom: 4px;
 }
 
 .lajur-row {
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     cursor: pointer;
     user-select: none;
 }
 
 .lajur-name {
-    font-size: 9.5px;
-    line-height: 1.25;
+    font-size: 11.5px;
+    line-height: 1.3;
 }
 
 /* --- CATATAN & TTD --- */
 .notes-header {
-    font-size: 11px;
+    font-size: 13px;
 }
 
 .notes-content {
     outline: none;
-    min-height: 70px;
-    font-size: 10.5px;
-    line-height: 1.35;
+    min-height: 80px;
+    font-size: 12px;
+    line-height: 1.4;
 }
 
 .signature-box {
@@ -525,7 +526,7 @@ const toggleAction = (actionName: string) => {
 }
 
 .pejabat-title {
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .signature-space {
@@ -533,16 +534,16 @@ const toggleAction = (actionName: string) => {
 }
 
 .pejabat-name {
-    font-size: 11px;
+    font-size: 12.5px;
 }
 
 .pejabat-nip {
-    font-size: 10px;
+    font-size: 11.5px;
 }
 
 /* --- FOOTER INFO --- */
 .print-footer-info {
-    font-size: 9px;
+    font-size: 10.5px;
     padding-top: 5px;
 }
 
