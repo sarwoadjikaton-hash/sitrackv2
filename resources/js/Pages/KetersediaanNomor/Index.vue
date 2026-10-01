@@ -458,7 +458,7 @@ function upsertRows(sheet, records) {
       rec.tanggal_masuk || "",
       rec.unit_pengolah_arsip || "-",
       rec.penandatangan_surat || "-",
-      rec.permohonan || "-",
+      rec.permohonan || "Tanda Tangan",
       rec.tujuan_surat || "-",
       rec.tanggal_surat || "",
       rec.keamanan_akses || "B",

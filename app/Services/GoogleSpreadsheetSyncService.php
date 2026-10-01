@@ -603,15 +603,29 @@ class GoogleSpreadsheetSyncService
                 $padding = $num->type?->sequence_padding ?? 4;
                 $seqText = $num->sequence_number ? str_pad((string) $num->sequence_number, $padding, '0', STR_PAD_LEFT) : '-';
 
+                // Normalisasi Permohonan agar sesuai Aturan Validasi Data Spreadsheet Kemnaker ("Tanda Tangan", "Paraf", "Tanda Tangan & Paraf")
+                $rawReq = trim((string) ($num->request_type ?? ''));
+                if (stripos($rawReq, 'paraf') !== false && (stripos($rawReq, 'tanda tangan') !== false || stripos($rawReq, 'ttd') !== false)) {
+                    $permohonan = 'Tanda Tangan & Paraf';
+                } elseif (stripos($rawReq, 'paraf') !== false) {
+                    $permohonan = 'Paraf';
+                } else {
+                    $permohonan = 'Tanda Tangan';
+                }
+
+                // Normalisasi Keamanan Akses ("B", "R", "SR", "K")
+                $rawSec = strtoupper(trim((string) ($num->security_access ?? '')));
+                $keamananAkses = in_array($rawSec, ['B', 'R', 'SR', 'K'], true) ? $rawSec : 'B';
+
                 $rows[] = [
                     'no_urut' => $rowCounter,
                     'tanggal_masuk' => $num->incoming_date ? \Carbon\Carbon::parse($num->incoming_date)->format('d/m/Y') : '',
                     'unit_pengolah_arsip' => $num->processing_unit_text ?: '-',
                     'penandatangan_surat' => $num->signatory ?: '-',
-                    'permohonan' => $num->request_type ?: '-',
+                    'permohonan' => $permohonan,
                     'tujuan_surat' => $num->destination ?: '-',
                     'tanggal_surat' => $num->letter_date ? \Carbon\Carbon::parse($num->letter_date)->format('d M Y') : '',
-                    'keamanan_akses' => $num->security_access ?: 'B',
+                    'keamanan_akses' => $keamananAkses,
                     'nomor_urut' => $seqText,
                     'kode_klas_arsip' => $num->classification_code ?: 'UM.01',
                     'bulan' => $num->month_number ?: '',
@@ -824,7 +838,7 @@ function upsertRows(sheet, records) {
       rec.tanggal_masuk || "",
       rec.unit_pengolah_arsip || "-",
       rec.penandatangan_surat || "-",
-      rec.permohonan || "-",
+      rec.permohonan || "Tanda Tangan",
       rec.tujuan_surat || "-",
       rec.tanggal_surat || "",
       rec.keamanan_akses || "B",
