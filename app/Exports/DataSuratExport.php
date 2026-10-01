@@ -94,10 +94,7 @@ class DataSuratExport implements
                           $sub->whereNull('received_date')->whereYear('created_at', $this->year);
                       });
                 })
-                ->where(function ($q) use ($typeIds) {
-                    $q->whereIn('letter_number_type_id', $typeIds)
-                      ->orWhereNull('letter_number_type_id');
-                });
+                ->whereIn('letter_number_type_id', $typeIds);
 
             if ($this->search !== '') {
                 $unQuery->where(function ($q) {
