@@ -226,7 +226,7 @@ const breadcrumb = computed(() => {
         <ToastNotification />
 
         <!-- Sidebar Navigation -->
-        <aside class="app-sidebar" ref="sidebarRef"
+        <aside class="app-sidebar no-print" ref="sidebarRef"
             :class="{ 'is-open': isMobileNavOpen, 'is-collapsed': isSidebarCollapsed }">
             <div class="sidebar-inner" @mouseover="showTooltip" @mouseout="hideTooltip">
                 <!-- Brand Header (Dual Logo) -->
@@ -2555,5 +2555,43 @@ const breadcrumb = computed(() => {
 .mobile-sheet-leave-to {
     opacity: 0;
     transform: translateY(16px) scale(0.97);
+}
+
+@media print {
+    .no-print,
+    .app-sidebar,
+    .app-topbar,
+    .app-page-footer,
+    .mobile-bottom-bar,
+    .mobile-sheet-dropdown,
+    .mobile-sheet-backdrop,
+    .sidebar-backdrop,
+    .sidebar-tooltip-floating {
+        display: none !important;
+    }
+
+    body {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .app-shell {
+        display: block !important;
+        background: #ffffff !important;
+    }
+
+    .app-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        display: block !important;
+    }
+
+    .app-main-body {
+        padding: 0 !important;
+        background: transparent !important;
+        min-height: auto !important;
+    }
 }
 </style>

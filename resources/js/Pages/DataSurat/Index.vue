@@ -301,12 +301,20 @@ const submitDataSurat = () => {
 };
 
 const printData = () => {
-    window.print();
+    const url = route('data-surat.index', {
+        workbook: currentWorkbookId.value,
+        search: search.value,
+        year: props.selectedYear,
+        status: filterStatus.value,
+        sort: filterSort.value,
+        print: 1,
+    });
+    window.open(url, '_blank');
 };
 
 onMounted(() => {
     if (props.isPrintMode) {
-        setTimeout(() => { window.print(); }, 1000);
+        setTimeout(() => { window.print(); }, 800);
     }
 });
 
@@ -481,9 +489,9 @@ const switchToEdit = () => {
             </div>
 
             <!-- Data Table Card (Figma Prototype Model) -->
-            <div class="bg-white rounded-4 border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-white rounded-4 border border-slate-200 shadow-sm print-card">
             <!-- Desktop Table View (>= md) -->
-            <div class="d-none d-md-block table-responsive">
+            <div class="d-none d-md-block d-print-block table-responsive">
                 <table class="table-modern">
                     <thead>
                         <tr>
@@ -940,21 +948,63 @@ const switchToEdit = () => {
 
 @media print {
     @page {
-        margin: 10mm;
+        size: A4 landscape;
+        margin: 8mm 10mm;
     }
 
     .no-print {
         display: none !important;
     }
 
-    .table-modern {
-        border: 1px solid black !important;
+    .d-print-block {
+        display: block !important;
     }
 
-    .table-modern th,
+    .table-responsive {
+        overflow: visible !important;
+        display: block !important;
+    }
+
+    .print-card {
+        border: none !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+        background: transparent !important;
+    }
+
+    .table-modern {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        border: 1.5px solid #000 !important;
+        font-size: 8.5pt !important;
+        table-layout: auto !important;
+    }
+
+    .table-modern th {
+        background-color: #f1f5f9 !important;
+        color: #000 !important;
+        border: 1px solid #000 !important;
+        padding: 6px !important;
+        font-weight: bold !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
     .table-modern td {
-        border: 1px solid #ccc !important;
-        color: black !important;
+        border: 1px solid #475569 !important;
+        color: #000 !important;
+        padding: 4.5px 6px !important;
+        vertical-align: top !important;
+    }
+
+    .table-modern tr {
+        page-break-inside: avoid !important;
+    }
+
+    .badge {
+        border: 1px solid #94a3b8 !important;
+        color: #000 !important;
+        background: transparent !important;
     }
 
     .text-truncate {
