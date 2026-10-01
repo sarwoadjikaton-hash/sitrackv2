@@ -87,25 +87,27 @@ const updatePosition = () => {
     if (!wrapperEl.value) return;
     const rect = wrapperEl.value.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
-    const panelHeight = panelEl.value?.offsetHeight || 300;
+    const panelHeight = panelEl.value?.offsetHeight || 280;
     const openUpward = spaceBelow < panelHeight + 12 && rect.top > panelHeight;
 
+    // Pastikan lebar dropdown minimal 240px atau selebar trigger button
+    let width = Math.max(rect.width, 240);
     let left = rect.left;
-    let width = rect.width;
 
-    // Mobile screen protection: ensure width fits viewport and doesn't bleed out
-    if (window.innerWidth < 576) {
-        width = Math.max(width, Math.min(window.innerWidth - 24, 340));
-        if (left + width > window.innerWidth - 12) {
-            left = Math.max(12, window.innerWidth - width - 12);
-        }
+    // Batasi agar tidak meluap keluar layar kanan atau kiri
+    if (left + width > window.innerWidth - 12) {
+        left = Math.max(12, window.innerWidth - width - 12);
     }
+    if (left < 12) {
+        left = 12;
+    }
+    width = Math.min(width, window.innerWidth - 24);
 
-    panelStyle.left = `${Math.max(8, left)}px`;
-    panelStyle.width = `${Math.min(width, window.innerWidth - 16)}px`;
+    panelStyle.left = `${Math.round(left)}px`;
+    panelStyle.width = `${Math.round(width)}px`;
     panelStyle.top = openUpward
-        ? `${rect.top - panelHeight - 6}px`
-        : `${rect.bottom + 6}px`;
+        ? `${Math.round(rect.top - panelHeight - 6)}px`
+        : `${Math.round(rect.bottom + 6)}px`;
 };
 
 const toggle = () => {
@@ -213,9 +215,12 @@ onUnmounted(() => {
                 <div v-if="isOpen" ref="panelEl" class="dd-panel"
                     :style="{ top: panelStyle.top, left: panelStyle.left, width: panelStyle.width }">
                     <div v-if="showSearch" class="dd-search">
-                        <i class="bi bi-search"></i>
+                        <i class="bi bi-search dd-search-icon"></i>
                         <input ref="searchInputEl" v-model="search" type="text" :placeholder="searchPlaceholder"
                             @keydown.stop="onKeydown" />
+                        <button v-if="search" type="button" class="dd-clear-btn" @click="search = ''" title="Hapus pencarian">
+                            <i class="bi bi-x"></i>
+                        </button>
                     </div>
 
                     <div class="dd-list">
@@ -226,15 +231,15 @@ onUnmounted(() => {
                                 'is-custom-option': opt.isCustom
                             }"
                             @mouseenter="highlightedIndex = idx" @click="selectOption(opt)">
-                            <div class="d-flex align-items-center gap-2 text-truncate">
+                            <div class="dd-option-left">
                                 <i v-if="opt.isCustom" class="bi bi-pencil-square text-primary flex-shrink-0"></i>
-                                <span class="text-truncate">{{ opt.label }}</span>
+                                <span class="dd-option-label">{{ opt.label }}</span>
                             </div>
-                            <i v-if="opt.value === modelValue && !opt.isCustom" class="bi bi-check-lg"></i>
+                            <i v-if="opt.value === modelValue && !opt.isCustom" class="bi bi-check-lg dd-check-icon"></i>
                         </button>
 
                         <div v-if="filteredOptions.length === 0" class="dd-empty">
-                            {{ emptyText }}
+                            <i class="bi bi-inbox me-1"></i> {{ emptyText }}
                         </div>
                     </div>
                 </div>
@@ -258,23 +263,23 @@ onUnmounted(() => {
     background: #fff;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
-    padding: 0.55rem 0.85rem;
+    padding: 0.5rem 0.85rem;
     font-size: .875rem;
     color: #0f172a;
     text-align: left;
     cursor: pointer;
     transition: all 0.2s ease;
-    min-height: 40px;
+    min-height: 38px;
     box-sizing: border-box;
     line-height: 1.5;
 }
 
 .dd-trigger.dd-size-sm {
-    padding: 0.35rem 0.65rem;
-    font-size: 0.815rem;
-    border-radius: 6px;
-    gap: 0.4rem;
-    min-height: 32px;
+    padding: 0.42rem 0.75rem;
+    font-size: 0.84rem;
+    border-radius: 8px;
+    gap: 0.45rem;
+    min-height: 38px;
 }
 
 .dd-trigger.dd-size-lg {
@@ -300,7 +305,7 @@ onUnmounted(() => {
 }
 
 .dd-trigger-label {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -350,34 +355,68 @@ onUnmounted(() => {
 .dd-panel {
     position: fixed;
     z-index: 9999;
-    background: #fff;
-    border: 1px solid #B5CCE3;
-    border-radius: 14px;
-    box-shadow: 0 20px 40px -12px rgba(3, 32, 90, 0.18);
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.16), 0 4px 12px rgba(15, 23, 42, 0.08);
     overflow: hidden;
+    font-family: inherit;
+    box-sizing: border-box;
 }
 
 .dd-search {
     display: flex;
     align-items: center;
-    gap: .5rem;
-    padding: .65rem .9rem;
-    border-bottom: 1px solid #E4F5F9;
-    color: #536b88;
+    gap: 0.5rem;
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid #f1f5f9;
+    background: #f8fafc;
+    color: #64748b;
+    box-sizing: border-box;
+}
+
+.dd-search-icon {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    flex-shrink: 0;
 }
 
 .dd-search input {
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
     border: none;
+    background: transparent;
     outline: none;
-    font-size: .9rem;
-    color: #03205A;
+    font-size: 0.85rem;
+    color: #0f172a;
+    padding: 0;
+}
+
+.dd-search input::placeholder {
+    color: #94a3b8;
+}
+
+.dd-clear-btn {
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.dd-clear-btn:hover {
+    color: #0f172a;
 }
 
 .dd-list {
-    max-height: 240px;
+    max-height: 260px;
     overflow-y: auto;
-    padding: .35rem;
+    padding: 0.35rem;
+    box-sizing: border-box;
 }
 
 .dd-list::-webkit-scrollbar {
@@ -385,7 +424,7 @@ onUnmounted(() => {
 }
 
 .dd-list::-webkit-scrollbar-thumb {
-    background: #B5CCE3;
+    background: #cbd5e1;
     border-radius: 4px;
 }
 
@@ -394,64 +433,91 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: .5rem;
+    gap: 0.5rem;
     background: transparent;
     border: none;
-    border-radius: 9px;
-    padding: .6rem .75rem;
-    font-size: .9rem;
-    color: #03205A;
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.85rem;
+    color: #1e293b;
     text-align: left;
     cursor: pointer;
-    transition: background .12s ease, color .12s ease;
+    transition: background 0.12s ease, color 0.12s ease;
+    box-sizing: border-box;
+}
+
+.dd-option-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.dd-option-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    min-width: 0;
+    line-height: 1.35;
+}
+
+.dd-check-icon {
+    color: #0284c7;
+    font-size: 0.95rem;
+    font-weight: bold;
+    flex-shrink: 0;
+    margin-left: 0.25rem;
 }
 
 .dd-option.is-custom-option {
-    background: #E4F5F9;
-    border-bottom: 1px dashed #B5CCE3;
-    color: #167992;
+    background: #f0f9ff;
+    border-bottom: 1px dashed #bae6fd;
+    color: #0284c7;
     font-weight: 600;
     margin-bottom: 4px;
 }
 
 .dd-option.is-custom-option:hover,
 .dd-option.is-custom-option.is-highlighted {
-    background: #EEF7FC;
-    color: #03205A;
+    background: #e0f2fe;
+    color: #0369a1;
 }
 
 .dd-option.is-highlighted {
-    background: #E4F5F9;
-    color: #03205A;
+    background: #f1f5f9;
+    color: #0f172a;
 }
 
 .dd-option.is-selected {
-    color: #167992;
-    font-weight: 700;
+    background: #e0f2fe;
+    color: #0284c7;
+    font-weight: 600;
 }
 
-.dd-option i {
-    color: #167992;
-    font-size: .85rem;
-    flex: none;
+.dd-option.is-selected.is-highlighted {
+    background: #bae6fd;
+    color: #0369a1;
 }
 
 .dd-empty {
-    padding: 1.1rem .75rem;
+    padding: 1rem 0.75rem;
     text-align: center;
-    font-size: .85rem;
+    font-size: 0.825rem;
     color: #94a3b8;
 }
 
 /* Animasi buka-tutup */
 .dd-fade-enter-active,
 .dd-fade-leave-active {
-    transition: opacity .16s ease, transform .16s ease;
+    transition: opacity .15s ease, transform .15s ease;
 }
 
 .dd-fade-enter-from,
 .dd-fade-leave-to {
     opacity: 0;
-    transform: translateY(-6px) scale(.98);
+    transform: translateY(-4px);
 }
 </style>
