@@ -44,121 +44,112 @@ const overlayStyle = computed(() => ({
     <Head title="Masuk ke Sistem Staf - SiTrack" />
     <ToastNotification />
 
-    <div class="auth-wrapper">
-        <!-- Ambient decorative shapes in background (matching reference design) -->
-        <div class="ambient-backdrop">
-            <div class="ambient-blob-pink"></div>
-            <div class="ambient-dot-grid"></div>
+    <div class="login-split-page">
+        
+        <!-- ================= LEFT PANEL: ILUSTRASI SEAMLESS ================= -->
+        <div class="login-left-pane">
+            <!-- Header Brand -->
+            <div class="left-brand">
+                <div class="brand-badge-white">
+                    <img src="/images/sitrack_logo.svg" alt="SiTrack Logo" width="36" height="36" />
+                </div>
+                <div class="brand-info">
+                    <h1 class="brand-title">SiTrack</h1>
+                    <p class="brand-subtitle">Tata Usaha Sekjen Kemnaker</p>
+                </div>
+            </div>
+
+            <!-- Center Illustration (Blends 100% with #7e8fe9) -->
+            <div class="left-illustration-container">
+                <img src="/images/login-illustration.png" alt="Ilustrasi Persuratan" class="illustration-image" />
+            </div>
+
+            <!-- Footer Copyright -->
+            <div class="left-footer">
+                <p class="mb-0">&copy; 2026 SiTrack &bull; Kementerian Ketenagakerjaan RI</p>
+            </div>
         </div>
 
-        <!-- Main Card Container -->
-        <div class="auth-card-container">
-            
-            <!-- LEFT PANEL: Gambar Ilustrasi & Identitas Aplikasi -->
-            <div class="auth-panel-left">
-                <!-- Top Brand -->
-                <div class="left-brand-row">
-                    <div class="brand-badge-white">
-                        <img src="/images/sitrack_logo.svg" alt="SiTrack Logo" width="32" height="32" />
+        <!-- ================= RIGHT PANEL: FORM LOGIN WITH CURVED SEPARATOR ================= -->
+        <div class="login-right-pane">
+            <div class="form-wrapper" :class="{ 'has-errors': form.errors.username || form.errors.password }">
+                
+                <!-- Header Form -->
+                <div class="form-header text-start mb-4">
+                    <div class="badge-staff-pill mb-2">
+                        <i class="bi bi-shield-lock-fill me-1"></i> Area Khusus Staf
                     </div>
-                    <div class="brand-text">
-                        <div class="brand-name">SiTrack</div>
-                        <div class="brand-tagline">Tata Usaha Sekjen Kemnaker</div>
-                    </div>
+                    <h2 class="form-title">Selamat Datang</h2>
+                    <p class="form-subtitle">Silakan masukkan username dan kata sandi Anda untuk mengakses sistem persuratan.</p>
                 </div>
 
-                <!-- 3D Illustration Display -->
-                <div class="illustration-display-wrap">
-                    <img src="/images/login-illustration.png" alt="Ilustrasi Persuratan" class="illustration-img animate-float" />
-                </div>
-
-                <!-- Left Footer Info -->
-                <div class="left-footer-text">
-                    <p class="mb-0">&copy; 2026 SiTrack &bull; Kementerian Ketenagakerjaan RI</p>
-                </div>
-            </div>
-
-            <!-- RIGHT PANEL: Form Login dengan Pemisah Melengkung (Curved Separator) -->
-            <div class="auth-panel-right">
-                <div class="form-content-wrap" :class="{ 'has-errors': form.errors.username || form.errors.password }">
-                    
-                    <!-- Form Header -->
-                    <div class="form-header text-start mb-4">
-                        <span class="staff-access-pill mb-2">
-                            <i class="bi bi-shield-lock-fill me-1"></i> Area Khusus Staf
-                        </span>
-                        <h2 class="form-title">Selamat Datang</h2>
-                        <p class="form-subtitle">Masukkan akun Anda untuk mengelola persuratan dan tindak lanjut naskah dinas.</p>
+                <!-- Form Login -->
+                <form @submit.prevent="submit" novalidate>
+                    <!-- Username Input -->
+                    <div class="field-float mb-3"
+                        :class="{ 'is-filled': form.username, 'is-invalid': form.errors.username }">
+                        <i class="bi bi-person field-icon"></i>
+                        <input v-model="form.username" type="text" id="username" placeholder=" " autofocus
+                            autocomplete="username" />
+                        <label for="username">Username Staf</label>
                     </div>
+                    <div v-if="form.errors.username" class="field-error">{{ form.errors.username }}</div>
 
-                    <form @submit.prevent="submit" novalidate>
-                        <!-- Username Input -->
-                        <div class="field-float mb-3"
-                            :class="{ 'is-filled': form.username, 'is-invalid': form.errors.username }">
-                            <i class="bi bi-person field-icon"></i>
-                            <input v-model="form.username" type="text" id="username" placeholder=" " autofocus
-                                autocomplete="username" />
-                            <label for="username">Username Staf</label>
-                        </div>
-                        <div v-if="form.errors.username" class="field-error">{{ form.errors.username }}</div>
-
-                        <!-- Password Input -->
-                        <div class="field-float mb-2"
-                            :class="{ 'is-filled': form.password, 'is-invalid': form.errors.password }">
-                            <i class="bi bi-lock field-icon"></i>
-                            <input v-model="form.password" :type="showPassword ? 'text' : 'password'" id="password"
-                                placeholder=" " autocomplete="current-password" />
-                            <label for="password">Kata Sandi</label>
-                            <button type="button" class="field-suffix-btn" @click="togglePassword" tabindex="-1">
-                                <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye']"></i>
-                            </button>
-                        </div>
-                        <div v-if="form.errors.password" class="field-error mb-2">{{ form.errors.password }}</div>
-
-                        <!-- Remember Me Switch -->
-                        <div class="d-flex align-items-center justify-content-between my-3">
-                            <label class="switch-label">
-                                <input v-model="form.remember" type="checkbox" class="switch-input" />
-                                <div class="switch-button">
-                                    <div class="switch-circle"></div>
-                                </div>
-                                <span class="ms-2 small text-muted fw-semibold">Ingat sesi saya</span>
-                            </label>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button ref="submitBtn" type="submit" class="btn-primary-action w-100" :disabled="form.processing"
-                            @click="captureOrigin">
-                            <span v-if="form.processing" class="btn-loading">
-                                <span class="btn-loading-ring"></span>
-                                <span>Memverifikasi akun...</span>
-                            </span>
-                            <span v-else class="d-inline-flex align-items-center justify-content-center gap-2">
-                                <span>Masuk ke Sistem</span>
-                                <i class="bi bi-arrow-right"></i>
-                            </span>
+                    <!-- Password Input -->
+                    <div class="field-float mb-2"
+                        :class="{ 'is-filled': form.password, 'is-invalid': form.errors.password }">
+                        <i class="bi bi-lock field-icon"></i>
+                        <input v-model="form.password" :type="showPassword ? 'text' : 'password'" id="password"
+                            placeholder=" " autocomplete="current-password" />
+                        <label for="password">Kata Sandi</label>
+                        <button type="button" class="field-suffix-btn" @click="togglePassword" tabindex="-1">
+                            <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye']"></i>
                         </button>
-                    </form>
+                    </div>
+                    <div v-if="form.errors.password" class="field-error mb-2">{{ form.errors.password }}</div>
 
-                    <!-- Kembali ke Publik Link -->
-                    <div class="text-center mt-4 pt-3 border-top">
-                        <Link href="/tracking" class="back-link">
-                            <i class="bi bi-arrow-left me-1"></i> Kembali ke Portal Lacak Publik
-                        </Link>
+                    <!-- Remember Me Toggle -->
+                    <div class="d-flex align-items-center justify-content-between my-3">
+                        <label class="switch-label">
+                            <input v-model="form.remember" type="checkbox" class="switch-input" />
+                            <div class="switch-button">
+                                <div class="switch-circle"></div>
+                            </div>
+                            <span class="ms-2 small text-muted fw-semibold">Ingat sesi saya</span>
+                        </label>
                     </div>
 
-                    <!-- Footer Meta Bantuan -->
-                    <div class="form-bottom-meta">
-                        <div class="d-flex align-items-center justify-content-center gap-3 text-muted">
-                            <span class="small"><i class="bi bi-headset me-1 text-primary"></i> Bantuan TU Sekjen</span>
-                            <span class="opacity-30">&bull;</span>
-                            <span class="small"><i class="bi bi-shield-check me-1 text-success"></i> Sistem Terproteksi</span>
-                        </div>
-                    </div>
+                    <!-- Submit Button -->
+                    <button ref="submitBtn" type="submit" class="btn-login-action w-100" :disabled="form.processing"
+                        @click="captureOrigin">
+                        <span v-if="form.processing" class="btn-loading">
+                            <span class="btn-loading-ring"></span>
+                            <span>Memverifikasi akun...</span>
+                        </span>
+                        <span v-else class="d-inline-flex align-items-center justify-content-center gap-2">
+                            <span>Masuk ke Sistem</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </span>
+                    </button>
+                </form>
 
+                <!-- Kembali ke Lacak Publik -->
+                <div class="text-center mt-4 pt-3 border-top">
+                    <Link href="/tracking" class="back-link">
+                        <i class="bi bi-arrow-left me-1"></i> Kembali ke Portal Lacak Publik
+                    </Link>
                 </div>
-            </div>
 
+                <!-- Footer Meta -->
+                <div class="form-footer-meta mt-4 text-center">
+                    <div class="d-flex align-items-center justify-content-center gap-3 text-muted small">
+                        <span><i class="bi bi-headset me-1 text-primary"></i> Bantuan TU</span>
+                        <span class="opacity-30">&bull;</span>
+                        <span><i class="bi bi-shield-check me-1 text-success"></i> Sistem Terproteksi</span>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
         <!-- Ripple Login Transition Overlay -->
@@ -184,213 +175,144 @@ const overlayStyle = computed(() => ({
 </template>
 
 <style scoped lang="scss">
-$navy-dark: #1E2338;
-$navy-panel: #2A314E;
-$blue-primary: #4F6AF4;
-$blue-vibrant: #435FE8;
-$blue-dark: #3750D6;
-$pink-coral: #FF5A87;
-$soft-bg: #F5F7FC;
-$text-dark: #1E293B;
+$theme-blue: #7e8fe9;
+$theme-dark-blue: #556be8;
+$theme-darker-blue: #4459d4;
+$text-dark: #0F172A;
 $text-muted: #64748B;
-$border-light: #E2E8F0;
+$border-color: #CBD5E1;
 
-.auth-wrapper {
-    position: relative;
+/* Full screen direct split page without any outer container/background */
+.login-split-page {
     min-height: 100vh;
-    overflow: hidden;
+    width: 100vw;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background: $navy-dark;
-    padding: 2rem 1.25rem;
+    background: $theme-blue;
+    overflow-x: hidden;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* ===== Ambient Decorative Backdrop ===== */
-.ambient-backdrop {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.ambient-blob-pink {
-    position: absolute;
-    top: -10%;
-    right: -10%;
-    width: 600px;
-    height: 600px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 90, 135, 0.75) 0%, rgba(255, 90, 135, 0.15) 60%, transparent 80%);
-    filter: blur(40px);
-}
-
-.ambient-dot-grid {
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px);
-    background-size: 28px 28px;
-    opacity: 0.6;
-}
-
-/* ===== Main Split Card Container ===== */
-.auth-card-container {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-    max-width: 1020px;
-    min-height: 600px;
-    background: transparent;
-    border-radius: 36px;
-    display: flex;
-    box-shadow: 0 30px 90px -20px rgba(10, 18, 45, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
-    overflow: hidden;
-    animation: cardFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* ===== LEFT PANEL (Ilustrasi) ===== */
-.auth-panel-left {
-    flex: 1.1;
-    background: linear-gradient(145deg, #637DF5 0%, #4D6BF0 50%, #3B58E9 100%);
-    padding: 2.5rem;
+/* ===== LEFT PANE (Illustration Side) ===== */
+.login-left-pane {
+    flex: 1.15;
+    background: $theme-blue;
+    min-height: 100vh;
+    padding: 3rem 3.5rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     position: relative;
     overflow: hidden;
-
-    &::after {
-        content: '';
-        position: absolute;
-        bottom: -20%;
-        left: -20%;
-        width: 400px;
-        height: 400px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-        pointer-events: none;
-    }
 }
 
-.left-brand-row {
+.left-brand {
     display: flex;
     align-items: center;
-    gap: 0.85rem;
+    gap: 1rem;
     position: relative;
     z-index: 2;
 }
 
 .brand-badge-white {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     background: #ffffff;
-    border-radius: 14px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
 
-.brand-text {
-    .brand-name {
-        font-size: 1.25rem;
+.brand-info {
+    .brand-title {
+        font-size: 1.45rem;
         font-weight: 800;
         color: #ffffff;
         letter-spacing: -0.01em;
-        line-height: 1.2;
+        line-height: 1.15;
+        margin: 0;
     }
-    .brand-tagline {
-        font-size: 0.72rem;
+    .brand-subtitle {
+        font-size: 0.8rem;
         font-weight: 600;
         color: rgba(255, 255, 255, 0.85);
-        letter-spacing: 0.02em;
+        margin: 0;
     }
 }
 
-.illustration-display-wrap {
-    position: relative;
-    z-index: 2;
+.left-illustration-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem 0;
-}
-
-.illustration-img {
-    max-width: 100%;
-    max-height: 380px;
-    object-fit: contain;
-    filter: drop-shadow(0 18px 35px rgba(25, 45, 140, 0.3));
-    user-select: none;
-}
-
-.animate-float {
-    animation: floatSmooth 6s ease-in-out infinite;
-}
-
-@keyframes floatSmooth {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-8px);
-    }
-}
-
-.left-footer-text {
-    position: relative;
-    z-index: 2;
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.8);
-}
-
-/* ===== RIGHT PANEL (Form Login with Curved Separator) ===== */
-.auth-panel-right {
     flex: 1;
+    padding: 1rem 0;
+}
+
+.illustration-image {
+    width: 100%;
+    max-width: 540px;
+    height: auto;
+    max-height: 70vh;
+    object-fit: contain;
+    user-select: none;
+    filter: drop-shadow(0 20px 40px rgba(45, 65, 160, 0.25));
+}
+
+.left-footer {
+    position: relative;
+    z-index: 2;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* ===== RIGHT PANE (White Login Form with Curved Border) ===== */
+.login-right-pane {
+    flex: 0.95;
     background: #ffffff;
-    border-top-left-radius: 54px; /* Curved inward shape matching reference */
-    padding: 3rem 3rem;
+    min-height: 100vh;
+    border-top-left-radius: 64px;
+    border-bottom-left-radius: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 3.5rem 4.5rem;
     position: relative;
-    z-index: 2;
-    box-shadow: -15px 0 35px rgba(0, 0, 0, 0.06);
+    z-index: 5;
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.08);
 }
 
-.form-content-wrap {
+.form-wrapper {
     width: 100%;
-    max-width: 380px;
+    max-width: 400px;
 
     &.has-errors {
         animation: shake 0.4s ease-in-out;
     }
 }
 
-.staff-access-pill {
+.badge-staff-pill {
     display: inline-flex;
     align-items: center;
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     font-weight: 700;
-    color: $blue-primary;
-    background: rgba(79, 106, 244, 0.1);
-    padding: 0.3rem 0.85rem;
+    color: $theme-dark-blue;
+    background: rgba(126, 143, 233, 0.15);
+    padding: 0.32rem 0.85rem;
     border-radius: 999px;
     letter-spacing: 0.02em;
 }
 
 .form-title {
-    font-size: 1.65rem;
+    font-size: 1.85rem;
     font-weight: 800;
     color: $text-dark;
     letter-spacing: -0.02em;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.35rem;
 }
 
 .form-subtitle {
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     color: $text-muted;
     line-height: 1.5;
     margin-bottom: 0;
@@ -402,8 +324,8 @@ $border-light: #E2E8F0;
 
     input {
         width: 100%;
-        height: 54px;
-        border: 1.5px solid #CBD5E1;
+        height: 56px;
+        border: 1.5px solid $border-color;
         border-radius: 14px;
         padding: 0 1rem 0 3rem;
         font-size: 0.95rem;
@@ -413,9 +335,9 @@ $border-light: #E2E8F0;
 
         &:focus {
             outline: none;
-            border-color: $blue-primary;
+            border-color: $theme-dark-blue;
             background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(79, 106, 244, 0.15);
+            box-shadow: 0 0 0 4px rgba(126, 143, 233, 0.25);
         }
     }
 
@@ -427,7 +349,7 @@ $border-light: #E2E8F0;
         color: #94A3B8;
         pointer-events: none;
         transition: all 0.2s ease;
-        font-size: 0.9rem;
+        font-size: 0.92rem;
     }
 
     .field-icon {
@@ -436,7 +358,7 @@ $border-light: #E2E8F0;
         top: 50%;
         transform: translateY(-50%);
         color: #94A3B8;
-        font-size: 1.15rem;
+        font-size: 1.2rem;
     }
 
     input:focus + label,
@@ -444,7 +366,7 @@ $border-light: #E2E8F0;
         top: 0;
         font-size: 0.74rem;
         font-weight: 700;
-        color: $blue-primary;
+        color: $theme-dark-blue;
         background: #ffffff;
         padding: 0 6px;
     }
@@ -490,8 +412,8 @@ $border-light: #E2E8F0;
 
     .switch-button {
         position: relative;
-        width: 42px;
-        height: 22px;
+        width: 44px;
+        height: 24px;
         background-color: #CBD5E1;
         border-radius: 20px;
         transition: all 0.3s ease;
@@ -499,8 +421,8 @@ $border-light: #E2E8F0;
 
     .switch-circle {
         position: absolute;
-        top: 2px;
-        left: 2px;
+        top: 3px;
+        left: 3px;
         width: 18px;
         height: 18px;
         background-color: white;
@@ -510,8 +432,8 @@ $border-light: #E2E8F0;
     }
 
     .switch-input:checked + .switch-button {
-        background-color: $blue-primary;
-        box-shadow: 0 3px 8px rgba(79, 106, 244, 0.3);
+        background-color: $theme-dark-blue;
+        box-shadow: 0 3px 10px rgba(85, 107, 232, 0.35);
     }
 
     .switch-input:checked + .switch-button .switch-circle {
@@ -520,21 +442,21 @@ $border-light: #E2E8F0;
 }
 
 /* Primary Action Button */
-.btn-primary-action {
-    height: 52px;
+.btn-login-action {
+    height: 54px;
     border: none;
     border-radius: 14px;
     color: #ffffff;
     font-weight: 700;
-    font-size: 0.95rem;
-    background: linear-gradient(135deg, $blue-primary 0%, $blue-vibrant 100%);
-    box-shadow: 0 6px 18px rgba(79, 106, 244, 0.35);
+    font-size: 0.98rem;
+    background: linear-gradient(135deg, $theme-dark-blue 0%, $theme-darker-blue 100%);
+    box-shadow: 0 6px 18px rgba(85, 107, 232, 0.35);
     transition: all 0.25s ease;
 
     &:hover:not(:disabled) {
         transform: translateY(-2px);
-        background: linear-gradient(135deg, $blue-vibrant 0%, $blue-dark 100%);
-        box-shadow: 0 8px 24px rgba(79, 106, 244, 0.45);
+        background: linear-gradient(135deg, $theme-blue 0%, $theme-dark-blue 100%);
+        box-shadow: 0 8px 24px rgba(85, 107, 232, 0.45);
     }
 
     &:active {
@@ -566,28 +488,13 @@ $border-light: #E2E8F0;
 
 .back-link {
     color: #64748B;
-    font-size: 0.85rem;
+    font-size: 0.86rem;
     font-weight: 600;
     text-decoration: none;
     transition: color 0.2s;
 
     &:hover {
-        color: $blue-primary;
-    }
-}
-
-.form-bottom-meta {
-    margin-top: 1.5rem;
-}
-
-@keyframes cardFadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.98);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
+        color: $theme-dark-blue;
     }
 }
 
@@ -611,7 +518,7 @@ $border-light: #E2E8F0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: $navy-dark;
+    background: $theme-darker-blue;
     clip-path: circle(150% at var(--origin-x) var(--origin-y));
 }
 
@@ -667,31 +574,38 @@ $border-light: #E2E8F0;
     }
 }
 
-/* Responsive adjustments */
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .login-left-pane {
+        padding: 2.5rem 2rem;
+    }
+    .login-right-pane {
+        padding: 3rem 2.5rem;
+    }
+}
+
 @media (max-width: 991px) {
-    .auth-card-container {
+    .login-split-page {
         flex-direction: column;
-        max-width: 480px;
-        border-radius: 28px;
     }
 
-    .auth-panel-left {
-        padding: 2rem 1.75rem 1.5rem;
+    .login-left-pane {
+        min-height: auto;
+        padding: 2.5rem 2rem 3rem;
     }
 
-    .illustration-display-wrap {
-        padding: 1rem 0;
+    .illustration-image {
+        max-width: 320px;
+        max-height: 240px;
     }
 
-    .illustration-img {
-        max-height: 220px;
-    }
-
-    .auth-panel-right {
-        border-top-left-radius: 36px;
-        border-top-right-radius: 36px;
-        padding: 2.5rem 1.75rem;
-        margin-top: -24px;
+    .login-right-pane {
+        min-height: auto;
+        border-top-left-radius: 40px;
+        border-top-right-radius: 40px;
+        border-bottom-left-radius: 0;
+        margin-top: -32px;
+        padding: 3rem 2rem;
     }
 }
 </style>
