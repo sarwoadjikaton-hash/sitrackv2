@@ -523,7 +523,7 @@ const orderedTimeline = computed<TimelineItem[]>(() => {
                                                         <!-- Top Step Number & DateTime -->
                                                         <div class="perjalanan-header-row">
                                                             <span class="perjalanan-step-label" :class="{ 'is-active-step': item.isCurrent, 'is-completed-step': item.isCompleted && !item.isCurrent, 'is-pending-step': item.isPending }">
-                                                                Step {{ item.stepNumber }}
+                                                                Tahap {{ item.stepNumber }}
                                                             </span>
                                                             <div v-if="item.dateTime && !item.isPending" class="perjalanan-date">
                                                                 {{ item.dateTime }}
@@ -540,16 +540,16 @@ const orderedTimeline = computed<TimelineItem[]>(() => {
                                                             </div>
                                                         </div>
 
-                                                        <!-- Status Tag Under Title (Completed / In Progress / Pending) -->
+                                                        <!-- Status Tag Under Title (Selesai / Sedang Berjalan / Menunggu) -->
                                                         <div class="perjalanan-status-sub">
                                                             <span v-if="item.isPending" class="status-sub-text text-pending">
-                                                                Pending
+                                                                Menunggu
                                                             </span>
                                                             <span v-else-if="item.isCurrent && !item.isException" class="status-sub-text text-in-progress">
-                                                                In Progress
+                                                                Sedang Berjalan
                                                             </span>
                                                             <span v-else-if="item.isCompleted && !item.isException" class="status-sub-text text-completed">
-                                                                Completed
+                                                                Selesai
                                                             </span>
                                                             <span v-else-if="item.isException" :class="item.exceptionType === 'warning' ? 'status-sub-text text-warning' : 'status-sub-text text-danger'">
                                                                 {{ item.exceptionType === 'warning' ? 'Perlu Revisi' : 'Ditolak' }}
