@@ -45,113 +45,136 @@ const overlayStyle = computed(() => ({
     <ToastNotification />
 
     <div class="auth-shell">
-        <!-- Edge-to-edge 2 Columns Container -->
+        <!-- Main Card Container with Outer Radius -->
         <div class="auth-main-card">
-            <!-- LEFT COLUMN: Brand & 3D Illustration -->
+            <!-- LEFT COLUMN: Brand, Hero Title & 3D Illustration -->
             <div class="auth-left-pane">
-                <div class="left-pane-content">
-                    <!-- Top Logo Header (Format Navbar Public) -->
-                    <div class="brand-top-row">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                                <!-- Logo SiTrack -->
-                                <img src="/images/sitrack_logo.svg" alt="SiTrack" class="app-logo-header shadow-sm rounded-3" />
-                                <span class="brand-pipe-divider text-white-50 opacity-40 fw-light">|</span>
-                                <!-- Logo Kemnaker -->
-                                <img src="/images/kemnaker_logo.png" alt="Kemnaker" class="kemnaker-logo-header kemnaker-logo-light" />
-                            </div>
+                <!-- Top Brand Header -->
+                <div class="brand-top-section">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                            <!-- Logo SiTrack -->
+                            <img src="/images/sitrack_logo.svg" alt="SiTrack" class="app-logo-header shadow-sm rounded-3" />
+                            <span class="brand-pipe-divider text-white-50 opacity-40 fw-light">|</span>
+                            <!-- Logo Kemnaker -->
+                            <img src="/images/kemnaker_logo.png" alt="Kemnaker" class="kemnaker-logo-header kemnaker-logo-light" />
+                        </div>
 
-                            <!-- Text Kemnaker -->
-                            <div class="kemnaker-brand-text text-uppercase fw-bold">
-                                <div class="lh-sm">KEMENTERIAN</div>
-                                <div class="lh-sm">KETENAGAKERJAAN</div>
-                                <div class="lh-sm">REPUBLIK INDONESIA</div>
-                            </div>
+                        <!-- Text Kemnaker -->
+                        <div class="kemnaker-brand-text text-uppercase fw-bold">
+                            <div class="lh-sm">KEMENTERIAN</div>
+                            <div class="lh-sm">KETENAGAKERJAAN</div>
+                            <div class="lh-sm">REPUBLIK INDONESIA</div>
                         </div>
                     </div>
+                    <p class="brand-tagline-text mt-2 mb-0">
+                        Tracking Online, Learn the Status.
+                    </p>
+                </div>
 
-                    <!-- Center 3D Illustration -->
-                    <div class="illustration-container">
-                        <img src="/images/login-illustration.png" alt="Ilustrasi Persuratan SiTrack" class="illustration-3d-img" />
-                    </div>
+                <!-- Hero Big Headline -->
+                <div class="hero-headline-wrap my-auto">
+                    <h1 class="hero-headline-text">
+                        Lacak Status Surat<br />
+                        Anda Dari Mana<br />
+                        Saja Di Dunia. <span class="globe-icon">🌍</span>
+                    </h1>
+                </div>
 
-                    <!-- Bottom Note -->
-                    <div class="left-pane-footer">
-                        <p class="footer-copy-text mb-0">
-                            &copy; 2026 SiTrack &bull; Kementerian Ketenagakerjaan Republik Indonesia
-                        </p>
-                    </div>
+                <!-- 3D Illustration at Bottom Left -->
+                <div class="illustration-container">
+                    <img src="/images/login-illustration.png" alt="Ilustrasi Persuratan SiTrack" class="illustration-3d-img" />
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: Curved Divider & Login Form -->
+            <!-- RIGHT COLUMN: White Rounded Pane & Login Form -->
             <div class="auth-right-pane">
-                <!-- SVG Curved Shape Divider -->
-                <div class="curved-divider-wrapper" aria-hidden="true">
-                    <svg class="curved-divider-svg" viewBox="0 0 100 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M100 0 C40 0 0 80 0 200 L0 800 L100 800 Z" fill="#ffffff" />
-                    </svg>
+                <!-- Top Actions (Portal Link / Language) -->
+                <div class="right-pane-top-bar d-flex justify-content-end align-items-center">
+                    <Link href="/tracking" class="top-portal-link d-inline-flex align-items-center gap-1">
+                        <span>Portal Lacak Publik</span>
+                        <i class="bi bi-chevron-down small opacity-75"></i>
+                    </Link>
                 </div>
 
-                <div class="right-pane-content">
-                    <!-- Login Form Box -->
-                    <div class="login-inner-card" :class="{ 'has-errors': form.errors.username || form.errors.password }">
-                        <div class="form-header-section mb-4">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="badge-staff-access">STAFF ACCESS ONLY</span>
-                                <span class="portal-badge-text">Portal Staf</span>
+                <div class="form-center-wrapper my-auto">
+                    <!-- Title Section -->
+                    <div class="form-header-section mb-4">
+                        <h2 class="form-main-title fw-bold mb-1">Masuk ke Akun Anda</h2>
+                        <p class="form-sub-title text-muted">Sistem Elektronik Administrasi Persuratan Staf</p>
+                    </div>
+
+                    <!-- Form -->
+                    <form @submit.prevent="submit" novalidate class="login-form-body">
+                        <!-- Username Field -->
+                        <div class="clean-input-group mb-3" :class="{ 'is-invalid': form.errors.username }">
+                            <label for="username" class="clean-label">Username Staf</label>
+                            <div class="clean-input-wrap">
+                                <input
+                                    v-model="form.username"
+                                    type="text"
+                                    id="username"
+                                    class="clean-input"
+                                    placeholder="Masukkan username"
+                                    autofocus
+                                    autocomplete="username"
+                                />
                             </div>
-                            <h2 class="form-title text-dark fw-bold mb-1">Masuk ke Sistem</h2>
-                            <p class="text-muted small mb-0">Sistem Elektronik Administrasi Persuratan</p>
+                            <div v-if="form.errors.username" class="clean-error-text">{{ form.errors.username }}</div>
                         </div>
 
-                        <form @submit.prevent="submit" novalidate>
-                            <!-- Username Field -->
-                            <div class="field-float mb-3" :class="{ 'is-filled': form.username, 'is-invalid': form.errors.username }">
-                                <i class="bi bi-person field-icon"></i>
-                                <input v-model="form.username" type="text" id="username" placeholder=" " autofocus autocomplete="username" />
-                                <label for="username">Username Staf</label>
-                            </div>
-                            <div v-if="form.errors.username" class="field-error">{{ form.errors.username }}</div>
-
-                            <!-- Password Field -->
-                            <div class="field-float mb-2" :class="{ 'is-filled': form.password, 'is-invalid': form.errors.password }">
-                                <i class="bi bi-lock field-icon"></i>
-                                <input v-model="form.password" :type="showPassword ? 'text' : 'password'" id="password" placeholder=" " autocomplete="current-password" />
-                                <label for="password">Kata Sandi</label>
-                                <button type="button" class="field-suffix-btn" @click="togglePassword" tabindex="-1">
+                        <!-- Password Field -->
+                        <div class="clean-input-group mb-3" :class="{ 'is-invalid': form.errors.password }">
+                            <label for="password" class="clean-label">Kata Sandi</label>
+                            <div class="clean-input-wrap">
+                                <input
+                                    v-model="form.password"
+                                    :type="showPassword ? 'text' : 'password'"
+                                    id="password"
+                                    class="clean-input"
+                                    placeholder="Masukkan kata sandi"
+                                    autocomplete="current-password"
+                                />
+                                <button type="button" class="password-toggle-btn" @click="togglePassword" tabindex="-1" aria-label="Toggle password visibility">
                                     <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye']"></i>
                                 </button>
                             </div>
-                            <div v-if="form.errors.password" class="field-error mb-2">{{ form.errors.password }}</div>
-
-                            <!-- Remember Me Toggle -->
-                            <div class="d-flex align-items-center justify-content-between my-3.5">
-                                <label class="switch-label">
-                                    <input v-model="form.remember" type="checkbox" class="switch-input" />
-                                    <div class="switch-button">
-                                        <div class="switch-circle"></div>
-                                    </div>
-                                    <span class="ms-2 small text-muted fw-semibold">Ingat sesi saya</span>
-                                </label>
-                            </div>
-
-                            <!-- Submit Button -->
-                            <button ref="submitBtn" type="submit" class="btn-glow-submit w-100 mt-2" :disabled="form.processing" @click="captureOrigin">
-                                <span v-if="form.processing" class="btn-loading">
-                                    <span class="btn-loading-ring"></span>
-                                    <span>Memeriksa akun...</span>
-                                </span>
-                                <span v-else>Masuk ke Sistem</span>
-                            </button>
-                        </form>
-
-                        <div class="text-center mt-4 pt-3 border-top">
-                            <Link href="/tracking" class="back-link">
-                                <i class="bi bi-arrow-left me-1"></i> Kembali ke Portal Lacak Publik
-                            </Link>
+                            <div v-if="form.errors.password" class="clean-error-text">{{ form.errors.password }}</div>
                         </div>
-                    </div>
+
+                        <!-- Remember Me -->
+                        <div class="d-flex align-items-center justify-content-between mb-4 mt-2">
+                            <label class="clean-checkbox-label">
+                                <input v-model="form.remember" type="checkbox" class="clean-checkbox-input" />
+                                <span class="clean-checkbox-text">Ingat sesi login saya</span>
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button
+                            ref="submitBtn"
+                            type="submit"
+                            class="btn-primary-pill w-100"
+                            :disabled="form.processing"
+                            @click="captureOrigin"
+                        >
+                            <span v-if="form.processing" class="btn-loading">
+                                <span class="btn-loading-ring"></span>
+                                <span>Memeriksa akun...</span>
+                            </span>
+                            <span v-else>Masuk ke Sistem</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Footer / Return Link -->
+                <div class="right-pane-footer text-center mt-3">
+                    <p class="text-muted small mb-0">
+                        Bukan staf?
+                        <Link href="/tracking" class="footer-action-link fw-semibold">
+                            Lacak Surat Publik
+                        </Link>
+                    </p>
                 </div>
             </div>
         </div>
@@ -181,54 +204,49 @@ const overlayStyle = computed(() => ({
     position: relative;
     width: 100vw;
     min-height: 100vh;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     display: flex;
-    background: #ffffff;
-    padding: 0;
+    align-items: center;
+    justify-content: center;
+    background: #eef2f8;
+    padding: 2.5rem 1.5rem;
     margin: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Edge-to-Edge 2-Column Container */
+/* Main Card Container with Outer Radius */
 .auth-main-card {
     position: relative;
     display: flex;
     width: 100%;
-    min-height: 100vh;
-    background: #ffffff;
+    max-width: 1040px;
+    min-height: 610px;
+    background: #6F81EB;
+    border-radius: 36px;
+    box-shadow: 0 24px 60px rgba(65, 84, 209, 0.2);
     margin: 0;
-    padding: 0;
     overflow: hidden;
 }
 
 /* ========================================================
-   LEFT PANE: 3D Illustration & Seamless Color Background
+   LEFT PANE: Brand, Hero Headline & 3D Illustration
    ======================================================== */
 .auth-left-pane {
     position: relative;
     flex: 1.15;
-    background: #7383E2;
-    min-height: 100vh;
-    padding: 3rem 4rem;
+    background: #6F81EB;
+    padding: 2.6rem 2.8rem 1.2rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    overflow: hidden;
+    color: #ffffff;
     z-index: 1;
 }
 
-.left-pane-content {
+.brand-top-section {
     position: relative;
     z-index: 2;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.brand-top-row {
-    display: flex;
-    align-items: center;
 }
 
 .app-logo-header {
@@ -238,8 +256,8 @@ const overlayStyle = computed(() => ({
 
 @media (min-width: 576px) {
     .app-logo-header {
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
     }
 }
 
@@ -258,8 +276,8 @@ const overlayStyle = computed(() => ({
 
 @media (min-width: 576px) {
     .kemnaker-logo-light {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
     }
 }
 
@@ -273,7 +291,7 @@ const overlayStyle = computed(() => ({
 .kemnaker-brand-text {
     font-size: 0.65rem;
     letter-spacing: 0.6px;
-    line-height: 1.25;
+    line-height: 1.22;
     color: #ffffff;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
@@ -285,21 +303,50 @@ const overlayStyle = computed(() => ({
     }
 }
 
+.brand-tagline-text {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.82);
+    font-weight: 500;
+    letter-spacing: 0.2px;
+}
+
+/* Hero Headline */
+.hero-headline-wrap {
+    margin: 1.8rem 0 1.2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-headline-text {
+    font-size: 2.15rem;
+    font-weight: 800;
+    line-height: 1.22;
+    color: #ffffff;
+    letter-spacing: -0.025em;
+}
+
+.globe-icon {
+    display: inline-block;
+    font-size: 1.9rem;
+    vertical-align: middle;
+}
+
+/* 3D Illustration Container */
 .illustration-container {
     position: relative;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
-    padding: 1.5rem 0;
-    flex: 1;
+    width: 100%;
+    margin-top: auto;
+    z-index: 2;
 }
 
 .illustration-3d-img {
     position: relative;
-    z-index: 2;
     max-width: 100%;
     height: auto;
-    max-height: 380px;
+    max-height: 275px;
     object-fit: contain;
     animation: floatIllustration 8s ease-in-out infinite;
 }
@@ -309,225 +356,196 @@ const overlayStyle = computed(() => ({
         transform: translateY(0);
     }
     50% {
-        transform: translateY(-8px);
+        transform: translateY(-6px);
     }
-}
-
-.left-pane-footer {
-    text-align: left;
-}
-
-.footer-copy-text {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.8);
-    letter-spacing: 0.02em;
 }
 
 /* ========================================================
-   RIGHT PANE: Curved Divider & Login Form
+   RIGHT PANE: White Rounded Card & Login Form
    ======================================================== */
 .auth-right-pane {
     position: relative;
-    flex: 1;
+    flex: 1.08;
     background: #ffffff;
-    min-height: 100vh;
+    border-radius: 36px;
+    margin: 0;
+    padding: 2.6rem 3.5rem;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 4.5rem;
+    flex-direction: column;
+    justify-content: space-between;
     z-index: 2;
+    box-shadow: -10px 0 28px rgba(0, 0, 0, 0.04);
 }
 
-/* SVG Curved Shape Divider */
-.curved-divider-wrapper {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: -55px;
-    width: 58px;
-    height: 100%;
-    z-index: 10;
-    pointer-events: none;
-}
-
-.curved-divider-svg {
+.right-pane-top-bar {
     width: 100%;
-    height: 100%;
-    display: block;
 }
 
-.right-pane-content {
-    position: relative;
-    z-index: 15;
-    width: 100%;
-    max-width: 400px;
-}
-
-.badge-staff-access {
-    font-size: 0.65rem;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    color: #4F46E5;
-    background: #EEF2FF;
-    padding: 4px 12px;
-    border-radius: 50px;
-    display: inline-block;
-}
-
-.portal-badge-text {
-    font-size: 0.75rem;
+.top-portal-link {
+    font-size: 0.85rem;
     font-weight: 600;
-    color: #94A3B8;
+    color: #374151;
+    text-decoration: none;
+    padding: 0.35rem 0.75rem;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+
+    &:hover {
+        color: #5B6DEE;
+        background: #eef2ff;
+        border-color: #c7d2fe;
+    }
 }
 
-.form-title {
-    font-size: 1.65rem;
+.form-center-wrapper {
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+}
+
+.form-main-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #111827;
     letter-spacing: -0.02em;
 }
 
-/* Floating label inputs */
-.field-float {
+.form-sub-title {
+    font-size: 0.88rem;
+    color: #6B7280;
+}
+
+/* Clean Underline Input Form Style */
+.clean-input-group {
     position: relative;
 
-    input {
+    .clean-label {
+        display: block;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #1F2937;
+        margin-bottom: 0.35rem;
+    }
+
+    .clean-input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .clean-input {
         width: 100%;
-        height: 54px;
-        border: 1.5px solid #E2E8F0;
-        border-radius: 14px;
-        padding: 0 1rem 0 3rem;
+        padding: 0.65rem 0.2rem 0.65rem 0;
         font-size: 0.95rem;
-        background: #F8FAFC;
-        color: #0F172A;
-        transition: all 0.25s ease;
+        color: #111827;
+        background: transparent;
+        border: none;
+        border-bottom: 1.5px solid #E5E7EB;
+        outline: none;
+        border-radius: 0;
+        transition: border-color 0.2s, box-shadow 0.2s;
 
         &:focus {
-            outline: none;
-            border-color: #3A62E8;
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(58, 98, 232, 0.12);
+            border-bottom-color: #5B6DEE;
+            box-shadow: 0 1px 0 #5B6DEE;
+        }
+
+        &::placeholder {
+            color: #9CA3AF;
+            font-size: 0.9rem;
         }
     }
 
-    label {
-        position: absolute;
-        left: 3rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #64748B;
-        pointer-events: none;
-        transition: all 0.2s ease;
+    &.is-invalid .clean-input {
+        border-bottom-color: #EF4444;
+        box-shadow: 0 1px 0 #EF4444;
     }
 
-    .field-icon {
-        position: absolute;
-        left: 1.2rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #64748B;
-        font-size: 1.15rem;
-    }
-
-    input:focus + label,
-    &.is-filled label {
-        top: 0;
-        font-size: 0.72rem;
-        font-weight: 700;
-        color: #3A62E8;
-        background: #ffffff;
-        padding: 0 6px;
-    }
-
-    .field-suffix-btn {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        border: none;
-        background: transparent;
-        color: #64748B;
-        cursor: pointer;
-    }
-
-    &.is-invalid input {
-        border-color: #EF4444;
+    .clean-error-text {
+        color: #EF4444;
+        font-size: 0.75rem;
+        margin-top: 4px;
+        font-weight: 500;
     }
 }
 
-.field-error {
-    color: #EF4444;
-    font-size: 0.75rem;
-    margin-top: 4px;
+.password-toggle-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #9CA3AF;
+    font-size: 1.15rem;
+    cursor: pointer;
+    padding: 4px;
+    transition: color 0.2s ease;
+
+    &:hover {
+        color: #4B5563;
+    }
+}
+
+.clean-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.clean-checkbox-input {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid #CBD5E1;
+    accent-color: #5B6DEE;
+    cursor: pointer;
+}
+
+.clean-checkbox-text {
+    font-size: 0.82rem;
+    color: #4B5563;
     font-weight: 500;
 }
 
-/* Switch Toggle */
-.switch-label {
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
-    user-select: none;
-
-    .switch-input {
-        display: none;
-    }
-
-    .switch-button {
-        position: relative;
-        width: 40px;
-        height: 22px;
-        background-color: #CBD5E1;
-        border-radius: 20px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .switch-circle {
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        width: 16px;
-        height: 16px;
-        background-color: white;
-        border-radius: 50%;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .switch-input:checked + .switch-button {
-        background-color: #3A62E8;
-    }
-
-    .switch-input:checked + .switch-button .switch-circle {
-        transform: translateX(18px);
-    }
-}
-
-/* Button Glow Submit */
-.btn-glow-submit {
-    height: 54px;
-    border: none;
-    border-radius: 14px;
+/* Button Pill Submit */
+.btn-primary-pill {
+    height: 48px;
+    background: #5B6DEE;
     color: #ffffff;
+    border: none;
+    border-radius: 50px;
     font-weight: 700;
-    font-size: 0.95rem;
-    background: linear-gradient(135deg, #4A72F5 0%, #3A62E8 100%);
-    box-shadow: 0 4px 14px rgba(58, 98, 232, 0.35);
-    transition: all 0.2s ease;
+    font-size: 0.98rem;
+    letter-spacing: 0.2px;
     cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 8px 22px rgba(91, 109, 238, 0.35);
 
     &:hover:not(:disabled) {
+        background: #4B5EE3;
         transform: translateY(-2px);
-        background: linear-gradient(135deg, #3A62E8 0%, #2544C0 100%);
-        box-shadow: 0 8px 20px rgba(58, 98, 232, 0.45);
+        box-shadow: 0 12px 26px rgba(91, 109, 238, 0.45);
     }
 
-    &:active {
+    &:active:not(:disabled) {
         transform: translateY(0);
+    }
+
+    &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
     }
 }
 
 .btn-loading {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
 }
 
@@ -547,15 +565,12 @@ const overlayStyle = computed(() => ({
     }
 }
 
-.back-link {
-    color: #64748B;
-    font-size: 0.85rem;
-    font-weight: 600;
+.footer-action-link {
+    color: #5B6DEE;
     text-decoration: none;
-    transition: color 0.2s ease;
 
     &:hover {
-        color: #3A62E8;
+        text-decoration: underline;
     }
 }
 
@@ -630,32 +645,33 @@ const overlayStyle = computed(() => ({
    RESPONSIVE DESIGN (Mobile & Tablet)
    ======================================================== */
 @media (max-width: 991.98px) {
+    .auth-shell {
+        padding: 1.5rem 1rem;
+    }
+
     .auth-main-card {
         flex-direction: column;
-        max-width: 500px;
+        max-width: 480px;
         min-height: auto;
         border-radius: 28px;
     }
 
     .auth-left-pane {
-        padding: 2rem 1.5rem;
+        padding: 2rem 1.75rem 1.5rem;
         flex: none;
     }
 
-    .illustration-container {
-        padding: 1rem 0;
+    .hero-headline-text {
+        font-size: 1.75rem;
     }
 
     .illustration-3d-img {
         max-height: 200px;
     }
 
-    .curved-divider-wrapper {
-        display: none;
-    }
-
     .auth-right-pane {
-        padding: 2.5rem 1.75rem;
+        border-radius: 28px;
+        padding: 2.2rem 1.75rem;
     }
 }
 </style>
