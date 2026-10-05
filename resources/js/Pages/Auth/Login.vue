@@ -142,7 +142,7 @@ const overlayStyle = computed(() => ({
                     <!-- Bottom Link inside card -->
                     <div class="text-center mt-4 pt-3 border-top">
                         <p class="text-muted small mb-0">
-                            Ingin melacak surat?
+                            Bukan Staff?
                             <Link href="/tracking" class="back-link fw-semibold ms-1">
                                 Buka Portal Publik
                             </Link>
@@ -264,16 +264,6 @@ const overlayStyle = computed(() => ({
     height: auto;
     max-height: 390px;
     object-fit: contain;
-    animation: floatIllustration 8s ease-in-out infinite;
-}
-
-@keyframes floatIllustration {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-8px);
-    }
 }
 
 .left-bottom-footer {
