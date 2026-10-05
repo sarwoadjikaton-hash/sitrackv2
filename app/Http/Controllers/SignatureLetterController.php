@@ -49,6 +49,7 @@ class SignatureLetterController extends Controller
         $selectedWorkbookId = (int) $request->input('workbook', 0);
         $search = trim((string) $request->input('search', ''));
         $status = trim((string) $request->input('status', ''));
+        $action = trim((string) $request->input('action', ''));
         $sort = $request->input('sort', 'date_desc');
         $periode = $request->input('periode', 'all');
         $tanggal = $request->input('tanggal', now()->toDateString());
@@ -60,6 +61,10 @@ class SignatureLetterController extends Controller
 
         if ($selectedWorkbookId > 0) {
             $query->where('letter_number_type_id', $selectedWorkbookId);
+        }
+
+        if ($action !== '') {
+            $query->where('requested_actions', 'ILIKE', "%{$action}%");
         }
 
         if ($search !== '') {
@@ -74,6 +79,7 @@ class SignatureLetterController extends Controller
                     ->orWhere('signatory_name', 'ILIKE', "%{$search}%")
                     ->orWhere('technical_officer', 'ILIKE', "%{$search}%")
                     ->orWhere('current_position', 'ILIKE', "%{$search}%")
+                    ->orWhere('requested_actions', 'ILIKE', "%{$search}%")
                     ->orWhere('notes', 'ILIKE', "%{$search}%")
                     ->orWhereHas('recipientUnit', function ($uq) use ($search) {
                         $uq->where('unit_name', 'ILIKE', "%{$search}%");
@@ -125,6 +131,7 @@ class SignatureLetterController extends Controller
                 'workbook' => $selectedWorkbookId,
                 'search' => $search,
                 'status' => $status,
+                'action' => $action,
                 'sort' => $sort,
                 'periode' => $periode,
                 'tanggal' => $tanggal,

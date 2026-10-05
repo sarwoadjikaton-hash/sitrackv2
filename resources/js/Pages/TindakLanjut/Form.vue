@@ -208,6 +208,9 @@ watch(classificationCode, () => {
 const actionOptions = [
     'Mohon Tanda Tangan',
     'Mohon Paraf',
+    'Sekjen',
+    'a.n. Sekjen',
+    'a.n. Menteri',
 ];
 
 const handleFileUpload = (e: Event) => {

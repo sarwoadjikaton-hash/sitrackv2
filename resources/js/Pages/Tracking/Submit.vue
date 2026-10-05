@@ -17,6 +17,7 @@ const form = useForm({
     destination: '',
     priority: 'Biasa',
     type_id: (props.types[0]?.id || 1) as number,
+    requested_actions: [] as string[],
     subject: '',
     letter_date: new Date().toISOString().substring(0, 10),
     notes: '',
@@ -34,6 +35,14 @@ const typeOptions = computed(() =>
 const priorityOptions = [
     { value: 'Biasa', label: 'Biasa' },
     { value: 'Segera', label: 'Segera' },
+];
+
+const requestedActionOptions = [
+    { value: 'Mohon Tanda Tangan', label: 'Mohon Tanda Tangan' },
+    { value: 'Mohon Paraf', label: 'Mohon Paraf' },
+    { value: 'Sekjen', label: 'Sekjen' },
+    { value: 'a.n. Sekjen', label: 'a.n. Sekjen' },
+    { value: 'a.n. Menteri', label: 'a.n. Menteri' },
 ];
 
 const submit = () => {
@@ -131,8 +140,33 @@ const submit = () => {
                                     </Transition>
                                 </div>
 
-                                <!-- 4. Perihal & Keterangan -->
+                                <!-- 4. Permohonan Paraf, Tanda Tangan & Penandatangan (Multiple Checkbox) -->
                                 <div class="col-12 animate-field" style="--delay: 7">
+                                    <label class="form-label small fw-bold d-flex align-items-center justify-content-between mb-2">
+                                        <span>Permohonan Paraf, Tanda Tangan & Penandatangan</span>
+                                        <span class="text-muted fw-normal" style="font-size: 0.75rem;">(Bisa pilih lebih dari satu)</span>
+                                    </label>
+                                    <div class="row g-2">
+                                        <div v-for="opt in requestedActionOptions" :key="opt.value" class="col-md-4 col-sm-6">
+                                            <label class="custom-checkbox-card" :class="{ 'is-checked': form.requested_actions.includes(opt.value) }">
+                                                <input
+                                                    type="checkbox"
+                                                    v-model="form.requested_actions"
+                                                    :value="opt.value"
+                                                    class="form-check-input me-2"
+                                                />
+                                                <span class="checkbox-label-text fw-semibold">{{ opt.label }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <Transition name="fade-error">
+                                        <div v-if="form.errors.requested_actions" class="text-danger small mt-1">{{
+                                            form.errors.requested_actions }}</div>
+                                    </Transition>
+                                </div>
+
+                                <!-- 5. Perihal & Keterangan -->
+                                <div class="col-12 animate-field" style="--delay: 8">
                                     <label class="form-label small fw-bold">Perihal Naskah Dinas</label>
                                     <textarea v-model="form.subject" class="form-control custom-input" rows="3"
                                         placeholder="Tuliskan perihal surat / naskah dinas permohonan paraf secara lengkap..." required></textarea>
@@ -142,7 +176,7 @@ const submit = () => {
                                     </Transition>
                                 </div>
 
-                                <div class="col-12 animate-field" style="--delay: 8">
+                                <div class="col-12 animate-field" style="--delay: 9">
                                     <label class="form-label small fw-bold">Keterangan Tambahan / Catatan Khusus</label>
                                     <textarea v-model="form.notes" class="form-control custom-input" rows="2"
                                          placeholder="Catatan pengantar berkas atau instruksi tambahan..."></textarea>
@@ -220,6 +254,51 @@ const submit = () => {
     border-color: #14b8a6;
     box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
     transform: translateY(-2px);
+}
+
+.custom-checkbox-card {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    user-select: none;
+    margin-bottom: 0;
+}
+
+.custom-checkbox-card:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+.custom-checkbox-card.is-checked {
+    background: #f0fdfa;
+    border-color: #14b8a6;
+    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.12);
+}
+
+.custom-checkbox-card .form-check-input {
+    cursor: pointer;
+    border-color: #94a3b8;
+    margin-top: 0;
+}
+
+.custom-checkbox-card .form-check-input:checked {
+    background-color: #167992;
+    border-color: #167992;
+}
+
+.checkbox-label-text {
+    font-size: 0.88rem;
+    color: #1e293b;
+}
+
+.custom-checkbox-card.is-checked .checkbox-label-text {
+    color: #0f766e;
 }
 
 .btn-submit-track {

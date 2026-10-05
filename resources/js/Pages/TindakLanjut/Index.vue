@@ -16,6 +16,7 @@ const props = defineProps<{
         workbook: number;
         search: string;
         status: string;
+        action?: string;
         sort?: string;
         periode?: string;
         tanggal?: string;
@@ -32,6 +33,7 @@ const filterPeriode = ref(props.filters.periode || 'all');
 const filterTanggal = ref(props.filters.tanggal || new Date().toISOString().substring(0, 10));
 const filterBulan = ref(props.filters.bulan || (new Date().getMonth() + 1));
 const statusFilter = ref(props.filters.status || '');
+const actionFilter = ref(props.filters.action || '');
 
 const workbookOptions = computed(() => [
     { value: 0, label: 'Semua Workbook' },
@@ -50,6 +52,7 @@ const applyFilter = () => {
         workbook: currentWorkbookId.value,
         search: search.value,
         status: statusFilter.value,
+        action: actionFilter.value,
         sort: filterSort.value,
         periode: filterPeriode.value,
         tanggal: filterPeriode.value === 'hari' ? filterTanggal.value : undefined,
@@ -57,7 +60,7 @@ const applyFilter = () => {
     }, { preserveState: true, replace: true });
 };
 
-watch([currentWorkbookId, filterSort, filterPeriode, statusFilter], () => {
+watch([currentWorkbookId, filterSort, filterPeriode, statusFilter, actionFilter], () => {
     applyFilter();
 });
 
@@ -94,6 +97,9 @@ watch(() => statusForm.status, (newStatus) => {
 const actionOptions = [
     'Mohon Tanda Tangan',
     'Mohon Paraf',
+    'Sekjen',
+    'a.n. Sekjen',
+    'a.n. Menteri',
 ];
 
 const handleFileUpload = (e: Event) => {
@@ -240,6 +246,18 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                             @update:model-value="applyFilter"
                         />
                     </div>
+                    <div style="min-width: 170px;">
+                        <SearchableSelect
+                            v-model="actionFilter"
+                            :options="[
+                                { value: '', label: 'Semua Tindakan / TTD' },
+                                ...actionOptions.map(a => ({ value: a, label: a }))
+                            ]"
+                            placeholder="Semua Tindakan / TTD"
+                            size="sm"
+                            @update:model-value="applyFilter"
+                        />
+                    </div>
                     <div style="min-width: 190px;">
                         <SearchableSelect
                             v-model="currentWorkbookId"
@@ -252,6 +270,31 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                             @update:model-value="applyFilter"
                         />
                     </div>
+                </div>
+
+                <!-- Quick Action Filter Chips -->
+                <div class="px-3 px-sm-4 py-2 border-bottom d-flex align-items-center gap-1.5 flex-wrap" style="background: #f8fafc;">
+                    <span class="small text-muted fw-semibold me-1 d-flex align-items-center gap-1" style="font-size: 0.76rem;">
+                        <i class="bi bi-funnel text-primary"></i> Filter Tindakan:
+                    </span>
+                    <button
+                        type="button"
+                        class="filter-chip-btn"
+                        :class="{ 'is-active': actionFilter === '' }"
+                        @click="actionFilter = ''; applyFilter();"
+                    >
+                        Semua
+                    </button>
+                    <button
+                        v-for="opt in actionOptions"
+                        :key="opt"
+                        type="button"
+                        class="filter-chip-btn"
+                        :class="{ 'is-active': actionFilter === opt }"
+                        @click="actionFilter = (actionFilter === opt ? '' : opt); applyFilter();"
+                    >
+                        {{ opt }}
+                    </button>
                 </div>
 
             <!-- Desktop Table View (>= md) -->
@@ -476,3 +519,33 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
         </div>
     </AppLayout>
 </template>
+
+<style scoped>
+.filter-chip-btn {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.filter-chip-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-color: #cbd5e1;
+}
+
+.filter-chip-btn.is-active {
+    background: #2743AF;
+    color: #ffffff;
+    border-color: #2743AF;
+    box-shadow: 0 2px 6px rgba(39, 67, 175, 0.25);
+}
+</style>

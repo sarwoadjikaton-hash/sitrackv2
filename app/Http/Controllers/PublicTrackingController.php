@@ -118,6 +118,7 @@ class PublicTrackingController extends Controller
             'destination' => ['required', 'string', 'max:255'],
             'priority' => ['required', 'in:Biasa,Segera'],
             'type_id' => ['required', 'exists:letter_number_types,id'],
+            'requested_actions' => ['nullable'],
             'subject' => ['required', 'string', 'max:500'],
             'letter_date' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:500'],
@@ -144,6 +145,10 @@ class PublicTrackingController extends Controller
                 $pdfContent = PdfTextExtractor::extract($attachmentPath);
             }
 
+            $actions = is_array($request->input('requested_actions'))
+                ? implode(', ', array_filter($request->input('requested_actions')))
+                : $request->input('requested_actions');
+
             $letter = Letter::create([
                 'tracking_code' => $trackingCode,
                 'agenda_number' => $agendaNumber,
@@ -164,6 +169,7 @@ class PublicTrackingController extends Controller
                 'priority' => $validated['priority'],
                 'security_level' => 'Biasa',
                 'current_position' => $unitPengusulName,
+                'requested_actions' => $actions ?: null,
                 'notes' => $validated['notes'] ?? null,
                 'attachment_path' => $attachmentPath,
                 'pdf_content' => $pdfContent,
