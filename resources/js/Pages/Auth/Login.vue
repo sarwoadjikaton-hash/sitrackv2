@@ -50,20 +50,23 @@ const overlayStyle = computed(() => ({
             <!-- LEFT COLUMN: Brand & 3D Illustration -->
             <div class="auth-left-pane">
                 <div class="left-pane-content">
-                    <!-- Top Logo Header -->
+                    <!-- Top Logo Header (Format Navbar Public) -->
                     <div class="brand-top-row">
-                        <div class="brand-logos-pill">
-                            <div class="logo-icon-wrap">
-                                <img src="/images/sitrack_logo.svg" alt="SiTrack Logo" width="34" height="34" />
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                                <!-- Logo SiTrack -->
+                                <img src="/images/sitrack_logo.svg" alt="SiTrack" class="app-logo-header shadow-sm rounded-3" />
+                                <span class="brand-pipe-divider text-white-50 opacity-40 fw-light">|</span>
+                                <!-- Logo Kemnaker -->
+                                <img src="/images/kemnaker_logo.png" alt="Kemnaker" class="kemnaker-logo-header kemnaker-logo-light" />
                             </div>
-                            <span class="logo-divider"></span>
-                            <div class="logo-icon-wrap kemnaker-icon">
-                                <img src="/images/kemnaker_logo.png" alt="Kemnaker Logo" width="28" height="28" />
+
+                            <!-- Text Kemnaker -->
+                            <div class="kemnaker-brand-text text-uppercase fw-bold">
+                                <div class="lh-sm">KEMENTERIAN</div>
+                                <div class="lh-sm">KETENAGAKERJAAN</div>
+                                <div class="lh-sm">REPUBLIK INDONESIA</div>
                             </div>
-                        </div>
-                        <div class="brand-title-group">
-                            <span class="brand-name">SiTrack</span>
-                            <span class="brand-subtitle">TU SEKJEN</span>
                         </div>
                     </div>
 
@@ -226,50 +229,60 @@ const overlayStyle = computed(() => ({
 .brand-top-row {
     display: flex;
     align-items: center;
-    gap: 1rem;
 }
 
-.brand-logos-pill {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    background: rgba(255, 255, 255, 0.22);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    padding: 0.45rem 0.8rem;
-    border-radius: 18px;
+.app-logo-header {
+    width: 36px;
+    height: 36px;
 }
 
-.logo-icon-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+@media (min-width: 576px) {
+    .app-logo-header {
+        width: 40px;
+        height: 40px;
+    }
 }
 
-.logo-divider {
-    width: 1px;
-    height: 20px;
-    background: rgba(255, 255, 255, 0.4);
+.kemnaker-logo-header {
+    width: 30px;
+    height: 30px;
 }
 
-.brand-title-group {
-    display: flex;
-    flex-direction: column;
+.kemnaker-logo-light {
+    width: 30px;
+    height: 30px;
+    filter: brightness(0) invert(1);
+    opacity: 0.95;
+    vertical-align: middle;
 }
 
-.brand-name {
-    font-size: 1.35rem;
-    font-weight: 800;
+@media (min-width: 576px) {
+    .kemnaker-logo-light {
+        width: 34px;
+        height: 34px;
+    }
+}
+
+.brand-pipe-divider {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.45);
+    margin: 0 0.15rem;
+    user-select: none;
+}
+
+.kemnaker-brand-text {
+    font-size: 0.65rem;
+    letter-spacing: 0.6px;
+    line-height: 1.25;
     color: #ffffff;
-    letter-spacing: -0.01em;
-    line-height: 1.1;
+    font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-.brand-subtitle {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.85);
-    letter-spacing: 0.08em;
+@media (min-width: 576px) {
+    .kemnaker-brand-text {
+        font-size: 0.72rem;
+        letter-spacing: 0.65px;
+    }
 }
 
 .illustration-container {
