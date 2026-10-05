@@ -142,7 +142,7 @@ const overlayStyle = computed(() => ({
                     <!-- Bottom Link inside card -->
                     <div class="text-center mt-4 pt-3 border-top">
                         <Link href="/tracking" class="back-link">
-                            <i class="bi bi-arrow-left me-1"></i> Kembali ke Portal Lacak Publik
+                            <i class="bi bi-arrow-left me-1"></i> Bukan Staff? Kembali Ke Portal Publik
                         </Link>
                     </div>
                 </div>
@@ -184,14 +184,14 @@ const overlayStyle = computed(() => ({
     min-height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;
-    background: linear-gradient(145deg, #4A7EF8 0%, #2962EA 50%, #1742B8 100%);
+    background: linear-gradient(145deg, #0e347e 0%, #03205A 50%, #02163f 100%);
     margin: 0;
     padding: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 /* ========================================================
-   LEFT SECTION: Blue Gradient & 3D Illustration
+   LEFT SECTION: Deep Navy System & 3D Illustration
    ======================================================== */
 .auth-left-section {
     flex: 1.05;
@@ -313,7 +313,7 @@ const overlayStyle = computed(() => ({
     background: #ffffff;
     border-radius: 32px;
     padding: 3rem 2.8rem 2.5rem;
-    box-shadow: 0 20px 45px rgba(37, 99, 235, 0.08), 0 6px 18px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 20px 45px rgba(3, 32, 90, 0.08), 0 6px 18px rgba(0, 0, 0, 0.03);
     border: 1px solid rgba(226, 232, 240, 0.9);
 }
 
@@ -321,8 +321,8 @@ const overlayStyle = computed(() => ({
     font-size: 0.65rem;
     font-weight: 800;
     letter-spacing: 0.12em;
-    color: #2563EB;
-    background: #EFF6FF;
+    color: #1C386F;
+    background: #EEF7FC;
     padding: 4px 12px;
     border-radius: 50px;
     display: inline-block;
@@ -337,7 +337,7 @@ const overlayStyle = computed(() => ({
 .active-tab-title {
     font-size: 1.65rem;
     font-weight: 800;
-    color: #0F172A;
+    color: #03205A;
     letter-spacing: -0.02em;
 }
 
@@ -358,9 +358,9 @@ const overlayStyle = computed(() => ({
 
         &:focus {
             outline: none;
-            border-color: #2563EB;
+            border-color: #1C386F;
             background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+            box-shadow: 0 0 0 4px rgba(28, 56, 111, 0.12);
         }
     }
 
@@ -388,7 +388,7 @@ const overlayStyle = computed(() => ({
         top: 0;
         font-size: 0.72rem;
         font-weight: 700;
-        color: #2563EB;
+        color: #1C386F;
         background: #ffffff;
         padding: 0 6px;
     }
@@ -449,7 +449,7 @@ const overlayStyle = computed(() => ({
     }
 
     .switch-input:checked + .switch-button {
-        background-color: #2563EB;
+        background-color: #1C386F;
     }
 
     .switch-input:checked + .switch-button .switch-circle {
@@ -466,15 +466,15 @@ const overlayStyle = computed(() => ({
     font-weight: 700;
     font-size: 0.98rem;
     letter-spacing: 0.2px;
-    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-    box-shadow: 0 8px 22px rgba(37, 99, 235, 0.35);
+    background: linear-gradient(135deg, #1C386F 0%, #03205A 100%);
+    box-shadow: 0 8px 22px rgba(3, 32, 90, 0.35);
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
 
     &:hover:not(:disabled) {
         transform: translateY(-2px);
-        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-        box-shadow: 0 12px 26px rgba(37, 99, 235, 0.45);
+        background: linear-gradient(135deg, #142850 0%, #02163f 100%);
+        box-shadow: 0 12px 26px rgba(3, 32, 90, 0.45);
     }
 
     &:active {
@@ -512,7 +512,7 @@ const overlayStyle = computed(() => ({
     transition: color 0.2s ease;
 
     &:hover {
-        color: #2563EB;
+        color: #1C386F;
     }
 }
 
