@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { Unit, LetterNumberType } from '@/types';
@@ -37,13 +37,24 @@ const priorityOptions = [
     { value: 'Segera', label: 'Segera' },
 ];
 
-const requestedActionOptions = [
+const primaryActions = [
     { value: 'Mohon Tanda Tangan', label: 'Mohon Tanda Tangan' },
     { value: 'Mohon Paraf', label: 'Mohon Paraf' },
+];
+
+const signerOptions = [
     { value: 'Sekjen', label: 'Sekjen' },
     { value: 'a.n. Sekjen', label: 'a.n. Sekjen' },
     { value: 'a.n. Menteri', label: 'a.n. Menteri' },
 ];
+
+watch(() => form.requested_actions.includes('Mohon Tanda Tangan'), (hasTTD: boolean) => {
+    if (!hasTTD) {
+        form.requested_actions = form.requested_actions.filter(
+            (act) => !['Sekjen', 'a.n. Sekjen', 'a.n. Menteri'].includes(act)
+        );
+    }
+});
 
 const submit = () => {
     form.post('/ajukan-surat');
@@ -140,14 +151,14 @@ const submit = () => {
                                     </Transition>
                                 </div>
 
-                                <!-- 4. Permohonan Paraf, Tanda Tangan & Penandatangan (Multiple Checkbox) -->
+                                <!-- 4. Permohonan Tindakan (Multiple Checkbox) -->
                                 <div class="col-12 animate-field" style="--delay: 7">
                                     <label class="form-label small fw-bold d-flex align-items-center justify-content-between mb-2">
-                                        <span>Permohonan Paraf, Tanda Tangan & Penandatangan</span>
+                                        <span>Permohonan Tindakan</span>
                                         <span class="text-muted fw-normal" style="font-size: 0.75rem;">(Bisa pilih lebih dari satu)</span>
                                     </label>
                                     <div class="row g-2">
-                                        <div v-for="opt in requestedActionOptions" :key="opt.value" class="col-md-4 col-sm-6">
+                                        <div v-for="opt in primaryActions" :key="opt.value" class="col-sm-6">
                                             <label class="custom-checkbox-card" :class="{ 'is-checked': form.requested_actions.includes(opt.value) }">
                                                 <input
                                                     type="checkbox"
@@ -159,6 +170,32 @@ const submit = () => {
                                             </label>
                                         </div>
                                     </div>
+
+                                    <!-- Sub-options: Penandatangan (Muncul saat Mohon Tanda Tangan dipilih) -->
+                                    <Transition name="fade-sub">
+                                        <div v-if="form.requested_actions.includes('Mohon Tanda Tangan')" class="sub-checkbox-box mt-3 p-3 rounded-3">
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <span class="small fw-bold text-dark d-flex align-items-center gap-1.5" style="font-size: 0.8rem;">
+                                                    <i class="bi bi-person-badge text-info"></i> Pejabat Penandatangan:
+                                                </span>
+                                                <span class="text-muted" style="font-size: 0.72rem;">(Opsional - boleh pilih lebih dari satu)</span>
+                                            </div>
+                                            <div class="row g-2">
+                                                <div v-for="sOpt in signerOptions" :key="sOpt.value" class="col-sm-4">
+                                                    <label class="custom-checkbox-card sub-card" :class="{ 'is-checked': form.requested_actions.includes(sOpt.value) }">
+                                                        <input
+                                                            type="checkbox"
+                                                            v-model="form.requested_actions"
+                                                            :value="sOpt.value"
+                                                            class="form-check-input me-2"
+                                                        />
+                                                        <span class="checkbox-label-text">{{ sOpt.label }}</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Transition>
+
                                     <Transition name="fade-error">
                                         <div v-if="form.errors.requested_actions" class="text-danger small mt-1">{{
                                             form.errors.requested_actions }}</div>
@@ -299,6 +336,32 @@ const submit = () => {
 
 .custom-checkbox-card.is-checked .checkbox-label-text {
     color: #0f766e;
+}
+
+.sub-checkbox-box {
+    background: #f8fafc;
+    border: 1px dashed #94a3b8;
+    border-left: 3px solid #167992;
+}
+
+.sub-card {
+    background: #ffffff;
+    padding: 0.6rem 0.85rem;
+}
+
+.sub-card .checkbox-label-text {
+    font-size: 0.82rem;
+}
+
+.fade-sub-enter-active,
+.fade-sub-leave-active {
+    transition: all 0.25s ease;
+}
+
+.fade-sub-enter-from,
+.fade-sub-leave-to {
+    opacity: 0;
+    transform: translateY(-8px);
 }
 
 .btn-submit-track {

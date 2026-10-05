@@ -102,6 +102,25 @@ const actionOptions = [
     'a.n. Menteri',
 ];
 
+const primaryActionOptions = [
+    'Mohon Tanda Tangan',
+    'Mohon Paraf',
+];
+
+const signerOptions = [
+    'Sekjen',
+    'a.n. Sekjen',
+    'a.n. Menteri',
+];
+
+watch(() => statusForm.requested_actions.includes('Mohon Tanda Tangan'), (hasTTD: boolean) => {
+    if (!hasTTD) {
+        statusForm.requested_actions = statusForm.requested_actions.filter(
+            (act) => !signerOptions.includes(act)
+        );
+    }
+});
+
 const handleFileUpload = (e: Event) => {
     const target = e.target as HTMLInputElement;
     if (target.files && target.files[0]) {
@@ -480,14 +499,34 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label small fw-bold">Tindakan / Mohon</label>
+                    <label class="form-label small fw-bold d-flex align-items-center justify-content-between">
+                        <span>Tindakan / Mohon</span>
+                        <span class="text-muted fw-normal" style="font-size: 0.72rem;">(Opsional - multiple choice)</span>
+                    </label>
                     <div class="row g-2">
-                        <div v-for="opt in actionOptions" :key="opt" class="col-6">
+                        <div v-for="opt in primaryActionOptions" :key="opt" class="col-6">
                             <div class="form-check">
                                 <input :id="`act-${opt}`" v-model="statusForm.requested_actions" type="checkbox"
                                     class="form-check-input" :value="opt" />
-                                <label :for="`act-${opt}`" class="form-check-label small">
+                                <label :for="`act-${opt}`" class="form-check-label small" style="cursor: pointer;">
                                     {{ opt }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sub-options Penandatangan (muncul saat Mohon Tanda Tangan dipilih) -->
+                    <div v-if="statusForm.requested_actions.includes('Mohon Tanda Tangan')" class="mt-2.5 p-2 bg-light rounded-2 border">
+                        <div class="small fw-semibold text-dark mb-1 d-flex align-items-center gap-1" style="font-size: 0.75rem;">
+                            <i class="bi bi-person-badge text-primary"></i> Pejabat Penandatangan:
+                            <span class="text-muted fw-normal" style="font-size: 0.7rem;">(Opsional)</span>
+                        </div>
+                        <div class="d-flex gap-3 flex-wrap">
+                            <div v-for="sOpt in signerOptions" :key="sOpt" class="form-check">
+                                <input :id="`act-${sOpt}`" v-model="statusForm.requested_actions" type="checkbox"
+                                    class="form-check-input" :value="sOpt" />
+                                <label :for="`act-${sOpt}`" class="form-check-label small" style="cursor: pointer;">
+                                    {{ sOpt }}
                                 </label>
                             </div>
                         </div>
