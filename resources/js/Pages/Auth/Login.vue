@@ -45,15 +45,8 @@ const overlayStyle = computed(() => ({
     <ToastNotification />
 
     <div class="auth-shell">
-        <!-- Ambient background with geometric accents -->
-        <div class="ambient-bg">
-            <div class="ambient-circle circle-1"></div>
-            <div class="ambient-circle circle-2"></div>
-            <div class="grid-overlay"></div>
-        </div>
-
-        <!-- Main Card with 2 Columns and Curved Shape Divider -->
-        <div class="auth-main-card shadow-2xl">
+        <!-- Edge-to-edge 2 Columns Container -->
+        <div class="auth-main-card">
             <!-- LEFT COLUMN: Brand & 3D Illustration -->
             <div class="auth-left-pane">
                 <div class="left-pane-content">
@@ -76,7 +69,6 @@ const overlayStyle = computed(() => ({
 
                     <!-- Center 3D Illustration -->
                     <div class="illustration-container">
-                        <div class="illustration-glow"></div>
                         <img src="/images/login-illustration.png" alt="Ilustrasi Persuratan SiTrack" class="illustration-3d-img" />
                     </div>
 
@@ -94,7 +86,7 @@ const overlayStyle = computed(() => ({
                 <!-- SVG Curved Shape Divider -->
                 <div class="curved-divider-wrapper" aria-hidden="true">
                     <svg class="curved-divider-svg" viewBox="0 0 100 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M100 0 C35 0 0 70 0 160 L0 800 L100 800 Z" fill="#ffffff" />
+                        <path d="M100 0 C40 0 0 80 0 200 L0 800 L100 800 Z" fill="#ffffff" />
                     </svg>
                 </div>
 
@@ -182,101 +174,39 @@ const overlayStyle = computed(() => ({
 </template>
 
 <style scoped lang="scss">
-$primary-blue: #3A62E8;
-$primary-dark: #1E3A8A;
-$primary-indigo: #4F46E5;
-$accent-teal: #14B8A6;
-$bg-dark-indigo: #1E2238;
-$bg-navy: #181C2E;
-
 .auth-shell {
     position: relative;
+    width: 100vw;
     min-height: 100vh;
     overflow: hidden;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(circle at 15% 15%, #2B355B 0%, #171A29 100%);
-    padding: 2.5rem 1.25rem;
+    background: #ffffff;
+    padding: 0;
+    margin: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Ambient Background Blobs */
-.ambient-bg {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.ambient-circle {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(90px);
-    opacity: 0.35;
-}
-
-.circle-1 {
-    width: 450px;
-    height: 450px;
-    background: #3A62E8;
-    top: -100px;
-    left: -100px;
-}
-
-.circle-2 {
-    width: 500px;
-    height: 500px;
-    background: #FF5E8E;
-    bottom: -150px;
-    right: -100px;
-    opacity: 0.25;
-}
-
-.grid-overlay {
-    position: absolute;
-    inset: 0;
-    background-image:
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-}
-
-/* Main 2-Column Container */
+/* Edge-to-Edge 2-Column Container */
 .auth-main-card {
     position: relative;
-    z-index: 10;
     display: flex;
     width: 100%;
-    max-width: 1080px;
-    min-height: 640px;
+    min-height: 100vh;
     background: #ffffff;
-    border-radius: 36px;
+    margin: 0;
+    padding: 0;
     overflow: hidden;
-    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.1);
-    animation: cardZoomIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes cardZoomIn {
-    from {
-        opacity: 0;
-        transform: scale(0.96) translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
 }
 
 /* ========================================================
-   LEFT PANE: 3D Illustration & Vibrant Gradient
+   LEFT PANE: 3D Illustration & Seamless Color Background
    ======================================================== */
 .auth-left-pane {
     position: relative;
     flex: 1.15;
-    background: linear-gradient(145deg, #4A72F5 0%, #3557DC 60%, #2544C0 100%);
-    padding: 2.5rem 3rem;
+    background: #7383E2;
+    min-height: 100vh;
+    padding: 3rem 4rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -303,10 +233,10 @@ $bg-navy: #181C2E;
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    background: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.22);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 0.4rem 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    padding: 0.45rem 0.8rem;
     border-radius: 18px;
 }
 
@@ -319,7 +249,7 @@ $bg-navy: #181C2E;
 .logo-divider {
     width: 1px;
     height: 20px;
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.4);
 }
 
 .brand-title-group {
@@ -328,7 +258,7 @@ $bg-navy: #181C2E;
 }
 
 .brand-name {
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     font-weight: 800;
     color: #ffffff;
     letter-spacing: -0.01em;
@@ -336,9 +266,9 @@ $bg-navy: #181C2E;
 }
 
 .brand-subtitle {
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.85);
     letter-spacing: 0.08em;
 }
 
@@ -348,16 +278,7 @@ $bg-navy: #181C2E;
     align-items: center;
     justify-content: center;
     padding: 1.5rem 0;
-}
-
-.illustration-glow {
-    position: absolute;
-    width: 280px;
-    height: 280px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, transparent 70%);
-    filter: blur(24px);
-    z-index: 1;
+    flex: 1;
 }
 
 .illustration-3d-img {
@@ -365,9 +286,8 @@ $bg-navy: #181C2E;
     z-index: 2;
     max-width: 100%;
     height: auto;
-    max-height: 340px;
+    max-height: 380px;
     object-fit: contain;
-    filter: drop-shadow(0 18px 30px rgba(10, 25, 80, 0.35));
     animation: floatIllustration 8s ease-in-out infinite;
 }
 
@@ -376,7 +296,7 @@ $bg-navy: #181C2E;
         transform: translateY(0);
     }
     50% {
-        transform: translateY(-10px);
+        transform: translateY(-8px);
     }
 }
 
@@ -385,8 +305,8 @@ $bg-navy: #181C2E;
 }
 
 .footer-copy-text {
-    font-size: 0.72rem;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
     letter-spacing: 0.02em;
 }
 
@@ -397,10 +317,11 @@ $bg-navy: #181C2E;
     position: relative;
     flex: 1;
     background: #ffffff;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 3rem 3.5rem;
+    padding: 3rem 4.5rem;
     z-index: 2;
 }
 
@@ -409,8 +330,8 @@ $bg-navy: #181C2E;
     position: absolute;
     top: 0;
     bottom: 0;
-    left: -40px;
-    width: 42px;
+    left: -55px;
+    width: 58px;
     height: 100%;
     z-index: 10;
     pointer-events: none;
@@ -426,14 +347,14 @@ $bg-navy: #181C2E;
     position: relative;
     z-index: 15;
     width: 100%;
-    max-width: 380px;
+    max-width: 400px;
 }
 
 .badge-staff-access {
     font-size: 0.65rem;
     font-weight: 800;
     letter-spacing: 0.12em;
-    color: #3A62E8;
+    color: #4F46E5;
     background: #EEF2FF;
     padding: 4px 12px;
     border-radius: 50px;
@@ -447,7 +368,7 @@ $bg-navy: #181C2E;
 }
 
 .form-title {
-    font-size: 1.55rem;
+    font-size: 1.65rem;
     letter-spacing: -0.02em;
 }
 
