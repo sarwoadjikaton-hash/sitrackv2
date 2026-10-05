@@ -45,18 +45,25 @@ const overlayStyle = computed(() => ({
     <ToastNotification />
 
     <div class="auth-shell">
+        <!-- Ambient System Background Glows -->
+        <div class="auth-ambient-mesh" aria-hidden="true">
+            <div class="ambient-blob ambient-blob-1"></div>
+            <div class="ambient-blob ambient-blob-2"></div>
+            <div class="ambient-blob ambient-blob-3"></div>
+        </div>
+
         <div class="auth-main-container">
-            <!-- LEFT COLUMN: Brand Logo & 3D Illustration (Clean White / No Background) -->
+            <!-- LEFT COLUMN: Brand Logo & 3D Illustration (Blended with System Navy BG) -->
             <div class="auth-left-pane">
-                <!-- Top Brand Header (Navbar Public Format) -->
+                <!-- Top Brand Header (Navbar Public Format - White on Navy) -->
                 <div class="brand-top-row">
                     <div class="d-flex align-items-center gap-2">
                         <div class="d-flex align-items-center gap-2 flex-shrink-0">
                             <!-- Logo SiTrack -->
                             <img src="/images/sitrack_logo.svg" alt="SiTrack" class="app-logo-header shadow-sm rounded-3" />
-                            <span class="brand-pipe-divider text-muted opacity-50 fw-light">|</span>
+                            <span class="brand-pipe-divider text-white-50 opacity-40 fw-light">|</span>
                             <!-- Logo Kemnaker -->
-                            <img src="/images/kemnaker_logo.png" alt="Kemnaker" class="kemnaker-logo-header" />
+                            <img src="/images/kemnaker_logo.png" alt="Kemnaker" class="kemnaker-logo-header kemnaker-logo-light" />
                         </div>
 
                         <!-- Text Kemnaker -->
@@ -68,7 +75,7 @@ const overlayStyle = computed(() => ({
                     </div>
                 </div>
 
-                <!-- 3D Illustration Center (Clean, Transparent, No Background) -->
+                <!-- 3D Illustration Center (Transparent & Blended) -->
                 <div class="illustration-container">
                     <img src="/images/login-illustration.png" alt="Ilustrasi Persuratan SiTrack" class="illustration-3d-img" />
                 </div>
@@ -81,7 +88,7 @@ const overlayStyle = computed(() => ({
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: Initial Floating Label Login Form -->
+            <!-- RIGHT COLUMN: White Form Login Card -->
             <div class="auth-right-pane">
                 <div class="login-inner-card" :class="{ 'has-errors': form.errors.username || form.errors.password }">
                     <div class="form-header-section mb-4">
@@ -173,33 +180,78 @@ const overlayStyle = computed(() => ({
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #ffffff;
-    padding: 2rem 1.5rem;
+    background: #03205A;
+    padding: 2.5rem 1.5rem;
     margin: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Ambient System Background Mesh (Matching SiTrack Theme) */
+.auth-ambient-mesh {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.ambient-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    mix-blend-mode: screen;
+    opacity: 0.45;
+}
+
+.ambient-blob-1 {
+    width: 500px;
+    height: 500px;
+    top: -10%;
+    left: -5%;
+    background: radial-gradient(circle, #4A9CF0 0%, transparent 70%);
+}
+
+.ambient-blob-2 {
+    width: 450px;
+    height: 450px;
+    bottom: -10%;
+    left: 25%;
+    background: radial-gradient(circle, #167992 0%, transparent 70%);
+}
+
+.ambient-blob-3 {
+    width: 520px;
+    height: 520px;
+    top: 20%;
+    right: -10%;
+    background: radial-gradient(circle, #2743AF 0%, transparent 70%);
 }
 
 .auth-main-container {
     position: relative;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     width: 100%;
     max-width: 1140px;
-    min-height: 600px;
-    background: #ffffff;
+    min-height: 580px;
+    background: transparent;
     margin: 0 auto;
+    z-index: 2;
+    gap: 2.5rem;
 }
 
 /* ========================================================
-   LEFT PANE: Brand Logo & Clean Illustration
+   LEFT PANE: Brand Logo & 3D Illustration on Navy BG
    ======================================================== */
 .auth-left-pane {
     flex: 1.15;
-    padding: 2rem 3rem 2rem 1rem;
+    padding: 1rem 1rem 1rem 0;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 560px;
+    min-height: 540px;
+    color: #ffffff;
 }
 
 .brand-top-row {
@@ -225,6 +277,11 @@ const overlayStyle = computed(() => ({
     vertical-align: middle;
 }
 
+.kemnaker-logo-light {
+    filter: brightness(0) invert(1);
+    opacity: 0.95;
+}
+
 @media (min-width: 576px) {
     .kemnaker-logo-header {
         width: 32px;
@@ -234,7 +291,7 @@ const overlayStyle = computed(() => ({
 
 .brand-pipe-divider {
     font-size: 1.25rem;
-    color: #94a3b8;
+    color: rgba(255, 255, 255, 0.45);
     margin: 0 0.15rem;
     user-select: none;
 }
@@ -243,7 +300,7 @@ const overlayStyle = computed(() => ({
     font-size: 0.65rem;
     letter-spacing: 0.6px;
     line-height: 1.22;
-    color: #0f172a;
+    color: #ffffff;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
@@ -286,25 +343,27 @@ const overlayStyle = computed(() => ({
 
 .footer-copy-text {
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: rgba(255, 255, 255, 0.65);
     letter-spacing: 0.02em;
 }
 
 /* ========================================================
-   RIGHT PANE: Floating Label Login Form
+   RIGHT PANE: White Floating Card Login Form
    ======================================================== */
 .auth-right-pane {
-    flex: 1;
+    flex: 0.95;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem 1rem 2rem 3rem;
-    border-left: 1px solid #f1f5f9;
 }
 
 .login-inner-card {
     width: 100%;
-    max-width: 420px;
+    max-width: 440px;
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 2.8rem 2.8rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
 }
 
 .badge-staff-access {
