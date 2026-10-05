@@ -85,77 +85,94 @@ const overlayStyle = computed(() => ({
             </svg>
         </div>
 
-        <div class="auth-center">
-            <!-- Card Login di Tengah -->
-            <div class="auth-card" :class="{ 'has-errors': form.errors.username || form.errors.password }">
-                <!-- Brand Header -->
-                <div class="text-center mb-4">
-                    <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
-                        <div class="brand-logo-ring shadow-sm">
-                            <img src="/images/sitrack_logo.svg" alt="SiTrack Logo" width="46" height="46" />
-                        </div>
-                        <span class="fs-4 text-muted opacity-50 fw-light">|</span>
-                        <div class="brand-logo-ring brand-logo-kemnaker shadow-sm">
-                            <img src="/images/kemnaker_logo.png" alt="Kemnaker Logo" width="40" height="40" />
-                        </div>
-                    </div>
-                    <h2 class="fw-bold mb-0 mt-2 text-dark">SiTrack</h2>
-                    <p class="text-muted small mb-0 mt-1">Sistem Elektronik Administrasi Persuratan TU SEKJEN</p>
-                </div>
-
-                <span class="eyebrow d-block text-center mb-3">STAFF ACCESS ONLY</span>
-
-                <form @submit.prevent="submit" novalidate>
-                    <!-- Username Field -->
-                    <div class="field-float mb-3"
-                        :class="{ 'is-filled': form.username, 'is-invalid': form.errors.username }">
-                        <i class="bi bi-person field-icon"></i>
-                        <input v-model="form.username" type="text" id="username" placeholder=" " autofocus
-                            autocomplete="username" />
-                        <label for="username">Username Staf</label>
-                    </div>
-                    <div v-if="form.errors.username" class="field-error">{{ form.errors.username }}</div>
-
-                    <!-- Password Field -->
-                    <div class="field-float mb-2"
-                        :class="{ 'is-filled': form.password, 'is-invalid': form.errors.password }">
-                        <i class="bi bi-lock field-icon"></i>
-                        <input v-model="form.password" :type="showPassword ? 'text' : 'password'" id="password"
-                            placeholder=" " autocomplete="current-password" />
-                        <label for="password">Kata Sandi</label>
-                        <button type="button" class="field-suffix-btn" @click="togglePassword" tabindex="-1">
-                            <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye']"></i>
-                        </button>
-                    </div>
-                    <div v-if="form.errors.password" class="field-error mb-2">{{ form.errors.password }}</div>
-
-                    <!-- Remember Me & Switch -->
-                    <div class="d-flex align-items-center justify-content-between my-4">
-                        <label class="switch-label">
-                            <input v-model="form.remember" type="checkbox" class="switch-input" />
-                            <div class="switch-button">
-                                <div class="switch-circle"></div>
+        <div class="auth-wrapper">
+            <!-- Split Card: Form di Kiri, Ilustrasi di Kanan -->
+            <div class="auth-split-card" :class="{ 'has-errors': form.errors.username || form.errors.password }">
+                
+                <!-- SISI KIRI: Form Login -->
+                <div class="auth-form-side">
+                    <!-- Brand Header -->
+                    <div class="brand-header text-start mb-4">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="brand-logo-ring shadow-sm">
+                                <img src="/images/sitrack_logo.svg" alt="SiTrack Logo" width="42" height="42" />
                             </div>
-                            <span class="ms-2 small text-muted fw-semibold">Ingat sesi saya</span>
-                        </label>
+                            <span class="fs-4 text-muted opacity-50 fw-light">|</span>
+                            <div class="brand-logo-ring brand-logo-kemnaker shadow-sm">
+                                <img src="/images/kemnaker_logo.png" alt="Kemnaker Logo" width="38" height="38" />
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <h2 class="fw-bold mb-0 text-dark">SiTrack</h2>
+                            <span class="eyebrow">AKSES STAF</span>
+                        </div>
+                        <p class="text-muted small mb-0 mt-1">Sistem Elektronik Administrasi Persuratan TU SEKJEN</p>
                     </div>
 
-                    <!-- Submit Button with Glow -->
-                    <button ref="submitBtn" type="submit" class="btn-glow w-100" :disabled="form.processing"
-                        @click="captureOrigin">
-                        <span v-if="form.processing" class="btn-loading">
-                            <span class="btn-loading-ring"></span>
-                            <span>Memeriksa akun...</span>
-                        </span>
-                        <span v-else>Masuk ke Sistem</span>
-                    </button>
-                </form>
+                    <form @submit.prevent="submit" novalidate>
+                        <!-- Username Field -->
+                        <div class="field-float mb-3"
+                            :class="{ 'is-filled': form.username, 'is-invalid': form.errors.username }">
+                            <i class="bi bi-person field-icon"></i>
+                            <input v-model="form.username" type="text" id="username" placeholder=" " autofocus
+                                autocomplete="username" />
+                            <label for="username">Username Staf</label>
+                        </div>
+                        <div v-if="form.errors.username" class="field-error">{{ form.errors.username }}</div>
 
-                <div class="text-center mt-4 pt-3 border-top">
-                    <Link href="/tracking" class="back-link">
-                        <i class="bi bi-arrow-left me-1"></i> Kembali ke Portal Lacak Publik
-                    </Link>
+                        <!-- Password Field -->
+                        <div class="field-float mb-2"
+                            :class="{ 'is-filled': form.password, 'is-invalid': form.errors.password }">
+                            <i class="bi bi-lock field-icon"></i>
+                            <input v-model="form.password" :type="showPassword ? 'text' : 'password'" id="password"
+                                placeholder=" " autocomplete="current-password" />
+                            <label for="password">Kata Sandi</label>
+                            <button type="button" class="field-suffix-btn" @click="togglePassword" tabindex="-1">
+                                <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye']"></i>
+                            </button>
+                        </div>
+                        <div v-if="form.errors.password" class="field-error mb-2">{{ form.errors.password }}</div>
+
+                        <!-- Remember Me & Switch -->
+                        <div class="d-flex align-items-center justify-content-between my-3">
+                            <label class="switch-label">
+                                <input v-model="form.remember" type="checkbox" class="switch-input" />
+                                <div class="switch-button">
+                                    <div class="switch-circle"></div>
+                                </div>
+                                <span class="ms-2 small text-muted fw-semibold">Ingat sesi saya</span>
+                            </label>
+                        </div>
+
+                        <!-- Submit Button with Glow -->
+                        <button ref="submitBtn" type="submit" class="btn-glow w-100" :disabled="form.processing"
+                            @click="captureOrigin">
+                            <span v-if="form.processing" class="btn-loading">
+                                <span class="btn-loading-ring"></span>
+                                <span>Memeriksa akun...</span>
+                            </span>
+                            <span v-else>Masuk ke Sistem</span>
+                        </button>
+                    </form>
+
+                    <div class="mt-4 pt-3 border-top">
+                        <Link href="/tracking" class="back-link">
+                            <i class="bi bi-arrow-left me-1"></i> Kembali ke Portal Lacak Publik
+                        </Link>
+                    </div>
                 </div>
+
+                <!-- SISI KANAN: Gambar Ilustrasi -->
+                <div class="auth-illustration-side">
+                    <div class="illustration-box">
+                        <img src="/images/login-illustration.png" alt="Ilustrasi Pelacakan Persuratan" class="illustration-img" />
+                    </div>
+                    <div class="illustration-caption">
+                        <h5 class="fw-bold text-white mb-1">Pelacakan Persuratan Terpadu</h5>
+                        <p class="text-white-50 small mb-0">Kelola dan pantau disposisi serta penandatanganan naskah dinas secara terintegrasi.</p>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Footer Statis 2026 -->
@@ -284,7 +301,6 @@ $ice-white: #EEF7FC;
 }
 
 @keyframes mailFloat {
-
     0%,
     100% {
         transform: translate(0, 0) rotate(var(--r, 0deg));
@@ -301,36 +317,111 @@ $ice-white: #EEF7FC;
     }
 }
 
-/* ===== Kartu login (di atas background, WAJIB solid) ===== */
-.auth-center {
+/* ===== Split Layout Card ===== */
+.auth-wrapper {
     position: relative;
     z-index: 10;
     width: 100%;
-    max-width: 440px;
+    max-width: 960px;
+    margin: 0 auto;
 }
 
-.auth-card {
+.auth-split-card {
     position: relative;
     z-index: 10;
     background: #fff;
     border-radius: 28px;
-    padding: 3rem 2.5rem;
     box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 32px 80px -20px rgba(3, 32, 90, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.8);
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    overflow: hidden;
     animation: fadeUp .6s ease-out both;
 
     &.has-errors {
         animation: shake 0.4s ease-in-out;
     }
+
+    @media (max-width: 860px) {
+        grid-template-columns: 1fr;
+        max-width: 460px;
+        margin: 0 auto;
+    }
+}
+
+/* Sisi Kiri */
+.auth-form-side {
+    padding: 3rem 2.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    @media (max-width: 576px) {
+        padding: 2.25rem 1.5rem;
+    }
+}
+
+/* Sisi Kanan: Ilustrasi */
+.auth-illustration-side {
+    background: linear-gradient(145deg, #748be8 0%, #5b73d9 100%);
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.25) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    @media (max-width: 860px) {
+        display: none;
+    }
+}
+
+.illustration-box {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 380px;
+    margin-bottom: 1.25rem;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+    transition: transform 0.4s ease;
+
+    &:hover {
+        transform: translateY(-4px) scale(1.02);
+    }
+}
+
+.illustration-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+
+.illustration-caption {
+    position: relative;
+    z-index: 2;
+    max-width: 320px;
 }
 
 .brand-logo-ring {
-    width: 64px;
-    height: 64px;
+    width: 56px;
+    height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 18px;
+    border-radius: 16px;
     background: rgba(22, 121, 146, 0.08);
     border: 1px solid rgba(22, 121, 146, 0.2);
 }
@@ -338,10 +429,10 @@ $ice-white: #EEF7FC;
 .eyebrow {
     font-size: .65rem;
     font-weight: 800;
-    letter-spacing: .15em;
+    letter-spacing: .12em;
     color: $teal-500;
     background: $powder-cyan;
-    padding: 4px 12px;
+    padding: 4px 10px;
     border-radius: 50px;
     display: inline-block;
 }
@@ -362,7 +453,7 @@ $ice-white: #EEF7FC;
 
     input {
         width: 100%;
-        height: 56px;
+        height: 54px;
         border: 1.5px solid $soft-blue;
         border-radius: 14px;
         padding: 0 1rem 0 3rem;
@@ -480,7 +571,7 @@ $ice-white: #EEF7FC;
 
 /* Button with Gradient & Glow */
 .btn-glow {
-    height: 56px;
+    height: 54px;
     border: none;
     border-radius: 14px;
     color: #fff;
