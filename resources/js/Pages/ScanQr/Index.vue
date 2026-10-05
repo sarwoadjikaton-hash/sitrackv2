@@ -15,7 +15,7 @@ const props = defineProps<{
     allowedStatuses: string[];
 }>();
 
-const mode = ref<'manual' | 'camera'>(props.tracking ? 'manual' : 'camera');
+const mode = ref<'camera' | 'file' | 'manual'>(props.tracking ? 'manual' : 'camera');
 const scanInput = ref(props.tracking || '');
 const notFound = ref(!!props.tracking && !props.letter);
 
@@ -32,6 +32,9 @@ const isSecureContext = ref(true);
 const isFileScanning = ref(false);
 const fileScanError = ref<string | null>(null);
 const fileInputRef = ref<HTMLInputElement | null>(null);
+const isDragging = ref(false);
+const uploadedFilePreview = ref<string | null>(null);
+const uploadedFileName = ref<string | null>(null);
 
 const defaultPositionByStatus: Record<string, string> = {
     'Diregistrasi': 'Unit Pengusul',
@@ -159,7 +162,7 @@ const startCamera = async (cameraId?: string) => {
         } else if (errStr.includes('NotFoundError') || errStr.includes('DevicesNotFoundError')) {
             cameraError.value = "Kamera tidak ditemukan pada perangkat ini.";
         } else if (!window.isSecureContext) {
-            cameraError.value = "Koneksi non-HTTPS membatasi streaming kamera. Gunakan tombol 'Upload Foto QR' atau input kode manual.";
+            cameraError.value = "Koneksi non-HTTPS membatasi streaming kamera. Gunakan menu 'Upload Lembar Pendamping' atau input kode manual.";
         } else {
             cameraError.value = "Gagal mengakses kamera: " + (err?.message || "Pastikan kamera tidak digunakan aplikasi lain.");
         }
@@ -194,26 +197,55 @@ const triggerFileInput = () => {
     fileInputRef.value?.click();
 };
 
-const handleFileUpload = async (e: Event) => {
-    const target = e.target as HTMLInputElement;
-    if (!target.files || target.files.length === 0) return;
-    const file = target.files[0];
+const processImageFile = async (file: File) => {
+    if (!file) return;
     fileScanError.value = null;
     isFileScanning.value = true;
+    uploadedFileName.value = file.name;
+
+    try {
+        uploadedFilePreview.value = URL.createObjectURL(file);
+    } catch (e) {
+        uploadedFilePreview.value = null;
+    }
 
     try {
         if (!fileQrCode) {
             fileQrCode = new Html5Qrcode("reader-file-hidden");
         }
-        const decodedText = await fileQrCode.scanFile(file, true);
+        const decodedText = await fileQrCode.scanFile(file, false);
         onScanSuccess(decodedText);
     } catch (err: any) {
         console.error("File scan error:", err);
-        fileScanError.value = "QR Code tidak terdeteksi pada gambar. Pastikan foto QR jelas dan tidak buram.";
+        fileScanError.value = "QR Code tidak terdeteksi pada berkas ini. Pastikan foto Lembar Pendamping terlihat jelas, fokus pada bagian QR Code, dan tidak buram/terpotong.";
     } finally {
         isFileScanning.value = false;
-        target.value = '';
     }
+};
+
+const handleFileUpload = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (!target.files || target.files.length === 0) return;
+    const file = target.files[0];
+    processImageFile(file);
+    target.value = '';
+};
+
+const handleDrop = (e: DragEvent) => {
+    isDragging.value = false;
+    if (!e.dataTransfer || !e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
+    const file = e.dataTransfer.files[0];
+    if (file.type.startsWith('image/')) {
+        processImageFile(file);
+    } else {
+        fileScanError.value = "Format file tidak didukung. Harap unggah file foto/gambar (JPG, JPEG, PNG, WEBP).";
+    }
+};
+
+const resetUploadedFile = () => {
+    uploadedFilePreview.value = null;
+    uploadedFileName.value = null;
+    fileScanError.value = null;
 };
 
 // --- SAFE BACK NAVIGATION ---
@@ -278,14 +310,14 @@ watch(mode, (newMode) => {
 
         <!-- Hidden input & container for file scanning -->
         <div id="reader-file-hidden" style="display: none;"></div>
-        <input ref="fileInputRef" type="file" accept="image/*" capture="environment" class="d-none" @change="handleFileUpload" />
+        <input ref="fileInputRef" type="file" accept="image/*" class="d-none" @change="handleFileUpload" />
 
         <div class="max-w-2xl mx-auto space-y-5">
-            <!-- Header (Figma Prototype Model) -->
+            <!-- Header -->
             <div class="d-flex align-items-center justify-content-between gap-3">
                 <div>
                     <h1 class="font-display fw-bold fs-4 text-dark mb-1">Scan &amp; Update Status Surat</h1>
-                    <p class="text-muted small mb-0">Pindai QR code atau input kode tracking untuk memperbarui status berkas</p>
+                    <p class="text-muted small mb-0">Pindai QR code dari kamera, upload lembar fisik, atau masukkan kode tracking</p>
                 </div>
                 <button type="button" @click="goBack" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 text-dark fw-medium small border bg-white shadow-xs transition hover:bg-light">
                     <i class="bi bi-arrow-left text-muted"></i>
@@ -293,29 +325,38 @@ watch(mode, (newMode) => {
                 </button>
             </div>
 
-            <!-- Mode Toggle (Figma Prototype Model) -->
-            <div class="d-inline-flex gap-1 p-1 bg-slate-100 rounded-3 border border-slate-200">
-                <button
-                    type="button"
-                    @click="mode = 'manual'"
-                    class="d-flex align-items-center gap-2 px-3 py-1.5 rounded-2 text-sm fw-medium border-0 transition"
-                    :class="mode === 'manual' ? 'bg-white text-dark shadow-xs fw-semibold' : 'text-muted bg-transparent hover:text-dark'"
-                >
-                    <i class="bi bi-search"></i>
-                    <span>Input Manual</span>
-                </button>
+            <!-- Mode Switcher (3 Opsi: Buka Kamera, Upload Lembar Pendamping, Input Manual) -->
+            <div class="d-flex gap-1 p-1 bg-slate-100 rounded-3 border border-slate-200 flex-wrap flex-sm-nowrap">
                 <button
                     type="button"
                     @click="mode = 'camera'"
-                    class="d-flex align-items-center gap-2 px-3 py-1.5 rounded-2 text-sm fw-medium border-0 transition"
+                    class="d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-2 text-sm fw-medium border-0 transition flex-grow-1"
                     :class="mode === 'camera' ? 'bg-white text-dark shadow-xs fw-semibold' : 'text-muted bg-transparent hover:text-dark'"
                 >
-                    <i class="bi bi-camera"></i>
-                    <span>Kamera QR</span>
+                    <i class="bi bi-camera-video"></i>
+                    <span>Buka Kamera QR</span>
+                </button>
+                <button
+                    type="button"
+                    @click="mode = 'file'"
+                    class="d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-2 text-sm fw-medium border-0 transition flex-grow-1"
+                    :class="mode === 'file' ? 'bg-white text-dark shadow-xs fw-semibold' : 'text-muted bg-transparent hover:text-dark'"
+                >
+                    <i class="bi bi-file-earmark-arrow-up"></i>
+                    <span>Upload Lembar Pendamping</span>
+                </button>
+                <button
+                    type="button"
+                    @click="mode = 'manual'"
+                    class="d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-2 text-sm fw-medium border-0 transition flex-grow-1"
+                    :class="mode === 'manual' ? 'bg-white text-dark shadow-xs fw-semibold' : 'text-muted bg-transparent hover:text-dark'"
+                >
+                    <i class="bi bi-keyboard"></i>
+                    <span>Input Manual</span>
                 </button>
             </div>
 
-            <!-- CAMERA VIEW (Figma Prototype Model) -->
+            <!-- 1. CAMERA VIEW -->
             <div v-show="mode === 'camera'" class="bg-white rounded-4 border border-slate-200 shadow-sm overflow-hidden">
                 <div class="relative bg-slate-900 text-center p-3" style="min-height: 320px;">
                     <!-- Video / Html5QrCode Container -->
@@ -326,7 +367,7 @@ watch(mode, (newMode) => {
                         <div class="w-16 h-16 rounded-3 bg-slate-800 d-flex align-items-center justify-center mb-3 text-slate-400">
                             <i class="bi bi-camera fs-2"></i>
                         </div>
-                        <div class="fw-semibold text-white mb-1">Aktifkan Kamera</div>
+                        <div class="fw-semibold text-white mb-1">Kamera Belum Aktif</div>
                         <p class="text-white-50 small mb-3">Arahkan kamera ke QR code pada Lembar Cetak Pendamping</p>
                         <button type="button" @click="toggleCamera" class="btn text-white fw-semibold px-4 py-2 rounded-3 shadow-sm border-0" style="background: #2743AF;">
                             <i class="bi bi-camera-video me-1.5"></i> Nyalakan Kamera
@@ -341,10 +382,9 @@ watch(mode, (newMode) => {
                             {{ isCameraRunning ? 'Matikan Kamera' : 'Nyalakan Kamera' }}
                         </button>
 
-                        <button type="button" class="btn btn-sm btn-outline-light fw-medium px-3 rounded-2" :disabled="isFileScanning" @click="triggerFileInput">
-                            <span v-if="isFileScanning" class="spinner-border spinner-border-sm me-1"></span>
-                            <i v-else class="bi bi-image me-1"></i>
-                            Upload Foto QR
+                        <button type="button" class="btn btn-sm btn-outline-light fw-medium px-3 rounded-2" @click="mode = 'file'">
+                            <i class="bi bi-upload me-1"></i>
+                            Upload Berkas Fisik
                         </button>
 
                         <select v-if="cameras.length > 1" v-model="selectedCameraId" class="form-select form-select-sm w-auto bg-dark text-white border-secondary rounded-2" @change="startCamera(selectedCameraId)">
@@ -355,11 +395,81 @@ watch(mode, (newMode) => {
                     </div>
                 </div>
 
-                <!-- Footer tip / gallery fallback -->
+                <!-- Footer tip / switch to file mode -->
                 <div class="p-3 bg-slate-50 border-top text-center text-muted small d-flex align-items-center justify-content-center gap-2">
-                    <span>Atau scan file foto dari perangkat:</span>
-                    <button type="button" @click="triggerFileInput" class="btn btn-link p-0 text-decoration-none fw-semibold" style="color: #2743AF;">
-                        Pilih dari galeri
+                    <span>Memiliki hasil print lembar pendamping?</span>
+                    <button type="button" @click="mode = 'file'" class="btn btn-link p-0 text-decoration-none fw-semibold" style="color: #2743AF;">
+                        Upload file / foto lembar pendamping
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. FILE UPLOAD VIEW (Lembar Pendamping Fisik) -->
+            <div v-show="mode === 'file'" class="bg-white rounded-4 border border-slate-200 shadow-sm overflow-hidden p-4">
+                <div
+                    class="dropzone-box rounded-4 p-4 text-center transition cursor-pointer border-2"
+                    :class="{ 'border-primary bg-primary-subtle/10': isDragging, 'border-dashed border-slate-300 hover:border-slate-400 bg-slate-50/50': !isDragging }"
+                    @dragover.prevent="isDragging = true"
+                    @dragleave.prevent="isDragging = false"
+                    @drop.prevent="handleDrop"
+                    @click="triggerFileInput"
+                >
+                    <!-- Scanning state -->
+                    <div v-if="isFileScanning" class="py-5 d-flex flex-column align-items-center justify-content-center">
+                        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+                        <h6 class="fw-bold text-dark mb-1">Menganalisis QR Code...</h6>
+                        <p class="text-muted small mb-0">Sedang membaca kode QR dari foto lembar pendamping Anda</p>
+                    </div>
+
+                    <!-- Selected image preview state (before result / on retry) -->
+                    <div v-else-if="uploadedFilePreview" class="py-3 d-flex flex-column align-items-center justify-content-center">
+                        <div class="position-relative mb-3">
+                            <img :src="uploadedFilePreview" alt="Preview Lembar Pendamping" class="rounded-3 shadow-xs border" style="max-height: 200px; max-width: 100%; object-fit: contain;" />
+                            <span class="position-absolute top-0 end-0 translate-middle-y badge bg-dark rounded-pill px-2 py-1 shadow-sm small">
+                                {{ uploadedFileName }}
+                            </span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" @click.stop="triggerFileInput" class="btn btn-sm btn-outline-primary rounded-2 fw-semibold">
+                                <i class="bi bi-arrow-repeat me-1"></i> Pilih Gambar Lain
+                            </button>
+                            <button type="button" @click.stop="resetUploadedFile" class="btn btn-sm btn-light border rounded-2 text-muted">
+                                <i class="bi bi-x-lg me-1"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Empty / Idle state -->
+                    <div v-else class="py-4 d-flex flex-column align-items-center justify-content-center">
+                        <div class="w-16 h-16 rounded-4 bg-primary-subtle text-primary d-flex align-items-center justify-content-center mb-3 shadow-xs">
+                            <i class="bi bi-file-earmark-arrow-up fs-2"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1.5">Unggah Foto / Scan Lembar Pendamping</h6>
+                        <p class="text-muted small mb-3 max-w-md mx-auto">
+                            Tarik dan letakkan file gambar di sini, atau klik tombol di bawah untuk memilih dari perangkat / galeri.
+                        </p>
+                        <button type="button" class="btn text-white fw-semibold px-4 py-2 rounded-3 shadow-xs border-0" style="background: #2743AF;">
+                            <i class="bi bi-folder2-open me-1.5"></i> Pilih File Fisik / Foto
+                        </button>
+                        <div class="text-muted mt-2.5" style="font-size: 0.75rem;">
+                            Mendukung file gambar: JPG, JPEG, PNG, WEBP
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Lembar Pendamping -->
+                <div class="mt-3 p-3 bg-slate-50 rounded-3 border border-slate-200/70 d-flex align-items-start gap-2.5">
+                    <i class="bi bi-info-circle-fill text-primary flex-shrink-0 mt-0.5"></i>
+                    <div class="small text-muted">
+                        <strong class="text-dark">Petunjuk Lembar Fisik:</strong> Pastikan QR Code pada lembar cetak pendamping berada dalam pencahayaan yang cukup, tegak, dan tidak terpotong saat difoto/discan.
+                    </div>
+                </div>
+
+                <!-- Quick Switch to Camera -->
+                <div class="text-center mt-3 pt-2 border-top">
+                    <span class="text-muted small">Ingin scan langsung menggunakan kamera? </span>
+                    <button type="button" @click="mode = 'camera'" class="btn btn-link p-0 text-decoration-none fw-semibold small" style="color: #2743AF;">
+                        Buka Kamera QR
                     </button>
                 </div>
             </div>
@@ -370,15 +480,31 @@ watch(mode, (newMode) => {
                 <div class="flex-grow-1">
                     <div class="fw-bold">Kendala Kamera:</div>
                     <div>{{ cameraError }}</div>
+                    <div class="mt-1">
+                        <button type="button" @click="mode = 'file'" class="btn btn-sm btn-link p-0 text-decoration-none fw-semibold text-warning-emphasis">
+                            → Gunakan opsi Upload Lembar Pendamping
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div v-if="fileScanError" class="alert alert-danger border-0 small py-2.5 px-3 rounded-3 d-flex align-items-start gap-2 mb-0">
+            <div v-if="fileScanError && mode === 'file'" class="alert alert-danger border-0 small py-2.5 px-3 rounded-3 d-flex align-items-start gap-2 mb-0">
                 <i class="bi bi-x-circle-fill text-danger flex-shrink-0 mt-0.5"></i>
-                <div class="flex-grow-1">{{ fileScanError }}</div>
+                <div class="flex-grow-1">
+                    <div class="fw-bold">Gagal Mendeteksi QR:</div>
+                    <div>{{ fileScanError }}</div>
+                    <div class="mt-2 d-flex gap-2">
+                        <button type="button" @click="triggerFileInput" class="btn btn-sm btn-danger px-3 rounded-2 fw-semibold">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Coba Gambar Lain
+                        </button>
+                        <button type="button" @click="mode = 'camera'" class="btn btn-sm btn-outline-danger px-3 rounded-2 fw-medium">
+                            <i class="bi bi-camera me-1"></i> Beralih ke Kamera
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <!-- MANUAL INPUT CARD (Figma Prototype Model) -->
+            <!-- 3. MANUAL INPUT CARD -->
             <div v-show="mode === 'manual'" class="bg-white rounded-4 border border-slate-200 shadow-sm p-4">
                 <label class="d-block text-xs fw-bold text-muted text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 0.05em;">
                     Kode Tracking / Nomor Agenda
@@ -404,7 +530,7 @@ watch(mode, (newMode) => {
                 </div>
             </div>
 
-            <!-- NOT FOUND ALERT (Figma Prototype Model) -->
+            <!-- NOT FOUND ALERT -->
             <div v-if="notFound && !letter" class="bg-white rounded-4 border border-danger-subtle shadow-sm p-4 d-flex align-items-center gap-3">
                 <div class="w-10 h-10 rounded-3 bg-danger-subtle text-danger d-flex align-items-center justify-center flex-shrink-0">
                     <i class="bi bi-exclamation-circle-fill fs-5"></i>
@@ -417,7 +543,7 @@ watch(mode, (newMode) => {
                 </div>
             </div>
 
-            <!-- FOUND RESULT & STATUS UPDATE CARD (Figma Prototype Model) -->
+            <!-- FOUND RESULT & STATUS UPDATE CARD -->
             <div v-if="letter" class="bg-white rounded-4 border border-slate-200 shadow-sm overflow-hidden">
                 <!-- Letter Info Header -->
                 <div class="p-4 border-bottom border-slate-100 bg-slate-50">
@@ -502,5 +628,17 @@ watch(mode, (newMode) => {
 
 :deep(#reader__scan_region) {
     background: transparent !important;
+}
+
+.dropzone-box {
+    border-style: dashed;
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    transition: all 0.2s ease-in-out;
+}
+
+.dropzone-box:hover {
+    border-color: #2743af;
+    background: #f1f5f9;
 }
 </style>
