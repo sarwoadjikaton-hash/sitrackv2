@@ -45,19 +45,18 @@ const overlayStyle = computed(() => ({
     <ToastNotification />
 
     <div class="auth-shell">
-        <!-- Main Card Container with Outer Radius -->
-        <div class="auth-main-card">
-            <!-- LEFT COLUMN: Brand, Hero Title & 3D Illustration -->
+        <div class="auth-main-container">
+            <!-- LEFT COLUMN: Brand Logo & 3D Illustration (Clean White / No Background) -->
             <div class="auth-left-pane">
-                <!-- Top Brand Header -->
-                <div class="brand-top-section">
+                <!-- Top Brand Header (Navbar Public Format) -->
+                <div class="brand-top-row">
                     <div class="d-flex align-items-center gap-2">
                         <div class="d-flex align-items-center gap-2 flex-shrink-0">
                             <!-- Logo SiTrack -->
                             <img src="/images/sitrack_logo.svg" alt="SiTrack" class="app-logo-header shadow-sm rounded-3" />
-                            <span class="brand-pipe-divider text-white-50 opacity-40 fw-light">|</span>
+                            <span class="brand-pipe-divider text-muted opacity-50 fw-light">|</span>
                             <!-- Logo Kemnaker -->
-                            <img src="/images/kemnaker_logo.png" alt="Kemnaker" class="kemnaker-logo-header kemnaker-logo-light" />
+                            <img src="/images/kemnaker_logo.png" alt="Kemnaker" class="kemnaker-logo-header" />
                         </div>
 
                         <!-- Text Kemnaker -->
@@ -67,97 +66,66 @@ const overlayStyle = computed(() => ({
                             <div class="lh-sm">REPUBLIK INDONESIA</div>
                         </div>
                     </div>
-                    <p class="brand-tagline-text mt-2 mb-0">
-                        Tracking Online, Learn the Status.
-                    </p>
                 </div>
 
-                <!-- Hero Big Headline -->
-                <div class="hero-headline-wrap my-auto">
-                    <h1 class="hero-headline-text">
-                        Lacak Status Surat<br />
-                        Anda Dari Mana<br />
-                        Saja Di Dunia. <span class="globe-icon">🌍</span>
-                    </h1>
-                </div>
-
-                <!-- 3D Illustration at Bottom Left -->
+                <!-- 3D Illustration Center (Clean, Transparent, No Background) -->
                 <div class="illustration-container">
                     <img src="/images/login-illustration.png" alt="Ilustrasi Persuratan SiTrack" class="illustration-3d-img" />
                 </div>
+
+                <!-- Footer Note -->
+                <div class="left-pane-footer">
+                    <p class="footer-copy-text mb-0">
+                        &copy; 2026 SiTrack &bull; Kementerian Ketenagakerjaan Republik Indonesia
+                    </p>
+                </div>
             </div>
 
-            <!-- RIGHT COLUMN: White Rounded Pane & Login Form -->
+            <!-- RIGHT COLUMN: Initial Floating Label Login Form -->
             <div class="auth-right-pane">
-                <!-- Top Actions (Portal Link / Language) -->
-                <div class="right-pane-top-bar d-flex justify-content-end align-items-center">
-                    <Link href="/tracking" class="top-portal-link d-inline-flex align-items-center gap-1">
-                        <span>Portal Lacak Publik</span>
-                        <i class="bi bi-chevron-down small opacity-75"></i>
-                    </Link>
-                </div>
-
-                <div class="form-center-wrapper my-auto">
-                    <!-- Title Section -->
+                <div class="login-inner-card" :class="{ 'has-errors': form.errors.username || form.errors.password }">
                     <div class="form-header-section mb-4">
-                        <h2 class="form-main-title fw-bold mb-1">Masuk ke Akun Anda</h2>
-                        <p class="form-sub-title text-muted">Sistem Elektronik Administrasi Persuratan Staf</p>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="badge-staff-access">STAFF ACCESS ONLY</span>
+                            <span class="portal-badge-text">Portal Staf</span>
+                        </div>
+                        <h2 class="form-title text-dark fw-bold mb-1">Masuk ke Sistem</h2>
+                        <p class="text-muted small mb-0">Sistem Elektronik Administrasi Persuratan</p>
                     </div>
 
-                    <!-- Form -->
-                    <form @submit.prevent="submit" novalidate class="login-form-body">
+                    <form @submit.prevent="submit" novalidate>
                         <!-- Username Field -->
-                        <div class="clean-input-group mb-3" :class="{ 'is-invalid': form.errors.username }">
-                            <label for="username" class="clean-label">Username Staf</label>
-                            <div class="clean-input-wrap">
-                                <input
-                                    v-model="form.username"
-                                    type="text"
-                                    id="username"
-                                    class="clean-input"
-                                    placeholder="Masukkan username"
-                                    autofocus
-                                    autocomplete="username"
-                                />
-                            </div>
-                            <div v-if="form.errors.username" class="clean-error-text">{{ form.errors.username }}</div>
+                        <div class="field-float mb-3" :class="{ 'is-filled': form.username, 'is-invalid': form.errors.username }">
+                            <i class="bi bi-person field-icon"></i>
+                            <input v-model="form.username" type="text" id="username" placeholder=" " autofocus autocomplete="username" />
+                            <label for="username">Username Staf</label>
                         </div>
+                        <div v-if="form.errors.username" class="field-error">{{ form.errors.username }}</div>
 
                         <!-- Password Field -->
-                        <div class="clean-input-group mb-3" :class="{ 'is-invalid': form.errors.password }">
-                            <label for="password" class="clean-label">Kata Sandi</label>
-                            <div class="clean-input-wrap">
-                                <input
-                                    v-model="form.password"
-                                    :type="showPassword ? 'text' : 'password'"
-                                    id="password"
-                                    class="clean-input"
-                                    placeholder="Masukkan kata sandi"
-                                    autocomplete="current-password"
-                                />
-                                <button type="button" class="password-toggle-btn" @click="togglePassword" tabindex="-1" aria-label="Toggle password visibility">
-                                    <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye']"></i>
-                                </button>
-                            </div>
-                            <div v-if="form.errors.password" class="clean-error-text">{{ form.errors.password }}</div>
+                        <div class="field-float mb-2" :class="{ 'is-filled': form.password, 'is-invalid': form.errors.password }">
+                            <i class="bi bi-lock field-icon"></i>
+                            <input v-model="form.password" :type="showPassword ? 'text' : 'password'" id="password" placeholder=" " autocomplete="current-password" />
+                            <label for="password">Kata Sandi</label>
+                            <button type="button" class="field-suffix-btn" @click="togglePassword" tabindex="-1" aria-label="Toggle password">
+                                <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye']"></i>
+                            </button>
                         </div>
+                        <div v-if="form.errors.password" class="field-error mb-2">{{ form.errors.password }}</div>
 
-                        <!-- Remember Me -->
-                        <div class="d-flex align-items-center justify-content-between mb-4 mt-2">
-                            <label class="clean-checkbox-label">
-                                <input v-model="form.remember" type="checkbox" class="clean-checkbox-input" />
-                                <span class="clean-checkbox-text">Ingat sesi login saya</span>
+                        <!-- Remember Me Toggle -->
+                        <div class="d-flex align-items-center justify-content-between my-3.5">
+                            <label class="switch-label">
+                                <input v-model="form.remember" type="checkbox" class="switch-input" />
+                                <div class="switch-button">
+                                    <div class="switch-circle"></div>
+                                </div>
+                                <span class="ms-2 small text-muted fw-semibold">Ingat sesi saya</span>
                             </label>
                         </div>
 
                         <!-- Submit Button -->
-                        <button
-                            ref="submitBtn"
-                            type="submit"
-                            class="btn-primary-pill w-100"
-                            :disabled="form.processing"
-                            @click="captureOrigin"
-                        >
+                        <button ref="submitBtn" type="submit" class="btn-glow-submit w-100 mt-2" :disabled="form.processing" @click="captureOrigin">
                             <span v-if="form.processing" class="btn-loading">
                                 <span class="btn-loading-ring"></span>
                                 <span>Memeriksa akun...</span>
@@ -165,16 +133,12 @@ const overlayStyle = computed(() => ({
                             <span v-else>Masuk ke Sistem</span>
                         </button>
                     </form>
-                </div>
 
-                <!-- Footer / Return Link -->
-                <div class="right-pane-footer text-center mt-3">
-                    <p class="text-muted small mb-0">
-                        Bukan staf?
-                        <Link href="/tracking" class="footer-action-link fw-semibold">
-                            Lacak Surat Publik
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <Link href="/tracking" class="back-link">
+                            <i class="bi bi-arrow-left me-1"></i> Kembali ke Portal Lacak Publik
                         </Link>
-                    </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -209,44 +173,38 @@ const overlayStyle = computed(() => ({
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #eef2f8;
-    padding: 2.5rem 1.5rem;
+    background: #ffffff;
+    padding: 2rem 1.5rem;
     margin: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Main Card Container with Outer Radius */
-.auth-main-card {
+.auth-main-container {
     position: relative;
     display: flex;
+    align-items: center;
     width: 100%;
-    max-width: 1040px;
-    min-height: 610px;
-    background: #6F81EB;
-    border-radius: 36px;
-    box-shadow: 0 24px 60px rgba(65, 84, 209, 0.2);
-    margin: 0;
-    overflow: hidden;
+    max-width: 1140px;
+    min-height: 600px;
+    background: #ffffff;
+    margin: 0 auto;
 }
 
 /* ========================================================
-   LEFT PANE: Brand, Hero Headline & 3D Illustration
+   LEFT PANE: Brand Logo & Clean Illustration
    ======================================================== */
 .auth-left-pane {
-    position: relative;
     flex: 1.15;
-    background: #6F81EB;
-    padding: 2.6rem 2.8rem 1.2rem;
+    padding: 2rem 3rem 2rem 1rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    color: #ffffff;
-    z-index: 1;
+    min-height: 560px;
 }
 
-.brand-top-section {
-    position: relative;
-    z-index: 2;
+.brand-top-row {
+    display: flex;
+    align-items: center;
 }
 
 .app-logo-header {
@@ -264,18 +222,11 @@ const overlayStyle = computed(() => ({
 .kemnaker-logo-header {
     width: 30px;
     height: 30px;
-}
-
-.kemnaker-logo-light {
-    width: 30px;
-    height: 30px;
-    filter: brightness(0) invert(1);
-    opacity: 0.95;
     vertical-align: middle;
 }
 
 @media (min-width: 576px) {
-    .kemnaker-logo-light {
+    .kemnaker-logo-header {
         width: 32px;
         height: 32px;
     }
@@ -283,7 +234,7 @@ const overlayStyle = computed(() => ({
 
 .brand-pipe-divider {
     font-size: 1.25rem;
-    color: rgba(255, 255, 255, 0.45);
+    color: #94a3b8;
     margin: 0 0.15rem;
     user-select: none;
 }
@@ -292,7 +243,7 @@ const overlayStyle = computed(() => ({
     font-size: 0.65rem;
     letter-spacing: 0.6px;
     line-height: 1.22;
-    color: #ffffff;
+    color: #0f172a;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
@@ -303,50 +254,19 @@ const overlayStyle = computed(() => ({
     }
 }
 
-.brand-tagline-text {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.82);
-    font-weight: 500;
-    letter-spacing: 0.2px;
-}
-
-/* Hero Headline */
-.hero-headline-wrap {
-    margin: 1.8rem 0 1.2rem;
-    position: relative;
-    z-index: 2;
-}
-
-.hero-headline-text {
-    font-size: 2.15rem;
-    font-weight: 800;
-    line-height: 1.22;
-    color: #ffffff;
-    letter-spacing: -0.025em;
-}
-
-.globe-icon {
-    display: inline-block;
-    font-size: 1.9rem;
-    vertical-align: middle;
-}
-
-/* 3D Illustration Container */
 .illustration-container {
     position: relative;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
-    width: 100%;
-    margin-top: auto;
-    z-index: 2;
+    padding: 1.5rem 0;
+    flex: 1;
 }
 
 .illustration-3d-img {
-    position: relative;
     max-width: 100%;
     height: auto;
-    max-height: 275px;
+    max-height: 360px;
     object-fit: contain;
     animation: floatIllustration 8s ease-in-out infinite;
 }
@@ -356,196 +276,202 @@ const overlayStyle = computed(() => ({
         transform: translateY(0);
     }
     50% {
-        transform: translateY(-6px);
+        transform: translateY(-8px);
     }
+}
+
+.left-pane-footer {
+    text-align: left;
+}
+
+.footer-copy-text {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    letter-spacing: 0.02em;
 }
 
 /* ========================================================
-   RIGHT PANE: White Rounded Card & Login Form
+   RIGHT PANE: Floating Label Login Form
    ======================================================== */
 .auth-right-pane {
-    position: relative;
-    flex: 1.08;
-    background: #ffffff;
-    border-radius: 36px;
-    margin: 0;
-    padding: 2.6rem 3.5rem;
+    flex: 1;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    z-index: 2;
-    box-shadow: -10px 0 28px rgba(0, 0, 0, 0.04);
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem 2rem 3rem;
+    border-left: 1px solid #f1f5f9;
 }
 
-.right-pane-top-bar {
+.login-inner-card {
     width: 100%;
+    max-width: 420px;
 }
 
-.top-portal-link {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #374151;
-    text-decoration: none;
-    padding: 0.35rem 0.75rem;
-    border-radius: 10px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    transition: all 0.2s ease;
-
-    &:hover {
-        color: #5B6DEE;
-        background: #eef2ff;
-        border-color: #c7d2fe;
-    }
-}
-
-.form-center-wrapper {
-    width: 100%;
-    max-width: 380px;
-    margin: 0 auto;
-}
-
-.form-main-title {
-    font-size: 1.85rem;
+.badge-staff-access {
+    font-size: 0.65rem;
     font-weight: 800;
-    color: #111827;
+    letter-spacing: 0.12em;
+    color: #4F46E5;
+    background: #EEF2FF;
+    padding: 4px 12px;
+    border-radius: 50px;
+    display: inline-block;
+}
+
+.portal-badge-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94A3B8;
+}
+
+.form-title {
+    font-size: 1.65rem;
     letter-spacing: -0.02em;
 }
 
-.form-sub-title {
-    font-size: 0.88rem;
-    color: #6B7280;
-}
-
-/* Clean Underline Input Form Style */
-.clean-input-group {
+/* Floating label inputs */
+.field-float {
     position: relative;
 
-    .clean-label {
-        display: block;
-        font-size: 0.88rem;
-        font-weight: 600;
-        color: #1F2937;
-        margin-bottom: 0.35rem;
-    }
-
-    .clean-input-wrap {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-
-    .clean-input {
+    input {
         width: 100%;
-        padding: 0.65rem 0.2rem 0.65rem 0;
+        height: 54px;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 0 1rem 0 3rem;
         font-size: 0.95rem;
-        color: #111827;
-        background: transparent;
-        border: none;
-        border-bottom: 1.5px solid #E5E7EB;
-        outline: none;
-        border-radius: 0;
-        transition: border-color 0.2s, box-shadow 0.2s;
+        background: #F8FAFC;
+        color: #0F172A;
+        transition: all 0.25s ease;
 
         &:focus {
-            border-bottom-color: #5B6DEE;
-            box-shadow: 0 1px 0 #5B6DEE;
-        }
-
-        &::placeholder {
-            color: #9CA3AF;
-            font-size: 0.9rem;
+            outline: none;
+            border-color: #3A62E8;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(58, 98, 232, 0.12);
         }
     }
 
-    &.is-invalid .clean-input {
-        border-bottom-color: #EF4444;
-        box-shadow: 0 1px 0 #EF4444;
+    label {
+        position: absolute;
+        left: 3rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748B;
+        pointer-events: none;
+        transition: all 0.2s ease;
     }
 
-    .clean-error-text {
-        color: #EF4444;
-        font-size: 0.75rem;
-        margin-top: 4px;
-        font-weight: 500;
+    .field-icon {
+        position: absolute;
+        left: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748B;
+        font-size: 1.15rem;
+    }
+
+    input:focus + label,
+    &.is-filled label {
+        top: 0;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #3A62E8;
+        background: #ffffff;
+        padding: 0 6px;
+    }
+
+    .field-suffix-btn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: transparent;
+        color: #64748B;
+        cursor: pointer;
+    }
+
+    &.is-invalid input {
+        border-color: #EF4444;
     }
 }
 
-.password-toggle-btn {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #9CA3AF;
-    font-size: 1.15rem;
-    cursor: pointer;
-    padding: 4px;
-    transition: color 0.2s ease;
-
-    &:hover {
-        color: #4B5563;
-    }
-}
-
-.clean-checkbox-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-    cursor: pointer;
-    user-select: none;
-}
-
-.clean-checkbox-input {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-    border: 1.5px solid #CBD5E1;
-    accent-color: #5B6DEE;
-    cursor: pointer;
-}
-
-.clean-checkbox-text {
-    font-size: 0.82rem;
-    color: #4B5563;
+.field-error {
+    color: #EF4444;
+    font-size: 0.75rem;
+    margin-top: 4px;
     font-weight: 500;
 }
 
-/* Button Pill Submit */
-.btn-primary-pill {
-    height: 48px;
-    background: #5B6DEE;
-    color: #ffffff;
-    border: none;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 0.98rem;
-    letter-spacing: 0.2px;
+/* Switch Toggle */
+.switch-label {
+    display: inline-flex;
+    align-items: center;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 8px 22px rgba(91, 109, 238, 0.35);
+    user-select: none;
+
+    .switch-input {
+        display: none;
+    }
+
+    .switch-button {
+        position: relative;
+        width: 40px;
+        height: 22px;
+        background-color: #CBD5E1;
+        border-radius: 20px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .switch-circle {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 16px;
+        height: 16px;
+        background-color: white;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .switch-input:checked + .switch-button {
+        background-color: #3A62E8;
+    }
+
+    .switch-input:checked + .switch-button .switch-circle {
+        transform: translateX(18px);
+    }
+}
+
+/* Button Glow Submit */
+.btn-glow-submit {
+    height: 54px;
+    border: none;
+    border-radius: 14px;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    background: linear-gradient(135deg, #4A72F5 0%, #3A62E8 100%);
+    box-shadow: 0 4px 14px rgba(58, 98, 232, 0.35);
+    transition: all 0.2s ease;
+    cursor: pointer;
 
     &:hover:not(:disabled) {
-        background: #4B5EE3;
         transform: translateY(-2px);
-        box-shadow: 0 12px 26px rgba(91, 109, 238, 0.45);
+        background: linear-gradient(135deg, #3A62E8 0%, #2544C0 100%);
+        box-shadow: 0 8px 20px rgba(58, 98, 232, 0.45);
     }
 
-    &:active:not(:disabled) {
+    &:active {
         transform: translateY(0);
-    }
-
-    &:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
     }
 }
 
 .btn-loading {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 10px;
 }
 
@@ -565,12 +491,15 @@ const overlayStyle = computed(() => ({
     }
 }
 
-.footer-action-link {
-    color: #5B6DEE;
+.back-link {
+    color: #64748B;
+    font-size: 0.85rem;
+    font-weight: 600;
     text-decoration: none;
+    transition: color 0.2s ease;
 
     &:hover {
-        text-decoration: underline;
+        color: #3A62E8;
     }
 }
 
@@ -649,29 +578,26 @@ const overlayStyle = computed(() => ({
         padding: 1.5rem 1rem;
     }
 
-    .auth-main-card {
+    .auth-main-container {
         flex-direction: column;
         max-width: 480px;
         min-height: auto;
-        border-radius: 28px;
     }
 
     .auth-left-pane {
-        padding: 2rem 1.75rem 1.5rem;
+        padding: 1.5rem 0.5rem;
+        min-height: auto;
         flex: none;
     }
 
-    .hero-headline-text {
-        font-size: 1.75rem;
-    }
-
     .illustration-3d-img {
-        max-height: 200px;
+        max-height: 220px;
     }
 
     .auth-right-pane {
-        border-radius: 28px;
-        padding: 2.2rem 1.75rem;
+        border-left: none;
+        border-top: 1px solid #f1f5f9;
+        padding: 2rem 0.5rem 1rem;
     }
 }
-</style>
+</style>
