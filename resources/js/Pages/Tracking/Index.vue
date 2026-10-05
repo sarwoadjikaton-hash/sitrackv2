@@ -256,8 +256,32 @@ const orderedTimeline = computed<TimelineItem[]>(() => {
 
     const items: TimelineItem[] = [];
 
-    // Helper for fallback date
-    const fallbackDate = formatDateTime(props.letter.received_date || props.letter.created_at);
+    // Helper to resolve datetime for skipped intermediate steps:
+    // Matches the timestamp of the status that was updated/completed to reach this point
+    const getResolvedDateTime = (idx: number): string => {
+        // 1. Look ahead for the next logged step in the pipeline
+        for (let k = idx + 1; k < defs.length; k++) {
+            const nextLog = matchedLogMap.get(k);
+            if (nextLog?.changed_at) {
+                return formatDateTime(nextLog.changed_at);
+            }
+        }
+        // 2. If no subsequent log, use the latest log if available
+        if (props.logs && props.logs.length > 0) {
+            const lastLog = props.logs[props.logs.length - 1];
+            if (lastLog?.changed_at) {
+                return formatDateTime(lastLog.changed_at);
+            }
+        }
+        // 3. Fallback to letter's updated_at or created_at (with real timestamps)
+        if (props.letter?.updated_at) {
+            return formatDateTime(props.letter.updated_at);
+        }
+        if (props.letter?.created_at) {
+            return formatDateTime(props.letter.created_at);
+        }
+        return '-';
+    };
 
     // Build standard sequential pipeline
     defs.forEach((stepDef, idx) => {
@@ -279,7 +303,7 @@ const orderedTimeline = computed<TimelineItem[]>(() => {
             note = 'Telah diverifikasi dan diselesaikan sesuai alur proses SOP.';
             position = stepDef.defaultPosition;
             changedBy = 'Sistem / Petugas';
-            dateTime = fallbackDate;
+            dateTime = getResolvedDateTime(idx);
         } else if (isPending) {
             note = stepDef.defaultDesc;
             position = stepDef.defaultPosition;
@@ -319,7 +343,7 @@ const orderedTimeline = computed<TimelineItem[]>(() => {
             isPending: false,
             isException: true,
             exceptionType: isRevisi ? 'warning' : 'danger',
-            dateTime: exceptionLog ? formatDateTime(exceptionLog.changed_at) : fallbackDate,
+            dateTime: exceptionLog ? formatDateTime(exceptionLog.changed_at) : (props.letter.updated_at ? formatDateTime(props.letter.updated_at) : formatDateTime(props.letter.created_at)),
             note: exceptionLog?.note || props.letter.notes || (isRevisi ? 'Dokumen memerlukan perbaikan/revisi dari unit pengusul.' : 'Pengajuan dokumen ditolak/dikembalikan.'),
             position: props.letter.current_position || 'Tata Usaha Sekjen',
             changedBy: exceptionLog?.changed_by || 'Petugas Verifikator',
