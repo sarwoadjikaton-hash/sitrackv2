@@ -484,7 +484,7 @@ const orderedTimeline = computed<TimelineItem[]>(() => {
                                                 <div v-for="(item, idx) in orderedTimeline" :key="item.id" 
                                                     class="perjalanan-item" 
                                                     :class="{ 
-                                                        'is-completed': item.isCompleted, 
+                                                        'is-completed': item.isCompleted && !item.isCurrent, 
                                                         'is-current': item.isCurrent, 
                                                         'is-pending': item.isPending, 
                                                         'is-exception': item.isException,
@@ -493,46 +493,39 @@ const orderedTimeline = computed<TimelineItem[]>(() => {
                                                     
                                                     <!-- Left line & indicator column -->
                                                     <div class="perjalanan-line-col">
-                                                        <!-- Completed Dot: Checked Blue -->
-                                                        <div v-if="item.isCompleted && !item.isException" class="perjalanan-dot is-completed" :class="{ 'is-current-glow': item.isCurrent }">
+                                                        <!-- Completed Dot: Checked Purple/Blue -->
+                                                        <div v-if="item.isCompleted && !item.isCurrent && !item.isException" class="perjalanan-dot is-completed">
                                                             <i class="bi bi-check-lg"></i>
+                                                        </div>
+                                                        <!-- In Progress / Current Dot: Bullseye Ring + Core -->
+                                                        <div v-else-if="item.isCurrent && !item.isException" class="perjalanan-dot is-current">
+                                                            <span class="dot-inner-core"></span>
                                                         </div>
                                                         <!-- Exception Dot: Warning (Amber) or Danger (Red) -->
                                                         <div v-else-if="item.isException" class="perjalanan-dot is-exception" :class="item.exceptionType === 'warning' ? 'dot-warning' : 'dot-danger'">
                                                             <i :class="item.exceptionType === 'warning' ? 'bi bi-exclamation-triangle-fill' : 'bi bi-x-circle-fill'"></i>
                                                         </div>
-                                                        <!-- Pending Dot: Gray with clock -->
-                                                        <div v-else class="perjalanan-dot is-pending">
-                                                            <i class="bi bi-clock"></i>
-                                                        </div>
+                                                        <!-- Pending Dot: Soft Pastel Circle -->
+                                                        <div v-else class="perjalanan-dot is-pending"></div>
                                                         
                                                         <!-- Connector Line -->
                                                         <div v-if="idx < orderedTimeline.length - 1" 
                                                             class="perjalanan-connector" 
-                                                            :class="{ 'is-pending': item.isPending, 'is-completed': item.isCompleted && orderedTimeline[idx + 1]?.isCompleted }">
+                                                            :class="{ 
+                                                                'is-active-line': item.isCompleted && (orderedTimeline[idx + 1]?.isCompleted || orderedTimeline[idx + 1]?.isCurrent),
+                                                                'is-pending-line': !item.isCompleted || !(orderedTimeline[idx + 1]?.isCompleted || orderedTimeline[idx + 1]?.isCurrent)
+                                                            }">
                                                         </div>
                                                     </div>
 
                                                     <!-- Right Body -->
                                                     <div class="perjalanan-body">
-                                                        <div class="perjalanan-top-row">
-                                                            <div class="perjalanan-title-wrap d-flex align-items-center gap-2 flex-wrap">
-                                                                <span class="perjalanan-title" :class="{ 'text-muted-title': item.isPending, 'text-danger': item.isException && item.exceptionType === 'danger', 'text-warning-dark': item.isException && item.exceptionType === 'warning' }">
-                                                                    {{ item.title }}
-                                                                </span>
-                                                                <!-- Status Tag -->
-                                                                <span v-if="item.isPending" class="badge-pending-tag">
-                                                                    Menunggu
-                                                                </span>
-                                                                <span v-else-if="item.isCurrent && !item.isException" class="badge-current-tag">
-                                                                    Sedang Berjalan
-                                                                </span>
-                                                                <span v-else-if="item.isException" :class="item.exceptionType === 'warning' ? 'badge-warning-tag' : 'badge-danger-tag'">
-                                                                    {{ item.exceptionType === 'warning' ? 'Perlu Revisi' : 'Ditolak' }}
-                                                                </span>
-                                                            </div>
-                                                            
-                                                            <div v-if="item.dateTime" class="perjalanan-date">
+                                                        <!-- Top Step Number & DateTime -->
+                                                        <div class="perjalanan-header-row">
+                                                            <span class="perjalanan-step-label" :class="{ 'is-active-step': item.isCurrent, 'is-completed-step': item.isCompleted && !item.isCurrent, 'is-pending-step': item.isPending }">
+                                                                Step {{ item.stepNumber }}
+                                                            </span>
+                                                            <div v-if="item.dateTime && !item.isPending" class="perjalanan-date">
                                                                 {{ item.dateTime }}
                                                             </div>
                                                             <div v-else-if="item.isPending" class="perjalanan-date-pending">
@@ -540,36 +533,59 @@ const orderedTimeline = computed<TimelineItem[]>(() => {
                                                             </div>
                                                         </div>
 
-                                                        <div v-if="item.note" class="perjalanan-note" :class="{ 'text-muted-pending': item.isPending }">
-                                                            {{ item.note }}
-                                                        </div>
-                                                        
-                                                        <div v-if="item.position" class="perjalanan-position" :class="{ 'text-muted-pending': item.isPending }">
-                                                            <i class="bi bi-geo-alt-fill me-1" :class="item.isPending ? 'text-muted' : 'text-primary'"></i>
-                                                            {{ item.position }}
-                                                        </div>
-                                                        
-                                                        <div v-if="item.changedBy" class="perjalanan-by">
-                                                            Oleh: {{ item.changedBy }}
-                                                        </div>
-
-                                                        <!-- Lampiran per log -->
-                                                        <div v-if="isValidAttachment(item.attachmentPath)" class="perjalanan-attachment">
-                                                            <div class="d-flex align-items-center gap-2 overflow-hidden">
-                                                                <i class="bi bi-paperclip text-primary"></i>
-                                                                <span class="small text-truncate fw-semibold text-dark" style="max-width: 220px;" :title="item.attachmentName || item.attachmentPath?.split('/').pop() || 'Lampiran'">
-                                                                    {{ item.attachmentName || item.attachmentPath?.split('/').pop() || 'Lampiran' }}
-                                                                </span>
+                                                        <!-- Title -->
+                                                        <div class="perjalanan-title-wrap">
+                                                            <div class="perjalanan-title" :class="{ 'text-muted-title': item.isPending, 'text-danger': item.isException && item.exceptionType === 'danger', 'text-warning-dark': item.isException && item.exceptionType === 'warning' }">
+                                                                {{ item.title }}
                                                             </div>
-                                                            <a :href="`/lampiran/view/${item.attachmentPath}`" target="_blank"
-                                                                class="btn btn-sm btn-outline-primary py-1 px-2 text-nowrap d-inline-flex align-items-center gap-1 small">
-                                                                <i class="bi bi-eye"></i> Buka
-                                                            </a>
                                                         </div>
-                                                    </div>
 
-                                                </div>
-                                            </div>
+                                                        <!-- Status Tag Under Title (Completed / In Progress / Pending) -->
+                                                        <div class="perjalanan-status-sub">
+                                                            <span v-if="item.isPending" class="status-sub-text text-pending">
+                                                                Pending
+                                                            </span>
+                                                            <span v-else-if="item.isCurrent && !item.isException" class="status-sub-text text-in-progress">
+                                                                In Progress
+                                                            </span>
+                                                            <span v-else-if="item.isCompleted && !item.isException" class="status-sub-text text-completed">
+                                                                Completed
+                                                            </span>
+                                                            <span v-else-if="item.isException" :class="item.exceptionType === 'warning' ? 'status-sub-text text-warning' : 'status-sub-text text-danger'">
+                                                                {{ item.exceptionType === 'warning' ? 'Perlu Revisi' : 'Ditolak' }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div v-if="item.note" class="perjalanan-note" :class="{ 'text-muted-pending': item.isPending }">
+                                                             {{ item.note }}
+                                                         </div>
+                                                         
+                                                         <div v-if="item.position" class="perjalanan-position" :class="{ 'text-muted-pending': item.isPending }">
+                                                             <i class="bi bi-geo-alt-fill me-1" :class="item.isPending ? 'text-muted' : 'text-primary'"></i>
+                                                             {{ item.position }}
+                                                         </div>
+                                                         
+                                                         <div v-if="item.changedBy" class="perjalanan-by">
+                                                             Oleh: {{ item.changedBy }}
+                                                         </div>
+
+                                                         <!-- Lampiran per log -->
+                                                         <div v-if="isValidAttachment(item.attachmentPath)" class="perjalanan-attachment">
+                                                             <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                                                 <i class="bi bi-paperclip text-primary"></i>
+                                                                 <span class="small text-truncate fw-semibold text-dark" style="max-width: 220px;" :title="item.attachmentName || item.attachmentPath?.split('/').pop() || 'Lampiran'">
+                                                                     {{ item.attachmentName || item.attachmentPath?.split('/').pop() || 'Lampiran' }}
+                                                                 </span>
+                                                             </div>
+                                                             <a :href="`/lampiran/view/${item.attachmentPath}`" target="_blank"
+                                                                 class="btn btn-sm btn-outline-primary py-1 px-2 text-nowrap d-inline-flex align-items-center gap-1 small">
+                                                                 <i class="bi bi-eye"></i> Buka
+                                                             </a>
+                                                         </div>
+                                                     </div>
+
+                                                 </div>
+                                             </div>
 
                                             <!-- Cetak Lembar Pendamping Button (muncul jika siap diambil) -->
                                             <div v-if="(letter.process_lane === 'signature' || !letter.process_lane) && isReadyForPickup" class="cetak-pendamping-wrap mt-3 pt-3 border-top">
@@ -781,7 +797,7 @@ const orderedTimeline = computed<TimelineItem[]>(() => {
     display: flex;
     gap: 1.25rem;
     position: relative;
-    padding-bottom: 1.75rem;
+    padding-bottom: 2rem;
 }
 
 .perjalanan-item.is-last {
@@ -792,104 +808,147 @@ const orderedTimeline = computed<TimelineItem[]>(() => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 36px;
-    min-width: 36px;
+    width: 32px;
+    min-width: 32px;
     position: relative;
+    padding-top: 1px;
 }
 
 .perjalanan-dot {
-    width: 32px;
-    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.9rem;
     position: relative;
     z-index: 2;
     flex-shrink: 0;
-    transition: all 0.25s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* 1. Completed: Solid Indigo/Blue Circle with Checkmark */
 .perjalanan-dot.is-completed {
-    background: #2743AF;
+    width: 28px;
+    height: 28px;
+    background: #5465FF;
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(39, 67, 175, 0.35);
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(84, 101, 255, 0.35);
 }
 
-.perjalanan-dot.is-current-glow {
-    box-shadow: 0 0 0 4px rgba(39, 67, 175, 0.22), 0 4px 14px rgba(39, 67, 175, 0.35);
-    animation: dotPulse 2s infinite ease-in-out;
+/* 2. In Progress / Current: Outer Ring with Inner Dot (Bullseye) */
+.perjalanan-dot.is-current {
+    width: 28px;
+    height: 28px;
+    background: #ffffff;
+    border: 3px solid #5465FF;
+    box-shadow: 0 0 0 4px rgba(84, 101, 255, 0.18), 0 2px 10px rgba(84, 101, 255, 0.25);
+    animation: pulseRing 2s infinite ease-in-out;
 }
 
-@keyframes dotPulse {
+.dot-inner-core {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #5465FF;
+}
+
+@keyframes pulseRing {
     0%, 100% {
-        box-shadow: 0 0 0 4px rgba(39, 67, 175, 0.22), 0 4px 14px rgba(39, 67, 175, 0.35);
+        box-shadow: 0 0 0 4px rgba(84, 101, 255, 0.18), 0 2px 10px rgba(84, 101, 255, 0.25);
     }
     50% {
-        box-shadow: 0 0 0 7px rgba(61, 165, 249, 0.35), 0 4px 14px rgba(39, 67, 175, 0.4);
+        box-shadow: 0 0 0 7px rgba(84, 101, 255, 0.28), 0 2px 14px rgba(84, 101, 255, 0.35);
     }
 }
 
+/* 3. Pending: Soft Pastel Lavender Circle */
 .perjalanan-dot.is-pending {
-    background: #F8FAFC;
-    border: 2px solid #CBD5E1;
-    color: #94A3B8;
-    font-size: 0.8rem;
+    width: 20px;
+    height: 20px;
+    background: #C7D2FE;
+    margin: 4px 0;
     box-shadow: none;
 }
 
+/* 4. Exception: Warning / Danger */
 .perjalanan-dot.is-exception.dot-warning {
+    width: 28px;
+    height: 28px;
     background: #F59E0B;
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+    font-size: 0.85rem;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
 }
 
 .perjalanan-dot.is-exception.dot-danger {
+    width: 28px;
+    height: 28px;
     background: #EF4444;
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+    font-size: 0.85rem;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
 }
 
+/* Connector Line */
 .perjalanan-connector {
-    width: 2px;
+    width: 2.5px;
     flex: 1;
-    background: #CBD5E1;
-    margin-top: 4px;
+    margin-top: 5px;
+    margin-bottom: 5px;
     position: relative;
     z-index: 1;
-    min-height: 28px;
+    min-height: 38px;
+    border-radius: 999px;
 }
 
-.perjalanan-connector.is-completed {
-    background: #2743AF;
+.perjalanan-connector.is-active-line {
+    background: #5465FF;
 }
 
-.perjalanan-connector.is-pending {
-    background: transparent;
-    border-left: 2px dashed #CBD5E1;
-    width: 0;
+.perjalanan-connector.is-pending-line {
+    background: #E2E8F0;
 }
 
 .perjalanan-body {
     flex: 1;
     min-width: 0;
-    padding-top: 2px;
+    padding-top: 1px;
 }
 
-.perjalanan-top-row {
+.perjalanan-header-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.75rem;
-    flex-wrap: wrap;
+    margin-bottom: 0.15rem;
+}
+
+.perjalanan-step-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #64748B;
+}
+
+.perjalanan-step-label.is-active-step {
+    color: #5465FF;
+}
+
+.perjalanan-step-label.is-completed-step {
+    color: #475569;
+}
+
+.perjalanan-step-label.is-pending-step {
+    color: #94A3B8;
 }
 
 .perjalanan-title {
-    font-size: 1.02rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: #0F172A;
-    line-height: 1.4;
+    line-height: 1.35;
+    margin-bottom: 0.2rem;
 }
 
 .text-muted-title {
@@ -901,51 +960,44 @@ const orderedTimeline = computed<TimelineItem[]>(() => {
     color: #B45309 !important;
 }
 
-.badge-pending-tag {
-    background: #F1F5F9;
-    color: #64748B;
-    border: 1px solid #E2E8F0;
-    font-size: 0.68rem;
-    font-weight: 600;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-    letter-spacing: 0.02em;
+/* Status Label Under Title (Completed / In Progress / Pending) */
+.perjalanan-status-sub {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
 }
 
-.badge-current-tag {
-    background: rgba(39, 67, 175, 0.1);
-    color: #2743AF;
-    border: 1px solid rgba(39, 67, 175, 0.25);
-    font-size: 0.68rem;
+.status-sub-text {
+    font-size: 0.8rem;
     font-weight: 700;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
 }
 
-.badge-warning-tag {
-    background: rgba(245, 158, 11, 0.12);
-    color: #B45309;
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    font-size: 0.68rem;
-    font-weight: 700;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
+.status-sub-text.text-completed {
+    color: #10B981; /* Green like in the image */
 }
 
-.badge-danger-tag {
-    background: rgba(239, 68, 68, 0.12);
+.status-sub-text.text-in-progress {
+    color: #5465FF; /* Purple/Indigo like in the image */
+}
+
+.status-sub-text.text-pending {
+    color: #94A3B8; /* Muted gray like in the image */
+}
+
+.status-sub-text.text-warning {
+    color: #D97706;
+}
+
+.status-sub-text.text-danger {
     color: #DC2626;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    font-size: 0.68rem;
-    font-weight: 700;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
 }
 
 .perjalanan-date {
     font-size: 0.82rem;
-    color: #2743AF;
+    color: #5465FF;
     font-weight: 700;
     font-family: 'Plus Jakarta Sans', monospace;
     white-space: nowrap;
