@@ -44,130 +44,137 @@ const overlayStyle = computed(() => ({
     <Head title="Masuk ke Sistem Staf - SiTrack" />
     <ToastNotification />
 
-    <div class="login-split-page">
-        
-        <!-- ================= LEFT PANEL: ILUSTRASI SEAMLESS ================= -->
-        <div class="login-left-pane">
-            <!-- Header Brand -->
-            <div class="left-brand">
-                <div class="brand-badge-white">
-                    <img src="/images/sitrack_logo.svg" alt="SiTrack Logo" width="36" height="36" />
-                </div>
-                <div class="brand-info">
-                    <h1 class="brand-title">SiTrack</h1>
-                    <p class="brand-subtitle">Tata Usaha Sekjen Kemnaker</p>
-                </div>
-            </div>
-
-            <!-- Center Illustration (Blends 100% with #7e8fe9) -->
-            <div class="left-illustration-container">
-                <img src="/images/login-illustration.png" alt="Ilustrasi Persuratan" class="illustration-image" />
-            </div>
-
-            <!-- Footer Copyright -->
-            <div class="left-footer">
-                <p class="mb-0">&copy; 2026 SiTrack &bull; Kementerian Ketenagakerjaan RI</p>
-            </div>
+    <div class="auth-shell">
+        <!-- Ambient background with geometric accents -->
+        <div class="ambient-bg">
+            <div class="ambient-circle circle-1"></div>
+            <div class="ambient-circle circle-2"></div>
+            <div class="grid-overlay"></div>
         </div>
 
-        <!-- ================= RIGHT PANEL: FORM LOGIN WITH CURVED SEPARATOR ================= -->
-        <div class="login-right-pane">
-            <div class="form-wrapper" :class="{ 'has-errors': form.errors.username || form.errors.password }">
-                
-                <!-- Header Form -->
-                <div class="form-header text-start mb-4">
-                    <div class="badge-staff-pill mb-2">
-                        <i class="bi bi-shield-lock-fill me-1"></i> Area Khusus Staf
-                    </div>
-                    <h2 class="form-title">Selamat Datang</h2>
-                    <p class="form-subtitle">Silakan masukkan username dan kata sandi Anda untuk mengakses sistem persuratan.</p>
-                </div>
-
-                <!-- Form Login -->
-                <form @submit.prevent="submit" novalidate>
-                    <!-- Username Input -->
-                    <div class="field-float mb-3"
-                        :class="{ 'is-filled': form.username, 'is-invalid': form.errors.username }">
-                        <i class="bi bi-person field-icon"></i>
-                        <input v-model="form.username" type="text" id="username" placeholder=" " autofocus
-                            autocomplete="username" />
-                        <label for="username">Username Staf</label>
-                    </div>
-                    <div v-if="form.errors.username" class="field-error">{{ form.errors.username }}</div>
-
-                    <!-- Password Input -->
-                    <div class="field-float mb-2"
-                        :class="{ 'is-filled': form.password, 'is-invalid': form.errors.password }">
-                        <i class="bi bi-lock field-icon"></i>
-                        <input v-model="form.password" :type="showPassword ? 'text' : 'password'" id="password"
-                            placeholder=" " autocomplete="current-password" />
-                        <label for="password">Kata Sandi</label>
-                        <button type="button" class="field-suffix-btn" @click="togglePassword" tabindex="-1">
-                            <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye']"></i>
-                        </button>
-                    </div>
-                    <div v-if="form.errors.password" class="field-error mb-2">{{ form.errors.password }}</div>
-
-                    <!-- Remember Me Toggle -->
-                    <div class="d-flex align-items-center justify-content-between my-3">
-                        <label class="switch-label">
-                            <input v-model="form.remember" type="checkbox" class="switch-input" />
-                            <div class="switch-button">
-                                <div class="switch-circle"></div>
+        <!-- Main Card with 2 Columns and Curved Shape Divider -->
+        <div class="auth-main-card shadow-2xl">
+            <!-- LEFT COLUMN: Brand & 3D Illustration -->
+            <div class="auth-left-pane">
+                <div class="left-pane-content">
+                    <!-- Top Logo Header -->
+                    <div class="brand-top-row">
+                        <div class="brand-logos-pill">
+                            <div class="logo-icon-wrap">
+                                <img src="/images/sitrack_logo.svg" alt="SiTrack Logo" width="34" height="34" />
                             </div>
-                            <span class="ms-2 small text-muted fw-semibold">Ingat sesi saya</span>
-                        </label>
+                            <span class="logo-divider"></span>
+                            <div class="logo-icon-wrap kemnaker-icon">
+                                <img src="/images/kemnaker_logo.png" alt="Kemnaker Logo" width="28" height="28" />
+                            </div>
+                        </div>
+                        <div class="brand-title-group">
+                            <span class="brand-name">SiTrack</span>
+                            <span class="brand-subtitle">TU SEKJEN</span>
+                        </div>
                     </div>
 
-                    <!-- Submit Button -->
-                    <button ref="submitBtn" type="submit" class="btn-login-action w-100" :disabled="form.processing"
-                        @click="captureOrigin">
-                        <span v-if="form.processing" class="btn-loading">
-                            <span class="btn-loading-ring"></span>
-                            <span>Memverifikasi akun...</span>
-                        </span>
-                        <span v-else class="d-inline-flex align-items-center justify-content-center gap-2">
-                            <span>Masuk ke Sistem</span>
-                            <i class="bi bi-arrow-right"></i>
-                        </span>
-                    </button>
-                </form>
+                    <!-- Center 3D Illustration -->
+                    <div class="illustration-container">
+                        <div class="illustration-glow"></div>
+                        <img src="/images/login-illustration.png" alt="Ilustrasi Persuratan SiTrack" class="illustration-3d-img" />
+                    </div>
 
-                <!-- Kembali ke Lacak Publik -->
-                <div class="text-center mt-4 pt-3 border-top">
-                    <Link href="/tracking" class="back-link">
-                        <i class="bi bi-arrow-left me-1"></i> Kembali ke Portal Lacak Publik
-                    </Link>
-                </div>
-
-                <!-- Footer Meta -->
-                <div class="form-footer-meta mt-4 text-center">
-                    <div class="d-flex align-items-center justify-content-center gap-3 text-muted small">
-                        <span><i class="bi bi-headset me-1 text-primary"></i> Bantuan TU</span>
-                        <span class="opacity-30">&bull;</span>
-                        <span><i class="bi bi-shield-check me-1 text-success"></i> Sistem Terproteksi</span>
+                    <!-- Bottom Note -->
+                    <div class="left-pane-footer">
+                        <p class="footer-copy-text mb-0">
+                            &copy; 2026 SiTrack &bull; Kementerian Ketenagakerjaan Republik Indonesia
+                        </p>
                     </div>
                 </div>
+            </div>
 
+            <!-- RIGHT COLUMN: Curved Divider & Login Form -->
+            <div class="auth-right-pane">
+                <!-- SVG Curved Shape Divider -->
+                <div class="curved-divider-wrapper" aria-hidden="true">
+                    <svg class="curved-divider-svg" viewBox="0 0 100 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M100 0 C35 0 0 70 0 160 L0 800 L100 800 Z" fill="#ffffff" />
+                    </svg>
+                </div>
+
+                <div class="right-pane-content">
+                    <!-- Login Form Box -->
+                    <div class="login-inner-card" :class="{ 'has-errors': form.errors.username || form.errors.password }">
+                        <div class="form-header-section mb-4">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="badge-staff-access">STAFF ACCESS ONLY</span>
+                                <span class="portal-badge-text">Portal Staf</span>
+                            </div>
+                            <h2 class="form-title text-dark fw-bold mb-1">Masuk ke Sistem</h2>
+                            <p class="text-muted small mb-0">Sistem Elektronik Administrasi Persuratan</p>
+                        </div>
+
+                        <form @submit.prevent="submit" novalidate>
+                            <!-- Username Field -->
+                            <div class="field-float mb-3" :class="{ 'is-filled': form.username, 'is-invalid': form.errors.username }">
+                                <i class="bi bi-person field-icon"></i>
+                                <input v-model="form.username" type="text" id="username" placeholder=" " autofocus autocomplete="username" />
+                                <label for="username">Username Staf</label>
+                            </div>
+                            <div v-if="form.errors.username" class="field-error">{{ form.errors.username }}</div>
+
+                            <!-- Password Field -->
+                            <div class="field-float mb-2" :class="{ 'is-filled': form.password, 'is-invalid': form.errors.password }">
+                                <i class="bi bi-lock field-icon"></i>
+                                <input v-model="form.password" :type="showPassword ? 'text' : 'password'" id="password" placeholder=" " autocomplete="current-password" />
+                                <label for="password">Kata Sandi</label>
+                                <button type="button" class="field-suffix-btn" @click="togglePassword" tabindex="-1">
+                                    <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye']"></i>
+                                </button>
+                            </div>
+                            <div v-if="form.errors.password" class="field-error mb-2">{{ form.errors.password }}</div>
+
+                            <!-- Remember Me Toggle -->
+                            <div class="d-flex align-items-center justify-content-between my-3.5">
+                                <label class="switch-label">
+                                    <input v-model="form.remember" type="checkbox" class="switch-input" />
+                                    <div class="switch-button">
+                                        <div class="switch-circle"></div>
+                                    </div>
+                                    <span class="ms-2 small text-muted fw-semibold">Ingat sesi saya</span>
+                                </label>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button ref="submitBtn" type="submit" class="btn-glow-submit w-100 mt-2" :disabled="form.processing" @click="captureOrigin">
+                                <span v-if="form.processing" class="btn-loading">
+                                    <span class="btn-loading-ring"></span>
+                                    <span>Memeriksa akun...</span>
+                                </span>
+                                <span v-else>Masuk ke Sistem</span>
+                            </button>
+                        </form>
+
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <Link href="/tracking" class="back-link">
+                                <i class="bi bi-arrow-left me-1"></i> Kembali ke Portal Lacak Publik
+                            </Link>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Ripple Login Transition Overlay -->
+        <!-- Ripple Login Transition Animation -->
         <Transition name="ripple">
             <div v-if="transitioning" class="login-transition-overlay" :style="overlayStyle">
                 <div class="login-transition-content">
                     <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
                         <div class="login-transition-logo-badge">
-                            <img src="/images/sitrack_logo.svg" alt="SiTrack" width="40" height="40"
-                                class="login-transition-logo" />
+                            <img src="/images/sitrack_logo.svg" alt="SiTrack" width="40" height="40" class="login-transition-logo" />
                         </div>
                         <span class="text-white opacity-40 fs-5">|</span>
                         <div class="login-transition-logo-badge">
-                            <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="36" height="36"
-                                class="login-transition-logo" />
+                            <img src="/images/kemnaker_logo.png" alt="Kemnaker" width="36" height="36" class="login-transition-logo" />
                         </div>
                     </div>
-                    <p class="login-transition-text">Memverifikasi kredensial staf...</p>
+                    <p class="login-transition-text">Memverifikasi kredensial...</p>
                 </div>
             </div>
         </Transition>
@@ -175,169 +182,295 @@ const overlayStyle = computed(() => ({
 </template>
 
 <style scoped lang="scss">
-$theme-blue: #7e8fe9;
-$theme-dark-blue: #556be8;
-$theme-darker-blue: #4459d4;
-$text-dark: #0F172A;
-$text-muted: #64748B;
-$border-color: #CBD5E1;
+$primary-blue: #3A62E8;
+$primary-dark: #1E3A8A;
+$primary-indigo: #4F46E5;
+$accent-teal: #14B8A6;
+$bg-dark-indigo: #1E2238;
+$bg-navy: #181C2E;
 
-/* Full screen direct split page without any outer container/background */
-.login-split-page {
+.auth-shell {
+    position: relative;
     min-height: 100vh;
-    width: 100vw;
+    overflow: hidden;
     display: flex;
-    background: $theme-blue;
-    overflow-x: hidden;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 15% 15%, #2B355B 0%, #171A29 100%);
+    padding: 2.5rem 1.25rem;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* ===== LEFT PANE (Illustration Side) ===== */
-.login-left-pane {
+/* Ambient Background Blobs */
+.ambient-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.ambient-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.35;
+}
+
+.circle-1 {
+    width: 450px;
+    height: 450px;
+    background: #3A62E8;
+    top: -100px;
+    left: -100px;
+}
+
+.circle-2 {
+    width: 500px;
+    height: 500px;
+    background: #FF5E8E;
+    bottom: -150px;
+    right: -100px;
+    opacity: 0.25;
+}
+
+.grid-overlay {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+/* Main 2-Column Container */
+.auth-main-card {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    width: 100%;
+    max-width: 1080px;
+    min-height: 640px;
+    background: #ffffff;
+    border-radius: 36px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    animation: cardZoomIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes cardZoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ========================================================
+   LEFT PANE: 3D Illustration & Vibrant Gradient
+   ======================================================== */
+.auth-left-pane {
+    position: relative;
     flex: 1.15;
-    background: $theme-blue;
-    min-height: 100vh;
-    padding: 3rem 3.5rem;
+    background: linear-gradient(145deg, #4A72F5 0%, #3557DC 60%, #2544C0 100%);
+    padding: 2.5rem 3rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    position: relative;
     overflow: hidden;
+    z-index: 1;
 }
 
-.left-brand {
+.left-pane-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.brand-top-row {
     display: flex;
     align-items: center;
     gap: 1rem;
-    position: relative;
-    z-index: 2;
 }
 
-.brand-badge-white {
-    width: 52px;
-    height: 52px;
-    background: #ffffff;
-    border-radius: 16px;
+.brand-logos-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.4rem 0.75rem;
+    border-radius: 18px;
+}
+
+.logo-icon-wrap {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
 
-.brand-info {
-    .brand-title {
-        font-size: 1.45rem;
-        font-weight: 800;
-        color: #ffffff;
-        letter-spacing: -0.01em;
-        line-height: 1.15;
-        margin: 0;
-    }
-    .brand-subtitle {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.85);
-        margin: 0;
-    }
+.logo-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.35);
 }
 
-.left-illustration-container {
+.brand-title-group {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    padding: 1rem 0;
+    flex-direction: column;
 }
 
-.illustration-image {
-    width: 100%;
-    max-width: 540px;
-    height: auto;
-    max-height: 70vh;
-    object-fit: contain;
-    user-select: none;
-    filter: drop-shadow(0 20px 40px rgba(45, 65, 160, 0.25));
+.brand-name {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
 }
 
-.left-footer {
-    position: relative;
-    z-index: 2;
-    font-size: 0.78rem;
-    color: rgba(255, 255, 255, 0.85);
-}
-
-/* ===== RIGHT PANE (White Login Form with Curved Border) ===== */
-.login-right-pane {
-    flex: 0.95;
-    background: #ffffff;
-    min-height: 100vh;
-    border-top-left-radius: 64px;
-    border-bottom-left-radius: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3.5rem 4.5rem;
-    position: relative;
-    z-index: 5;
-    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.08);
-}
-
-.form-wrapper {
-    width: 100%;
-    max-width: 400px;
-
-    &.has-errors {
-        animation: shake 0.4s ease-in-out;
-    }
-}
-
-.badge-staff-pill {
-    display: inline-flex;
-    align-items: center;
-    font-size: 0.74rem;
+.brand-subtitle {
+    font-size: 0.68rem;
     font-weight: 700;
-    color: $theme-dark-blue;
-    background: rgba(126, 143, 233, 0.15);
-    padding: 0.32rem 0.85rem;
-    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: 0.08em;
+}
+
+.illustration-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 0;
+}
+
+.illustration-glow {
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, transparent 70%);
+    filter: blur(24px);
+    z-index: 1;
+}
+
+.illustration-3d-img {
+    position: relative;
+    z-index: 2;
+    max-width: 100%;
+    height: auto;
+    max-height: 340px;
+    object-fit: contain;
+    filter: drop-shadow(0 18px 30px rgba(10, 25, 80, 0.35));
+    animation: floatIllustration 8s ease-in-out infinite;
+}
+
+@keyframes floatIllustration {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.left-pane-footer {
+    text-align: left;
+}
+
+.footer-copy-text {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.7);
     letter-spacing: 0.02em;
 }
 
-.form-title {
-    font-size: 1.85rem;
+/* ========================================================
+   RIGHT PANE: Curved Divider & Login Form
+   ======================================================== */
+.auth-right-pane {
+    position: relative;
+    flex: 1;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 3.5rem;
+    z-index: 2;
+}
+
+/* SVG Curved Shape Divider */
+.curved-divider-wrapper {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -40px;
+    width: 42px;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.curved-divider-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.right-pane-content {
+    position: relative;
+    z-index: 15;
+    width: 100%;
+    max-width: 380px;
+}
+
+.badge-staff-access {
+    font-size: 0.65rem;
     font-weight: 800;
-    color: $text-dark;
+    letter-spacing: 0.12em;
+    color: #3A62E8;
+    background: #EEF2FF;
+    padding: 4px 12px;
+    border-radius: 50px;
+    display: inline-block;
+}
+
+.portal-badge-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94A3B8;
+}
+
+.form-title {
+    font-size: 1.55rem;
     letter-spacing: -0.02em;
-    margin-bottom: 0.35rem;
 }
 
-.form-subtitle {
-    font-size: 0.88rem;
-    color: $text-muted;
-    line-height: 1.5;
-    margin-bottom: 0;
-}
-
-/* Floating Input Fields */
+/* Floating label inputs */
 .field-float {
     position: relative;
 
     input {
         width: 100%;
-        height: 56px;
-        border: 1.5px solid $border-color;
+        height: 54px;
+        border: 1.5px solid #E2E8F0;
         border-radius: 14px;
         padding: 0 1rem 0 3rem;
         font-size: 0.95rem;
         background: #F8FAFC;
-        color: $text-dark;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        color: #0F172A;
+        transition: all 0.25s ease;
 
         &:focus {
             outline: none;
-            border-color: $theme-dark-blue;
+            border-color: #3A62E8;
             background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(126, 143, 233, 0.25);
+            box-shadow: 0 0 0 4px rgba(58, 98, 232, 0.12);
         }
     }
 
@@ -346,27 +479,26 @@ $border-color: #CBD5E1;
         left: 3rem;
         top: 50%;
         transform: translateY(-50%);
-        color: #94A3B8;
+        color: #64748B;
         pointer-events: none;
         transition: all 0.2s ease;
-        font-size: 0.92rem;
     }
 
     .field-icon {
         position: absolute;
-        left: 1.15rem;
+        left: 1.2rem;
         top: 50%;
         transform: translateY(-50%);
-        color: #94A3B8;
-        font-size: 1.2rem;
+        color: #64748B;
+        font-size: 1.15rem;
     }
 
     input:focus + label,
     &.is-filled label {
         top: 0;
-        font-size: 0.74rem;
+        font-size: 0.72rem;
         font-weight: 700;
-        color: $theme-dark-blue;
+        color: #3A62E8;
         background: #ffffff;
         padding: 0 6px;
     }
@@ -378,13 +510,8 @@ $border-color: #CBD5E1;
         transform: translateY(-50%);
         border: none;
         background: transparent;
-        color: #94A3B8;
+        color: #64748B;
         cursor: pointer;
-        padding: 4px;
-
-        &:hover {
-            color: $text-dark;
-        }
     }
 
     &.is-invalid input {
@@ -396,7 +523,7 @@ $border-color: #CBD5E1;
     color: #EF4444;
     font-size: 0.75rem;
     margin-top: 4px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 /* Switch Toggle */
@@ -412,51 +539,51 @@ $border-color: #CBD5E1;
 
     .switch-button {
         position: relative;
-        width: 44px;
-        height: 24px;
+        width: 40px;
+        height: 22px;
         background-color: #CBD5E1;
         border-radius: 20px;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .switch-circle {
         position: absolute;
         top: 3px;
         left: 3px;
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         background-color: white;
         border-radius: 50%;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .switch-input:checked + .switch-button {
-        background-color: $theme-dark-blue;
-        box-shadow: 0 3px 10px rgba(85, 107, 232, 0.35);
+        background-color: #3A62E8;
     }
 
     .switch-input:checked + .switch-button .switch-circle {
-        transform: translateX(20px);
+        transform: translateX(18px);
     }
 }
 
-/* Primary Action Button */
-.btn-login-action {
+/* Button Glow Submit */
+.btn-glow-submit {
     height: 54px;
     border: none;
     border-radius: 14px;
     color: #ffffff;
     font-weight: 700;
-    font-size: 0.98rem;
-    background: linear-gradient(135deg, $theme-dark-blue 0%, $theme-darker-blue 100%);
-    box-shadow: 0 6px 18px rgba(85, 107, 232, 0.35);
-    transition: all 0.25s ease;
+    font-size: 0.95rem;
+    background: linear-gradient(135deg, #4A72F5 0%, #3A62E8 100%);
+    box-shadow: 0 4px 14px rgba(58, 98, 232, 0.35);
+    transition: all 0.2s ease;
+    cursor: pointer;
 
     &:hover:not(:disabled) {
         transform: translateY(-2px);
-        background: linear-gradient(135deg, $theme-blue 0%, $theme-dark-blue 100%);
-        box-shadow: 0 8px 24px rgba(85, 107, 232, 0.45);
+        background: linear-gradient(135deg, #3A62E8 0%, #2544C0 100%);
+        box-shadow: 0 8px 20px rgba(58, 98, 232, 0.45);
     }
 
     &:active {
@@ -476,11 +603,11 @@ $border-color: #CBD5E1;
     border-radius: 50%;
     flex-shrink: 0;
     border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #fff;
-    animation: spin 0.8s linear infinite;
+    border-top-color: #ffffff;
+    animation: btnRingSpin 0.8s linear infinite;
 }
 
-@keyframes spin {
+@keyframes btnRingSpin {
     to {
         transform: rotate(360deg);
     }
@@ -488,29 +615,17 @@ $border-color: #CBD5E1;
 
 .back-link {
     color: #64748B;
-    font-size: 0.86rem;
+    font-size: 0.85rem;
     font-weight: 600;
     text-decoration: none;
-    transition: color 0.2s;
+    transition: color 0.2s ease;
 
     &:hover {
-        color: $theme-dark-blue;
+        color: #3A62E8;
     }
 }
 
-@keyframes shake {
-    0%, 100% {
-        transform: translateX(0);
-    }
-    25% {
-        transform: translateX(-6px);
-    }
-    75% {
-        transform: translateX(6px);
-    }
-}
-
-/* ===== Ripple Login Transition Overlay ===== */
+/* Ripple Overlay Animation */
 .login-transition-overlay {
     position: fixed;
     inset: 0;
@@ -518,7 +633,7 @@ $border-color: #CBD5E1;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: $theme-darker-blue;
+    background: #1E3A8A;
     clip-path: circle(150% at var(--origin-x) var(--origin-y));
 }
 
@@ -552,11 +667,14 @@ $border-color: #CBD5E1;
     animation: transitionLogoPulse 1.4s ease-in-out infinite;
 }
 
+.login-transition-logo {
+    display: block;
+}
+
 .login-transition-text {
     margin-top: 0.85rem;
     font-size: 0.85rem;
     font-weight: 600;
-    letter-spacing: 0.02em;
 }
 
 @keyframes transitionFadeIn {
@@ -574,38 +692,36 @@ $border-color: #CBD5E1;
     }
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-    .login-left-pane {
-        padding: 2.5rem 2rem;
-    }
-    .login-right-pane {
-        padding: 3rem 2.5rem;
-    }
-}
-
-@media (max-width: 991px) {
-    .login-split-page {
+/* ========================================================
+   RESPONSIVE DESIGN (Mobile & Tablet)
+   ======================================================== */
+@media (max-width: 991.98px) {
+    .auth-main-card {
         flex-direction: column;
-    }
-
-    .login-left-pane {
+        max-width: 500px;
         min-height: auto;
-        padding: 2.5rem 2rem 3rem;
+        border-radius: 28px;
     }
 
-    .illustration-image {
-        max-width: 320px;
-        max-height: 240px;
+    .auth-left-pane {
+        padding: 2rem 1.5rem;
+        flex: none;
     }
 
-    .login-right-pane {
-        min-height: auto;
-        border-top-left-radius: 40px;
-        border-top-right-radius: 40px;
-        border-bottom-left-radius: 0;
-        margin-top: -32px;
-        padding: 3rem 2rem;
+    .illustration-container {
+        padding: 1rem 0;
+    }
+
+    .illustration-3d-img {
+        max-height: 200px;
+    }
+
+    .curved-divider-wrapper {
+        display: none;
+    }
+
+    .auth-right-pane {
+        padding: 2.5rem 1.75rem;
     }
 }
-</style>
+</style>
