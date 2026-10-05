@@ -44,62 +44,60 @@ const overlayStyle = computed(() => ({
     <Head title="Masuk ke Sistem Staf - SiTrack" />
     <ToastNotification />
 
-    <div class="auth-shell">
-        <!-- Ambient System Background Glows -->
-        <div class="auth-ambient-mesh" aria-hidden="true">
-            <div class="ambient-blob ambient-blob-1"></div>
-            <div class="ambient-blob ambient-blob-2"></div>
-            <div class="ambient-blob ambient-blob-3"></div>
-        </div>
-
-        <div class="auth-main-container">
-            <!-- LEFT COLUMN: Brand Logo & 3D Illustration (Blended with System Navy BG) -->
-            <div class="auth-left-pane">
-                <!-- Top Brand Header (Navbar Public Format - White on Navy) -->
-                <div class="brand-top-row">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                            <!-- Logo SiTrack -->
-                            <img src="/images/sitrack_logo.svg" alt="SiTrack" class="app-logo-header shadow-sm rounded-3" />
-                            <span class="brand-pipe-divider text-white-50 opacity-40 fw-light">|</span>
-                            <!-- Logo Kemnaker -->
-                            <img src="/images/kemnaker_logo.png" alt="Kemnaker" class="kemnaker-logo-header kemnaker-logo-light" />
-                        </div>
-
-                        <!-- Text Kemnaker -->
-                        <div class="kemnaker-brand-text text-uppercase fw-bold">
-                            <div class="lh-sm">KEMENTERIAN</div>
-                            <div class="lh-sm">KETENAGAKERJAAN</div>
-                            <div class="lh-sm">REPUBLIK INDONESIA</div>
-                        </div>
+    <div class="auth-page-wrapper">
+        <!-- LEFT HALF: Blue Gradient Area with 3D Illustration -->
+        <div class="auth-left-section">
+            <!-- Top Logo Header -->
+            <div class="left-top-brand">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                        <!-- Logo SiTrack -->
+                        <img src="/images/sitrack_logo.svg" alt="SiTrack" class="app-logo-header shadow-sm rounded-3" />
+                        <span class="brand-pipe-divider text-white-50 opacity-40 fw-light">|</span>
+                        <!-- Logo Kemnaker -->
+                        <img src="/images/kemnaker_logo.png" alt="Kemnaker" class="kemnaker-logo-header kemnaker-logo-light" />
                     </div>
-                </div>
 
-                <!-- 3D Illustration Center (Transparent & Blended) -->
-                <div class="illustration-container">
-                    <img src="/images/login-illustration.png" alt="Ilustrasi Persuratan SiTrack" class="illustration-3d-img" />
-                </div>
-
-                <!-- Footer Note -->
-                <div class="left-pane-footer">
-                    <p class="footer-copy-text mb-0">
-                        &copy; 2026 SiTrack &bull; Kementerian Ketenagakerjaan Republik Indonesia
-                    </p>
+                    <!-- Text Kemnaker -->
+                    <div class="kemnaker-brand-text text-uppercase fw-bold">
+                        <div class="lh-sm">KEMENTERIAN</div>
+                        <div class="lh-sm">KETENAGAKERJAAN</div>
+                        <div class="lh-sm">REPUBLIK INDONESIA</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: White Form Login Card -->
-            <div class="auth-right-pane">
-                <div class="login-inner-card" :class="{ 'has-errors': form.errors.username || form.errors.password }">
-                    <div class="form-header-section mb-4">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
+            <!-- 3D Illustration Center -->
+            <div class="left-illustration-center">
+                <img src="/images/login-illustration.png" alt="Ilustrasi Persuratan SiTrack" class="illustration-3d-img" />
+            </div>
+
+            <!-- Bottom Copyright -->
+            <div class="left-bottom-footer">
+                <p class="copyright-text mb-0">
+                    Copyright &copy; 2026 SiTrack. All rights reserved.
+                </p>
+            </div>
+        </div>
+
+        <!-- RIGHT HALF: Curved White Area with Floating Login Card -->
+        <div class="auth-right-section">
+            <div class="right-content-container">
+                <!-- Floating Login Card -->
+                <div class="floating-login-card" :class="{ 'has-errors': form.errors.username || form.errors.password }">
+                    <!-- Card Tabs Header -->
+                    <div class="card-header-tabs mb-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
                             <span class="badge-staff-access">STAFF ACCESS ONLY</span>
                             <span class="portal-badge-text">Portal Staf</span>
                         </div>
-                        <h2 class="form-title text-dark fw-bold mb-1">Masuk ke Sistem</h2>
-                        <p class="text-muted small mb-0">Sistem Elektronik Administrasi Persuratan</p>
+                        <div class="tab-title-row">
+                            <h2 class="active-tab-title mb-0">Masuk ke Sistem</h2>
+                        </div>
+                        <p class="text-muted small mt-1 mb-0">Sistem Elektronik Administrasi Persuratan</p>
                     </div>
 
+                    <!-- Form -->
                     <form @submit.prevent="submit" novalidate>
                         <!-- Username Field -->
                         <div class="field-float mb-3" :class="{ 'is-filled': form.username, 'is-invalid': form.errors.username }">
@@ -141,11 +139,19 @@ const overlayStyle = computed(() => ({
                         </button>
                     </form>
 
+                    <!-- Bottom Link inside card -->
                     <div class="text-center mt-4 pt-3 border-top">
                         <Link href="/tracking" class="back-link">
                             <i class="bi bi-arrow-left me-1"></i> Kembali ke Portal Lacak Publik
                         </Link>
                     </div>
+                </div>
+
+                <!-- Footer under card -->
+                <div class="right-bottom-subfooter text-center mt-4">
+                    <p class="text-muted small mb-0">
+                        Kementerian Ketenagakerjaan Republik Indonesia
+                    </p>
                 </div>
             </div>
         </div>
@@ -171,122 +177,52 @@ const overlayStyle = computed(() => ({
 </template>
 
 <style scoped lang="scss">
-.auth-shell {
+.auth-page-wrapper {
     position: relative;
+    display: flex;
     width: 100vw;
     min-height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #03205A;
-    padding: 2.5rem 1.5rem;
+    background: linear-gradient(145deg, #4A7EF8 0%, #2962EA 50%, #1742B8 100%);
     margin: 0;
+    padding: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Ambient System Background Mesh (Matching SiTrack Theme) */
-.auth-ambient-mesh {
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.ambient-blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(90px);
-    mix-blend-mode: screen;
-    opacity: 0.45;
-}
-
-.ambient-blob-1 {
-    width: 500px;
-    height: 500px;
-    top: -10%;
-    left: -5%;
-    background: radial-gradient(circle, #4A9CF0 0%, transparent 70%);
-}
-
-.ambient-blob-2 {
-    width: 450px;
-    height: 450px;
-    bottom: -10%;
-    left: 25%;
-    background: radial-gradient(circle, #167992 0%, transparent 70%);
-}
-
-.ambient-blob-3 {
-    width: 520px;
-    height: 520px;
-    top: 20%;
-    right: -10%;
-    background: radial-gradient(circle, #2743AF 0%, transparent 70%);
-}
-
-.auth-main-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 1140px;
-    min-height: 580px;
-    background: transparent;
-    margin: 0 auto;
-    z-index: 2;
-    gap: 2.5rem;
-}
-
 /* ========================================================
-   LEFT PANE: Brand Logo & 3D Illustration on Navy BG
+   LEFT SECTION: Blue Gradient & 3D Illustration
    ======================================================== */
-.auth-left-pane {
-    flex: 1.15;
-    padding: 1rem 1rem 1rem 0;
+.auth-left-section {
+    flex: 1.05;
+    padding: 3.5rem 4rem 2.5rem 4.5rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 540px;
-    color: #ffffff;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
 }
 
-.brand-top-row {
-    display: flex;
-    align-items: center;
+.left-top-brand {
+    position: relative;
+    z-index: 2;
 }
 
 .app-logo-header {
-    width: 36px;
-    height: 36px;
-}
-
-@media (min-width: 576px) {
-    .app-logo-header {
-        width: 38px;
-        height: 38px;
-    }
+    width: 38px;
+    height: 38px;
 }
 
 .kemnaker-logo-header {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     vertical-align: middle;
 }
 
 .kemnaker-logo-light {
     filter: brightness(0) invert(1);
     opacity: 0.95;
-}
-
-@media (min-width: 576px) {
-    .kemnaker-logo-header {
-        width: 32px;
-        height: 32px;
-    }
 }
 
 .brand-pipe-divider {
@@ -311,19 +247,19 @@ const overlayStyle = computed(() => ({
     }
 }
 
-.illustration-container {
+.left-illustration-center {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem 0;
+    padding: 2rem 0;
     flex: 1;
 }
 
 .illustration-3d-img {
     max-width: 100%;
     height: auto;
-    max-height: 360px;
+    max-height: 390px;
     object-fit: contain;
     animation: floatIllustration 8s ease-in-out infinite;
 }
@@ -337,41 +273,56 @@ const overlayStyle = computed(() => ({
     }
 }
 
-.left-pane-footer {
+.left-bottom-footer {
     text-align: left;
 }
 
-.footer-copy-text {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.65);
+.copyright-text {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 500;
     letter-spacing: 0.02em;
 }
 
 /* ========================================================
-   RIGHT PANE: White Floating Card Login Form
+   RIGHT SECTION: Curved Soft White Area with Floating Card
    ======================================================== */
-.auth-right-pane {
-    flex: 0.95;
+.auth-right-section {
+    flex: 1.15;
+    background: #F8FAFD;
+    border-top-left-radius: 90px;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 3.5rem 3rem;
+    position: relative;
+    z-index: 2;
+    box-shadow: -18px 0 45px rgba(0, 0, 0, 0.08);
 }
 
-.login-inner-card {
+.right-content-container {
     width: 100%;
     max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.floating-login-card {
+    width: 100%;
     background: #ffffff;
-    border-radius: 28px;
-    padding: 2.8rem 2.8rem;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    border-radius: 32px;
+    padding: 3rem 2.8rem 2.5rem;
+    box-shadow: 0 20px 45px rgba(37, 99, 235, 0.08), 0 6px 18px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(226, 232, 240, 0.9);
 }
 
 .badge-staff-access {
     font-size: 0.65rem;
     font-weight: 800;
     letter-spacing: 0.12em;
-    color: #4F46E5;
-    background: #EEF2FF;
+    color: #2563EB;
+    background: #EFF6FF;
     padding: 4px 12px;
     border-radius: 50px;
     display: inline-block;
@@ -383,8 +334,10 @@ const overlayStyle = computed(() => ({
     color: #94A3B8;
 }
 
-.form-title {
+.active-tab-title {
     font-size: 1.65rem;
+    font-weight: 800;
+    color: #0F172A;
     letter-spacing: -0.02em;
 }
 
@@ -405,9 +358,9 @@ const overlayStyle = computed(() => ({
 
         &:focus {
             outline: none;
-            border-color: #3A62E8;
+            border-color: #2563EB;
             background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(58, 98, 232, 0.12);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
         }
     }
 
@@ -435,7 +388,7 @@ const overlayStyle = computed(() => ({
         top: 0;
         font-size: 0.72rem;
         font-weight: 700;
-        color: #3A62E8;
+        color: #2563EB;
         background: #ffffff;
         padding: 0 6px;
     }
@@ -496,7 +449,7 @@ const overlayStyle = computed(() => ({
     }
 
     .switch-input:checked + .switch-button {
-        background-color: #3A62E8;
+        background-color: #2563EB;
     }
 
     .switch-input:checked + .switch-button .switch-circle {
@@ -506,21 +459,22 @@ const overlayStyle = computed(() => ({
 
 /* Button Glow Submit */
 .btn-glow-submit {
-    height: 54px;
+    height: 52px;
     border: none;
-    border-radius: 14px;
+    border-radius: 50px;
     color: #ffffff;
     font-weight: 700;
-    font-size: 0.95rem;
-    background: linear-gradient(135deg, #4A72F5 0%, #3A62E8 100%);
-    box-shadow: 0 4px 14px rgba(58, 98, 232, 0.35);
-    transition: all 0.2s ease;
+    font-size: 0.98rem;
+    letter-spacing: 0.2px;
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    box-shadow: 0 8px 22px rgba(37, 99, 235, 0.35);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
 
     &:hover:not(:disabled) {
         transform: translateY(-2px);
-        background: linear-gradient(135deg, #3A62E8 0%, #2544C0 100%);
-        box-shadow: 0 8px 20px rgba(58, 98, 232, 0.45);
+        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+        box-shadow: 0 12px 26px rgba(37, 99, 235, 0.45);
     }
 
     &:active {
@@ -558,7 +512,15 @@ const overlayStyle = computed(() => ({
     transition: color 0.2s ease;
 
     &:hover {
-        color: #3A62E8;
+        color: #2563EB;
+    }
+}
+
+.right-bottom-subfooter {
+    p {
+        color: #94A3B8;
+        font-size: 0.78rem;
+        font-weight: 500;
     }
 }
 
@@ -633,18 +595,12 @@ const overlayStyle = computed(() => ({
    RESPONSIVE DESIGN (Mobile & Tablet)
    ======================================================== */
 @media (max-width: 991.98px) {
-    .auth-shell {
-        padding: 1.5rem 1rem;
-    }
-
-    .auth-main-container {
+    .auth-page-wrapper {
         flex-direction: column;
-        max-width: 480px;
-        min-height: auto;
     }
 
-    .auth-left-pane {
-        padding: 1.5rem 0.5rem;
+    .auth-left-section {
+        padding: 2.5rem 1.75rem 2rem;
         min-height: auto;
         flex: none;
     }
@@ -653,10 +609,15 @@ const overlayStyle = computed(() => ({
         max-height: 220px;
     }
 
-    .auth-right-pane {
-        border-left: none;
-        border-top: 1px solid #f1f5f9;
-        padding: 2rem 0.5rem 1rem;
+    .auth-right-section {
+        border-top-left-radius: 40px;
+        border-top-right-radius: 40px;
+        padding: 2.5rem 1.5rem;
+    }
+
+    .floating-login-card {
+        padding: 2.2rem 1.75rem;
+        border-radius: 24px;
     }
 }
 </style>
