@@ -254,6 +254,12 @@ const orderedTimeline = computed<TimelineItem[]>(() => {
     const isDitolak = currentStatusStr.includes('tolak') || currentStatusStr.includes('kembali');
     const hasException = isRevisi || isDitolak;
 
+    // Check if document has reached final completed state
+    const isFinished = currentStatusStr === 'dokumen sudah diambil' || 
+                       currentStatusStr === 'selesai' || 
+                       currentStatusStr === 'tuntas' ||
+                       (activeMaxIdx === defs.length - 1 && !hasException);
+
     const items: TimelineItem[] = [];
 
     // Helper to resolve datetime for skipped intermediate steps:
@@ -287,7 +293,7 @@ const orderedTimeline = computed<TimelineItem[]>(() => {
     defs.forEach((stepDef, idx) => {
         const matchedLog = matchedLogMap.get(idx);
         const isCompleted = idx <= activeMaxIdx && activeMaxIdx !== -1;
-        const isCurrent = idx === activeMaxIdx && !hasException;
+        const isCurrent = idx === activeMaxIdx && !hasException && !isFinished;
         const isPending = !isCompleted;
 
         let title = matchedLog ? matchedLog.status : stepDef.title;
