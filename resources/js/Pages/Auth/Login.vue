@@ -141,9 +141,12 @@ const overlayStyle = computed(() => ({
 
                     <!-- Bottom Link inside card -->
                     <div class="text-center mt-4 pt-3 border-top">
-                        <Link href="/tracking" class="back-link">
-                            <i class="bi bi-arrow-left me-1"></i> Bukan Staff? Kembali Ke Portal Publik
-                        </Link>
+                        <p class="text-muted small mb-0">
+                            Ingin melacak surat?
+                            <Link href="/tracking" class="back-link fw-semibold ms-1">
+                                Buka Portal Publik
+                            </Link>
+                        </p>
                     </div>
                 </div>
 
