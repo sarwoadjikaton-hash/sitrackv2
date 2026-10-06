@@ -56,8 +56,12 @@ class SignatureLetterController extends Controller
         $bulan = (int) $request->input('bulan', now()->month);
         $year = (int) $request->input('year', date('Y'));
 
-        $query = Letter::with(['category', 'recipientUnit', 'letterNumberType'])
-            ->where('process_lane', 'signature');
+        $query = Letter::with([
+            'category',
+            'recipientUnit',
+            'letterNumberType',
+            'statusLogs' => fn($q) => $q->orderBy('changed_at', 'desc')->orderBy('id', 'desc'),
+        ])->where('process_lane', 'signature');
 
         if ($selectedWorkbookId > 0) {
             $query->where('letter_number_type_id', $selectedWorkbookId);

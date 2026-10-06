@@ -41,7 +41,11 @@ class ScanQrController extends Controller
         if ($rawTracking !== '') {
             $cleanCode = self::extractCode($rawTracking);
 
-            $letter = Letter::with(['category', 'recipientUnit'])
+            $letter = Letter::with([
+                'category',
+                'recipientUnit',
+                'statusLogs' => fn($q) => $q->orderBy('changed_at', 'desc')->orderBy('id', 'desc'),
+            ])
                 ->where(function ($q) use ($cleanCode, $rawTracking) {
                     $q->where('tracking_code', $cleanCode)
                         ->orWhere('tracking_code', $rawTracking)

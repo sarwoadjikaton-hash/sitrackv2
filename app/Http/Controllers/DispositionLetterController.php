@@ -44,7 +44,11 @@ class DispositionLetterController extends Controller
         $status = trim((string) $request->input('status', ''));
         $source = trim((string) $request->input('source', ''));
 
-        $query = Letter::with(['category', 'recipientUnit'])
+        $query = Letter::with([
+            'category',
+            'recipientUnit',
+            'statusLogs' => fn($q) => $q->orderBy('changed_at', 'desc')->orderBy('id', 'desc'),
+        ])
             ->withCount('dispositions')
             ->where('process_lane', 'disposition');
 

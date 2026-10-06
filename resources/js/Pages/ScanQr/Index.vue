@@ -4,6 +4,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import StatusHistoryTimeline from '@/Components/StatusHistoryTimeline.vue';
 import { Html5Qrcode } from "html5-qrcode";
 import type { Letter } from '@/types';
 
@@ -16,6 +17,7 @@ const props = defineProps<{
 }>();
 
 const mode = ref<'camera' | 'file' | 'manual'>(props.tracking ? 'manual' : 'camera');
+const resultCardTab = ref<'form' | 'history'>('form');
 const scanInput = ref(props.tracking || '');
 const notFound = ref(!!props.tracking && !props.letter);
 
@@ -564,8 +566,32 @@ watch(mode, (newMode) => {
                     </div>
                 </div>
 
-                <!-- Update Status Form -->
-                <form @submit.prevent="submitUpdate" class="p-4 space-y-4">
+                <!-- Result Card Navigation Tabs -->
+                <div class="px-4 pt-3 pb-0 bg-white border-bottom">
+                    <div class="d-flex gap-1 p-1 bg-slate-100 rounded-3 border border-slate-200">
+                        <button
+                            type="button"
+                            @click="resultCardTab = 'form'"
+                            class="btn btn-sm d-flex align-items-center justify-content-center gap-1.5 flex-grow-1 border-0 py-1.5 rounded-2 font-medium"
+                            :class="resultCardTab === 'form' ? 'bg-white text-dark shadow-xs fw-bold' : 'text-muted bg-transparent'"
+                        >
+                            <i class="bi bi-pencil-square text-primary"></i>
+                            <span>Form Pembaruan Status</span>
+                        </button>
+                        <button
+                            type="button"
+                            @click="resultCardTab = 'history'"
+                            class="btn btn-sm d-flex align-items-center justify-content-center gap-1.5 flex-grow-1 border-0 py-1.5 rounded-2 font-medium"
+                            :class="resultCardTab === 'history' ? 'bg-white text-dark shadow-xs fw-bold' : 'text-muted bg-transparent'"
+                        >
+                            <i class="bi bi-clock-history text-primary"></i>
+                            <span>Riwayat Perjalanan ({{ letter.status_logs?.length || 0 }})</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 1: Update Status Form -->
+                <form v-if="resultCardTab === 'form'" @submit.prevent="submitUpdate" class="p-4 space-y-4">
                     <div>
                         <label class="form-label fw-semibold text-dark small mb-1.5">Perbarui ke Status</label>
                         <SearchableSelect
@@ -608,6 +634,16 @@ watch(mode, (newMode) => {
                         <span>Simpan Pembaruan Status</span>
                     </button>
                 </form>
+
+                <!-- TAB 2: Riwayat Perjalanan Berkas (Timeline) -->
+                <div v-else-if="resultCardTab === 'history'" class="p-4">
+                    <StatusHistoryTimeline
+                        :logs="letter.status_logs"
+                        :current-status="letter.status"
+                        :current-position="letter.current_position"
+                        :created-date="letter.created_at"
+                    />
+                </div>
             </div>
         </div>
     </AppLayout>

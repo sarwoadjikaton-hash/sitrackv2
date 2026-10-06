@@ -6,6 +6,7 @@ import StatusBadge from '@/Components/StatusBadge.vue';
 import Pagination from '@/Components/Pagination.vue';
 import Modal from '@/Components/Modal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import StatusHistoryTimeline from '@/Components/StatusHistoryTimeline.vue';
 import { Letter, LetterNumberType, PaginatedData } from '@/types';
 
 const props = defineProps<{
@@ -66,6 +67,7 @@ watch([currentWorkbookId, filterSort, filterPeriode, statusFilter, actionFilter]
 
 // Quick Status Update Modal
 const showStatusModal = ref(false);
+const statusModalTab = ref<'form' | 'history'>('form');
 const activeLetter = ref<Letter | null>(null);
 
 const statusForm = useForm({
@@ -128,17 +130,24 @@ const handleFileUpload = (e: Event) => {
     }
 };
 
-const openStatusModal = (letter: Letter) => {
-    // Guard tambahan: data dari SRIKANDI tidak boleh diubah progressnya dari sini
-    if (letter.letter_source === 'SRIKANDI') return;
+const openStatusModal = (letter: Letter, tab: 'form' | 'history' = 'form') => {
+    // Guard tambahan: data dari SRIKANDI hanya bisa buka history
+    if (letter.letter_source === 'SRIKANDI' && tab === 'form') {
+        tab = 'history';
+    }
 
     activeLetter.value = letter;
+    statusModalTab.value = tab;
     statusForm.status = letter.status;
     statusForm.current_position = letter.current_position;
     statusForm.requested_actions = letter.requested_actions ? letter.requested_actions.split(', ') : [];
     statusForm.note = '';
     statusForm.attachment = null;
     showStatusModal.value = true;
+};
+
+const openHistoryModal = (letter: Letter) => {
+    openStatusModal(letter, 'history');
 };
 
 const closeStatusModal = () => {
@@ -367,12 +376,16 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                                 <div class="btn-group btn-group-sm">
                                     <button v-if="letter.letter_source !== 'SRIKANDI'" type="button"
                                         class="btn btn-outline-primary" title="Update Status Cepat"
-                                        @click="openStatusModal(letter)">
+                                        @click="openStatusModal(letter, 'form')">
                                         <i class="bi bi-arrow-repeat"></i>
                                     </button>
                                     <button v-else type="button" class="btn btn-outline-secondary"
                                         title="Progres dikelola di SRIKANDI, tidak dapat diubah di sini" disabled>
                                         <i class="bi bi-lock-fill"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-info" title="Lihat Riwayat Perjalanan"
+                                        @click="openHistoryModal(letter)">
+                                        <i class="bi bi-clock-history"></i>
                                     </button>
                                     <Link :href="`/cetak/pendamping/${letter.id}`" class="btn btn-outline-secondary"
                                         title="Cetak Lembar Pendamping" target="_blank">
@@ -446,9 +459,12 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                     <div class="d-flex align-items-center justify-content-end gap-1.5 flex-wrap">
                         <button v-if="letter.letter_source !== 'SRIKANDI'" type="button"
                             class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 px-2.5 py-1.5 flex-grow-1 justify-content-center"
-                            @click="openStatusModal(letter)">
+                            @click="openStatusModal(letter, 'form')">
                             <i class="bi bi-arrow-repeat"></i>
                             <span class="small fw-semibold">Update Status</span>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-info p-1.5 px-2.5" title="Riwayat Perjalanan" @click="openHistoryModal(letter)">
+                            <i class="bi bi-clock-history"></i>
                         </button>
                         <Link :href="`/cetak/pendamping/${letter.id}`" class="btn btn-sm btn-outline-secondary p-1.5 px-2.5" title="Cetak Lembar Pendamping" target="_blank">
                             <i class="bi bi-printer"></i>
@@ -476,84 +492,163 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
             </div>
         </div>
 
-        <!-- Quick Status Update Modal -->
-        <Modal :show="showStatusModal" @close="closeStatusModal">
+        <!-- Quick Status Update & Riwayat Modal -->
+        <Modal :show="showStatusModal" max-width="lg" @close="closeStatusModal">
             <template #title>
-                Update Status: {{ activeLetter?.agenda_number }}
+                Update Status: {{ activeLetter?.agenda_number || activeLetter?.tracking_code }}
             </template>
 
-            <form @submit.prevent="submitStatusUpdate">
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Status Dokumen</label>
-                    <SearchableSelect
-                        v-model="statusForm.status"
-                        :options="allowedStatuses.map(s => ({ value: s, label: s }))"
-                        placeholder="Pilih Status..."
-                    />
-                </div>
+            <!-- Mode Tabs Switcher inside Modal -->
+            <div class="d-flex gap-1 p-1 bg-slate-100 rounded-3 border border-slate-200 mb-3.5">
+                <button
+                    type="button"
+                    @click="statusModalTab = 'form'"
+                    class="btn btn-sm d-flex align-items-center justify-content-center gap-1.5 flex-grow-1 border-0 py-1.5 rounded-2 font-medium"
+                    :class="statusModalTab === 'form' ? 'bg-white text-dark shadow-xs fw-bold' : 'text-muted bg-transparent'"
+                >
+                    <i class="bi bi-pencil-square text-primary"></i>
+                    <span>Form Pembaruan Status</span>
+                </button>
+                <button
+                    type="button"
+                    @click="statusModalTab = 'history'"
+                    class="btn btn-sm d-flex align-items-center justify-content-center gap-1.5 flex-grow-1 border-0 py-1.5 rounded-2 font-medium"
+                    :class="statusModalTab === 'history' ? 'bg-white text-dark shadow-xs fw-bold' : 'text-muted bg-transparent'"
+                >
+                    <i class="bi bi-clock-history text-primary"></i>
+                    <span>Riwayat Perjalanan ({{ activeLetter?.status_logs?.length || 0 }})</span>
+                </button>
+            </div>
 
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Posisi Berkas Terkini</label>
-                    <input v-model="statusForm.current_position" type="text" class="form-control"
-                        placeholder="Contoh: Sekretaris Jenderal / Arsiparis / TU" required />
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label small fw-bold d-flex align-items-center justify-content-between">
-                        <span>Tindakan / Mohon</span>
-                        <span class="text-muted fw-normal" style="font-size: 0.72rem;">(Opsional - multiple choice)</span>
-                    </label>
-                    <div class="row g-2">
-                        <div v-for="opt in primaryActionOptions" :key="opt" class="col-6">
-                            <div class="form-check">
-                                <input :id="`act-${opt}`" v-model="statusForm.requested_actions" type="checkbox"
-                                    class="form-check-input" :value="opt" />
-                                <label :for="`act-${opt}`" class="form-check-label small" style="cursor: pointer;">
-                                    {{ opt }}
-                                </label>
-                            </div>
-                        </div>
+            <!-- TAB 1: FORM PEMBARUAN STATUS -->
+            <div v-if="statusModalTab === 'form'">
+                <!-- Summary Banner -->
+                <div class="p-2.5 mb-3 bg-light rounded-3 border d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="small">
+                        <span class="text-muted">Posisi berkas saat ini: </span>
+                        <strong class="text-dark"><i class="bi bi-geo-alt-fill text-primary me-0.5"></i>{{ activeLetter?.current_position || '-' }}</strong>
                     </div>
-
-                    <!-- Sub-options Penandatangan (muncul saat Mohon Tanda Tangan dipilih) -->
-                    <div v-if="statusForm.requested_actions.includes('Mohon Tanda Tangan')" class="mt-2.5 p-2 bg-light rounded-2 border">
-                        <div class="small fw-semibold text-dark mb-1 d-flex align-items-center gap-1" style="font-size: 0.75rem;">
-                            <i class="bi bi-person-badge text-primary"></i> Pejabat Penandatangan:
-                            <span class="text-muted fw-normal" style="font-size: 0.7rem;">(Opsional)</span>
-                        </div>
-                        <div class="d-flex gap-3 flex-wrap">
-                            <div v-for="sOpt in signerOptions" :key="sOpt" class="form-check">
-                                <input :id="`act-${sOpt}`" v-model="statusForm.requested_actions" type="checkbox"
-                                    class="form-check-input" :value="sOpt" />
-                                <label :for="`act-${sOpt}`" class="form-check-label small" style="cursor: pointer;">
-                                    {{ sOpt }}
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Unggah / Perbarui Lampiran Naskah</label>
-                    <input type="file" class="form-control"
-                        accept=".pdf,.docx,.doc,.jpg,.jpeg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
-                        @change="handleFileUpload" />
-                    <small class="text-muted">Maksimal 20 MB (Opsional, untuk menambahkan atau memperbarui file lampiran naskah)</small>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Catatan Perubahan</label>
-                    <textarea v-model="statusForm.note" class="form-control" rows="2"
-                        placeholder="Catatan perpindahan atau instruksi tambahan..."></textarea>
-                </div>
-
-                <div class="d-flex justify-content-end gap-2 pt-2 border-top">
-                    <button type="button" class="btn btn-secondary" @click="closeStatusModal">Batal</button>
-                    <button type="submit" class="btn btn-primary-blue" :disabled="statusForm.processing">
-                        Simpan Perubahan
+                    <button type="button" @click="statusModalTab = 'history'" class="btn btn-link p-0 text-decoration-none small fw-semibold text-primary d-flex align-items-center gap-1">
+                        <i class="bi bi-clock-history"></i> Lihat Riwayat Perjalanan
                     </button>
                 </div>
-            </form>
+
+                <form @submit.prevent="submitStatusUpdate">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Status Dokumen</label>
+                        <SearchableSelect
+                            v-model="statusForm.status"
+                            :options="allowedStatuses.map(s => ({ value: s, label: s }))"
+                            placeholder="Pilih Status..."
+                        />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Posisi Berkas Terkini</label>
+                        <input v-model="statusForm.current_position" type="text" class="form-control"
+                            placeholder="Contoh: Sekretaris Jenderal / Arsiparis / TU" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold d-flex align-items-center justify-content-between">
+                            <span>Tindakan / Mohon</span>
+                            <span class="text-muted fw-normal" style="font-size: 0.72rem;">(Opsional - multiple choice)</span>
+                        </label>
+                        <div class="row g-2">
+                            <div v-for="opt in primaryActionOptions" :key="opt" class="col-6">
+                                <div class="form-check">
+                                    <input :id="`act-${opt}`" v-model="statusForm.requested_actions" type="checkbox"
+                                        class="form-check-input" :value="opt" />
+                                    <label :for="`act-${opt}`" class="form-check-label small" style="cursor: pointer;">
+                                        {{ opt }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sub-options Penandatangan (muncul saat Mohon Tanda Tangan dipilih) -->
+                        <div v-if="statusForm.requested_actions.includes('Mohon Tanda Tangan')" class="mt-2.5 p-2 bg-light rounded-2 border">
+                            <div class="small fw-semibold text-dark mb-1 d-flex align-items-center gap-1" style="font-size: 0.75rem;">
+                                <i class="bi bi-person-badge text-primary"></i> Pejabat Penandatangan:
+                                <span class="text-muted fw-normal" style="font-size: 0.7rem;">(Opsional)</span>
+                            </div>
+                            <div class="d-flex gap-3 flex-wrap">
+                                <div v-for="sOpt in signerOptions" :key="sOpt" class="form-check">
+                                    <input :id="`act-${sOpt}`" v-model="statusForm.requested_actions" type="checkbox"
+                                        class="form-check-input" :value="sOpt" />
+                                    <label :for="`act-${sOpt}`" class="form-check-label small" style="cursor: pointer;">
+                                        {{ sOpt }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Unggah / Perbarui Lampiran Naskah</label>
+                        <input type="file" class="form-control"
+                            accept=".pdf,.docx,.doc,.jpg,.jpeg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+                            @change="handleFileUpload" />
+                        <small class="text-muted">Maksimal 20 MB (Opsional, untuk menambahkan atau memperbarui file lampiran naskah)</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Catatan Perubahan</label>
+                        <textarea v-model="statusForm.note" class="form-control" rows="2"
+                            placeholder="Catatan perpindahan atau instruksi tambahan..."></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                        <button type="button" class="btn btn-secondary" @click="closeStatusModal">Batal</button>
+                        <button type="submit" class="btn btn-primary-blue" :disabled="statusForm.processing">
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- TAB 2: RIWAYAT PERJALANAN (TIMELINE) -->
+            <div v-else-if="statusModalTab === 'history'">
+                <!-- Letter Info Header -->
+                <div class="p-3 mb-3 bg-light rounded-3 border">
+                    <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
+                        <div>
+                            <span class="font-mono text-xs text-muted fw-bold">{{ activeLetter?.tracking_code }}</span>
+                            <h6 class="fw-bold text-dark mb-0 mt-0.5">{{ activeLetter?.subject }}</h6>
+                        </div>
+                        <StatusBadge v-if="activeLetter" :status="activeLetter.status" />
+                    </div>
+                    <div class="d-flex align-items-center gap-3 text-muted small mt-2 flex-wrap" style="font-size: 0.76rem;">
+                        <span>No Surat: <strong class="text-dark">{{ activeLetter?.letter_number || '(Belum ada nomor)' }}</strong></span>
+                        <span>&bull;</span>
+                        <span>Pengirim: <strong class="text-dark">{{ activeLetter?.sender_unit || activeLetter?.sender_name }}</strong></span>
+                        <span>&bull;</span>
+                        <span>Posisi Terkini: <strong class="text-dark">{{ activeLetter?.current_position }}</strong></span>
+                    </div>
+                </div>
+
+                <!-- Timeline Component -->
+                <StatusHistoryTimeline
+                    :logs="activeLetter?.status_logs"
+                    :current-status="activeLetter?.status"
+                    :current-position="activeLetter?.current_position"
+                    :created-date="activeLetter?.created_at"
+                />
+
+                <div class="d-flex justify-content-between align-items-center pt-3 mt-3 border-top">
+                    <button
+                        v-if="activeLetter?.letter_source !== 'SRIKANDI'"
+                        type="button"
+                        class="btn btn-sm btn-primary-blue d-flex align-items-center gap-1.5"
+                        @click="statusModalTab = 'form'"
+                    >
+                        <i class="bi bi-pencil-square"></i>
+                        <span>Buka Form Pembaruan</span>
+                    </button>
+                    <div v-else></div>
+                    <button type="button" class="btn btn-sm btn-secondary" @click="closeStatusModal">Tutup</button>
+                </div>
+            </div>
         </Modal>
         </div>
     </AppLayout>
