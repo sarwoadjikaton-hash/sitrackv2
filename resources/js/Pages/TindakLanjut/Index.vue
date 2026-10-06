@@ -495,7 +495,10 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
         <!-- Quick Status Update & Riwayat Modal -->
         <Modal :show="showStatusModal" max-width="lg" @close="closeStatusModal">
             <template #title>
-                Update Status: {{ activeLetter?.agenda_number || activeLetter?.tracking_code }}
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-text text-primary"></i>
+                    <span>Detail & Status: <span class="font-mono text-primary">{{ activeLetter?.agenda_number || activeLetter?.tracking_code }}</span></span>
+                </div>
             </template>
 
             <!-- Mode Tabs Switcher inside Modal -->
@@ -523,14 +526,16 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
             <!-- TAB 1: FORM PEMBARUAN STATUS -->
             <div v-if="statusModalTab === 'form'">
                 <!-- Summary Banner -->
-                <div class="p-2.5 mb-3 bg-light rounded-3 border d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <div class="small">
-                        <span class="text-muted">Posisi berkas saat ini: </span>
-                        <strong class="text-dark"><i class="bi bi-geo-alt-fill text-primary me-0.5"></i>{{ activeLetter?.current_position || '-' }}</strong>
+                <div class="p-3 mb-3 bg-slate-50 rounded-3 border border-slate-200">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div class="small">
+                            <span class="text-slate-500">Posisi berkas saat ini: </span>
+                            <strong class="text-dark ms-1"><i class="bi bi-geo-alt-fill text-primary me-0.5"></i>{{ activeLetter?.current_position || '-' }}</strong>
+                        </div>
+                        <button type="button" @click="statusModalTab = 'history'" class="btn btn-sm btn-link p-0 text-decoration-none small fw-semibold text-primary d-flex align-items-center gap-1">
+                            <i class="bi bi-clock-history"></i> Lihat Riwayat Perjalanan
+                        </button>
                     </div>
-                    <button type="button" @click="statusModalTab = 'history'" class="btn btn-link p-0 text-decoration-none small fw-semibold text-primary d-flex align-items-center gap-1">
-                        <i class="bi bi-clock-history"></i> Lihat Riwayat Perjalanan
-                    </button>
                 </div>
 
                 <form @submit.prevent="submitStatusUpdate">
@@ -609,21 +614,43 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
 
             <!-- TAB 2: RIWAYAT PERJALANAN (TIMELINE) -->
             <div v-else-if="statusModalTab === 'history'">
-                <!-- Letter Info Header -->
-                <div class="p-3 mb-3 bg-light rounded-3 border">
-                    <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
-                        <div>
-                            <span class="font-mono text-xs text-muted fw-bold">{{ activeLetter?.tracking_code }}</span>
-                            <h6 class="fw-bold text-dark mb-0 mt-0.5">{{ activeLetter?.subject }}</h6>
+                <!-- Letter Info Header Card -->
+                <div class="p-3.5 mb-3.5 rounded-3 border border-slate-200" style="background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);">
+                    <!-- Top Row: Tracking Code & Status -->
+                    <div class="d-flex align-items-start justify-content-between gap-2 mb-2 flex-wrap">
+                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                            <span class="badge bg-white text-slate-700 border border-slate-300 font-mono px-2 py-1 small fw-bold shadow-2xs">
+                                {{ activeLetter?.tracking_code }}
+                            </span>
+                            <span v-if="activeLetter?.agenda_number" class="badge bg-slate-200 text-slate-700 px-2 py-1 small fw-semibold">
+                                Agenda: {{ activeLetter?.agenda_number }}
+                            </span>
                         </div>
                         <StatusBadge v-if="activeLetter" :status="activeLetter.status" />
                     </div>
-                    <div class="d-flex align-items-center gap-3 text-muted small mt-2 flex-wrap" style="font-size: 0.76rem;">
-                        <span>No Surat: <strong class="text-dark">{{ activeLetter?.letter_number || '(Belum ada nomor)' }}</strong></span>
-                        <span>&bull;</span>
-                        <span>Pengirim: <strong class="text-dark">{{ activeLetter?.sender_unit || activeLetter?.sender_name }}</strong></span>
-                        <span>&bull;</span>
-                        <span>Posisi Terkini: <strong class="text-dark">{{ activeLetter?.current_position }}</strong></span>
+
+                    <!-- Subject -->
+                    <h6 class="fw-bold text-dark mb-2.5 fs-6" style="line-height: 1.4;">
+                        {{ activeLetter?.subject }}
+                    </h6>
+
+                    <!-- Key Metadata Grid -->
+                    <div class="row g-2 text-muted small pt-2 border-top border-slate-200" style="font-size: 0.78rem;">
+                        <div class="col-sm-4 d-flex align-items-center gap-1.5">
+                            <i class="bi bi-envelope-paper text-slate-400"></i>
+                            <span class="text-slate-500">No. Surat:</span>
+                            <strong class="text-dark text-truncate" :title="activeLetter?.letter_number || '-'">{{ activeLetter?.letter_number || '(Belum ada)' }}</strong>
+                        </div>
+                        <div class="col-sm-4 d-flex align-items-center gap-1.5">
+                            <i class="bi bi-building text-slate-400"></i>
+                            <span class="text-slate-500">Pengirim:</span>
+                            <strong class="text-dark text-truncate" :title="activeLetter?.sender_unit || activeLetter?.sender_name || '-'">{{ activeLetter?.sender_unit || activeLetter?.sender_name || '-' }}</strong>
+                        </div>
+                        <div class="col-sm-4 d-flex align-items-center gap-1.5">
+                            <i class="bi bi-geo-alt-fill text-primary opacity-80"></i>
+                            <span class="text-slate-500">Posisi:</span>
+                            <strong class="text-dark text-truncate" :title="activeLetter?.current_position || '-'">{{ activeLetter?.current_position || '-' }}</strong>
+                        </div>
                     </div>
                 </div>
 
