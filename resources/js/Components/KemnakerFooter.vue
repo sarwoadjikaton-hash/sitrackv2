@@ -58,6 +58,10 @@
                             <i class="bi bi-headset"></i>
                             <span>Call Center: <strong>1500630</strong></span>
                         </a>
+                        <a href="/panduan" target="_blank" class="contact-chip">
+                            <i class="bi bi-file-earmark-pdf-fill text-info"></i>
+                            <span>Panduan Alur (A4)</span>
+                        </a>
                     </div>
                 </div>
             </div>

@@ -33,6 +33,7 @@ Route::get('/ajukan-surat', [PublicTrackingController::class, 'create'])->name('
 Route::post('/ajukan-surat', [PublicTrackingController::class, 'store'])->name('tracking.store');
 Route::get('/surat-berhasil/{code}', [PublicTrackingController::class, 'success'])->name('tracking.success');
 Route::get('/data-surat/slots', [DataSuratController::class, 'getSlots'])->name('data-surat.slots.public');
+Route::redirect('/panduan', '/poster-panduan.html')->name('panduan');
 
 // Akses Berkas Lampiran Publik / Tracking
 Route::get('/lampiran/view/{path}', [PublicTrackingController::class, 'viewAttachment'])

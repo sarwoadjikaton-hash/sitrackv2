@@ -178,6 +178,17 @@ class LetterNumberTypeSeeder extends Seeder
                 'default_signer_code' => '1',
                 'display_order' => 15,
             ],
+            [
+                'type_code' => 'LAINNYA',
+                'type_name' => 'Lainnya',
+                'workbook_name' => 'LAINNYA',
+                'uses_security_access' => false,
+                'extra_field' => 'scan_result',
+                'number_pattern' => '{sequence}/{classification}/{month_roman}/{year}',
+                'sequence_padding' => 4,
+                'default_signer_code' => '1',
+                'display_order' => 99,
+            ],
         ];
 
         foreach ($types as $type) {
