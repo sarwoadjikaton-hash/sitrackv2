@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: sitrack
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_PASSWORD: Indmrtprg1
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d sitrack" ]
       interval: 5s
@@ -13,6 +13,8 @@ services:
       retries: 10
     volumes:
       - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
     networks:
       - sitrack_net
     restart: unless-stopped
