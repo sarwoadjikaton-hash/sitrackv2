@@ -29,7 +29,7 @@ const uploadExcel = (e: any) => {
                 </button>
                 <input type="file" @change="uploadExcel" accept=".xlsx, .xls" />
             </div>
-            <small class="text-muted">Format: .xlsx atau .xls (Maks 2MB)</small>
+            <small class="text-muted">Format: .xlsx atau .xls (Maksimal 20 MB)</small>
         </div>
 
         <!-- Progress Bar jika sedang upload -->

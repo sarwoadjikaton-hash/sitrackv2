@@ -594,7 +594,7 @@ const statsSelesai = computed(() => props.letters.data.filter(l => l.status === 
                         <input type="file" class="form-control"
                             accept=".pdf,.docx,.doc,.jpg,.jpeg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
                             @change="handleFileUpload" />
-                        <small class="text-muted">Maksimal 20 MB (Opsional, untuk menambahkan atau memperbarui file lampiran naskah)</small>
+                        <small class="text-muted">Maksimal 20 MB (Format: PDF, DOCX, DOC, JPG, PNG &bull; Opsional)</small>
                     </div>
 
                     <div class="mb-3">

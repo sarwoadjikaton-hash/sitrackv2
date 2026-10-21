@@ -592,9 +592,11 @@ const deleteLetter = () => {
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label small fw-bold">Lampiran</label>
-                    <input type="file" class="form-control" @change="handleInstructionFile" />
-                    <small class="text-muted">PDF/DOCX/gambar, maksimal 20 MB</small>
+                    <label class="form-label small fw-bold">Lampiran Arahan</label>
+                    <input type="file" class="form-control"
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+                        @change="handleInstructionFile" />
+                    <small class="text-muted">Maksimal 20 MB (Format: PDF, DOCX, DOC, JPG, PNG)</small>
                 </div>
 
                 <div class="mb-3">
@@ -636,9 +638,11 @@ const deleteLetter = () => {
 
 
                 <div class="mb-3">
-                    <label class="form-label small fw-bold">Lampiran</label>
-                    <input type="file" class="form-control" @change="handleItemFile" />
-                    <small class="text-muted">PDF/DOCX/gambar, maksimal 20 MB</small>
+                    <label class="form-label small fw-bold">Lampiran Progres / Bukti Tindak Lanjut</label>
+                    <input type="file" class="form-control"
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+                        @change="handleItemFile" />
+                    <small class="text-muted">Maksimal 20 MB (Format: PDF, DOCX, DOC, JPG, PNG)</small>
                     <div v-if="activeItem?.attachment_path" class="mt-1">
                         <a :href="`/lampiran/view/${activeItem.attachment_path}`" target="_blank" class="small text-danger">
                             <i class="bi bi-file-earmark-pdf me-1"></i>Lampiran saat ini

@@ -23,7 +23,7 @@ class LetterImportController extends Controller
     {
         $data = $request->validate([
             'type_id' => ['nullable', 'integer', 'exists:letter_number_types,id'],
-            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:20480'],
         ]);
 
         $import = new DataSuratImport();
@@ -60,7 +60,7 @@ class LetterImportController extends Controller
     public function importLetters(Request $request): RedirectResponse
     {
         $request->validate([
-            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:20480'],
         ]);
 
         $import = new LettersImport();

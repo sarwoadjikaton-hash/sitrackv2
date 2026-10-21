@@ -454,7 +454,7 @@ watch(mode, (newMode) => {
                             <i class="bi bi-folder2-open me-1.5"></i> Pilih File Fisik / Foto
                         </button>
                         <div class="text-muted mt-2.5" style="font-size: 0.75rem;">
-                            Mendukung file gambar: JPG, JPEG, PNG, WEBP
+                            Mendukung file gambar: JPG, JPEG, PNG, WEBP (Maksimal 20 MB)
                         </div>
                     </div>
                 </div>

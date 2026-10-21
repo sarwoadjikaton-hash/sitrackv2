@@ -301,8 +301,11 @@ const submit = () => {
 
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Unggah Dokumen Lampiran (PDF)</label>
-                                <input type="file" class="form-control" @change="handleFileUpload" />
+                                <label class="form-label small fw-bold">Unggah Dokumen Lampiran</label>
+                                <input type="file" class="form-control"
+                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+                                    @change="handleFileUpload" />
+                                <small class="text-muted">Maksimal 20 MB (Format: PDF, DOCX, DOC, JPG, PNG)</small>
                             </div>
 
                             <div class="col-md-6">

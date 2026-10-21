@@ -534,11 +534,11 @@ const statusOptions = computed(() =>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Unggah Lampiran (PDF/DOCX)</label>
+                                <label class="form-label small fw-bold">Unggah Lampiran</label>
                                 <input type="file" class="form-control"
-                                    accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                    accept=".pdf,.docx,.doc,.jpg,.jpeg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
                                     @change="handleFileUpload" />
-                                <small class="text-muted">Maksimal 20 MB</small>
+                                <small class="text-muted">Maksimal 20 MB (Format: PDF, DOCX, DOC, JPG, PNG)</small>
                             </div>
 
                             <div class="col-md-6">

@@ -744,11 +744,12 @@ const switchToEdit = () => {
                             Pilih "Semua Jenis Naskah" kalau file Excel-mu sudah punya kolom JENIS NASKAH per baris.
                         </small>
                     </div>
-                    <div class="border-dashed p-5 text-center rounded-4 mb-3" @click="fileInput?.click()"
+                    <div class="border-dashed p-4 text-center rounded-4 mb-3" @click="fileInput?.click()"
                         style="cursor:pointer; background: #f8fafc;">
                         <i class="bi bi-cloud-arrow-up display-4 text-primary"></i>
-                        <h6 class="mt-2 fw-bold">{{ importForm.file ? importForm.file.name : 'Klik untuk pilih file' }}
+                        <h6 class="mt-2 fw-bold mb-1">{{ importForm.file ? importForm.file.name : 'Klik untuk pilih file' }}
                         </h6>
+                        <small class="text-muted d-block">Format: .xlsx, .xls (Maksimal 20 MB)</small>
                         <input type="file" ref="fileInput" class="d-none" @change="handleFile" accept=".xlsx, .xls">
                     </div>
                     <div class="d-flex justify-content-between align-items-center mt-4">
@@ -887,11 +888,11 @@ const switchToEdit = () => {
 
                         <div class="col-12">
                             <label class="form-label small fw-bold">Lampiran PDF (opsional, isinya bisa dicari)</label>
-                            <input type="file" class="form-control" accept=".pdf"
+                            <input type="file" class="form-control" accept=".pdf,application/pdf"
                                 @change="(e: any) => form.attachment = e.target.files[0]" />
-                            <small class="text-muted">
-                                Isi teks di dalam PDF akan otomatis bisa dicari lewat kolom pencarian.
-                                <span v-if="isEditing && viewingRecord === null">Kosongkan jika tidak ingin mengganti
+                            <small class="text-muted d-block mt-1">
+                                Maksimal 20 MB (Format: .pdf). Isi teks di dalam PDF akan otomatis bisa dicari lewat kolom pencarian.
+                                <span v-if="isEditing && viewingRecord === null" class="d-block mt-0.5 text-secondary">Kosongkan jika tidak ingin mengganti
                                     file yang sudah ada.</span>
                             </small>
                         </div>
