@@ -109,6 +109,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/disposisi/create', [DispositionLetterController::class, 'create'])->middleware('permission:manage disposition lane')->name('disposisi.create');
     Route::post('/disposisi', [DispositionLetterController::class, 'store'])->middleware('permission:manage disposition lane')->name('disposisi.store');
     Route::get('/disposisi/{id}', [DispositionLetterController::class, 'show'])->middleware('permission:view disposition lane')->name('disposisi.show');
+    Route::delete('/disposisi/{id}', [DispositionLetterController::class, 'destroy'])->middleware('permission:manage disposition lane')->name('disposisi.destroy');
     Route::post('/disposisi/{id}/add-instruction', [DispositionLetterController::class, 'addDisposition'])->middleware('permission:give disposition instruction')->name('disposisi.add-instruction');
     Route::put('/disposisi/{id}/item/{dispositionId}', [DispositionLetterController::class, 'updateDispositionItem'])->middleware('permission:update disposition progress')->name('disposisi.update-item');
     Route::post('/disposisi/{id}/status', [DispositionLetterController::class, 'updateLetterStatus'])->middleware('permission:update disposition progress')->name('disposisi.update-status');

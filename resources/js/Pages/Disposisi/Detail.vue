@@ -227,6 +227,13 @@ const deleteRelation = (id: number) => {
         router.delete(`/letter-relations/${id}`);
     }
 };
+
+const deleteLetter = () => {
+    const label = props.letter.agenda_number || props.letter.tracking_code || 'surat ini';
+    if (confirm(`Apakah Anda yakin ingin menghapus surat disposisi "${label}"? Seluruh data disposisi dan riwayat terkait akan ikut terhapus.`)) {
+        router.delete(`/disposisi/${props.letter.id}`);
+    }
+};
 </script>
 
 <template>
@@ -255,6 +262,11 @@ const deleteRelation = (id: number) => {
                 <button type="button" class="btn btn-sm btn-primary-blue d-flex align-items-center justify-content-center flex-grow-1 flex-sm-grow-0"
                     @click="openAddInstruction(null, 'Sekretaris Jenderal')">
                     <i class="bi bi-plus-lg me-1"></i> Tambah Arahan
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center flex-grow-1 flex-sm-grow-0"
+                    title="Hapus Surat Disposisi"
+                    @click="deleteLetter">
+                    <i class="bi bi-trash me-1"></i> Hapus
                 </button>
                 <Link href="/disposisi" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center flex-grow-1 flex-sm-grow-0">
                     Kembali

@@ -32,6 +32,15 @@ const handleFilter = () => {
 const statsTotal = computed(() => props.letters.total || props.letters.data.length);
 const statsProses = computed(() => props.letters.data.filter(l => l.status !== 'Dokumen Sudah diambil' && l.status !== 'Selesai').length);
 const statsTuntas = computed(() => props.letters.data.filter(l => l.status === 'Dokumen Sudah diambil' || l.status === 'Selesai').length);
+
+const deleteLetter = (letter: Letter) => {
+    const label = letter.agenda_number || letter.tracking_code || 'surat ini';
+    if (confirm(`Apakah Anda yakin ingin menghapus surat disposisi "${label}"? Seluruh data disposisi dan riwayat terkait akan ikut terhapus.`)) {
+        router.delete(`/disposisi/${letter.id}`, {
+            preserveScroll: true,
+        });
+    }
+};
 </script>
 
 <template>
@@ -176,12 +185,23 @@ const statsTuntas = computed(() => props.letters.data.filter(l => l.status === '
                                 </span>
                             </td>
                             <td class="text-end">
-                                <Link
-                                    :href="`/disposisi/${letter.id}`"
-                                    class="btn btn-sm btn-outline-blue"
-                                >
-                                    <i class="bi bi-folder2-open me-1"></i> Detail & Arahan
-                                </Link>
+                                <div class="btn-group btn-group-sm">
+                                    <Link
+                                        :href="`/disposisi/${letter.id}`"
+                                        class="btn btn-outline-primary"
+                                        title="Detail & Arahan"
+                                    >
+                                        <i class="bi bi-folder2-open me-1"></i> Detail &amp; Arahan
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-danger"
+                                        title="Hapus Surat Disposisi"
+                                        @click="deleteLetter(letter)"
+                                    >
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         <tr v-if="letters.data.length === 0">
@@ -223,12 +243,20 @@ const statsTuntas = computed(() => props.letters.data.filter(l => l.status === '
                         </div>
                     </div>
 
-                    <!-- Action Button -->
-                    <div>
-                        <Link :href="`/disposisi/${letter.id}`" class="btn btn-sm btn-outline-blue w-100 text-center d-flex align-items-center justify-content-center gap-1.5 py-1.5">
+                    <!-- Actions Row -->
+                    <div class="d-flex align-items-center gap-1.5">
+                        <Link :href="`/disposisi/${letter.id}`" class="btn btn-sm btn-outline-blue flex-grow-1 text-center d-flex align-items-center justify-content-center gap-1.5 py-1.5">
                             <i class="bi bi-folder2-open"></i>
                             <span>Detail &amp; Arahan</span>
                         </Link>
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-danger p-1.5 px-2.5"
+                            title="Hapus Surat Disposisi"
+                            @click="deleteLetter(letter)"
+                        >
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </div>
                 </div>
 

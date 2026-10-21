@@ -13,6 +13,8 @@ use App\Services\LetterNumberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use App\Models\LetterNumber;
 use Inertia\Inertia;
 use Inertia\Response;
 use RuntimeException;
@@ -527,5 +529,40 @@ class DispositionLetterController extends Controller
         }
 
         return back()->with('success', 'Status lajur disposisi diperbarui.');
+    }
+
+    /**
+     * Delete a disposition letter
+     */
+    public function destroy($id)
+    {
+        $letter = Letter::where('process_lane', 'disposition')->findOrFail($id);
+
+        DB::beginTransaction();
+        try {
+            if ($letter->attachment_path) {
+                Storage::disk('public')->delete($letter->attachment_path);
+            }
+
+            foreach ($letter->dispositions as $disp) {
+                if ($disp->attachment_path) {
+                    Storage::disk('public')->delete($disp->attachment_path);
+                }
+            }
+
+            LetterNumber::where('linked_letter_id', $letter->id)->update([
+                'linked_letter_id' => null,
+            ]);
+
+            $letter->delete();
+
+            DB::commit();
+
+            return redirect()->route('disposisi.index')
+                ->with('success', 'Surat disposisi berhasil dihapus.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menghapus surat disposisi: ' . $e->getMessage());
+        }
     }
 }
