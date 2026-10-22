@@ -160,18 +160,18 @@ const dispositionExceptions = [
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <span class="badge rounded-circle d-grid place-items-center fw-bold"
-                                    :class="step.num === 7 ? 'bg-success text-white' : (step.num === 6 ? 'bg-warning text-dark' : 'bg-primary text-white')"
+                                    :class="step.num === 7 ? 'bg-success text-white' : (step.num === 6 ? 'bg-warning text-dark' : (step.num === 1 ? 'bg-purple text-white' : 'bg-primary text-white'))"
                                     style="width: 28px; height: 28px; font-size: 0.85rem;">
                                     {{ step.num }}
                                 </span>
-                                <i :class="['bi', step.icon, step.num === 7 ? 'text-success' : (step.num === 6 ? 'text-warning' : 'text-primary'), 'fs-5']"></i>
+                                <i :class="['bi', step.icon, step.num === 7 ? 'text-success' : (step.num === 6 ? 'text-warning' : (step.num === 1 ? 'text-purple' : 'text-primary')), 'fs-5']"></i>
                             </div>
                             <h6 class="fw-bold text-dark mb-1">{{ step.title }}</h6>
                             <p class="small text-muted mb-3" style="font-size: 0.82rem; line-height: 1.45;">{{ step.desc }}</p>
                         </div>
                         <div class="pt-2 border-top">
                             <span class="badge small fw-medium border"
-                                :class="step.num === 7 ? 'bg-success-subtle text-success border-success-subtle' : (step.num === 6 ? 'bg-warning-subtle text-warning-emphasis border-warning-subtle' : 'bg-light text-primary')">
+                                :class="step.num === 7 ? 'bg-success-subtle text-success border-success-subtle' : (step.num === 6 ? 'bg-warning-subtle text-warning-emphasis border-warning-subtle' : (step.num === 1 ? 'bg-purple-subtle text-purple border-purple-subtle' : 'bg-light text-primary'))">
                                 <i class="bi bi-person me-1"></i>{{ step.role }}
                             </span>
                         </div>

@@ -302,6 +302,7 @@ const statusLabel = (status: string) => {
     if (status === 'reserved') return 'Direservasi';
     if (status === 'preorder') return 'Pre-Order';
     if (status === 'used') return 'Terpakai';
+    if (status === 'diregistrasi' || status === 'registered') return 'Diregistrasi';
     return status;
 };
 
@@ -1033,7 +1034,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                                 <div v-if="num.subject" class="fw-semibold text-dark">
                                     {{ num.subject }}
                                 </div>
-                                <div v-else-if="num.status === 'reserved'" class="text-warning fw-semibold small">
+                                <div v-else-if="num.status === 'reserved' || num.status === 'diregistrasi'" class="text-purple fw-semibold small">
                                     <i class="bi bi-bookmark-fill me-1"></i>
                                     {{ num.reserved_for ? `Direservasi untuk: ${num.reserved_for}` : 'Slot Direservasi' }}
                                 </div>
@@ -1065,7 +1066,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                                         'bg-success text-white': num.status === 'available',
                                         'bg-danger text-white': num.status === 'used',
                                         'bg-info text-white': num.status === 'preorder',
-                                        'bg-warning text-dark': num.status === 'reserved',
+                                        'bg-purple text-white': num.status === 'reserved' || num.status === 'diregistrasi',
                                     }"
                                 >
                                     {{ statusLabel(num.status) }}
@@ -1129,7 +1130,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                                 'bg-success text-white': num.status === 'available',
                                 'bg-danger text-white': num.status === 'used',
                                 'bg-info text-white': num.status === 'preorder',
-                                'bg-warning text-dark': num.status === 'reserved',
+                                'bg-purple text-white': num.status === 'reserved' || num.status === 'diregistrasi',
                             }"
                         >
                             {{ statusLabel(num.status) }}
@@ -1172,7 +1173,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                         class="badge px-2 py-2 font-monospace border-0 position-relative"
                         :class="{
                             'bg-success text-white': num.status === 'available' && !isSelected(num.id),
-                            'bg-warning text-dark': num.status === 'reserved' && !isSelected(num.id),
+                            'bg-purple text-white': (num.status === 'reserved' || num.status === 'diregistrasi') && !isSelected(num.id),
                             'bg-info text-white': num.status === 'preorder' && !isSelected(num.id),
                             'bg-danger text-white': num.status === 'used' && !isSelected(num.id),
                             'bg-primary text-white selected-badge': isSelected(num.id),
@@ -1219,7 +1220,7 @@ const formatDateIndo = (dateStr?: string | null) => {
                                 'bg-success text-white': selectedNumber.status === 'available',
                                 'bg-danger text-white': selectedNumber.status === 'used',
                                 'bg-info text-white': selectedNumber.status === 'preorder',
-                                'bg-warning text-dark': selectedNumber.status === 'reserved',
+                                'bg-purple text-white': selectedNumber.status === 'reserved' || selectedNumber.status === 'diregistrasi',
                             }">
                                 {{ statusLabel(selectedNumber.status) }}
                             </span>
@@ -1250,7 +1251,7 @@ const formatDateIndo = (dateStr?: string | null) => {
 
                 <div v-if="selectedNumber.reserved_for" class="mb-3">
                     <label class="form-label text-muted small fw-bold">DIRESERVASI UNTUK</label>
-                    <div class="fw-semibold text-warning">
+                    <div class="fw-semibold text-purple">
                         {{ selectedNumber.reserved_for }}
                     </div>
                 </div>

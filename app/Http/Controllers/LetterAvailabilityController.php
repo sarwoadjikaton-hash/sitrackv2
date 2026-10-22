@@ -211,15 +211,15 @@ class LetterAvailabilityController extends Controller
                 }
 
                 // Verify all slots are available with row lock
-                $lockedCount = LetterNumber::where('type_id', $typeId)
+                $lockedSlots = LetterNumber::where('type_id', $typeId)
                     ->where('number_year', $year)
                     ->whereBetween('sequence_number', [$start, $end])
                     ->where('status', 'available')
                     ->lockForUpdate()
-                    ->count();
+                    ->get();
 
                 $expectedCount = ($end - $start + 1);
-                if ($lockedCount !== $expectedCount) {
+                if ($lockedSlots->count() !== $expectedCount) {
                     throw new RuntimeException('Gagal! Sebagian atau seluruh nomor dalam rentang sudah terpakai/direservasi.');
                 }
 

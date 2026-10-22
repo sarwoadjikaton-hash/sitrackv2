@@ -362,10 +362,31 @@ h1, h2, h3, h4, h5, h6,
   flex-shrink: 0;
 }
 
+.badge-status-registered {
+  background-color: #7c3aed;
+  color: #ffffff;
+  border: 1px solid #6d28d9;
+}
+
 .badge-status-processing {
   background-color: #1C386F;
   color: #ffffff;
   border: 1px solid #03205A;
+}
+
+.bg-purple {
+  background-color: #7c3aed !important;
+  color: #ffffff !important;
+}
+
+.text-purple {
+  color: #7c3aed !important;
+}
+
+.bg-purple-subtle {
+  background-color: #f5f3ff !important;
+  color: #6d28d9 !important;
+  border-color: #ddd6fe !important;
 }
 
 .badge-status-waiting {
