@@ -240,6 +240,7 @@ class LetterAvailabilityController extends Controller
 
                     $trackingCode = LetterNumberService::generateTrackingCode($type->type_code);
                     $agendaNumber = LetterNumberService::nextAgendaNumber('in');
+                    $signatoryName = ($signerCode === '1') ? 'Sekretaris Jenderal' : null;
                     $letterSubject = $notes ?: ($purpose === 'preorder' ? "Pre-Order Naskah ({$type->type_name})" : "Reservasi Naskah ({$type->type_name})");
 
                     $letter = Letter::create([
@@ -251,6 +252,7 @@ class LetterAvailabilityController extends Controller
                         'process_lane' => 'signature',
                         'sender_unit' => $senderUnit,
                         'sender_name' => $senderName,
+                        'signatory_name' => $signatoryName,
                         'subject' => $letterSubject,
                         'letter_date' => $letterDate ?: now()->toDateString(),
                         'received_date' => $periodDate ?: now()->toDateString(),
@@ -283,6 +285,7 @@ class LetterAvailabilityController extends Controller
                             'unit_id' => $unitId,
                             'processing_unit_text' => $senderUnit,
                             'reserved_for' => $picName,
+                            'signatory' => $signatoryName,
                             'letter_date' => $letterDate,
                             'incoming_date' => $periodDate ?: now()->toDateString(),
                             'subject' => $letterSubject,

@@ -16,6 +16,7 @@ type NumberDetail = {
     unit?: { id: number; unit_name: string };
     processing_unit_text?: string | null;
     signatory?: string | null;
+    signer_code?: string | null;
     destination?: string | null;
     subject?: string | null;
     reserved_for?: string | null;
@@ -1242,10 +1243,10 @@ const formatDateIndo = (dateStr?: string | null) => {
                     </div>
                 </div>
 
-                <div v-if="selectedNumber.signatory" class="mb-3">
+                <div v-if="selectedNumber.signatory || selectedNumber.signer_code || activeType?.default_signer_code" class="mb-3">
                     <label class="form-label text-muted small fw-bold">PENANDATANGAN</label>
                     <div class="fw-semibold text-dark">
-                        {{ selectedNumber.signatory }}
+                        {{ selectedNumber.signatory || ((selectedNumber.signer_code === '1' || activeType?.default_signer_code === '1') ? 'Sekretaris Jenderal' : (selectedNumber.signer_code || '-')) }}
                     </div>
                 </div>
 
