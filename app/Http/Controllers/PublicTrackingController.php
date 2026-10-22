@@ -119,7 +119,7 @@ class PublicTrackingController extends Controller
             'priority' => ['required', 'in:Biasa,Segera'],
             'type_id' => ['required', 'exists:letter_number_types,id'],
             'requested_actions' => ['nullable'],
-            'subject' => ['required', 'string', 'max:500'],
+            'subject' => ['nullable', 'string', 'max:500'],
             'letter_date' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:500'],
             'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:20480'],
@@ -149,6 +149,9 @@ class PublicTrackingController extends Controller
                 ? implode(', ', array_filter($request->input('requested_actions')))
                 : $request->input('requested_actions');
 
+            $cleanSubject = !empty(trim((string)($validated['subject'] ?? ''))) ? trim((string)$validated['subject']) : '-';
+            $cleanNotes = !empty(trim((string)($validated['notes'] ?? ''))) ? trim((string)$validated['notes']) : '-';
+
             $letter = Letter::create([
                 'tracking_code' => $trackingCode,
                 'agenda_number' => $agendaNumber,
@@ -162,7 +165,7 @@ class PublicTrackingController extends Controller
                 'sender_phone' => $validated['sender_phone'],
                 'recipient_unit_id' => null,
                 'destination' => $validated['destination'],
-                'subject' => $validated['subject'],
+                'subject' => $cleanSubject,
                 'letter_date' => $validated['letter_date'] ?? date('Y-m-d'),
                 'received_date' => date('Y-m-d'),
                 'status' => 'Pengajuan Berhasil',
@@ -170,7 +173,7 @@ class PublicTrackingController extends Controller
                 'security_level' => 'Biasa',
                 'current_position' => $unitPengusulName,
                 'requested_actions' => $actions ?: null,
-                'notes' => $validated['notes'] ?? null,
+                'notes' => $cleanNotes,
                 'attachment_path' => $attachmentPath,
                 'pdf_content' => $pdfContent,
             ]);

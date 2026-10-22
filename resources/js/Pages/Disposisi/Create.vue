@@ -90,7 +90,13 @@ const handleFileUpload = (e: Event) => {
 };
 
 const submit = () => {
-    form.post('/disposisi');
+    form.transform((data) => ({
+        ...data,
+        subject: data.subject?.trim() || '-',
+        sender_name: data.sender_name?.trim() || '-',
+        sender_unit: data.sender_unit?.trim() || '-',
+        notes: data.notes?.trim() || '-',
+    })).post('/disposisi');
 };
 </script>
 
@@ -193,7 +199,7 @@ const submit = () => {
 
                             <div class="col-12">
                                 <label class="form-label small fw-bold">Perihal Surat</label>
-                                <textarea v-model="form.subject" class="form-control" rows="2" placeholder="Tuliskan perihal surat secara lengkap..." required></textarea>
+                                <textarea v-model="form.subject" class="form-control" rows="2" placeholder="Tuliskan perihal surat (kosongkan jika belum ada / otomatis '-')"></textarea>
                                 <div v-if="form.errors.subject" class="text-danger small mt-1">{{ form.errors.subject }}</div>
                             </div>
                         </div>

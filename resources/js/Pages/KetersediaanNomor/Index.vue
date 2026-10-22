@@ -1032,25 +1032,29 @@ const formatDateIndo = (dateStr?: string | null) => {
 
                             <!-- 3. PERIHAL SURAT -->
                             <td>
-                                <div v-if="num.status === 'reserved' || num.status === 'diregistrasi'" class="text-purple fw-semibold small">
-                                    <i class="bi bi-bookmark-fill me-1"></i>
-                                    {{ num.reserved_for ? `Direservasi untuk: ${num.reserved_for}` : (num.subject || 'Slot Direservasi') }}
-                                    <div v-if="num.subject && num.reserved_for && !num.subject.toLowerCase().startsWith('reservasi')" class="text-muted small fw-normal mt-0.5">
-                                        {{ num.subject }}
+                                <div v-if="num.status === 'reserved' || num.status === 'diregistrasi'">
+                                    <div class="fw-semibold text-dark">
+                                        {{ (num.subject && num.subject.trim()) ? num.subject : '-' }}
+                                    </div>
+                                    <div v-if="num.reserved_for && num.reserved_for !== '-'" class="text-purple fw-semibold small mt-0.5">
+                                        <i class="bi bi-bookmark-fill me-1"></i>
+                                        Direservasi untuk: {{ num.reserved_for }}
                                     </div>
                                 </div>
-                                <div v-else-if="num.status === 'preorder'" class="text-info fw-semibold small">
-                                    <i class="bi bi-cart-fill me-1"></i>
-                                    {{ num.reserved_for ? `Pre-Order: ${num.reserved_for}` : (num.subject || 'Alokasi Pre-Order') }}
-                                    <div v-if="num.subject && num.reserved_for && !num.subject.toLowerCase().startsWith('pre-order')" class="text-muted small fw-normal mt-0.5">
-                                        {{ num.subject }}
+                                <div v-else-if="num.status === 'preorder'">
+                                    <div class="fw-semibold text-dark">
+                                        {{ (num.subject && num.subject.trim()) ? num.subject : '-' }}
+                                    </div>
+                                    <div v-if="num.reserved_for && num.reserved_for !== '-'" class="text-info fw-semibold small mt-0.5">
+                                        <i class="bi bi-cart-fill me-1"></i>
+                                        Pre-Order: {{ num.reserved_for }}
                                     </div>
                                 </div>
-                                <div v-else-if="num.subject" class="fw-semibold text-dark">
-                                    {{ num.subject }}
+                                <div v-else-if="num.status === 'used'" class="fw-semibold text-dark">
+                                    {{ (num.subject && num.subject.trim()) ? num.subject : '-' }}
                                 </div>
                                 <div v-else class="text-muted small fst-italic">
-                                    <i class="bi bi-dash-circle me-1"></i> Slot nomor tersedia belum digunakan
+                                    -
                                 </div>
                             </td>
 
@@ -1146,9 +1150,15 @@ const formatDateIndo = (dateStr?: string | null) => {
 
                     <div class="mb-2">
                         <div class="fw-bold text-dark mb-1 leading-snug">
-                            {{ ((num.status === 'reserved' || num.status === 'diregistrasi') && num.reserved_for) ? ('Direservasi untuk: ' + num.reserved_for) : (num.subject || num.reserved_for || (num.status === 'available' ? 'Slot Nomor Tersedia' : 'Tanpa Perihal')) }}
+                            {{ (num.subject && num.subject.trim()) ? num.subject : '-' }}
                         </div>
-                        <div v-if="num.number_text" class="small text-muted font-monospace text-truncate">
+                        <div v-if="(num.status === 'reserved' || num.status === 'diregistrasi') && num.reserved_for && num.reserved_for !== '-'" class="text-purple small fw-semibold">
+                            <i class="bi bi-bookmark-fill me-1"></i> Direservasi untuk: {{ num.reserved_for }}
+                        </div>
+                        <div v-else-if="num.status === 'preorder' && num.reserved_for && num.reserved_for !== '-'" class="text-info small fw-semibold">
+                            <i class="bi bi-cart-fill me-1"></i> Pre-Order: {{ num.reserved_for }}
+                        </div>
+                        <div v-if="num.number_text" class="small text-muted font-monospace text-truncate mt-1">
                             {{ num.number_text }}
                         </div>
                     </div>
@@ -1382,8 +1392,8 @@ const formatDateIndo = (dateStr?: string | null) => {
                     </template>
 
                     <div class="col-12">
-                        <label class="form-label fw-semibold text-dark">Catatan / Keterangan</label>
-                        <textarea v-model="form.notes" class="form-control" rows="2" placeholder="Catatan tambahan..."></textarea>
+                        <label class="form-label fw-semibold text-dark">Perihal Surat / Catatan</label>
+                        <textarea v-model="form.notes" class="form-control" rows="2" placeholder="Tuliskan perihal surat (kosongkan jika belum ada / otomatis '-')"></textarea>
                     </div>
                 </div>
 

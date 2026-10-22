@@ -226,9 +226,13 @@ class LetterAvailabilityController extends Controller
                 }
 
                 $status = ($purpose === 'preorder') ? 'preorder' : 'reserved';
-                $senderUnit = $unitText ?: ($unitId ? Unit::find($unitId)?->unit_name : null);
-                $senderName = $picName ?: 'Pemohon';
+                $cleanUnit = (!empty($unitText) && trim((string)$unitText) !== '')
+                    ? trim((string)$unitText)
+                    : ($unitId ? (Unit::find($unitId)?->unit_name ?: '-') : '-');
+                $cleanPic = (!empty($picName) && trim((string)$picName) !== '') ? trim((string)$picName) : '-';
+                $cleanNotes = (!empty($notes) && trim((string)$notes) !== '') ? trim((string)$notes) : '-';
                 $monthNumber = $letterDate ? (int) date('n', strtotime($letterDate)) : (int) date('n');
+                $signatoryName = ($signerCode === '1') ? 'Sekretaris Jenderal' : '-';
 
                 for ($n = $start; $n <= $end; $n++) {
                     $numberText = LetterNumberService::buildNumberText($type, [
@@ -240,8 +244,7 @@ class LetterAvailabilityController extends Controller
 
                     $trackingCode = LetterNumberService::generateTrackingCode($type->type_code);
                     $agendaNumber = LetterNumberService::nextAgendaNumber('in');
-                    $signatoryName = ($signerCode === '1') ? 'Sekretaris Jenderal' : null;
-                    $letterSubject = $notes ?: ($purpose === 'preorder' ? "Pre-Order Naskah ({$type->type_name})" : "Reservasi Naskah ({$type->type_name})");
+                    $letterSubject = $cleanNotes;
 
                     $letter = Letter::create([
                         'tracking_code' => $trackingCode,
@@ -250,8 +253,8 @@ class LetterAvailabilityController extends Controller
                         'letter_number_type_id' => $type->id,
                         'letter_type' => 'in',
                         'process_lane' => 'signature',
-                        'sender_unit' => $senderUnit,
-                        'sender_name' => $senderName,
+                        'sender_unit' => $cleanUnit,
+                        'sender_name' => $cleanPic,
                         'signatory_name' => $signatoryName,
                         'subject' => $letterSubject,
                         'letter_date' => $letterDate ?: now()->toDateString(),
@@ -260,7 +263,7 @@ class LetterAvailabilityController extends Controller
                         'security_level' => 'Biasa',
                         'status' => 'Dokumen Diterima dan Diinput',
                         'current_position' => 'Arsiparis',
-                        'notes' => $notes,
+                        'notes' => $cleanNotes,
                         'letter_source' => 'Manual',
                         'created_by' => $userId,
                     ]);
@@ -283,12 +286,12 @@ class LetterAvailabilityController extends Controller
                             'status' => $status,
                             'number_text' => $numberText,
                             'unit_id' => $unitId,
-                            'processing_unit_text' => $senderUnit,
-                            'reserved_for' => $picName,
+                            'processing_unit_text' => $cleanUnit,
+                            'reserved_for' => $cleanPic,
                             'signatory' => $signatoryName,
                             'letter_date' => $letterDate,
                             'incoming_date' => $periodDate ?: now()->toDateString(),
-                            'subject' => $notes ?: null,
+                            'subject' => $letterSubject,
                             'signer_code' => $signerCode,
                             'month_number' => $monthNumber,
                             'linked_letter_id' => $letter->id,
@@ -305,10 +308,10 @@ class LetterAvailabilityController extends Controller
                     'period_month' => $periodDate,
                     'letter_date' => $letterDate,
                     'unit_id' => $unitId,
-                    'unit_text' => $senderUnit,
-                    'pic_name' => $picName,
+                    'unit_text' => $cleanUnit,
+                    'pic_name' => $cleanPic,
                     'status' => 'active',
-                    'notes' => $notes,
+                    'notes' => $cleanNotes,
                     'created_by' => $userId,
                 ]);
             }

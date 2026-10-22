@@ -57,7 +57,11 @@ watch(() => form.requested_actions.includes('Mohon Tanda Tangan'), (hasTTD: bool
 });
 
 const submit = () => {
-    form.post('/ajukan-surat');
+    form.transform((data) => ({
+        ...data,
+        subject: data.subject?.trim() || '-',
+        notes: data.notes?.trim() || '-',
+    })).post('/ajukan-surat');
 };
 </script>
 
@@ -206,7 +210,7 @@ const submit = () => {
                                 <div class="col-12 animate-field" style="--delay: 8">
                                     <label class="form-label small fw-bold">Perihal Naskah Dinas</label>
                                     <textarea v-model="form.subject" class="form-control custom-input" rows="3"
-                                        placeholder="Tuliskan perihal surat / naskah dinas permohonan paraf secara lengkap..." required></textarea>
+                                        placeholder="Tuliskan perihal surat (kosongkan jika belum ada / otomatis '-')"></textarea>
                                     <Transition name="fade-error">
                                         <div v-if="form.errors.subject" class="text-danger small mt-1">{{
                                             form.errors.subject }}</div>

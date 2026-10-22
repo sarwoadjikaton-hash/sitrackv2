@@ -179,11 +179,11 @@ class SignatureLetterController extends Controller
             'sender_unit' => ['nullable', 'string', 'max:150'],
             'category_id' => ['nullable', 'exists:letter_categories,id'],
             'letter_number_type_id' => ['nullable', 'exists:letter_number_types,id'],
-            'sender_name' => ['required', 'string', 'max:150'],
+            'sender_name' => ['nullable', 'string', 'max:150'],
             'sender_phone' => ['nullable', 'string', 'max:50'],
             'destination' => ['nullable', 'string', 'max:255'],
             'recipient_unit_id' => ['nullable'],
-            'subject' => ['required', 'string', 'max:500'],
+            'subject' => ['nullable', 'string', 'max:500'],
             'letter_date' => ['nullable', 'date'],
             'received_date' => ['nullable', 'date'],
             'priority' => ['nullable', 'string', 'max:50'],
@@ -207,6 +207,11 @@ class SignatureLetterController extends Controller
             : ($validated['requested_actions'] ?? null);
 
         $letterType = $validated['letter_type'] ?? 'in';
+        $cleanSubject = !empty(trim((string)($validated['subject'] ?? ''))) ? trim((string)$validated['subject']) : '-';
+        $cleanSenderName = !empty(trim((string)($validated['sender_name'] ?? ''))) ? trim((string)$validated['sender_name']) : '-';
+        $cleanSenderUnit = !empty(trim((string)($validated['sender_unit'] ?? ''))) ? trim((string)$validated['sender_unit']) : '-';
+        $cleanDestination = !empty(trim((string)($validated['destination'] ?? ''))) ? trim((string)$validated['destination']) : '-';
+        $cleanNotes = !empty(trim((string)($validated['notes'] ?? ''))) ? trim((string)$validated['notes']) : '-';
 
         DB::beginTransaction();
         try {
@@ -228,18 +233,18 @@ class SignatureLetterController extends Controller
                 'letter_number' => $validated['letter_number'] ?? null,
                 'letter_type' => $letterType,
                 'process_lane' => 'signature',
-                'sender_unit' => $validated['sender_unit'] ?? null,
+                'sender_unit' => $cleanSenderUnit,
                 'category_id' => $validated['category_id'] ?: null,
                 'letter_number_type_id' => $letterNumberType?->id,
-                'sender_name' => $validated['sender_name'],
+                'sender_name' => $cleanSenderName,
                 'sender_phone' => $validated['sender_phone'] ?? null,
-                'destination' => $validated['destination'] ?? null,
+                'destination' => $cleanDestination,
                 'recipient_unit_id' => $validated['recipient_unit_id'] ?: (
                     !empty($validated['destination'])
                         ? Unit::where('unit_name', 'ILIKE', trim($validated['destination']))->value('id')
                         : null
                 ),
-                'subject' => $validated['subject'],
+                'subject' => $cleanSubject,
                 'letter_date' => $validated['letter_date'] ?? null,
                 'received_date' => $validated['received_date'] ?? date('Y-m-d'),
                 'priority' => $validated['priority'],
@@ -247,7 +252,7 @@ class SignatureLetterController extends Controller
                 'status' => $validated['status'],
                 'current_position' => $validated['current_position'],
                 'requested_actions' => $actions,
-                'notes' => $validated['notes'] ?? null,
+                'notes' => $cleanNotes,
                 'attachment_path' => $attachmentPath,
                 'letter_source' => $validated['letter_source'],
                 'created_by' => Auth::id(),
@@ -334,11 +339,11 @@ class SignatureLetterController extends Controller
             'sender_unit' => ['nullable', 'string', 'max:150'],
             'category_id' => ['nullable', 'exists:letter_categories,id'],
             'letter_number_type_id' => ['nullable', 'exists:letter_number_types,id'],
-            'sender_name' => ['required', 'string', 'max:150'],
+            'sender_name' => ['nullable', 'string', 'max:150'],
             'sender_phone' => ['nullable', 'string', 'max:50'],
             'destination' => ['nullable', 'string', 'max:255'],
             'recipient_unit_id' => ['nullable'],
-            'subject' => ['required', 'string', 'max:500'],
+            'subject' => ['nullable', 'string', 'max:500'],
             'letter_date' => ['nullable', 'date'],
             'received_date' => ['nullable', 'date'],
             'priority' => ['nullable', 'string', 'max:50'],
@@ -366,20 +371,26 @@ class SignatureLetterController extends Controller
 
         $statusChanged = ($letter->status !== $validated['status'] || $letter->current_position !== $validated['current_position']);
 
+        $cleanSubject = !empty(trim((string)($validated['subject'] ?? ''))) ? trim((string)$validated['subject']) : ($letter->subject ?: '-');
+        $cleanSenderName = !empty(trim((string)($validated['sender_name'] ?? ''))) ? trim((string)$validated['sender_name']) : ($letter->sender_name ?: '-');
+        $cleanSenderUnit = !empty(trim((string)($validated['sender_unit'] ?? ''))) ? trim((string)$validated['sender_unit']) : ($letter->sender_unit ?: '-');
+        $cleanDestination = !empty(trim((string)($validated['destination'] ?? ''))) ? trim((string)$validated['destination']) : ($letter->destination ?: '-');
+        $cleanNotes = !empty(trim((string)($validated['notes'] ?? ''))) ? trim((string)$validated['notes']) : ($letter->notes ?: '-');
+
         $letter->update([
             'letter_number' => $validated['letter_number'] ?? null,
-            'sender_unit' => $validated['sender_unit'] ?? null,
+            'sender_unit' => $cleanSenderUnit,
             'category_id' => $validated['category_id'] ?: null,
             'letter_number_type_id' => $validated['letter_number_type_id'] ?: null,
-            'sender_name' => $validated['sender_name'],
+            'sender_name' => $cleanSenderName,
             'sender_phone' => $validated['sender_phone'] ?? null,
-            'destination' => $validated['destination'] ?? null,
+            'destination' => $cleanDestination,
             'recipient_unit_id' => $validated['recipient_unit_id'] ?: (
                 !empty($validated['destination'])
                     ? Unit::where('unit_name', 'ILIKE', trim($validated['destination']))->value('id')
                     : null
             ),
-            'subject' => $validated['subject'],
+            'subject' => $cleanSubject,
             'letter_date' => $validated['letter_date'] ?? null,
             'received_date' => $validated['received_date'] ?? null,
             'priority' => $validated['priority'] ?? 'Biasa',
@@ -387,7 +398,7 @@ class SignatureLetterController extends Controller
             'status' => $validated['status'],
             'current_position' => $validated['current_position'],
             'requested_actions' => $actions,
-            'notes' => $validated['notes'] ?? null,
+            'notes' => $cleanNotes,
             'attachment_path' => $attachmentPath,
             'letter_source' => $validated['letter_source'] ?? $letter->letter_source ?? 'Manual',
         ]);

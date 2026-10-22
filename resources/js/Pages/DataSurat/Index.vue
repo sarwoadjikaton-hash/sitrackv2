@@ -287,17 +287,21 @@ const closeModal = () => {
 
 const submitDataSurat = () => {
     const action = isEditing.value ? `/data-surat/${editingId.value}` : '/data-surat';
-    if (isEditing.value) {
-        form.transform((data) => ({ ...data, _method: 'put' })).post(action, {
-            forceFormData: true,
-            onSuccess: () => closeModal(),
-        });
-    } else {
-        form.post(action, {
-            forceFormData: true,
-            onSuccess: () => closeModal(),
-        });
-    }
+    form.transform((data) => ({
+        ...data,
+        subject: data.subject?.trim() || '-',
+        processing_unit_text: data.processing_unit_text?.trim() || '-',
+        signatory: data.signatory?.trim() || '-',
+        request_type: data.request_type?.trim() || '-',
+        destination: data.destination?.trim() || '-',
+        technical_officer: data.technical_officer?.trim() || '-',
+        scan_result: data.scan_result?.trim() || '-',
+        nd_pengantar: data.nd_pengantar?.trim() || '-',
+        ...(isEditing.value ? { _method: 'put' } : {}),
+    })).post(action, {
+        forceFormData: true,
+        onSuccess: () => closeModal(),
+    });
 };
 
 const printData = () => {
@@ -531,7 +535,7 @@ const switchToEdit = () => {
                                 <small class="text-muted">Mohon: {{ record.request_type || '-' }}</small>
                             </td>
                             <td style="max-width: 300px;">
-                                <div :class="{ 'text-truncate': !isPrintMode }">{{ record.subject }}</div>
+                                <div :class="{ 'text-truncate': !isPrintMode }">{{ record.subject || '-' }}</div>
                                 <small v-if="record.technical_officer" class="text-muted">Oleh: {{
                                     record.technical_officer }}</small>
                                 <div v-if="record.tracking_code" class="text-muted font-monospace" style="font-size: 0.72rem;">Resi: {{ record.tracking_code }}</div>
@@ -580,7 +584,7 @@ const switchToEdit = () => {
                     </div>
 
                     <div class="mb-2">
-                        <div class="fw-bold text-dark mb-1 leading-snug">{{ record.subject || '(Tanpa Perihal)' }}</div>
+                        <div class="fw-bold text-dark mb-1 leading-snug">{{ record.subject || '-' }}</div>
                         <div v-if="record.number_text" class="small font-monospace text-primary fw-semibold">{{ record.number_text }}</div>
                         <div v-else class="small text-warning-emphasis fw-semibold"><i class="bi bi-clock-history me-1"></i>Belum Diberi Nomor</div>
                     </div>
@@ -883,7 +887,7 @@ const switchToEdit = () => {
                         </div>
                         <div class="col-12">
                             <label class="form-label small fw-bold">Perihal Surat</label>
-                            <textarea v-model="form.subject" class="form-control" rows="2" required></textarea>
+                            <textarea v-model="form.subject" class="form-control" rows="2" placeholder="Tuliskan perihal surat (kosongkan jika belum ada / otomatis '-')"></textarea>
                         </div>
 
                         <div class="col-12">

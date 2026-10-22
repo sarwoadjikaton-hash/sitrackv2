@@ -108,11 +108,11 @@ class DispositionLetterController extends Controller
     {
         $validated = $request->validate([
             'letter_number' => ['nullable', 'string', 'max:150'],
-            'sender_unit' => ['required', 'string', 'max:150'],
+            'sender_unit' => ['nullable', 'string', 'max:150'],
             'category_id' => ['nullable', 'exists:letter_categories,id'],
-            'sender_name' => ['required', 'string', 'max:150'],
+            'sender_name' => ['nullable', 'string', 'max:150'],
             'sender_phone' => ['nullable', 'string', 'max:50'],
-            'subject' => ['required', 'string', 'max:500'],
+            'subject' => ['nullable', 'string', 'max:500'],
             'letter_date' => ['nullable', 'date'],
             'received_date' => ['nullable', 'date'],
             'priority' => ['required', 'in:urgent,high,normal,low'],
@@ -156,6 +156,11 @@ class DispositionLetterController extends Controller
         $userId = Auth::id();
         $userName = Auth::user()->name ?: Auth::user()->username;
 
+        $cleanSubject = !empty(trim((string)($validated['subject'] ?? ''))) ? trim((string)$validated['subject']) : '-';
+        $cleanSenderUnit = !empty(trim((string)($validated['sender_unit'] ?? ''))) ? trim((string)$validated['sender_unit']) : '-';
+        $cleanSenderName = !empty(trim((string)($validated['sender_name'] ?? ''))) ? trim((string)$validated['sender_name']) : '-';
+        $cleanNotes = !empty(trim((string)($validated['notes'] ?? ''))) ? trim((string)$validated['notes']) : '-';
+
         DB::beginTransaction();
         try {
             // Data dari SRIKANDI tidak dapat nomor agenda/resi internal —
@@ -189,18 +194,18 @@ class DispositionLetterController extends Controller
                 'letter_number' => $validated['letter_number'] ?? null,
                 'letter_type' => 'in',
                 'process_lane' => 'disposition',
-                'sender_unit' => $validated['sender_unit'],
+                'sender_unit' => $cleanSenderUnit,
                 'category_id' => $validated['category_id'] ?: null,
-                'sender_name' => $validated['sender_name'],
+                'sender_name' => $cleanSenderName,
                 'sender_phone' => $validated['sender_phone'] ?? null,
-                'subject' => $validated['subject'],
+                'subject' => $cleanSubject,
                 'letter_date' => $validated['letter_date'] ?? null,
                 'received_date' => $validated['received_date'] ?? date('Y-m-d'),
                 'priority' => $validated['priority'],
                 'security_level' => $validated['security_level'],
                 'status' => $status,
                 'current_position' => $position,
-                'notes' => $validated['notes'] ?? null,
+                'notes' => $cleanNotes,
                 'attachment_path' => $attachmentPath,
                 'letter_source' => $validated['letter_source'],
                 'created_by' => $userId,

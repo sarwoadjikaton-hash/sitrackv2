@@ -232,32 +232,22 @@ const handleFileUpload = (e: Event) => {
 };
 
 const submit = () => {
-    if (isEditing && props.letter) {
-        form.transform((data) => ({
-            ...data,
-            _method: 'put',
-        })).post(`/tindak-lanjut/${props.letter.id}`, {
-            forceFormData: true,
-            preserveScroll: true,
-            onSuccess: () => {
-                // berhasil
-            },
-            onError: (errors) => {
-                console.log('Update gagal:', errors);
-            },
-        });
-    } else {
-        form.post('/tindak-lanjut', {
-            forceFormData: true,
-            preserveScroll: true,
-            onSuccess: () => {
-                // berhasil
-            },
-            onError: (errors) => {
-                console.log('Input gagal:', errors);
-            },
-        });
-    }
+    const url = (isEditing && props.letter) ? `/tindak-lanjut/${props.letter.id}` : '/tindak-lanjut';
+    form.transform((data) => ({
+        ...data,
+        subject: data.subject?.trim() || '-',
+        sender_name: data.sender_name?.trim() || '-',
+        sender_unit: data.sender_unit?.trim() || '-',
+        destination: data.destination?.trim() || '-',
+        notes: data.notes?.trim() || '-',
+        ...(isEditing && props.letter ? { _method: 'put' } : {}),
+    })).post(url, {
+        forceFormData: true,
+        preserveScroll: true,
+        onError: (errors) => {
+            console.log('Operasi gagal:', errors);
+        },
+    });
 };
 
 const letterSourceOptions = [
@@ -407,7 +397,7 @@ const statusOptions = computed(() =>
                             <div class="col-12">
                                 <label class="form-label small fw-bold">Perihal Naskah Dinas</label>
                                 <textarea v-model="form.subject" class="form-control" rows="2"
-                                    placeholder="Tuliskan perihal surat secara lengkap..." required></textarea>
+                                    placeholder="Tuliskan perihal surat (kosongkan jika belum ada / otomatis '-')"></textarea>
                                 <div v-if="form.errors.subject" class="text-danger small mt-1">{{ form.errors.subject }}
                                 </div>
                             </div>
@@ -420,13 +410,13 @@ const statusOptions = computed(() =>
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold">Unit / Instansi Pengirim</label>
                                 <input v-model="form.sender_unit" type="text" class="form-control"
-                                    placeholder="Nama instansi/unit kerja" />
+                                    placeholder="Nama instansi/unit kerja (opsional, '-') " />
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold">Nama Pengirim / Pembawa</label>
                                 <input v-model="form.sender_name" type="text" class="form-control"
-                                    placeholder="Nama lengkap pengirim" required />
+                                    placeholder="Nama lengkap pengirim (opsional, '-')" />
                             </div>
 
                             <div class="col-md-4">
