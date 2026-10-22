@@ -288,7 +288,7 @@ class LetterAvailabilityController extends Controller
                             'signatory' => $signatoryName,
                             'letter_date' => $letterDate,
                             'incoming_date' => $periodDate ?: now()->toDateString(),
-                            'subject' => $letterSubject,
+                            'subject' => $notes ?: null,
                             'signer_code' => $signerCode,
                             'month_number' => $monthNumber,
                             'linked_letter_id' => $letter->id,
